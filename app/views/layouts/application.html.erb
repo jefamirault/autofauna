@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PlantCare</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+  <header>
+    <nav>
+      <%= params[:controller] != 'plants' || params[:action] != 'index' ? link_to('Plants', plants_path) : 'Plants' %> |
+      <%= params[:controller] != 'waterings' || params[:action] != 'index' ? link_to('Waterings', waterings_path) : 'Waterings' %> |
+      <%= params[:controller] != 'plants' || params[:action] != 'new' ? link_to('New Plant', new_plant_path) : 'New Plant' %>
+    </nav>
+    <time>Current Time: <%= Time.now %></time>
+  </header>
+
+  <%= yield %>
+
+  </body>
+</html>

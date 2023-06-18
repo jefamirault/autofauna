@@ -1,0 +1,45 @@
+<div id="<%= dom_id plant %>">
+  <p>
+    <strong>Name:</strong>
+    <%= plant.name %>
+  </p>
+
+  <p>
+    <strong>Uid:</strong>
+    <%= plant.uid %>
+  </p>
+
+  <p>
+    <strong>Location:</strong>
+    <%= plant.location %>
+  </p>
+
+  <p>
+    <strong>Pot:</strong>
+    <%= plant.pot %>
+  </p>
+
+  <p>
+    <strong>Last Watering:</strong>
+    <%= time_ago plant.last_watering %>
+  </p>
+
+  <p>
+    <strong>Watering Frequency:</strong>
+    <%= @plant.watering_frequency_text %>
+  </p>
+
+  <p>
+    <strong>Time Until Watering:</strong>
+    <%= @plant.time_until_watering_text %>
+  </p>
+
+
+  <p>
+    <strong>Archived?:</strong>
+    <%= @plant.archived %>
+  </p>
+
+
+
+</div>

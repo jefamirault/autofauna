@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  uid: 1
+  location: MyString
+  pot: MyString
+
+two:
+  name: MyString
+  uid: 1
+  location: MyString
+  pot: MyString

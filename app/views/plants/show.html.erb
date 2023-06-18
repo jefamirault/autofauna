@@ -1,0 +1,19 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @plant %>
+
+<div>
+  <%= link_to "Edit this plant", edit_plant_path(@plant) %> |
+  <%= link_to "Back to plants", plants_path %> |
+  <%= link_to "Water this plant", plant_water_path(@plant) %>
+
+  <%= button_to "Destroy this plant", @plant, method: :delete %>
+</div>
+
+<p><strong>Log:</strong>
+  <ul>
+    <% @plant.waterings.reverse.each do |watering| %>
+      <li> Watered <%= format_date watering.date %> <%= watering.notes %></li>
+    <% end %>
+  </ul>
+</p>

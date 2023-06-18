@@ -1,0 +1,34 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Waterings</h1>
+
+
+<table>
+  <thead>
+  <tr>
+    <th>Plant</th>
+    <th>Date</th>
+    <th>Notes</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @waterings.each do |watering| %>
+    <tr>
+      <td><%= link_to watering.plant, watering_path(watering.id) %></td>
+      <td><%= format_date watering.date %></td>
+      <td><%= watering.notes %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<!--<div id="waterings">-->
+  <%# @waterings.each do |watering| %>
+    <%#= render watering %>
+<!--    <p>-->
+      <%#= link_to "Show this watering", watering %>
+<!--    </p>-->
+  <%# end %>
+<!--</div>-->
+
+<%= link_to "New watering", new_watering_path %>

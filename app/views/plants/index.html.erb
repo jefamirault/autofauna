@@ -1,0 +1,42 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Plants</h1>
+
+Sort by:
+<%= params[:sort] != 'suggested' ? link_to('Suggested', plants_path(sort: 'suggested')) : 'Suggested' %> |
+<%= params[:sort] != 'last' ? link_to('Last Watering', plants_path(sort: 'last')) : 'Last Watering' %> |
+<%= params[:sort] != 'number' ? link_to('Number', plants_path(sort: 'number')) : 'Number' %>
+
+
+<table>
+  <thead>
+    <tr>
+      <th>Plant</th>
+      <th>Location</th>
+      <th>Pot</th>
+      <th>Last Watering</th>
+      <th>Frequency</th>
+      <!--      <th>Suggested Watering</th>-->
+      <th>Days Until Water</th>
+      <th>Last Fertilized</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+      <% @plants.each do |plant| %>
+        <tr>
+          <td><%= link_to plant.label, plant_path(plant.id) %></td>
+          <td><%= plant.location %></td>
+          <td><%= plant.pot %></td>
+          <td><%= time_ago plant.last_watering %></td>
+          <td><%= plant.watering_frequency_text %></td>
+          <!--          <td><%#= format_date plant.suggested_watering %></td>-->
+          <td><%= plant.time_until_watering_text %></td>
+          <td><%= time_ago plant.last_fertilized %></td>
+          <td><%= link_to 'Water', plant_water_path(plant) %></td>
+        </tr>
+      <% end %>
+  </tbody>
+</table>
+<br>
+<%= link_to "New plant", new_plant_path %>
