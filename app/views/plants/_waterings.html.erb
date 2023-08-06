@@ -1,0 +1,19 @@
+<%# expected local: waterings %>
+<table>
+  <thead>
+  <tr>
+    <th>Date</th>
+    <th>Interval</th>
+    <th>Notes</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% waterings.reverse.each do |watering| %>
+    <tr>
+      <td><%= format_date watering.date %></td>
+      <td><%= watering.interval_text %></td>
+      <td><%= watering.notes %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

@@ -10,10 +10,5 @@
   <%= button_to "Destroy this plant", @plant, method: :delete %>
 </div>
 
-<p><strong>Log:</strong>
-  <ul>
-    <% @plant.waterings.reverse.each do |watering| %>
-      <li> Watered <%= format_date watering.date %> <%= watering.notes %></li>
-    <% end %>
-  </ul>
-</p>
+<h3>Log:</h3>
+<%= render partial: 'waterings', locals: { waterings: @plant.waterings } %>
