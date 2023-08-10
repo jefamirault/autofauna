@@ -1,6 +1,8 @@
 class Watering < ApplicationRecord
   belongs_to :plant
 
+  after_commit :update_frequency
+
   # interval: integer # of days between this watering and the last watering for the same plant
   def interval
     if super.nil?
@@ -23,6 +25,19 @@ class Watering < ApplicationRecord
       "#{interval} days"
     else
       "n/a"
+    end
+  end
+
+  private
+
+  def update_frequency
+    if plant
+      if previous_changes[:plant_id]
+        # If the plant was changed when the watering gets updated, recalculate watering freq for both plants
+        previous_changes[:plant_id].compact.map {|id| Plant.find(id)}.each &:calculate_watering_frequency
+      else
+        plant.calculate_watering_frequency
+      end
     end
   end
 end

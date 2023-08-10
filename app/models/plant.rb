@@ -17,8 +17,17 @@ class Plant < ApplicationRecord
     waterings.any? ? waterings.last.date : nil
   end
 
+  def calculate_watering_frequency
+    calculated = waterings.count > 1 ? (last_watering - first_watering).to_i / (waterings.count - 1) : nil
+    self.watering_frequency = calculated
+    calculated if save
+  end
   def watering_frequency
-    waterings.count > 1 ? (last_watering - first_watering).to_i / (waterings.count - 1) : nil
+    if !super.nil?
+      super
+    else
+      calculate_watering_frequency
+    end
   end
 
   def watering_frequency_text
