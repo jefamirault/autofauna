@@ -17,7 +17,7 @@
       <%= params[:controller] != 'waterings' || params[:action] != 'index' ? link_to('Waterings', waterings_path) : 'Waterings' %> |
       <%= params[:controller] != 'plants' || params[:action] != 'new' ? link_to('New Plant', new_plant_path) : 'New Plant' %>
     </nav>
-    <time>Current Time: <%= Time.now %></time>
+    <time><%= format_date Time.now, time: true %></time>
   </header>
 
   <%= yield %>

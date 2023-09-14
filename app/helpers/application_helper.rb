@@ -1,7 +1,10 @@
 module ApplicationHelper
-  def format_date(date)
-    # date ? date.strftime('%A %-m/%-d/%y') : ""
-    date ? date.strftime('%a %-m/%-d/%y') : ""
+  def format_date(date, options = {})
+    if options[:time]
+      date ? date.strftime('%A %-m/%-d/%y %r') : ""
+    else
+      date ? date.strftime('%a %-m/%-d/%y') : ""
+    end
   end
 
   def time_ago(date, options = {})
