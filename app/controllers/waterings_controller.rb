@@ -12,7 +12,8 @@ class WateringsController < ApplicationController
 
   # GET /waterings/new
   def new
-    @watering = Watering.new plant_id: params[:plant_id], date: Date.today
+    @watering = Watering.create plant_id: params[:plant_id], date: Date.today
+    redirect_to plants_path
   end
 
   # GET /waterings/1/edit

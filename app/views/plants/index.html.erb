@@ -33,7 +33,11 @@ Sort by:
           <!--          <td><%#= format_date plant.suggested_watering %></td>-->
           <td><%= plant.time_until_watering_text %></td>
           <td><%= time_ago plant.last_fertilized %></td>
-          <td><%= link_to 'Water', plant_water_path(plant) %></td>
+          <% if plant.last_watering == Date.today %>
+            <td><%= link_to 'Edit Watering', edit_watering_path(plant.waterings.last) %></td>
+          <% else %>
+            <td><%= link_to 'Water', plant_water_path(plant) %></td>
+          <% end %>
         </tr>
       <% end %>
   </tbody>
