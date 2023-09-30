@@ -1,0 +1,3 @@
+<%= turbo_stream.replace dom_id(@watering.plant) do %>
+  <%= render "plants/plant_row", plant: @watering.plant %>
+<% end %>
