@@ -13,18 +13,3 @@
  *= require_tree .
  *= require_self
  */
-
-header {
-    padding: 0 0 1em
-}
-time {
-    float: right
-}
-
-nav {
-    float: left
-}
-
-h1 {
-    clear: both
-}

@@ -15,7 +15,7 @@ class WateringsController < ApplicationController
     @watering = Watering.create plant_id: params[:plant_id], date: Date.today
     respond_to do |format|
       format.turbo_stream
-      format.html
+      format.html { redirect_to edit_watering_path(@watering) }
     end
   end
 
