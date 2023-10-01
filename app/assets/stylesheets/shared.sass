@@ -22,6 +22,24 @@ h1
   clear: both
 
 
+@media (max-width: 1208px)
+  .trim
+    visibility: collapse
+    display: none
+@media (max-width: 1105px)
+  .trim2
+    visibility: collapse
+    display: none
+@media (max-width: 966px)
+  .trim3
+    visibility: collapse
+    display: none
+
+@media (max-width: 832px)
+  .trim4
+    visibility: collapse
+    display: none
+
 
 table
   border-spacing: 0
@@ -29,10 +47,14 @@ table
   margin: 1em 0
   border: 2px solid #2f5b2f
 
+.line-break::after
+    content: "\a"
+    white-space: pre
+
+
 thead th
   background: #2f5b2f
   color: white
-
 tbody tr:nth-child(even)
   background: rgba(22, 128, 22, 0.3)
 
@@ -42,7 +64,7 @@ tbody tr:nth-child(even)
 //  background: rgba(64, 196, 64, 0.1)
 
 th, td
-  padding: 8px 4px
+  padding: 12px 6px
 td
   text-overflow: '-'
   white-space: nowrap
