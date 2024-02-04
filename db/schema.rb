@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_10_144813) do
+ActiveRecord::Schema[7.0].define(version: 2023_12_28_212315) do
   create_table "plants", force: :cascade do |t|
     t.string "name"
     t.integer "uid"
@@ -24,7 +24,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_10_144813) do
 
   create_table "waterings", force: :cascade do |t|
     t.integer "plant_id"
-    t.date "date"
+    t.datetime "date", precision: nil
     t.string "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

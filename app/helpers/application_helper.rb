@@ -12,9 +12,13 @@ module ApplicationHelper
       nil
     else
       text = if date.today?
-               'Today'
+               if options[:precise]
+                 time_ago_in_words date
+               else
+                 'Today'
+               end
              else
-               days_ago = (Date.today - date).to_i
+               days_ago = (Date.today - date.to_date).to_i
                "#{days_ago} days ago"
              end
 

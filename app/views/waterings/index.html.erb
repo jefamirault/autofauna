@@ -17,7 +17,7 @@
   <% @waterings.each do |watering| %>
     <tr>
       <td><%= link_to watering.plant, watering_path(watering.id) %></td>
-      <td><%= format_date watering.date %></td>
+      <td><%= time_ago watering.date, precise: true %></td>
       <td><%= watering.interval_text %></td>
       <td><%= watering.plant.watering_frequency_text %></td>
       <td><%= watering.notes %></td>
