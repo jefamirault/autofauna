@@ -10,11 +10,11 @@ class Plant < ApplicationRecord
   end
 
   def first_watering
-    waterings.any? ? waterings.first.date : nil
+    waterings.any? ? waterings.first.date.to_date : nil
   end
 
   def last_watering
-    waterings.any? ? waterings.last.date : nil
+    waterings.any? ? waterings.last.date.to_date : nil
   end
 
   def calculate_watering_frequency
@@ -35,7 +35,11 @@ class Plant < ApplicationRecord
   end
 
   def suggested_watering
-    waterings.count <= 1 ? nil : first_watering && last_watering ? last_watering + watering_frequency : Date.today
+    if waterings.count <= 1
+      nil
+    else
+      first_watering && last_watering ? (last_watering + watering_frequency).to_date : Date.today
+    end
   end
 
   def time_until_watering

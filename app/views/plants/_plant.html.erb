@@ -24,6 +24,11 @@
   </p>
 
   <p>
+    <strong>Manual Watering Frequency?:</strong>
+    <%= @plant.manual_watering_frequency ? 'Yes' : 'No' %>
+  </p>
+
+  <p>
     <strong>Time Until Watering:</strong>
     <%= @plant.time_until_watering_text %>
   </p>

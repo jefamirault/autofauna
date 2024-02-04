@@ -9,7 +9,7 @@ class Watering < ApplicationRecord
       current = plant.waterings.index self
       if current > 0
         prev_watering = plant.waterings[current - 1]
-        self.interval = (self.date - prev_watering.date).to_i
+        self.interval = (self.date.to_date - prev_watering.date.to_date).to_i
       else
         # this is the first watering logged for this plant
         self.interval = -1
@@ -31,7 +31,7 @@ class Watering < ApplicationRecord
   private
 
   def update_frequency
-    if plant
+    if plant && !plant.manual_watering_frequency
       if previous_changes[:plant_id]
         # If the plant was changed when the watering gets updated, recalculate watering freq for both plants
         previous_changes[:plant_id].compact.map {|id| Plant.find(id)}.each &:calculate_watering_frequency

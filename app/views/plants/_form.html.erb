@@ -37,6 +37,16 @@
   </div>
 
   <div>
+    <%= form.label :watering_frequency, style: "display: block" %>
+    <%= form.number_field :watering_frequency %>
+  </div>
+
+  <div>
+    <%= form.label :manual_watering_frequency, style: "display: block" %>
+    <%= form.check_box :manual_watering_frequency %>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>
