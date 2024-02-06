@@ -12,11 +12,19 @@
 
   <body>
   <header>
-    <nav>
-      <%= params[:controller] != 'plants' || params[:action] != 'index' ? link_to('Plants', plants_path) : 'Plants' %> |
-      <%= params[:controller] != 'waterings' || params[:action] != 'index' ? link_to('Waterings', waterings_path) : 'Waterings' %> |
-      <%= params[:controller] != 'plants' || params[:action] != 'new' ? link_to('New Plant', new_plant_path) : 'New Plant' %>
-    </nav>
+    <% if session[:logged_in] %>
+      <nav>
+        <%= params[:controller] != 'plants' || params[:action] != 'index' ? link_to('Plants', plants_path) : 'Plants' %> |
+        <%= params[:controller] != 'waterings' || params[:action] != 'index' ? link_to('Waterings', waterings_path) : 'Waterings' %> |
+        <%= params[:controller] != 'plants' || params[:action] != 'new' ? link_to('New Plant', new_plant_path) : 'New Plant' %>
+      </nav>
+    <% end %>
+    <div style="float: right">
+      <% if session[:logged_in] %>
+        &nbsp;| Logged In |
+        <%= link_to 'Log Out', sessions_destroy_path %>
+    <% end %>
+    </div>
     <time><%= format_date Time.now, time: true %></time>
   </header>
 

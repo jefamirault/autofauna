@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  get 'sessions/new'
+  post 'sessions/create'
+  get 'sessions/destroy'
   resources :waterings
   resources :plants do
     get 'water'

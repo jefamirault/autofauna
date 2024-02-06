@@ -1,5 +1,6 @@
 class PlantsController < ApplicationController
   before_action :set_plant, only: %i[ show edit update destroy ]
+  before_action :authenticate
 
   def water
     @plant = Plant.find params[:plant_id]
