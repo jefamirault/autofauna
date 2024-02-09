@@ -16,7 +16,7 @@ class PlantsController < ApplicationController
     elsif params[:sort] == 'last'
       @plants = @plants.sort_by {|plant| [plant.last_watering ? 1 : 0, plant.last_watering] }.reverse
     elsif params[:sort] == 'number'
-
+      @plants = @plants.sort_by {|plant| [plant.uid ? 1 : 0, plant.uid] }
     end
   end
 
