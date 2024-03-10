@@ -37,3 +37,4 @@
 .idea
 
 .rbenv-vars
+.byebug_history
