@@ -19,7 +19,7 @@
       <td><%= link_to watering.plant, watering_path(watering.id) %></td>
       <td><%= time_ago watering.date, precise: true %></td>
       <td><%= watering.interval_text %></td>
-      <td><%= watering.plant.watering_frequency_text %></td>
+      <td><%= watering.plant ? watering.plant.watering_frequency_text : 'Plant deleted' %></td>
       <td><%= watering.notes %></td>
     </tr>
   <% end %>

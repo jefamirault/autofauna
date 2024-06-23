@@ -1,7 +1,7 @@
 class Watering < ApplicationRecord
   belongs_to :plant
 
-  after_commit :update_frequency
+  after_save_commit :update_frequency
 
   # interval: integer # of days between this watering and the last watering for the same plant
   def interval

@@ -1,5 +1,5 @@
 class Plant < ApplicationRecord
-  has_many :waterings, -> { order 'waterings.date' }
+  has_many :waterings, -> { order 'waterings.date' }, dependent: :destroy
 
   def label
     "##{uid} #{name}"
