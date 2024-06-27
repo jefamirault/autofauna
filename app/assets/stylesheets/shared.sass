@@ -1,16 +1,33 @@
+$green: #004D40
+$blue: #0E487B
+$yellow: #8C6800
+$purple: #D81B60 // https://davidmathlogic.com/colorblind
+
 body
   font-size: 150%
   font-family: verdana, sans-serif
+  background-image: url("background1.jpg")
+  margin: 0
 
-input[type=checkbox]
-  transform: scale(1.5)
-input, input[type=submit], button[type=submit]
-  font-size: 120%
-input[type=submit], button[type=submit]
-  padding: 16px 48px
+a
+  color: $purple
+textarea
+  font-size: 100%
+  font-family: verdana, sans-serif
+  width: 50%
+  min-width: 8em
 
 header
-  padding: 0 0 1em
+  padding: 1em 1em 2em
+  margin: 0 0 2em
+  background: rgba(255, 255, 255, 0.99)
+  background: $green
+  color: white
+  box-shadow: rgba(0, 0, 0, 0.45) 0 5px 15px 3px
+  white-space: nowrap
+
+  a
+    color: rgba(255, 255, 255, 0.75)
 
 time
   float: right
@@ -20,6 +37,32 @@ nav
 
 h1
   clear: both
+
+section#main
+  background: rgba(255, 255, 255, 0.975)
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px
+  border-radius: 25px
+  max-width: 1500px
+  margin: 0 auto 2em
+  padding: 0.5em 3em 2em
+  clear: both
+
+table
+  table-layout: fixed
+
+  td
+    text-overflow: '...'
+    white-space: nowrap
+    overflow: hidden
+
+input[type=checkbox]
+  transform: scale(1.5)
+input, input[type=submit], button[type=submit]
+  font-size: 120%
+input[type=submit], button[type=submit]
+  padding: 16px 48px
+
+
 
 
 @media (max-width: 1208px)
@@ -41,23 +84,43 @@ h1
     display: none
 
 
+
 table
   border-spacing: 0
   width: 100%
   margin: 1em 0
-  border: 2px solid #2f5b2f
+  border: 2px solid $green
 
 .line-break::after
     content: "\a"
     white-space: pre
 
-
 thead th
-  background: #2f5b2f
+  background: $green
   color: white
 tbody tr:nth-child(even)
-  background: rgba(22, 128, 22, 0.3)
+  background: rgba(0, 77, 64, 0.2)
 
+table.blue
+  border-color: $blue
+
+  thead th
+    background: $blue
+    color: white
+  tbody tr:nth-child(even)
+    background: rgba(14, 72, 123, 0.15)
+
+
+table.yellow
+  border-color: $yellow
+
+  thead th
+    background: $yellow
+    color: white
+  tbody tr:nth-child(even)
+    background: rgba(206, 154, 0, 0.3)
+
+//    TODO delete
 //th:nth-child(odd), td:nth-child(odd)
 //  background: rgba(0, 255, 0, 0.1)
 //th:nth-child(even), td:nth-child(even)
@@ -65,6 +128,3 @@ tbody tr:nth-child(even)
 
 th, td
   padding: 12px 6px
-td
-  text-overflow: '-'
-  white-space: nowrap

@@ -27,8 +27,9 @@
     </div>
     <time><%= format_date Time.now, time: true %></time>
   </header>
-
-  <%= yield %>
+  <section id="main">
+    <%= yield %>
+  </section>
 
   </body>
 </html>

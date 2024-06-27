@@ -1,32 +1,104 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Plants</h1>
+<!--Sort by:-->
+<!--<%#= params[:sort] != 'schedule' ? link_to('Scheduled', plants_path(sort: 'schedule')) : 'Scheduled' %> |-->
+<!--<%#= params[:sort] != 'last' ? link_to('Location', plants_path(sort: 'last')) : 'Location' %> |-->
+<%#= params[:sort] != 'number' ? link_to('Number', plants_path(sort: 'number')) : 'Number' %>
 
-Sort by:
-<%= params[:sort] != 'suggested' ? link_to('Suggested', plants_path(sort: 'suggested')) : 'Suggested' %> |
-<%= params[:sort] != 'last' ? link_to('Last Watering', plants_path(sort: 'last')) : 'Last Watering' %> |
-<%= params[:sort] != 'number' ? link_to('Number', plants_path(sort: 'number')) : 'Number' %>
-
-
-<table>
-  <thead>
+<h2>Scheduled Today</h2>
+<% if @scheduled_today.any? %>
+  <table>
+    <thead>
+    <tr>
+      <th>Plant</th>
+      <th>Location</th>
+          <th class="trim">Pot</th>
+      <th class="trim2" style="min-width:130px;">Watered</th>
+<!--      <th class="trim4">Frequency</th>-->
+      <!--      <th>Suggested Watering</th>-->
+      <th style="min-width:148px">Scheduled</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @scheduled_today.each do |plant| %>
+      <%= render 'plant_row', plant: plant %>
+    <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>Nothing scheduled for today.</p>
+<% end %>
+<h2>Upcoming</h2>
+<% if @upcoming.any? %>
+  <table class="yellow">
+    <thead>
     <tr>
       <th>Plant</th>
       <th>Location</th>
       <th class="trim">Pot</th>
-      <th class="trim2" style="min-width:130px;"><span class="line-break">Last</span> Watering</th>
-      <th class="trim4">Frequency</th>
+      <th class="trim2" style="min-width:130px;">Watered</th>
+<!--      <th class="trim4">Frequency</th>-->
       <!--      <th>Suggested Watering</th>-->
-      <th style="min-width:148px"><span class="line-break">Days Until</span> Water</th>
-      <th class="trim3"><span class="line-break">Last</span> Fertilized</th>
+      <th style="min-width:148px">Scheduled</th>
       <th>Action</th>
     </tr>
-  </thead>
-  <tbody>
-      <% @plants.each do |plant| %>
-        <%= render 'plant_row', plant: plant %>
-      <% end %>
-  </tbody>
-</table>
-<br>
+    </thead>
+    <tbody>
+    <% @upcoming.each do |plant| %>
+      <%= render 'plant_row', plant: plant %>
+    <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>Nothing scheduled in the next 7 days.</p>
+<% end %>
+<h2>Recently Watered</h2>
+<% if @recently.any? %>
+  <table class="blue">
+    <thead>
+    <tr>
+      <th>Plant</th>
+      <th>Location</th>
+          <th class="trim">Pot</th>
+      <th class="trim2" style="min-width:130px;">Watered</th>
+<!--      <th class="trim4">Frequency</th>-->
+      <!--      <th>Suggested Watering</th>-->
+      <th style="min-width:148px">Scheduled</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @recently.each do |plant| %>
+      <%= render 'plant_row', plant: plant %>
+    <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>Nothing watered in the last 7 days.</p>
+<% end %>
+
+<% if @unscheduled.any? %>
+  <h2>Unscheduled</h2>
+  <table>
+    <thead>
+    <tr>
+      <th>Plant</th>
+      <th>Location</th>
+          <th class="trim">Pot</th>
+      <th class="trim2" style="min-width:130px;">Watered</th>
+<!--      <th class="trim4">Frequency</th>-->
+      <!--      <th>Suggested Watering</th>-->
+      <th style="min-width:148px">Scheduled</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @unscheduled.each do |plant| %>
+      <%= render 'plant_row', plant: plant %>
+    <% end %>
+    </tbody>
+  </table>
+<% end  %>
+
 <%= link_to "New plant", new_plant_path %>

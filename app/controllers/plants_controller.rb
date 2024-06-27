@@ -9,15 +9,20 @@ class PlantsController < ApplicationController
 
   # GET /plants or /plants.json
   def index
-    @plants = Plant.where(archived: false)
-    params[:sort] ||= 'suggested'
-    if params[:sort] == 'suggested' || params[:sort].nil?
-      @plants = @plants.sort_by {|plant| [plant.suggested_watering ? 1 : 0, plant.suggested_watering] }
-    elsif params[:sort] == 'last'
-      @plants = @plants.sort_by {|plant| [plant.last_watering ? 1 : 0, plant.last_watering] }.reverse
-    elsif params[:sort] == 'number'
-      @plants = @plants.sort_by {|plant| [plant.uid ? 1 : 0, plant.uid] }
+    @plants = Plant.where(archived: false).sort do |a,b|
+      if a.suggested_watering.nil?
+        1
+      elsif b.suggested_watering.nil?
+        0
+      else
+        a.suggested_watering <=> b.suggested_watering
+      end
     end
+    @scheduled_today = @plants.select { |p| p.time_until_watering && p.time_until_watering <= 0 }
+    # @upcoming = @plants.select { |p| p.suggested_watering && p.suggested_watering < Time.now + 1.week}
+    @upcoming = @plants.select { |p| p.suggested_watering && p.suggested_watering > Time.now}
+    @recently = @plants.select { |p| p.last_watering && p.last_watering > Time.now - 1.week}.sort_by { |p| p.last_watering }.reverse
+    @unscheduled = @plants - @scheduled_today - @upcoming - @recently
   end
 
   # GET /plants/1 or /plants/1.json

@@ -50,9 +50,9 @@ class Plant < ApplicationRecord
     if suggested_watering
       days = time_until_watering
       style = if days < 0
-                'color: red'
+                'color: #D81B60'
               elsif days == 0
-                'color: blue'
+                'color: #0E487B'
               else
                 ''
               end
