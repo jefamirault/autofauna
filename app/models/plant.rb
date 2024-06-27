@@ -23,7 +23,9 @@ class Plant < ApplicationRecord
     calculated if save
   end
   def watering_frequency
-    if !super.nil?
+    if self.new_record?
+      nil
+    elsif !super.nil?
       super
     else
       calculate_watering_frequency
