@@ -1,26 +1,40 @@
 $green: #004D40
+$lightgreen: rgba(0, 77, 64, 0.15)
+
 $blue: #0E487B
+$lightblue: rgba(14, 72, 123, 0.1)
+
 $yellow: #8C6800
-$purple: #D81B60 // https://davidmathlogic.com/colorblind
+$lightyellow: rgba(206, 154, 0, 0.2)
+
+$purple: #D81B60
+$lightpurple: #D81B60   // https://davidmathlogic.com/colorblind
 
 body
-  font-size: 150%
-  font-family: verdana, sans-serif
-  background-image: url("background1.jpg")
+  font-size: 125%
+  font-family: Roboto, verdana, sans-serif
+  font-weight: 400
   margin: 0
 
+  background-color: #0a4b2e
+  background: linear-gradient( rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.3)), url("background1.jpg"), no-repeat
+  background-size: cover
+  background-attachment: fixed
 a
   color: $purple
+  text-decoration: none
+  &:hover, &:active
+    text-decoration: underline
+
 textarea
   font-size: 100%
-  font-family: verdana, sans-serif
+  font-family: Roboto, verdana, sans-serif
   width: 50%
   min-width: 8em
 
 header
   padding: 1em 1em 2em
   margin: 0 0 2em
-  background: rgba(255, 255, 255, 0.99)
   background: $green
   color: white
   box-shadow: rgba(0, 0, 0, 0.45) 0 5px 15px 3px
@@ -37,6 +51,9 @@ nav
 
 h1
   clear: both
+h2
+  font-size: 120%
+  padding: 1.5em 0 0
 
 section#main
   background: rgba(255, 255, 255, 0.975)
@@ -50,6 +67,10 @@ section#main
 table
   table-layout: fixed
 
+  th
+    text-align: left
+    padding-left: 1em
+    font-weight: 500
   td
     text-overflow: '...'
     white-space: nowrap
@@ -61,8 +82,6 @@ input, input[type=submit], button[type=submit]
   font-size: 120%
 input[type=submit], button[type=submit]
   padding: 16px 48px
-
-
 
 
 @media (max-width: 1208px)
@@ -84,47 +103,50 @@ input[type=submit], button[type=submit]
     display: none
 
 
+.line-break::after
+  content: "\a"
+  white-space: pre
 
 table
   border-spacing: 0
   width: 100%
   margin: 1em 0
-  border: 2px solid $green
 
-.line-break::after
-    content: "\a"
-    white-space: pre
+th, td
+  padding: 12px 6px
 
 thead th
-  background: $green
-  color: white
-tbody tr:nth-child(even)
-  background: rgba(0, 77, 64, 0.2)
+  color: $green
+tbody
+  tr:nth-child(odd)
+    background: $lightgreen
+  tr:nth-child(even)
+    td
+      border-top: 2px solid $lightgreen
+      border-bottom: 2px solid $lightgreen
+    td:first-child
+      border-left: 2px solid $lightgreen
+    td:last-child
+      border-right: 2px solid $lightgreen
 
 table.blue
   border-color: $blue
 
   thead th
-    background: $blue
-    color: white
-  tbody tr:nth-child(even)
-    background: rgba(14, 72, 123, 0.15)
+    color: $blue
+  tbody tr:nth-child(odd)
+    background: $lightblue
+
+  td
+    border-color: $lightblue !important
 
 
 table.yellow
   border-color: $yellow
 
   thead th
-    background: $yellow
-    color: white
-  tbody tr:nth-child(even)
-    background: rgba(206, 154, 0, 0.3)
-
-//    TODO delete
-//th:nth-child(odd), td:nth-child(odd)
-//  background: rgba(0, 255, 0, 0.1)
-//th:nth-child(even), td:nth-child(even)
-//  background: rgba(64, 196, 64, 0.1)
-
-th, td
-  padding: 12px 6px
+    color: $yellow
+  tbody tr:nth-child(odd)
+    background: $lightyellow
+  td
+    border-color: $lightyellow !important
