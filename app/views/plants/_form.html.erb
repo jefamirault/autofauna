@@ -37,6 +37,11 @@
   </div>
 
   <div>
+    <%= form.label :scheduled_watering, style: "display: block" %>
+    <%= form.date_field :scheduled_watering %>
+  </div>
+
+  <div>
     <%= form.label :watering_frequency, style: "display: block" %>
     <%= form.number_field :watering_frequency %>
   </div>

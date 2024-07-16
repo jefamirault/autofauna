@@ -10,19 +10,18 @@ class PlantsController < ApplicationController
   # GET /plants or /plants.json
   def index
     @plants = Plant.where(archived: false).sort do |a,b|
-      if a.suggested_watering.nil?
+      if a.scheduled_watering.nil?
         1
-      elsif b.suggested_watering.nil?
+      elsif b.scheduled_watering.nil?
         0
       else
-        a.suggested_watering <=> b.suggested_watering
+        a.scheduled_watering <=> b.scheduled_watering
       end
     end
     @scheduled_today = @plants.select { |p| p.time_until_watering && p.time_until_watering <= 0 }
-    # @upcoming = @plants.select { |p| p.suggested_watering && p.suggested_watering < Time.now + 1.week}
-    @upcoming = @plants.select { |p| p.suggested_watering && p.suggested_watering > Time.now}
+    @upcoming = @plants.select { |p| p.scheduled_watering && p.scheduled_watering > Time.now}
     @recently = @plants.select { |p| p.last_watering && p.last_watering > Time.now - 1.week}.sort_by { |p| p.last_watering }.reverse
-    @unscheduled = @plants - @scheduled_today - @upcoming - @recently
+    @unscheduled = Plant.where(scheduled_watering: nil, archived: false)
   end
 
   # GET /plants/1 or /plants/1.json
@@ -84,6 +83,6 @@ class PlantsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:name, :uid, :location, :pot, :archived, :watering_frequency, :manual_watering_frequency)
+      params.require(:plant).permit(:name, :uid, :location, :pot, :archived, :watering_frequency, :manual_watering_frequency, :scheduled_watering)
     end
 end

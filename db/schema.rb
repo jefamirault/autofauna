@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_03_10_142424) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_14_232154) do
   create_table "plants", force: :cascade do |t|
     t.string "name"
     t.integer "uid"
@@ -21,6 +21,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_10_142424) do
     t.boolean "archived", default: false
     t.integer "watering_frequency"
     t.boolean "manual_watering_frequency"
+    t.date "scheduled_watering"
   end
 
   create_table "waterings", force: :cascade do |t|

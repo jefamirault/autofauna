@@ -1,7 +1,10 @@
 class Watering < ApplicationRecord
   belongs_to :plant
+  validates :date, presence: true
 
   after_save_commit :update_frequency
+  after_save_commit :schedule_next_watering
+  after_destroy :schedule_next_watering
 
   # interval: integer # of days between this watering and the last watering for the same plant
   def interval
@@ -38,6 +41,13 @@ class Watering < ApplicationRecord
       else
         plant.calculate_watering_frequency
       end
+    end
+  end
+
+  def schedule_next_watering(options = {})
+    # run on create/delete, or if date changed
+    if previous_changes[:id] || previous_changes[:date] || self.destroyed? || options[:force]
+      plant.schedule_next_watering
     end
   end
 end

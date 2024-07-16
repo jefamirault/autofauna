@@ -1,6 +1,7 @@
 class Plant < ApplicationRecord
   has_many :waterings, -> { order 'waterings.date' }, dependent: :destroy
 
+
   def label
     "##{uid} #{name}"
   end
@@ -45,11 +46,11 @@ class Plant < ApplicationRecord
   end
 
   def time_until_watering
-    suggested_watering ? (suggested_watering - Date.today).to_i : nil
+    scheduled_watering ? (scheduled_watering - Date.today).to_i : nil
   end
 
   def time_until_watering_text
-    if suggested_watering
+    if scheduled_watering
       days = time_until_watering
       style = if days < 0
                 'color: #D81B60'
@@ -70,6 +71,18 @@ class Plant < ApplicationRecord
     else
       last_fertilization = waterings.order(:date).reverse.find {|w| w.notes =~ /fertilizer/}
       last_fertilization ? last_fertilization.date : nil
+    end
+  end
+
+  def schedule_next_watering
+    waterings = self.waterings.order(:date)
+    last = waterings[-1]
+    if self.manual_watering_frequency
+      self.update(scheduled_watering: last.date + self.watering_frequency * 1.day )
+    elsif waterings.count > 1
+      waterings = self.waterings.order(date: :desc)
+      last_interval = last.date - waterings[-2].date
+      self.update(scheduled_watering: last.date + last_interval)
     end
   end
 end
