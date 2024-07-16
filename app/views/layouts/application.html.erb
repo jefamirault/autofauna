@@ -16,7 +16,7 @@
 
   <body>
   <header>
-    <% if session[:logged_in] %>
+    <% if cookies.encrypted[:logged_in] %>
       <nav>
         <%= params[:controller] != 'plants' || params[:action] != 'index' ? link_to('Plants', plants_path) : 'Plants' %> |
         <%= params[:controller] != 'waterings' || params[:action] != 'index' ? link_to('Waterings', waterings_path) : 'Waterings' %> |
@@ -24,7 +24,7 @@
       </nav>
     <% end %>
     <div style="float: right">
-      <% if session[:logged_in] %>
+      <% if cookies.encrypted[:logged_in] %>
         &nbsp;| Logged In |
         <%= link_to 'Log Out', sessions_destroy_path %>
     <% end %>
