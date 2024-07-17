@@ -6,7 +6,7 @@
   <td><%= plant.location %></td>
 <!--  <td class="trim4"><%#= plant.watering_frequency_text %></td>-->
 <!--  <td class="trim3"><%#= time_ago plant.last_fertilized %></td>-->
-  <% if plant.last_watering == Date.today %>
+  <% if plant.last_watering == Time.zone.now.to_date %>
     <td><%= link_to 'Edit Watering', edit_watering_path(plant.waterings.last) %></td>
   <% else %>
     <td><%= link_to 'Water', plant_water_path(plant), data: { turbo_stream: true } %></td>

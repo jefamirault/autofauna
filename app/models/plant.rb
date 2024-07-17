@@ -41,12 +41,12 @@ class Plant < ApplicationRecord
     if waterings.count <= 1
       nil
     else
-      first_watering && last_watering ? (last_watering + watering_frequency).to_date : Date.today
+      first_watering && last_watering ? (last_watering + watering_frequency).to_date : Time.zone.now.to_date
     end
   end
 
   def time_until_watering
-    scheduled_watering ? (scheduled_watering - Date.today).to_i : nil
+    scheduled_watering ? (scheduled_watering - Time.zone.now.to_date).to_i : nil
   end
 
   def time_until_watering_text

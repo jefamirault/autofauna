@@ -18,9 +18,14 @@ class PlantsController < ApplicationController
         a.scheduled_watering <=> b.scheduled_watering
       end
     end
+    # Needs Water: scheduled today
     @scheduled_today = @plants.select { |p| p.time_until_watering && p.time_until_watering <= 0 }
-    @upcoming = @plants.select { |p| p.scheduled_watering && p.scheduled_watering > Time.now}
-    @recently = @plants.select { |p| p.last_watering && p.last_watering > Time.now - 1.week}.sort_by { |p| p.last_watering }.reverse
+    @watered_today = @plants.select {|p| p.last_watering == Time.zone.now.to_date }
+    @recently = @plants.select { |p| p.last_watering && p.last_watering > Time.zone.now.to_date - 1.week}.sort_by { |p| p.last_watering }.reverse
+
+    # Scheduled watering in the future
+
+    @upcoming = @plants.select { |p| p.scheduled_watering && p.scheduled_watering > Time.zone.now.to_date}
     @unscheduled = Plant.where(scheduled_watering: nil, archived: false)
   end
 

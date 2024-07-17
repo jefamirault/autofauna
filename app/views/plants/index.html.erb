@@ -1,11 +1,6 @@
 <p style="color: green"><%= notice %></p>
 
-<!--Sort by:-->
-<!--<%#= params[:sort] != 'schedule' ? link_to('Scheduled', plants_path(sort: 'schedule')) : 'Scheduled' %> |-->
-<!--<%#= params[:sort] != 'last' ? link_to('Location', plants_path(sort: 'last')) : 'Location' %> |-->
-<%#= params[:sort] != 'number' ? link_to('Number', plants_path(sort: 'number')) : 'Number' %>
-
-<h2>Scheduled Today</h2>
+<h2>Needs Watering</h2>
 <% if @scheduled_today.any? %>
   <table>
     <thead>
@@ -15,8 +10,6 @@
       <th style="min-width:148px">Scheduled</th>
       <th class="trim">Pot</th>
       <th>Location</th>
-<!--      <th class="trim4">Frequency</th>-->
-      <!--      <th>Suggested Watering</th>-->
       <th>Action</th>
     </tr>
     </thead>
@@ -27,7 +20,27 @@
     </tbody>
   </table>
 <% else %>
-  <p>Nothing scheduled for today.</p>
+  <p>Everything up to date!</p>
+<% end %>
+<% if @watered_today.any? %>
+  <h2>Watered Today</h2>
+  <table>
+    <thead>
+    <tr>
+      <th>Plant</th>
+      <th class="trim2" style="min-width:130px;">Watered</th>
+      <th style="min-width:148px">Scheduled</th>
+      <th class="trim">Pot</th>
+      <th>Location</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @watered_today.each do |plant| %>
+      <%= render 'plant_row', plant: plant %>
+    <% end %>
+    </tbody>
+  </table>
 <% end %>
 <h2>Upcoming</h2>
 <% if @upcoming.any? %>
@@ -39,8 +52,6 @@
       <th style="min-width:148px">Scheduled</th>
       <th class="trim">Pot</th>
       <th>Location</th>
-<!--      <th class="trim4">Frequency</th>-->
-      <!--      <th>Suggested Watering</th>-->
       <th>Action</th>
     </tr>
     </thead>
@@ -63,8 +74,6 @@
       <th style="min-width:148px">Scheduled</th>
       <th class="trim">Pot</th>
       <th>Location</th>
-<!--      <th class="trim4">Frequency</th>-->
-      <!--      <th>Suggested Watering</th>-->
       <th>Action</th>
     </tr>
     </thead>
@@ -88,8 +97,6 @@
       <th style="min-width:148px">Scheduled</th>
       <th class="trim">Pot</th>
       <th>Location</th>
-<!--      <th class="trim4">Frequency</th>-->
-      <!--      <th>Suggested Watering</th>-->
       <th>Action</th>
     </tr>
     </thead>

@@ -29,7 +29,7 @@
         <%= link_to 'Log Out', sessions_destroy_path %>
     <% end %>
     </div>
-    <time><%= format_date Time.now, time: true %></time>
+    <time><%= format_date Time.zone.now, time: true %></time>
   </header>
   <section id="main">
     <%= yield %>

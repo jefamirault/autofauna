@@ -18,7 +18,7 @@
 
   <div>
     <%= form.label :date, style: "display: block" %>
-    <%= form.date_field :date, value: watering.date || Date.today %>
+    <%= form.date_field :date, value: watering.date || Time.zone.now.to_date %>
   </div>
 
   <div>
