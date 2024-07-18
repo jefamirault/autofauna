@@ -2,7 +2,7 @@
 
 <h2>Needs Watering</h2>
 <% if @scheduled_today.any? %>
-  <table>
+  <table class="yellow">
     <thead>
     <tr>
       <th>Plant</th>
@@ -24,7 +24,7 @@
 <% end %>
 <% if @watered_today.any? %>
   <h2>Watered Today</h2>
-  <table>
+  <table class="blue">
     <thead>
     <tr>
       <th>Plant</th>
@@ -44,7 +44,7 @@
 <% end %>
 <h2>Upcoming</h2>
 <% if @upcoming.any? %>
-  <table class="yellow">
+  <table class="green">
     <thead>
     <tr>
       <th>Plant</th>
