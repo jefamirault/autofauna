@@ -51,15 +51,24 @@ class Plant < ApplicationRecord
 
   def time_until_watering_text
     if scheduled_watering
+
       days = time_until_watering
-      style = if days < 0
-                'color: #D81B60'
-              elsif days == 0
-                'color: #0E487B'
-              else
-                ''
-              end
-      "<span style=\"#{style}\">#{days} days</span>".html_safe
+      if days < 0
+        style = 'color: #D81B60'
+        if days == -1
+          text = 'Yesterday'
+        else
+          text = "#{days} days".html_safe
+        end
+      elsif days == 0
+        style = 'color: #0E487B'
+        text = 'Today'
+      elsif days == 1
+        text = 'Tomorrow'
+      else # days > 1
+        text = "#{days} days".html_safe
+      end
+      "<span style=\"#{style}\">#{text}</span>".html_safe
     else
       nil
     end

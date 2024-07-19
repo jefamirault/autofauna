@@ -19,7 +19,11 @@ module ApplicationHelper
                end
              else
                days_ago = (Time.zone.now.to_date - date.to_date).to_i
-               "#{days_ago} days ago"
+               if days_ago == 1
+                 'Yesterday'
+               else
+                 "#{days_ago} days ago"
+               end
              end
 
       options[:parentheses] ? "(#{text})" : text
