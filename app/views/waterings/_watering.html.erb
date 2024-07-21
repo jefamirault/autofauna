@@ -11,7 +11,7 @@
 
   <p>
     <strong>Notes:</strong>
-    <%= watering.notes %>
+    <%= watering.notes ? watering.notes.gsub("\n",'<br>').html_safe : '' %>
   </p>
 
 </div>
