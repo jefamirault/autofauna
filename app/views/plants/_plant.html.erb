@@ -19,19 +19,24 @@
   </p>
 
   <p>
-    <strong>Watering Frequency:</strong>
-    <%= @plant.watering_frequency_text %>
-  </p>
-
-  <p>
-    <strong>Manual Watering Frequency?:</strong>
-    <%= @plant.manual_watering_frequency ? 'Yes' : 'No' %>
-  </p>
-
-  <p>
     <strong>Scheduled Watering:</strong>
     <%= @plant.time_until_watering_text %>
   </p>
+
+  <p>
+    <strong>Watering Frequency:</strong>
+    <% if @plant.manual_watering_frequency %>
+      <%= @plant.watering_frequency_text %>
+    <% else %>
+      Auto
+    <% end %>
+  </p>
+
+<!--  <p>-->
+<!--    <strong>Manual Watering Frequency?:</strong>-->
+    <%#= @plant.manual_watering_frequency ? 'Yes' : 'No' %>
+<!--  </p>-->
+
 
 
   <p>

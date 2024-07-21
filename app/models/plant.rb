@@ -1,6 +1,7 @@
 class Plant < ApplicationRecord
   has_many :waterings, -> { order 'waterings.date' }, dependent: :destroy
 
+  after_save_commit :determine_schedule_change
 
   def label
     "##{uid} #{name}"
@@ -83,6 +84,11 @@ class Plant < ApplicationRecord
     end
   end
 
+  def determine_schedule_change
+    if self.previous_changes['manual_watering_frequency']
+      schedule_next_watering
+    end
+  end
   def schedule_next_watering
     waterings = self.waterings.order(:date)
     last = waterings[-1]
