@@ -9,23 +9,32 @@ class PlantsController < ApplicationController
 
   # GET /plants or /plants.json
   def index
-    @plants = Plant.where(archived: false).sort do |a,b|
-      if a.scheduled_watering.nil?
-        1
-      elsif b.scheduled_watering.nil?
-        0
+    active = Plant.where(archived: false).reject {|p| p.scheduled_watering.nil? || p.last_watering.nil?}
+    by_next = active.sort do |a,b|
+      if a.scheduled_watering == b.scheduled_watering
+        a.location <=> b.location
       else
         a.scheduled_watering <=> b.scheduled_watering
       end
     end
-    # Needs Water: scheduled today
-    @scheduled_today = @plants.select { |p| p.time_until_watering && p.time_until_watering <= 0 }
-    @watered_today = @plants.select {|p| p.last_watering == Time.zone.now.to_date }
-    @recently = @plants.select { |p| p.last_watering && p.last_watering > Time.zone.now.to_date - 1.week}.sort_by { |p| p.last_watering }.reverse
 
-    # Scheduled watering in the future
+    today = Time.zone.now.to_date
+    cutoff = by_next.find_index {|p| p.scheduled_watering > today}
+    @needs_water = by_next.take cutoff
+    @upcoming = by_next.drop cutoff
 
-    @upcoming = @plants.select { |p| p.scheduled_watering && p.scheduled_watering > Time.zone.now.to_date}
+    by_last = active.sort do |a,b|
+      if a.last_watering == b.last_watering
+        a.location <=> b.location
+      else
+        b.last_watering <=> a.last_watering
+      end
+    end
+    
+    cutoff = by_last.find_index {|p| p.last_watering < today}
+    @watered_today = by_last.take cutoff
+    @recently = by_last.drop(cutoff).reject {|p| p.last_watering < Time.zone.now.to_date - 1.week}
+
     @unscheduled = Plant.where(scheduled_watering: nil, archived: false)
   end
 

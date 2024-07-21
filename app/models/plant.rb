@@ -85,13 +85,14 @@ class Plant < ApplicationRecord
   end
 
   def determine_schedule_change
-    if self.previous_changes['manual_watering_frequency']
+    if self.previous_changes['manual_watering_frequency'] || self.previous_changes['watering_frequency']
       schedule_next_watering
     end
   end
   def schedule_next_watering
     waterings = self.waterings.order(:date)
     last = waterings[-1]
+    return if last.nil?
     if self.manual_watering_frequency
       self.update(scheduled_watering: last.date + self.watering_frequency * 1.day )
     elsif waterings.count > 1

@@ -1,7 +1,7 @@
 <p style="color: green"><%= notice %></p>
 
 <h2>Needs Watering</h2>
-<% if @scheduled_today.any? %>
+<% if @needs_water.any? %>
   <table class="yellow">
     <thead>
     <tr>
@@ -14,7 +14,7 @@
     </tr>
     </thead>
     <tbody>
-    <% @scheduled_today.each do |plant| %>
+    <% @needs_water.each do |plant| %>
       <%= render 'plant_row', plant: plant %>
     <% end %>
     </tbody>
