@@ -1,6 +1,7 @@
 class Plant < ApplicationRecord
   has_many :waterings, -> { order 'waterings.date' }, dependent: :destroy
 
+  before_validation :strip_whitespace
   after_save_commit :determine_schedule_change
 
   def label
@@ -99,6 +100,18 @@ class Plant < ApplicationRecord
       waterings = self.waterings.order(date: :desc)
       last_interval = last.date - waterings[-2].date
       self.update(scheduled_watering: last.date + last_interval)
+    end
+  end
+
+  def strip_whitespace
+    if changes['location']
+      self.location = self.location.strip
+    end
+    if changes['name']
+      self.name = self.name.strip
+    end
+    if changes['pot']
+      self.pot = self.pot.strip
     end
   end
 end

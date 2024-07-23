@@ -12,7 +12,11 @@ class PlantsController < ApplicationController
     active = Plant.where(archived: false).reject {|p| p.scheduled_watering.nil? || p.last_watering.nil?}
     by_next = active.sort do |a,b|
       if a.scheduled_watering == b.scheduled_watering
-        a.location <=> b.location
+        if a.location == b.location
+          a.uid <=> b.uid
+        else
+          a.location <=> b.location
+        end
       else
         a.scheduled_watering <=> b.scheduled_watering
       end
@@ -30,8 +34,8 @@ class PlantsController < ApplicationController
         b.last_watering <=> a.last_watering
       end
     end
-    
-    cutoff = by_last.find_index {|p| p.last_watering < today}
+
+    cutoff = by_last.find_index {|p| p.last_watering < today} || by_last.size
     @watered_today = by_last.take cutoff
     @recently = by_last.drop(cutoff).reject {|p| p.last_watering < Time.zone.now.to_date - 1.week}
 
