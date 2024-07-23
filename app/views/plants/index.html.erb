@@ -3,20 +3,11 @@
 <h2>Needs Watering</h2>
 <% if @needs_water.any? %>
   <table class="yellow">
-    <thead>
-    <tr>
-      <th>Plant</th>
-      <th>Location</th>
-      <th class="trim">Pot</th>
-      <th style="min-width:148px">Scheduled</th>
-      <th class="trim2" style="min-width:130px;">Watered</th>
-      <th>Action</th>
-    </tr>
-    </thead>
+    <%= render 'plant_row_header' %>
     <tbody>
-    <% @needs_water.each do |plant| %>
-      <%= render 'plant_row', plant: plant %>
-    <% end %>
+      <% @needs_water.each do |plant| %>
+        <%= render 'plant_row', plant: plant %>
+      <% end %>
     </tbody>
   </table>
 <% else %>
@@ -25,40 +16,22 @@
 <% if @watered_today.any? %>
   <h2>Watered Today</h2>
   <table class="blue">
-    <thead>
-    <tr>
-      <th>Plant</th>
-      <th>Location</th>
-      <th class="trim">Pot</th>
-      <th style="min-width:148px">Scheduled</th>
-      <th class="trim2" style="min-width:130px;">Watered</th>
-      <th>Action</th>
-    </tr>
-    </thead>
+    <%= render 'plant_row_header' %>
     <tbody>
-    <% @watered_today.each do |plant| %>
-      <%= render 'plant_row', plant: plant %>
-    <% end %>
+      <% @watered_today.each do |plant| %>
+        <%= render 'plant_row', plant: plant %>
+      <% end %>
     </tbody>
   </table>
 <% end %>
 <h2>Upcoming</h2>
 <% if @upcoming.any? %>
   <table class="green">
-    <thead>
-      <tr>
-        <th>Plant</th>
-        <th>Location</th>
-        <th class="trim">Pot</th>
-        <th style="min-width:148px">Scheduled</th>
-        <th class="trim2" style="min-width:130px;">Watered</th>
-        <th>Action</th>
-      </tr>
-    </thead>
+    <%= render 'plant_row_header' %>
     <tbody>
-    <% @upcoming.each do |plant| %>
-      <%= render 'plant_row', plant: plant %>
-    <% end %>
+      <% @upcoming.each do |plant| %>
+        <%= render 'plant_row', plant: plant %>
+      <% end %>
     </tbody>
   </table>
 <% else %>
@@ -67,20 +40,11 @@
 <h2>Recently Watered</h2>
 <% if @recently.any? %>
   <table class="blue">
-    <thead>
-    <tr>
-      <th>Plant</th>
-      <th>Location</th>
-      <th class="trim">Pot</th>
-      <th style="min-width:148px">Scheduled</th>
-      <th class="trim2" style="min-width:130px;">Watered</th>
-      <th>Action</th>
-    </tr>
-    </thead>
+    <%= render 'plant_row_header' %>
     <tbody>
-    <% @recently.each do |plant| %>
-      <%= render 'plant_row', plant: plant %>
-    <% end %>
+      <% @recently.each do |plant| %>
+        <%= render 'plant_row', plant: plant %>
+      <% end %>
     </tbody>
   </table>
 <% else %>
@@ -90,20 +54,11 @@
 <% if @unscheduled.any? %>
   <h2>Unscheduled</h2>
   <table>
-    <thead>
-    <tr>
-      <th>Plant</th>
-      <th>Location</th>
-      <th class="trim">Pot</th>
-      <th style="min-width:148px">Scheduled</th>
-      <th class="trim2" style="min-width:130px;">Watered</th>
-      <th>Action</th>
-    </tr>
-    </thead>
+    <%= render 'plant_row_header' %>
     <tbody>
-    <% @unscheduled.each do |plant| %>
-      <%= render 'plant_row', plant: plant %>
-    <% end %>
+      <% @unscheduled.each do |plant| %>
+        <%= render 'plant_row', plant: plant %>
+      <% end %>
     </tbody>
   </table>
 <% end  %>

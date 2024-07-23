@@ -1,23 +1,24 @@
 <tr id="<%= dom_id plant %>">
-  <td style="font-weight: 500">
+  <td class="plantColumn" style="font-weight: 500">
     <%= link_to plant.label, plant_path(plant.id) %>
   </td>
-  <td>
+  <td class="locationColumn">
     <%= plant.location %>
   </td>
-  <td class="trim">
+  <td class="containerColumn">
     <%= plant.pot %>
   </td>
-  <td>
+  <td class="scheduledColumn">
     <%= plant.time_until_watering_text %>
   </td>
-  <td class="trim2">
+  <td class="wateredColumn">
     <%= time_ago plant.last_watering %>
   </td>
-
-  <% if plant.last_watering == Time.zone.now.to_date %>
-    <td><%= link_to 'Edit', edit_watering_path(plant.waterings.last) %></td>
-  <% else %>
-    <td><%= link_to 'Water', plant_water_path(plant), data: { turbo_stream: true } %></td>
-  <% end %>
+  <td class="actionColumn">
+    <% if plant.last_watering == Time.zone.now.to_date %>
+      <%= link_to 'Edit', edit_watering_path(plant.waterings.last) %>
+    <% else %>
+      <%= link_to 'Water', plant_water_path(plant), data: { turbo_stream: true } %>
+    <% end %>
+  </td>
 </tr>

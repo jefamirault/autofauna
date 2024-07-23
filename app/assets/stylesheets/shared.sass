@@ -10,6 +10,9 @@ $lightyellow: rgba(206, 154, 0, 0.2)
 $purple: #D81B60
 $lightpurple: #D81B60   // https://davidmathlogic.com/colorblind
 
+*
+  transition: all 0.15s ease-out
+
 body
   font-size: 125%
   font-family: Roboto, verdana, sans-serif
@@ -43,8 +46,11 @@ header
   a
     color: rgba(255, 255, 255, 0.75)
 
+.logged_in
+  float: right
 time
   float: right
+  margin-left: 1.25em
 
 nav
   float: left
@@ -53,15 +59,14 @@ h1
   clear: both
 h2
   font-size: 120%
-  padding: 1.5em 0 0
+  padding-top: 1.5em
 
 section#main
   background: rgba(255, 255, 255, 0.975)
   box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px
   border-radius: 25px
-  max-width: 1500px
-  margin: 0 auto 2em
-  padding: 0.5em 3em 2em
+  margin: 0 3vw 2em
+  padding: 0.5em 3vw 2em
   clear: both
 
 table
@@ -69,12 +74,27 @@ table
 
   th
     text-align: left
-    padding-left: 1em
     font-weight: 500
   td
     text-overflow: '...'
     white-space: nowrap
     overflow: hidden
+
+  &.waterings
+    table-layout: auto
+    white-space: normal
+    .plantColumn
+      min-width: 200px
+      max-width: 0
+    .dateColumn
+      min-width: 120px
+      max-width: 0
+    .intervalColumn
+      min-width: 100px
+      max-width: 0
+    .notesColumn
+      min-width: 200px
+      max-width: 0
 
 input[type=checkbox]
   transform: scale(1.5)
@@ -84,23 +104,69 @@ input[type=submit], button[type=submit]
   padding: 16px 48px
 
 
-@media (max-width: 1208px)
-  .trim
-    visibility: collapse
-    display: none
-@media (max-width: 1105px)
-  .trim2
-    visibility: collapse
-    display: none
-@media (max-width: 966px)
-  .trim3
-    visibility: collapse
+// Responsive
+
+.plantColumn
+  width: 200px
+.locationColumn
+  width: 218px
+.containerColumn
+  width: 125px
+.scheduledColumn
+  width: 140px
+.wateredColumn
+  width: 140px
+.actionColumn
+  width: 74px
+
+.hide
+  display: none
+
+@media (max-width: 1130px)
+  .wateredColumn
     display: none
 
-@media (max-width: 832px)
-  .trim4
-    visibility: collapse
+  // gradually reduce #main side padding from 34 (14 per side) until 0 between media queries
+  // section#main side padding at 1130px = 34px
+  // (1130 - 960) / 34 = 5
+  section#main
+    margin-left: calc((100% - 960px) / 5)
+    margin-right: calc((100% - 960px) / 5)
+
+@media (max-width: 960px)
+  .containerColumn
     display: none
+  section#main
+    margin-right: 0
+    margin-left: 0
+  header
+    height: 44px
+    line-height: 35px
+  .logged_in
+    clear: both
+
+  .waterings
+    .intervalColumn
+      width: 0
+
+@media (max-width: 750px)
+  .scheduledColumn, .intervalColumn
+    display: none
+  header
+    height: 72px
+
+@media (max-width: 600px)
+  .locationColumn
+    display: none
+  section#main
+    padding-right: 0
+    padding-left: 0
+  td, th
+    &:first-child
+     padding-left: 1em
+
+  h1, h2, h3, p, form
+    padding-left: 20px
 
 
 .line-break::after

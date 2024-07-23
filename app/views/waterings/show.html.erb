@@ -2,11 +2,10 @@
 
 <%= render @watering %>
 
-<div>
+<p>
   <%= link_to "Edit this watering", edit_watering_path(@watering) %> |
   <%= link_to "Back to waterings", waterings_path %> |
   <%= link_to "Water this plant again", plant_water_path(@watering.plant) %>
 
-
   <%= button_to "Destroy this watering", @watering, method: :delete %>
-</div>
+</p>

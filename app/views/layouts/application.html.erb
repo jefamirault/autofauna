@@ -23,13 +23,12 @@
         <%= params[:controller] != 'plants' || params[:action] != 'new' ? link_to('New Plant', new_plant_path) : 'New Plant' %>
       </nav>
     <% end %>
-    <div style="float: right">
-      <% if cookies.encrypted[:logged_in] %>
-        &nbsp;| Logged In |
-        <%= link_to 'Log Out', sessions_destroy_path %>
-    <% end %>
-    </div>
     <time><%= format_date Time.zone.now, time: true %></time>
+    <div class="logged_in">
+      <% if cookies.encrypted[:logged_in] %>
+        <%= link_to 'Log Out', sessions_destroy_path %>
+      <% end %>
+    </div>
   </header>
   <section id="main">
     <%= yield %>
