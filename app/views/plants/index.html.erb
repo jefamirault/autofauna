@@ -1,7 +1,14 @@
 <p style="color: green"><%= notice %></p>
 
+<h1>Plants</h1>
+
+<div style="float:right">
+  <%= link_to "Import Plants", plants_import_path %> |
+  <%= link_to "Export Plants", plants_path(format: :json) %>
+</div>
+
 <h2>Needs Watering</h2>
-<% if @needs_water.any? %>
+<% if @needs_water %>
   <table class="yellow">
     <%= render 'plant_row_header' %>
     <tbody>
@@ -13,7 +20,7 @@
 <% else %>
   <p>Everything up to date!</p>
 <% end %>
-<% if @watered_today.any? %>
+<% if @watered_today %>
   <h2>Watered Today</h2>
   <table class="blue">
     <%= render 'plant_row_header' %>
@@ -25,7 +32,7 @@
   </table>
 <% end %>
 <h2>Upcoming</h2>
-<% if @upcoming.any? %>
+<% if @upcoming %>
   <table class="green">
     <%= render 'plant_row_header' %>
     <tbody>
@@ -38,7 +45,7 @@
   <p>Nothing scheduled in the next 7 days.</p>
 <% end %>
 <h2>Recently Watered</h2>
-<% if @recently.any? %>
+<% if @recently %>
   <table class="blue">
     <%= render 'plant_row_header' %>
     <tbody>
@@ -62,5 +69,8 @@
     </tbody>
   </table>
 <% end  %>
-
-<%= link_to "New plant", new_plant_path %>
+<div style=" text-align: center;">
+  <div class="plantButton">
+    <%= link_to "+ New Plant", new_plant_path %>
+  </div>
+</div>

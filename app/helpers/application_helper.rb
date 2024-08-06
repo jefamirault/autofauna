@@ -2,9 +2,15 @@ module ApplicationHelper
   def format_date(date, options = {})
     if options[:time]
       date ? date.strftime('%A %-m/%-d/%y %r') : ""
+    elsif options[:long]
+      date ? date.strftime('%A %-m/%-d/%y') : ""
     else
       date ? date.strftime('%a %-m/%-d/%y') : ""
     end
+  end
+
+  def format_time(time, options = {})
+    format_date time, time: true
   end
 
   def time_ago(date, options = {})

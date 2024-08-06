@@ -114,4 +114,22 @@ class Plant < ApplicationRecord
       self.pot = self.pot.strip
     end
   end
+
+  def self.create_from_json(json)
+    Plant.create do |p|
+      p.uid = Plant.next_uid
+      p.name = json['name']
+      p.location = json['location']
+      p.pot = json['pot']
+      p.scheduled_watering = json['scheduled_watering']
+      p.archived = json['archived']
+      p.created_at = json['created_at']
+    end
+  end
+
+  def self.next_uid
+    starting_id = 1
+    max = Plant.pluck(:uid).max
+    max ? max + 1 : starting_id
+  end
 end

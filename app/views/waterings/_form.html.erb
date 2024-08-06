@@ -11,9 +11,9 @@
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :plant_id, style: "display: block" %>
-    <%= form.number_field :plant_id %>
+  <%= form.label :plant, style: "display: block" %>
+  <div class="plantButton">
+    <%= link_to watering.plant %>
   </div>
 
   <div>

@@ -9,37 +9,52 @@ class PlantsController < ApplicationController
 
   # GET /plants or /plants.json
   def index
-    active = Plant.where(archived: false).reject {|p| p.scheduled_watering.nil? || p.last_watering.nil?}
-    by_next = active.sort do |a,b|
-      if a.scheduled_watering == b.scheduled_watering
-        if a.location == b.location
-          a.uid <=> b.uid
+    active = Plant.where(archived: false).reject {|p| p.scheduled_watering.nil? }
+    if active.size > 0
+      by_next = active.sort do |a,b|
+        if a.scheduled_watering == b.scheduled_watering
+          if a.location == b.location
+            a.uid <=> b.uid
+          else
+            a.location <=> b.location
+          end
         else
-          a.location <=> b.location
+          a.scheduled_watering <=> b.scheduled_watering
         end
-      else
-        a.scheduled_watering <=> b.scheduled_watering
       end
-    end
 
-    today = Time.zone.now.to_date
-    cutoff = by_next.find_index {|p| p.scheduled_watering > today}
-    @needs_water = by_next.take cutoff
-    @upcoming = by_next.drop cutoff
+      today = Time.zone.now.to_date
+      cutoff = by_next.find_index {|p| p.scheduled_watering > today} || 0
+      @needs_water = by_next.take cutoff
+      @upcoming = by_next.drop cutoff
 
-    by_last = active.sort do |a,b|
-      if a.last_watering == b.last_watering
-        a.location <=> b.location
-      else
-        b.last_watering <=> a.last_watering
+      # sort by last watered, then by location
+      by_last = active.sort do |a,b|
+        if a.last_watering == b.last_watering
+          a.location <=> b.location
+        elsif a.last_watering.nil?
+          -1
+        elsif b.last_watering.nil?
+          1
+        else
+          b.last_watering <=> a.last_watering
+        end
       end
-    end
 
-    cutoff = by_last.find_index {|p| p.last_watering < today} || by_last.size
-    @watered_today = by_last.take cutoff
-    @recently = by_last.drop(cutoff).reject {|p| p.last_watering < Time.zone.now.to_date - 1.week}
+      cutoff = by_last.find_index {|p| p.last_watering && p.last_watering < today} || by_last.size
+      @watered_today = by_last.take(cutoff).reject {|p| p.last_watering.nil?}
+      @recently = by_last.drop(cutoff).reject {|p| p.last_watering.nil? || p.last_watering < Time.zone.now.to_date - 1.week}
+    end
 
     @unscheduled = Plant.where(scheduled_watering: nil, archived: false)
+
+    respond_to do |format|
+      format.json {
+        @plants = Plant.all
+        redirect_to plants_path
+      }
+      format.html
+    end
   end
 
   # GET /plants/1 or /plants/1.json
@@ -48,7 +63,7 @@ class PlantsController < ApplicationController
 
   # GET /plants/new
   def new
-    @plant = Plant.new
+    @plant = Plant.new uid: Plant.next_uid
   end
 
   # GET /plants/1/edit
@@ -91,6 +106,14 @@ class PlantsController < ApplicationController
       format.html { redirect_to plants_url, notice: "Plant was successfully destroyed." }
       format.json { head :no_content }
     end
+  end
+
+  def process_file
+    json = params['plants'].read
+    plants = JSON.parse json
+    plants = [plants] if plants.class == Hash
+    plants.each {|j| Plant.create_from_json j }
+    puts json
   end
 
   private

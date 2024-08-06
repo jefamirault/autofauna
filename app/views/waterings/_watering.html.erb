@@ -1,12 +1,18 @@
 <div id="<%= dom_id watering %>">
-  <p>
-    <strong>Plant:</strong>
+  <h1>Watered on <%= format_date @watering.date, long: true %></h1>
+  <h4><%= time_ago @watering.date %></h4>
+  <strong>Plant:</strong>
+  <div class="plantButton">
     <%= link_to watering.plant %>
-  </p>
+  </div>
 
   <p>
-    <strong>Date:</strong>
-    <%= format_date watering.date %>
+    <strong>Logged:</strong>
+    <%= format_time watering.created_at %>
+  </p>
+  <p>
+    <strong>Updated:</strong>
+    <%= format_time watering.updated_at %>
   </p>
 
   <p>
