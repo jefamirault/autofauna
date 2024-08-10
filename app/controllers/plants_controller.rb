@@ -1,7 +1,7 @@
 class PlantsController < ApplicationController
   before_action :set_plant, only: %i[ show edit update destroy ]
-  before_action :authenticate
-
+  before_action :authenticate, except: [:index, :show]
+  before_action :authorize, except: [:index, :show]
   def water
     @plant = Plant.find params[:plant_id]
     redirect_to new_watering_path(plant_id: @plant.id)
@@ -49,10 +49,7 @@ class PlantsController < ApplicationController
     @unscheduled = Plant.where(scheduled_watering: nil, archived: false)
 
     respond_to do |format|
-      format.json {
-        @plants = Plant.all
-        redirect_to plants_path
-      }
+      format.json { @plants = Plant.all }
       format.html
     end
   end
@@ -108,12 +105,21 @@ class PlantsController < ApplicationController
     end
   end
 
+  def import
+
+  end
   def process_file
     json = params['plants'].read
     plants = JSON.parse json
     plants = [plants] if plants.class == Hash
-    plants.each {|j| Plant.create_from_json j }
-    puts json
+    requested = plants.count
+    created = plants.map {|j| Plant.create_from_json j }.map {|p| p.new_record? ? 0 : 1 }.reduce :+
+    if created > 0
+      redirect_to plants_path, notice: "Successully imported #{created} out of #{requested} plant#{requested > 1 ? 's' : ''}."
+    else
+      redirect_to plants_path, alert: "No plants imported."
+    end
+
   end
 
   private

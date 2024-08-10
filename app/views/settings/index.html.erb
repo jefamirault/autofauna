@@ -1,0 +1,20 @@
+<h1>User Settings</h1>
+
+<p>
+  <strong>Email:</strong>
+  <%= current_user.email %>
+</p>
+<p>
+  <strong>Account Created:</strong>
+  <%= format_time current_user.created_at %>
+</p>
+<p>
+  <strong>Account Updated:</strong>
+  <%= format_time current_user.updated_at %>
+</p>
+
+<br>
+<%= link_to 'Update Password', edit_password_path %>
+<br>
+<br>
+<%= button_to "Log Out", session_path, method: :delete %>

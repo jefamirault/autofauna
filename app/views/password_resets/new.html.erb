@@ -1,0 +1,18 @@
+<h1>Reset Your Password</h1>
+
+<%= form_with model: User.new, url: password_reset_path do |form| %>
+  <div class="field">
+    <%= form.label :email %>
+    <%= form.email_field :email, autofocus: true %>
+  </div>
+
+  <div class="submit">
+    <%= form.submit 'Reset Password' %>
+  </div>
+<% end %>
+
+<br>
+<%= link_to 'Log In', new_session_path %>
+<br>
+<br>
+<%= link_to 'Sign Up', new_registration_path %>

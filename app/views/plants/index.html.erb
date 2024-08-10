@@ -1,5 +1,3 @@
-<p style="color: green"><%= notice %></p>
-
 <h1>Plants</h1>
 
 <div style="float:right">
@@ -8,7 +6,7 @@
 </div>
 
 <h2>Needs Watering</h2>
-<% if @needs_water %>
+<% if @needs_water&.any? %>
   <table class="yellow">
     <%= render 'plant_row_header' %>
     <tbody>
@@ -20,7 +18,7 @@
 <% else %>
   <p>Everything up to date!</p>
 <% end %>
-<% if @watered_today %>
+<% if @watered_today&.any? %>
   <h2>Watered Today</h2>
   <table class="blue">
     <%= render 'plant_row_header' %>
@@ -32,7 +30,7 @@
   </table>
 <% end %>
 <h2>Upcoming</h2>
-<% if @upcoming %>
+<% if @upcoming&.any? %>
   <table class="green">
     <%= render 'plant_row_header' %>
     <tbody>
@@ -45,7 +43,7 @@
   <p>Nothing scheduled in the next 7 days.</p>
 <% end %>
 <h2>Recently Watered</h2>
-<% if @recently %>
+<% if @recently&.any? %>
   <table class="blue">
     <%= render 'plant_row_header' %>
     <tbody>
@@ -58,7 +56,7 @@
   <p>Nothing watered in the last 7 days.</p>
 <% end %>
 
-<% if @unscheduled.any? %>
+<% if @unscheduled&.any? %>
   <h2>Unscheduled</h2>
   <table>
     <%= render 'plant_row_header' %>

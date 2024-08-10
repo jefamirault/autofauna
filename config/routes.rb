@@ -1,10 +1,8 @@
 Rails.application.routes.draw do
-  get 'sessions/new'
-  post 'sessions/create'
-  get 'sessions/destroy'
-
-  resources :waterings
-
+  resource :session
+  resources :registrations
+  resource :password
+  resource :password_reset
 
   get 'plants/import', to: 'plants#import'
   post 'plants/import', to: 'plants#process_file'
@@ -12,5 +10,9 @@ Rails.application.routes.draw do
     get 'water'
   end
 
+  resources :waterings
+
   root "plants#index"
+
+  get 'settings', to: 'settings#index'
 end

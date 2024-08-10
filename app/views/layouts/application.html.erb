@@ -16,21 +16,26 @@
 
   <body>
   <header>
-    <% if cookies.encrypted[:logged_in] %>
-      <nav>
-        <%= params[:controller] != 'plants' || params[:action] != 'index' ? link_to('Plants', plants_path) : 'Plants' %> |
-        <%= params[:controller] != 'waterings' || params[:action] != 'index' ? link_to('Waterings', waterings_path) : 'Waterings' %> |
-        <%= params[:controller] != 'plants' || params[:action] != 'new' ? link_to('New Plant', new_plant_path) : 'New Plant' %>
-      </nav>
-    <% end %>
+    <nav>
+      <%= params[:controller] != 'plants' || params[:action] != 'index' ? link_to('Plants', plants_path) : 'Plants' %> |
+      <%= params[:controller] != 'waterings' || params[:action] != 'index' ? link_to('Waterings', waterings_path) : 'Waterings' %> |
+      <%= params[:controller] != 'plants' || params[:action] != 'new' ? link_to('New Plant', new_plant_path) : 'New Plant' %>
+    </nav>
     <time><%= format_date Time.zone.now, time: true %></time>
     <div class="logged_in">
-      <% if cookies.encrypted[:logged_in] %>
-        <%= link_to 'Log Out', sessions_destroy_path %>
+      <% if user_signed_in? %>
+        <%= params[:controller] == 'settings' ? 'Settings' : link_to('Settings', settings_path) %> |
+        <%= button_to "Log Out", session_path, method: :delete, class: 'logout' %>
+      <% else %>
+        <%= link_to "Log In", new_session_path %>
       <% end %>
     </div>
   </header>
-  <section id="main">
+
+  <section id="main" class="<%= params[:controller] %>">
+    <div style="color: green"><%= notice %></div>
+    <div style="color: #f44"><%= alert %></div>
+
     <%= yield %>
   </section>
 
