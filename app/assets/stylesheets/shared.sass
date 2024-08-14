@@ -36,15 +36,28 @@ textarea
   min-width: 8em
 
 header
-  padding: 1em 1em 2em
+  display: flex
+  flex-wrap: wrap
+  justify-content: space-between
+  align-items: center
+  padding: 1em 1em 1em
   margin: 0 0 2em
   background: $green
   color: white
   box-shadow: rgba(0, 0, 0, 0.45) 0 5px 15px 3px
-  white-space: nowrap
+  line-height: 35px
 
   a
     color: rgba(255, 255, 255, 0.75)
+
+  form
+    padding: 0
+
+#currentProject
+  font-weight: bold
+  font-size: 120%
+  a
+    color: white
 
 form.button_to
   display: inline-block
@@ -59,14 +72,9 @@ form.button_to
       text-decoration: underline
       cursor: pointer
 
-.logged_in
-  float: right
 time
   float: right
   margin-left: 1.25em
-
-nav
-  float: left
 
 h1
   clear: both
@@ -82,8 +90,8 @@ section#main
   padding: 0.5em 3vw 2em
   clear: both
 
-  &.sessions, &.registrations, &.password_resets, &.settings
-    width: 450px
+  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings
+    max-width: 450px
     display: block
     margin-left: auto
     margin-right: auto
@@ -152,11 +160,20 @@ input[type=submit], button[type=submit]
 .actionColumn
   width: 74px
 
+.collaboratorsColumn
+  width: 150px
+.plantsColumn
+  width: 100px
+.wateringsColumn
+  width: 100px
+.createdColumn
+  width: 150px
+
 .hide
   display: none
 
 @media (max-width: 1130px)
-  .wateredColumn
+  .wateredColumn, .collaboratorsColumn
     display: none
 
   // gradually reduce #main side padding from 34 (14 per side) until 0 between media queries
@@ -172,9 +189,6 @@ input[type=submit], button[type=submit]
   section#main
     margin-right: 0
     margin-left: 0
-  header
-    height: 44px
-    line-height: 35px
   .logged_in
     clear: both
 
@@ -182,13 +196,18 @@ input[type=submit], button[type=submit]
     .intervalColumn
       width: 0
 
+@media (max-width: 800px)
+  .wateringsColumn
+    display: none
 @media (max-width: 750px)
   .scheduledColumn, .intervalColumn
     display: none
-  header
-    height: 72px
-
+@media (max-width: 700px)
+  .plantsColumn
+    display: none
 @media (max-width: 600px)
+  .field, .submit
+    width: calc(100% - 18px)
   .locationColumn
     display: none
   section#main
@@ -200,6 +219,9 @@ input[type=submit], button[type=submit]
 
   h1, h2, h3, p, form
     padding-left: 20px
+@media (max-width: 550px)
+  .ownerColumn
+    display: none
 
 h4
   color: #bbb
@@ -216,6 +238,7 @@ table
 
 th, td
   padding: 12px 6px
+  line-height: 27px
 
 thead th
   color: $green
@@ -259,8 +282,17 @@ table.yellow
   width: 300px
   font-size: 120%
   border: 1px solid #444
-  border-radius: 25px
+  border-radius: 13px
   a
     display: block
     text-align: center
     line-height: 48px
+
+a.blue
+  color: $blue
+a.green
+  color: $green
+a.yellow
+  color: $yellow
+a.purple
+  color: $purple

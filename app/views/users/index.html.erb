@@ -1,0 +1,29 @@
+<h1>Users</h1>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Email</th>
+      <th>Projects</th>
+      <th>Collaborations</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @users.each do |user| %>
+      <tr>
+        <td>
+          <%= user.id %>
+        </td>
+        <td>
+          <%= user.email %>
+        </td>
+        <td>
+          <%= user.projects.count %>
+        </td>
+        <td>
+          <%= user.collaborations.count %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

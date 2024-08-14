@@ -15,10 +15,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    Current.user = nil
-    reset_session
-    cookies.delete :user_id
-    redirect_to new_session_path, notice: "You have been logged out."
+    logout
   end
 
   private

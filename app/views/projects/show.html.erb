@@ -1,0 +1,55 @@
+<h1><%= @project %></h1>
+
+<p>
+  <strong>Created:</strong>
+  <%= format_time @project.created_at %>
+</p>
+
+<p>
+  <%= link_to plants_path, class: 'green' do %>
+    <strong>Plants:</strong>
+    <%= @project.plants.count %>
+  <% end %>
+</p>
+
+<p>
+  <%= link_to waterings_path, class: 'blue' do %>
+    <strong>Waterings:</strong>
+    <%= @project.waterings.count %>
+  <% end %>
+</p>
+
+<p>
+  <strong>Owner:</strong>
+  <%= @project.owner %>
+</p>
+
+<p>
+  <strong>Collaborators:</strong>
+  <%= @project.collaborators.count %>
+  <%= form_with name: :thing, url: project_add_collaborator_path(current_project) do |form| %>
+    <%= form.label :user_email, 'Add Collaborator by Email:' %>
+    <%= form.text_field :user_email, name: 'collaborator[email]', required: true %>
+
+    <%= form.label 'collaborator[role]', 'Role' %>
+    <%= form.select 'collaborator[role]', options_for_select(Collaboration.roles.map {|k, v| [k.titleize, k]}, 1), {name: 'collaborator[role]'} %>
+
+    <%= form.submit 'Add Collaborator' %>
+  <% end %>
+</p>
+
+<ul>
+  <% @project.collaborations.each do |c| %>
+    <li>
+      <%= c.user %> - <%= c.role.titleize %>
+      (<%= link_to 'Remove', project_remove_collaborator_path(current_project, user_id: c.user.id), data: { "turbo-method": :put } %>)
+    </li>
+  <% end %>
+</ul>
+
+<p>
+  <%= link_to 'Edit Project', edit_project_path(@project) %>
+  <br>
+  <br>
+  <%= link_to 'All Projects', projects_path(@project) %>
+</p>

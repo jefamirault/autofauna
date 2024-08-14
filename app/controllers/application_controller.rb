@@ -1,18 +1,50 @@
 class ApplicationController < ActionController::Base
 
-
   private
 
   def authenticate
-    redirect_to new_session_path, alert: 'You must be logged in order to do that.' unless user_signed_in?
+    redirect_to request&.referer || new_session_path, alert: 'You must be logged in order to do that.' unless user_signed_in?
   end
 
-  def authorize
-    redirect_to request.referer, alert: "You need permission for #{params[:controller].titleize}##{params[:action].titleize} in order to do that." unless authorized?(current_user)
+  def authorize_admin
+    unless current_user.admin?
+      redirect_to request&.referer || root_path,
+                  alert: "You must have admin permissions in order to do that."
+    end
   end
-  def authorized?(user)
-    user.admin?
+  def authorize_viewer(project = current_project)
+    unless authorized?(current_user, :viewer)
+      redirect_to projects_path,
+                  alert: "You do not have Viewer permissions for that project."
+    end
   end
+  def authorize_editor(project = current_project)
+    unless authorized?(current_user, :editor)
+      redirect_to request&.referer || plants_path,
+                  alert: "You do not have Editor permissions for this project."
+    end
+  end
+  def authorized?(user, role, project = current_project)
+    if role == :public || project&.owner == user || user&.admin?
+      return true
+    elsif !user_signed_in?
+      return false
+    end
+    c = Collaboration.where(user: user, project: project).first
+    return false if c.nil?
+    permission_level = Collaboration.roles[c.role]
+    required_level = Collaboration.roles[role]
+    permission_level >= required_level
+  end
+
+  def set_current_project(project)
+    cookies.encrypted[:project_id] = { value: project.id, expires: 1.year }
+    Current.project = project
+  end
+  def current_project
+    Current.project ||= get_project_from_session
+  end
+  helper_method :current_project
 
   def current_user
     Current.user ||= authenticate_user_from_session
@@ -21,6 +53,9 @@ class ApplicationController < ActionController::Base
 
   def authenticate_user_from_session
     User.find_by(id: cookies.encrypted[:user_id])
+  end
+  def get_project_from_session
+    Project.find_by id: cookies.encrypted[:project_id]
   end
 
   def user_signed_in?
@@ -34,9 +69,11 @@ class ApplicationController < ActionController::Base
   end
 
   def logout
+    Current.project = nil
     Current.user = nil
     reset_session
+    cookies.delete :project_id
     cookies.delete :user_id
-    redirect_to sessions_new_path
+    redirect_to new_session_path, notice: "You have been logged out."
   end
 end

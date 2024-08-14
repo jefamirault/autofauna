@@ -1,7 +1,10 @@
 class PlantsController < ApplicationController
+  before_action :set_project
   before_action :set_plant, only: %i[ show edit update destroy ]
-  before_action :authenticate, except: [:index, :show]
-  before_action :authorize, except: [:index, :show]
+  before_action :authenticate, only: [:new]
+  before_action :authorize_viewer, only: [:index, :show]
+  before_action :authorize_editor, except: [:index, :show]
+
   def water
     @plant = Plant.find params[:plant_id]
     redirect_to new_watering_path(plant_id: @plant.id)
@@ -9,7 +12,10 @@ class PlantsController < ApplicationController
 
   # GET /plants or /plants.json
   def index
-    active = Plant.where(archived: false).reject {|p| p.scheduled_watering.nil? }
+    if current_project.nil?
+      return redirect_to projects_path, notice: 'Please select a project.'
+    end
+    active = current_project.plants.where(archived: false).reject {|p| p.scheduled_watering.nil? }
     if active.size > 0
       by_next = active.sort do |a,b|
         if a.scheduled_watering == b.scheduled_watering
@@ -46,10 +52,10 @@ class PlantsController < ApplicationController
       @recently = by_last.drop(cutoff).reject {|p| p.last_watering.nil? || p.last_watering < Time.zone.now.to_date - 1.week}
     end
 
-    @unscheduled = Plant.where(scheduled_watering: nil, archived: false)
+    @unscheduled = current_project.plants.where(scheduled_watering: nil, archived: false)
 
     respond_to do |format|
-      format.json { @plants = Plant.all }
+      format.json { @plants = current_project.plants }
       format.html
     end
   end
@@ -60,7 +66,7 @@ class PlantsController < ApplicationController
 
   # GET /plants/new
   def new
-    @plant = Plant.new uid: Plant.next_uid
+    @plant = Plant.new project: current_project, uid: current_project.next_uid
   end
 
   # GET /plants/1/edit
@@ -113,7 +119,7 @@ class PlantsController < ApplicationController
     plants = JSON.parse json
     plants = [plants] if plants.class == Hash
     requested = plants.count
-    created = plants.map {|j| Plant.create_from_json j }.map {|p| p.new_record? ? 0 : 1 }.reduce :+
+    created = plants.map {|j| Plant.create_from_json j, current_project }.map {|p| p.new_record? ? 0 : 1 }.reduce :+
     if created > 0
       redirect_to plants_path, notice: "Successully imported #{created} out of #{requested} plant#{requested > 1 ? 's' : ''}."
     else
@@ -128,8 +134,14 @@ class PlantsController < ApplicationController
       @plant = Plant.find(params[:id])
     end
 
+    def set_project
+      if params[:project_id]
+        set_current_project Project.find(params[:project_id])
+      end
+    end
+
     # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:name, :uid, :location, :pot, :archived, :watering_frequency, :manual_watering_frequency, :scheduled_watering)
+      params.require(:plant).permit(:name, :uid, :project_id, :location, :pot, :archived, :watering_frequency, :manual_watering_frequency, :scheduled_watering)
     end
 end

@@ -21,10 +21,20 @@
       <%= params[:controller] != 'waterings' || params[:action] != 'index' ? link_to('Waterings', waterings_path) : 'Waterings' %> |
       <%= params[:controller] != 'plants' || params[:action] != 'new' ? link_to('New Plant', new_plant_path) : 'New Plant' %>
     </nav>
-    <time><%= format_date Time.zone.now, time: true %></time>
+
+    <div id="currentProject" class="logged_in">
+      <%= link_to current_project || 'Select Project', projects_path %>
+    </div>
+
     <div class="logged_in">
+      <% if current_user&.admin? %>
+        <%= params[:controller] == 'users' ? 'Users' : link_to('Users', users_path) %> |
+      <% end %>
+      <% if current_project %>
+        <%= params[:controller] == 'projects' && params[:action] == 'edit' ? 'Project Settings' : link_to('Project Settings', project_path(current_project)) %> |
+      <% end %>
       <% if user_signed_in? %>
-        <%= params[:controller] == 'settings' ? 'Settings' : link_to('Settings', settings_path) %> |
+        <%= params[:controller] == 'settings' ? 'Account Settings' : link_to('Account Settings', settings_path) %> |
         <%= button_to "Log Out", session_path, method: :delete, class: 'logout' %>
       <% else %>
         <%= link_to "Log In", new_session_path %>

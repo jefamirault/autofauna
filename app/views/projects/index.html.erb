@@ -1,0 +1,35 @@
+<h1>Select Project</h1>
+
+<table class="green">
+  <thead>
+    <tr>
+      <th class="nameColumn">Name</th>
+      <th class="ownerColumn">Owner</th>
+      <th class="collaboratorsColumn">Collaborators</th>
+      <th class="plantsColumn">Plants</th>
+      <th class="wateringsColumn">Waterings</th>
+      <th class="createdColumn">Created</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% @projects.each do |project| %>
+    <tr data-controller="nav"
+        data-nav-url-value="<%= plants_path(project_id: project.id) %>"
+        data-action="click->nav#goToUrl"
+        style="cursor:pointer">
+      <td class="nameColumn"><%= project.name %></td>
+      <td class="ownerColumn"><%= project.owner %></td>
+      <td class="collaboratorsColumn"><%= project.collaborators.count %></td>
+      <td class="plantsColumn"><%= project.plants.count %></td>
+      <td class="wateringsColumn"><%= project.waterings.count %></td>
+      <td class="createdColumn"><%= format_date project.created_at %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<div style=" text-align: center;">
+  <div class="plantButton">
+    <%= link_to "+ New Project", new_project_path %>
+  </div>
+</div>

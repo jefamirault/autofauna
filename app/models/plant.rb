@@ -1,4 +1,5 @@
 class Plant < ApplicationRecord
+  belongs_to :project
   has_many :waterings, -> { order 'waterings.date' }, dependent: :destroy
 
   before_validation :strip_whitespace
@@ -115,9 +116,10 @@ class Plant < ApplicationRecord
     end
   end
 
-  def self.create_from_json(json)
-    Plant.create do |p|
+  def self.create_from_json(json, project)
+    p = Plant.new do |p|
       p.uid = Plant.next_uid
+      p.project = project
       p.name = json['name']
       p.location = json['location']
       p.pot = json['pot']
@@ -125,6 +127,8 @@ class Plant < ApplicationRecord
       p.archived = json['archived']
       p.created_at = json['created_at']
     end
+    p.save
+    p
   end
 
   def self.next_uid

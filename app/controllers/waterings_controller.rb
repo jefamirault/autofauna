@@ -1,11 +1,14 @@
 class WateringsController < ApplicationController
   before_action :set_watering, only: %i[ show edit update destroy ]
-  before_action :authenticate, except: [:index, :show]
-  before_action :authorize, except: [:index, :show]
+  before_action :authorize_viewer, only: [:index, :show]
+  before_action :authorize_editor, except: [:index, :show]
 
   # GET /waterings or /waterings.json
   def index
-    @waterings = Watering.all.order date: :desc
+    if current_project.nil?
+      return redirect_to projects_path, notice: 'Please select a project.'
+    end
+    @waterings = current_project&.waterings&.sort_by(&:date).reverse
   end
 
   # GET /waterings/1 or /waterings/1.json

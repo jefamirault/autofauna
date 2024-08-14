@@ -10,7 +10,7 @@
   </tr>
   </thead>
   <tbody>
-  <% @waterings.each do |watering| %>
+  <% @waterings&.each do |watering| %>
     <tr>
       <td class='plantColumn'><%= link_to watering.plant, watering_path(watering.id) %></td>
       <td class='dateColumn'><%= time_ago watering.date %></td>

@@ -1,6 +1,9 @@
 class User < ApplicationRecord
   has_secure_password
 
+  has_many :collaborations
+  has_many :projects, foreign_key: :owner_id
+
   validates :email, presence: true
   normalizes :email, with: -> { _1.strip.downcase }
 
@@ -10,5 +13,9 @@ class User < ApplicationRecord
 
   generates_token_for :email_confirmation, expires_in: 24.hours do
     email
+  end
+
+  def to_s
+    self.email
   end
 end
