@@ -23,7 +23,7 @@
 
   <div>
     <%= form.label :notes, style: "display: block" %>
-    <%= form.text_area :notes %>
+    <%= form.text_area :notes, autofocus: watering.notes.nil? || watering.notes == '' %>
   </div>
   <br>
   <div>
