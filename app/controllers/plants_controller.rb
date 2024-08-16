@@ -66,6 +66,7 @@ class PlantsController < ApplicationController
 
   # GET /plants/new
   def new
+    return redirect_to projects_path if current_project.nil?
     @plant = Plant.new project: current_project, uid: current_project.next_uid
   end
 
