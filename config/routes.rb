@@ -14,7 +14,7 @@ Rails.application.routes.draw do
 
   resources :waterings
 
-  root "projects#index"
+  root "plants#index"
 
   get 'settings', to: 'settings#index'
 

@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
   end
 
   def authorize_admin
-    unless current_user.admin?
+    unless current_user&.admin?
       redirect_to request&.referer || root_path,
                   alert: "You must have admin permissions in order to do that."
     end
@@ -25,7 +25,9 @@ class ApplicationController < ActionController::Base
     end
   end
   def authorized?(user, role, project = current_project)
-    if role == :public || project&.owner == user || user&.admin?
+    if !user_signed_in?
+      return false
+    elsif project&.owner == user || user&.admin?
       return true
     elsif !user_signed_in?
       return false

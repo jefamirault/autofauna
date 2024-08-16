@@ -1,11 +1,14 @@
+$darkgreen: #00362d
 $green: #004D40
 $lightgreen: rgba(0, 77, 64, 0.15)
+$lightgreensolid: rgb(217, 228, 226)
 
 $blue: #0E487B
 $lightblue: rgba(14, 72, 123, 0.1)
 
 $yellow: #8C6800
 $lightyellow: rgba(206, 154, 0, 0.2)
+$lightyellowsolid: rgb(245, 235, 204)
 
 $purple: #D81B60
 $lightpurple: #D81B60   // https://davidmathlogic.com/colorblind
@@ -40,12 +43,15 @@ header
   flex-wrap: wrap
   justify-content: space-between
   align-items: center
-  padding: 1em 1em 1em
+  padding: 0 1em 0
   margin: 0 0 2em
   background: $green
   color: white
   box-shadow: rgba(0, 0, 0, 0.45) 0 5px 15px 3px
-  line-height: 35px
+  line-height: 56px
+
+  button
+    line-height: 56px
 
   a
     color: rgba(255, 255, 255, 0.75)
@@ -53,23 +59,48 @@ header
   form
     padding: 0
 
+nav
+  display: flex
+  a
+    display: inline-block
+  .navItem, .button_to .navItem
+    padding: 0 13px
+
+  .navItem, .button_to .navItem
+    &:hover, &.selected
+      background: $lightgreensolid
+      color: $darkgreen
+      text-decoration: none
+
+  .navItem.selected
+    cursor: default
+    background: $lightgreensolid
+    color: $darkgreen
+    text-decoration: none
+
+
 #currentProject
+  margin: 0
+  padding: 0
   font-weight: bold
   font-size: 120%
   a
+    padding: 0 24px
+
     color: white
+    &:hover
+      text-decoration: none
+      color: rgba(255, 255, 255, 0.75)
 
 form.button_to
   display: inline-block
   button.logout
     font-family: Roboto, verdana, sans-serif
-    padding: 0
     color: rgba(255, 255, 255, 0.75)
     border: none
     background: none
     font-size: 100%
     &:hover
-      text-decoration: underline
       cursor: pointer
 
 time
@@ -296,3 +327,6 @@ a.yellow
   color: $yellow
 a.purple
   color: $purple
+
+p.large
+  font-size: 120%

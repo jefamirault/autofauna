@@ -35,4 +35,19 @@ module ApplicationHelper
       options[:parentheses] ? "(#{text})" : text
     end
   end
+
+  def nav_item(name, selected = false)
+    "<div class='navItem#{selected ? ' selected' : ''}'>#{name}</div>".html_safe
+  end
+
+  def nav_link(controller, options = {})
+    text = (options[:text] || controller).titleize
+    action = options[:action] || 'index'
+    path = options[:path] || send("#{controller}_path")
+    if params[:controller] == controller && params[:action] == action
+      nav_item(text, true)
+    else
+      link_to(text, path, class: 'navItem')
+    end
+  end
 end

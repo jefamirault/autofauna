@@ -17,29 +17,32 @@
   <body>
   <header>
     <nav>
-      <%= params[:controller] != 'plants' || params[:action] != 'index' ? link_to('Plants', plants_path) : 'Plants' %> |
-      <%= params[:controller] != 'waterings' || params[:action] != 'index' ? link_to('Waterings', waterings_path) : 'Waterings' %> |
-      <%= params[:controller] != 'plants' || params[:action] != 'new' ? link_to('New Plant', new_plant_path) : 'New Plant' %>
+      <div id="currentProject" class="logged_in">
+        <%= link_to current_project || 'Select Project', projects_path %>
+      </div>
+
+      <%= nav_link 'plants' %>
+      <%= nav_link 'waterings' %>
+      <%= nav_link 'plants', action: 'new', text: 'New Plant', path: new_plant_path %>
     </nav>
 
-    <div id="currentProject" class="logged_in">
-      <%= link_to current_project || 'Select Project', projects_path %>
-    </div>
 
-    <div class="logged_in">
+    <nav class="logged_in">
       <% if current_user&.admin? %>
-        <%= params[:controller] == 'users' ? 'Users' : link_to('Users', users_path) %> |
+        <%= nav_link 'users' %>
       <% end %>
+
       <% if current_project %>
-        <%= params[:controller] == 'projects' && params[:action] == 'edit' ? 'Project Settings' : link_to('Project Settings', project_path(current_project)) %> |
+        <%= nav_link 'projects', action: 'show', text: 'Project Settings', path: project_path(current_project) %>
       <% end %>
+
       <% if user_signed_in? %>
-        <%= params[:controller] == 'settings' ? 'Account Settings' : link_to('Account Settings', settings_path) %> |
-        <%= button_to "Log Out", session_path, method: :delete, class: 'logout' %>
+        <%= nav_link 'settings', text: 'Account Settings' %>
+        <%= button_to "Log Out", session_path, method: :delete, class: 'logout navItem' %>
       <% else %>
         <%= link_to "Log In", new_session_path %>
       <% end %>
-    </div>
+    </nav>
   </header>
 
   <section id="main" class="<%= params[:controller] %>">

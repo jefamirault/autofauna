@@ -13,7 +13,7 @@ class PlantsController < ApplicationController
   # GET /plants or /plants.json
   def index
     if current_project.nil?
-      return redirect_to projects_path, notice: 'Please select a project.'
+      return redirect_to projects_path
     end
     active = current_project.plants.where(archived: false).reject {|p| p.scheduled_watering.nil? }
     if active.size > 0
