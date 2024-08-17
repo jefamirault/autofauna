@@ -1,9 +1,24 @@
 class ApplicationController < ActionController::Base
+  around_action :switch_locale
+
+
 
   private
+  def switch_locale(&action)
+    locale = params[:locale] || cookies[:locale] || I18n.default_locale
+    if params[:locale]
+      cookies[:locale] = { value: locale, expires: 6.months }
+    end
+    I18n.with_locale(locale, &action)
+  end
+
+  def current_locale
+    cookies[:locale]
+  end
+  helper_method :current_locale
 
   def authenticate
-    redirect_to request&.referer || new_session_path, alert: 'You must be logged in order to do that.' unless user_signed_in?
+    redirect_to request&.referer || new_session_path, alert: t('errors.login_required') unless user_signed_in?
   end
 
   def authorize_admin
@@ -15,7 +30,7 @@ class ApplicationController < ActionController::Base
   def authorize_viewer(project = current_project)
     unless authorized?(current_user, :viewer)
       redirect_to projects_path,
-                  alert: "You do not have Viewer permissions for that project."
+                  alert: t('errors.missing_viewer_permission')
     end
   end
   def authorize_editor(project = current_project)
@@ -76,6 +91,6 @@ class ApplicationController < ActionController::Base
     reset_session
     cookies.delete :project_id
     cookies.delete :user_id
-    redirect_to new_session_path, notice: "You have been logged out."
+    redirect_to new_session_path, notice: t('account.log_out_success')
   end
 end

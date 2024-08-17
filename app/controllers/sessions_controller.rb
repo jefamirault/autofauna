@@ -7,9 +7,9 @@ class SessionsController < ApplicationController
     @user = User.authenticate_by(session_params)
     if @user.present?
       login @user if @user.present?
-      redirect_to plants_path, notice: "Signed in successfully."
+      redirect_to plants_path, notice: t('account.sign_in_success')
     else
-      flash[:alert] = 'Invalid email or password.'
+      flash[:alert] = t('errors.invalid_email_or_password')
       render :new, status: :unprocessable_entity
     end
   end

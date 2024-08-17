@@ -1,4 +1,4 @@
-<h1>Sign Up</h1>
+<h1><%= t 'sign_up' %></h1>
 
 <%= form_with model: @user, url: registrations_path do |form| %>
   <% if form.object.errors.any? %>
@@ -8,26 +8,26 @@
   <% end %>
 
   <div class="field">
-    <%= form.label :email %>
+    <%= form.label :email, t('email') %>
     <%= form.email_field :email, autofocus: true %>
   </div>
 
   <div class="field">
-    <%= form.label :password %>
+    <%= form.label :password, t('password') %>
     <%= form.password_field :password %>
   </div>
 
   <div class="field">
-    <%= form.label :password_confirmation %>
+    <%= form.label :password_confirmation, t('password_confirmation') %>
     <%= form.password_field :password_confirmation %>
   </div>
 
   <div class="submit">
-    <%= form.submit 'Sign Up' %>
+    <%= form.submit t('sign_up') %>
   </div>
 <% end %>
 
 <br>
-<%= link_to 'Log In', new_session_path %>
+<%= link_to t('log_in'), new_session_path %>
 <br><br>
-<%= link_to 'Forgot Your Password?', new_password_reset_path %>
+<%= link_to t('forgot_password'), new_password_reset_path %>

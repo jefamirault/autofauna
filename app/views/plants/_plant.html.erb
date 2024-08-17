@@ -1,30 +1,31 @@
 <div id="<%= dom_id plant %>">
   <h1>
-    Plant: #<%= plant.uid %> <%= plant.name %>
+    <%= t 'attributes.plant' %>: #<%= plant.uid %> <%= plant.name %>
   </h1>
 
   <p>
-    <strong>Location:</strong>
+    <strong><%= t 'attributes.location' %>:</strong>
     <%= plant.location %>
   </p>
 
   <p>
-    <strong>Pot:</strong>
+    <strong><%= t 'attributes.container' %>:</strong>
     <%= plant.pot %>
   </p>
 
+
   <p>
-    <strong>Last Watering:</strong>
+    <strong><%= t 'attributes.watered' %>:</strong>
     <%= time_ago plant.last_watering %>
   </p>
 
   <p>
-    <strong>Scheduled Watering:</strong>
+    <strong><%= t 'attributes.scheduled_watering' %>:</strong>
     <%= @plant.time_until_watering_text %>
   </p>
 
   <p>
-    <strong>Watering Frequency:</strong>
+    <strong><%= t 'attributes.watering_frequency' %>:</strong>
     <% if @plant.manual_watering_frequency %>
       <%= @plant.watering_frequency_text %>
     <% else %>
@@ -32,16 +33,9 @@
     <% end %>
   </p>
 
-<!--  <p>-->
-<!--    <strong>Manual Watering Frequency?:</strong>-->
-    <%#= @plant.manual_watering_frequency ? 'Yes' : 'No' %>
-<!--  </p>-->
-
-
-
   <p>
-    <strong>Archived?:</strong>
-    <%= @plant.archived %>
+    <strong><%= t 'attributes.archived' %>:</strong>
+    <%= t @plant.archived %>
   </p>
 
 

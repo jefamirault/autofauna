@@ -1,4 +1,4 @@
-<h1>Reset Your Password</h1>
+<h1><%= t 'reset_your_password' %></h1>
 
 <%= form_with model: User.new, url: password_reset_path do |form| %>
   <div class="field">
@@ -7,12 +7,12 @@
   </div>
 
   <div class="submit">
-    <%= form.submit 'Reset Password' %>
+    <%= form.submit t('reset_password') %>
   </div>
 <% end %>
 
 <br>
-<%= link_to 'Log In', new_session_path %>
+<%= link_to t('log_in'), new_session_path %>
 <br>
 <br>
-<%= link_to 'Sign Up', new_registration_path %>
+<%= link_to t('sign_up'), new_registration_path %>

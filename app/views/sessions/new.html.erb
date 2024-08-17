@@ -1,23 +1,23 @@
-<h1>Log In</h1>
+<h1><%= t 'log_in' %></h1>
 
 <%= form_with model: @user, url: session_path do |form| %>
   <div class="field">
-    <%= form.label :email %>
+    <%= form.label :email, t('email') %>
     <%= form.email_field :email, autofocus: true %>
   </div>
 
   <div class="field">
-    <%= form.label :password %>
+    <%= form.label :password, t('password') %>
     <%= form.password_field :password %>
   </div>
 
   <div class="submit">
-    <%= form.submit 'Log In' %>
+    <%= form.submit t('log_in') %>
   </div>
 <% end %>
 
 <p>
-  <%= link_to 'Sign Up', new_registration_path %>
+  <%= link_to t('sign_up'), new_registration_path %>
   <br><br>
-  <%= link_to 'Forgot Your Password?', new_password_reset_path %>
+  <%= link_to t('forgot_password'), new_password_reset_path %>
 </p>

@@ -1,8 +1,7 @@
-<h1>Editing plant</h1>
+<h1><%= t '.editing_plant' %></h1>
 
 <%= render "form", plant: @plant %>
 
 <p>
-  <%= link_to "Show this plant", @plant %> |
-  <%= link_to "Back to plants", plants_path %>
+  <%= link_to t('actions.discard_changes'), @plant %>
 </p>

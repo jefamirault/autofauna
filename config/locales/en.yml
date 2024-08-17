@@ -1,33 +1,157 @@
-# Files in the config/locales directory are used for internationalization
-# and are automatically loaded by Rails. If you want to use locales other
-# than English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# The following keys must be escaped otherwise they will not be retrieved by
-# the default I18n backend:
-#
-# true, false, on, off, yes, no
-#
-# Instead, surround them with single quotes.
-#
-# en:
-#   "true": "foo"
-#
-# To learn more, please read the Rails Internationalization guide
-# available at https://guides.rubyonrails.org/i18n.html.
-
 en:
-  hello: "Hello world"
+  layouts:
+    application:
+      current_project: "Select a Project"
+      plants: "Plants"
+      waterings: "Waterings"
+      "New Plant": "New Plant"
+      users: "Users"
+      log_in: "Log In"
+      log_out: "Log Out"
+      project_settings: "Project Settings"
+      account_settings: "Account Settings"
+  projects:
+    index:
+      select_project: "Select a Project"
+      switch_project: "Switch Project"
+      new_project: "New Project"
+      log_in: "Log in"
+      to_access: "to access your projects or"
+      sign_up: "sign up"
+      to_create: "to create one."
+    show:
+      add_collaborator_by_email: "Add Collaborator by Email:"
+      add_collaborator: "Add Collaborator"
+    messages:
+      add_collaborator_success: "Collaborator successfully added to project."
+      add_collaborator_error: "Failed to add collaborator to project."
+      remove_collaborator_success: "Collaborator successfully removed from project."
+      remove_collaborator_error: "Failed to remove collaborator from project."
+    plants: "Plants"
+    waterings: "Waterings"
+    name: "Name"
+    owner: "Owner"
+    collaborators: "Collaborators"
+    new_project: "New Projects"
+    my_projects: "My Projects"
+    create_project: "Create Project"
+    update_project: "Update Project"
+    edit_project: "Update Project"
+    all_projects: "All Projects"
+    create_success: "Project was successfully created."
+    update_success: "Project was successfully updated."
+  plants:
+    index:
+      plants: 'Plants'
+      import_plants: "Import Plants"
+      export_plants: "Export Plants"
+      needs_watering: "Needs Watering"
+      watered_today: "Watered Today"
+      upcoming: "Upcoming"
+      up_to_date: "Everything Up To Date!"
+      recently_watered: "Recently Watered"
+      plant: "Plant"
+      unscheduled: "Unscheduled"
+      action: "Action"
+      water: "Water"
+      edit: "Edit"
+      new_plant: "New Plant"
+      no_upcoming: "Nothing scheduled in the next 7 days."
+      no_recent_watering: "Nothing watered in the last 7 days."
+    show:
+      edit_this_plant: "Edit this plant"
+      water_this_plant: "Water this Plant"
+      delete_plant: "Delete Plant"
+      log: "Log"
+    edit:
+      editing_plant: "Editing Plant"
+    messages:
+      update_success: "Plant was successfully updated."
+      create_success: "Plant created successfully."
+      delete_success: "Plant was successfully deleted."
+      confirm_delete: "Are you sure you want to delete this plant and all of its associated data?"
+    back_to_plants: "Back to Plants"
+    create_plant: "Create Plant"
+    update_plant: "Update Plant"
+  waterings:
+    index:
+      waterings: "Waterings"
+    watered_on: "Watered on"
+    edit_watering: "Edit Watering"
+    all_waterings: "All Waterings"
+    water_again: "Water this plan again"
+    delete_watering: "Delete this watering"
+    create_watering: "Create Watering"
+    update_watering: "Update Watering"
+    messages:
+      create_success: "Watering was successfully created."
+      watering_updated: "Watering was successfully updated."
+      delete_success: "Watering deleted successfully."
+  log_in: "Log In"
+  sign_up: "Sign Up"
+  email: "Email"
+  password: "Password"
+  password_confirmation: "Password Confirmation"
+  forgot_password: "Forgot Your Password?"
+  reset_your_password: "Reset Your Password"
+  reset_password: "Reset Password"
+  account:
+    sign_in_success: "Signed in successfully."
+    log_out_success: "You have been logged out."
+    new_password: "New Password"
+    check_password_reset: "Check your email to reset your password."
+    success_password_reset: "Password updated successfully. Please log in."
+    password_update_success: "Your password has been updated successfully."
+    link_expired: "Please try again. The previous link has expired."
+    update_password: "Update Password"
+    current_password: "Current Password"
+  messages:
+    please_select_project: "Please select a project."
+  errors:
+    page_not_found: "The page you were looking for doesn't exist."
+    server_error: "Sorry, something went wrong. This error has been logged automatically."
+    missing_viewer_permission: "You do not have Viewer permissions for that project."
+    login_required: "You must be logged in order to do that."
+    invalid_email: "Please enter a valid user email address."
+    invalid_email_or_password: "Invalid email or password."
+    user_already_added: "User is already a collaborator on this project."
+  time:
+    today: "Today"
+    tomorrow: "Tomorrow"
+    yesterday: "Yesterday"
+    days_ago: "%{days} days ago"
+    days: "days"
+  attributes:
+    name: "Name"
+    created: "Created"
+    role: "Role"
+    location: "Location"
+    container: "Container"
+    scheduled: "Scheduled"
+    scheduled_watering: "Scheduled Watering"
+    watered: "Watered"
+    watering_frequency: "Watering Frequency"
+    archived: "Archived?"
+    plant: "Plant"
+    date:  "Date"
+    interval: "Interval"
+    notes: "Notes"
+    manual_watering_frequency: "Manual Watering Frequency"
+    logged: "Logged"
+    updated: "Updated"
+    projects: "Projects"
+    collaborations: "Collaborations"
+    account_created: "Account Created"
+    account_updated: "Account Updated"
+  roles:
+    viewer: "Viewer"
+    editor: "Editor"
+  actions:
+    remove: "Remove"
+    back: "Back"
+    cancel_edit: "Cancel Edit"
+    discard_changes: "Discard Changes"
+    cancel: 'Cancel'
+  true: "True"
+  false: "False"
+  back_to_settings: "Back to Settings"

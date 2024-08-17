@@ -1,7 +1,7 @@
-<h1>New Project</h1>
+<h1><%= t 'projects.new_project' %></h1>
 
 <%= render "form", project: @project %>
 
 <p>
-  <%= link_to "My Projects", projects_path %>
+  <%= link_to t('projects.my_projects'), projects_path %>
 </p>

@@ -1,8 +1,8 @@
 <h1>
   <% if current_project %>
-    Switch Projects
+    <%= t('.switch_project') %>
   <% else %>
-    Select Project
+    <%= t('.select_project') %>
   <% end %>
 </h1>
 
@@ -10,12 +10,12 @@
   <table class="green">
     <thead>
       <tr>
-        <th class="nameColumn">Name</th>
-        <th class="ownerColumn">Owner</th>
-        <th class="collaboratorsColumn">Collaborators</th>
-        <th class="plantsColumn">Plants</th>
-        <th class="wateringsColumn">Waterings</th>
-        <th class="createdColumn">Created</th>
+        <th class="nameColumn"><%= t 'projects.name' %></th>
+        <th class="ownerColumn"><%= t 'projects.owner' %></th>
+        <th class="collaboratorsColumn"><%= t 'projects.collaborators' %></th>
+        <th class="plantsColumn"><%= t 'projects.plants' %></th>
+        <th class="wateringsColumn"><%= t 'projects.waterings' %></th>
+        <th class="createdColumn"><%= t 'attributes.created' %></th>
       </tr>
     </thead>
     <tbody>
@@ -36,14 +36,14 @@
   </table>
 <% else %>
   <p class="large">
-    <%= link_to 'Log in', new_session_path %> to access your projects or <%= link_to 'Sign up', new_registration_path %> to create one.
+    <%= link_to t('.log_in'), new_session_path %> <%= t '.to_access' %> <%= link_to t('.sign_up'), new_registration_path %> <%= t '.to_create' %>
   </p>
 <% end %>
 
 <% if user_signed_in? %>
   <div style=" text-align: center;">
     <div class="plantButton">
-      <%= link_to "+ New Project", new_project_path %>
+      <%= link_to "+ #{t '.new_project'}", new_project_path %>
     </div>
   </div>
 <% end %>

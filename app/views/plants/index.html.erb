@@ -1,11 +1,11 @@
-<h1>Plants</h1>
+<h1><%= t '.plants' %></h1>
 
 <div style="float:right">
-  <%= link_to "Import Plants", plants_import_path %> |
-  <%= link_to "Export Plants", plants_path(format: :json) %>
+  <%= link_to t('.import_plants'), plants_import_path %> |
+  <%= link_to t('.export_plants'), plants_path(format: :json) %>
 </div>
 
-<h2>Needs Watering</h2>
+<h2><%= t '.needs_watering' %></h2>
 <% if @needs_water&.any? %>
   <table class="yellow">
     <%= render 'plant_row_header' %>
@@ -16,10 +16,10 @@
     </tbody>
   </table>
 <% else %>
-  <p>Everything up to date!</p>
+  <p><%= t '.up_to_date' %></p>
 <% end %>
 <% if @watered_today&.any? %>
-  <h2>Watered Today</h2>
+  <h2><%= t '.watered_today' %></h2>
   <table class="blue">
     <%= render 'plant_row_header' %>
     <tbody>
@@ -29,7 +29,7 @@
     </tbody>
   </table>
 <% end %>
-<h2>Upcoming</h2>
+<h2><%= t '.upcoming' %></h2>
 <% if @upcoming&.any? %>
   <table class="green">
     <%= render 'plant_row_header' %>
@@ -40,9 +40,9 @@
     </tbody>
   </table>
 <% else %>
-  <p>Nothing scheduled in the next 7 days.</p>
+  <p><%= t '.no_upcoming' %></p>
 <% end %>
-<h2>Recently Watered</h2>
+<h2><%= t '.recently_watered' %></h2>
 <% if @recently&.any? %>
   <table class="blue">
     <%= render 'plant_row_header' %>
@@ -53,11 +53,11 @@
     </tbody>
   </table>
 <% else %>
-  <p>Nothing watered in the last 7 days.</p>
+  <p><%= t '.no_recent_watering' %></p>
 <% end %>
 
 <% if @unscheduled&.any? %>
-  <h2>Unscheduled</h2>
+  <h2><%= t '.unscheduled' %></h2>
   <table>
     <%= render 'plant_row_header' %>
     <tbody>
@@ -69,6 +69,6 @@
 <% end  %>
 <div style=" text-align: center;">
   <div class="plantButton">
-    <%= link_to "+ New Plant", new_plant_path %>
+    <%= link_to "+ #{t '.new_plant'}", new_plant_path %>
   </div>
 </div>

@@ -1,4 +1,4 @@
-<h1>Update Password</h1>
+<h1><%= t 'account.update_password' %></h1>
 
 <%= form_with model: current_user, url: password_path do |form| %>
   <% if form.object.errors.any? %>
@@ -8,24 +8,24 @@
   <% end %>
 
   <div class="field">
-    <%= form.label :password_challenge, 'Current Password' %>
+    <%= form.label :password_challenge, t('account.current_password') %>
     <%= form.password_field :password_challenge, autofocus: true %>
   </div>
 
   <div class="field">
-    <%= form.label :password, 'New Password' %>
+    <%= form.label :password, t('account.new_password') %>
     <%= form.password_field :password %>
   </div>
 
   <div class="field">
-    <%= form.label :password_confirmation %>
+    <%= form.label :password_confirmation, t('password_confirmation') %>
     <%= form.password_field :password_confirmation %>
   </div>
 
   <div class="submit">
-    <%= form.submit 'Update Password' %>
+    <%= form.submit t('account.update_password') %>
   </div>
 <% end %>
 
 <br>
-<%= link_to 'Back to Settings', settings_path %>
+<%= link_to t('back_to_settings'), settings_path %>

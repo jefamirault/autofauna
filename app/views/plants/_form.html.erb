@@ -29,7 +29,7 @@
   </div>
 
   <div>
-    <%= form.label :pot, style: "display: block" %>
+    <%= form.label :pot, t('attributes.container'), style: "display: block" %>
     <%= form.text_field :pot %>
   </div>
 
@@ -49,11 +49,12 @@
   </div>
 
   <div>
-    <%= form.label :manual_watering_frequency, style: "display: block" %>
+    <%= form.label :manual_watering_frequency, t('attributes.manual_watering_frequency'), style: "display: block" %>
     <%= form.check_box :manual_watering_frequency %>
   </div>
   <br>
   <div>
-    <%= form.submit %>
+    <% submit_text = t(plant.new_record? ? 'plants.create_plant' : 'plants.update_plant') %>
+    <%= form.submit submit_text %>
   </div>
 <% end %>

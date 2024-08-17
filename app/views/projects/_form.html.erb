@@ -12,12 +12,13 @@
   <% end %>
 
   <div>
-    <%= form.label :name, style: "display: block" %>
+    <%= form.label :name, t('attributes.name'), style: "display: block" %>
     <%= form.text_field :name, autofocus: project.new_record? %>
   </div>
 
   <br>
   <div>
-    <%= form.submit %>
+    <% submit_text = t(project.new_record? ? 'projects.create_project' : 'projects.update_project') %>
+    <%= form.submit submit_text %>
   </div>
 <% end %>

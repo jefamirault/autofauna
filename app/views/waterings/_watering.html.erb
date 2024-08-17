@@ -1,22 +1,22 @@
 <div id="<%= dom_id watering %>">
-  <h1>Watered on <%= format_date @watering.date, long: true %></h1>
+  <h1><%= t('waterings.watered_on') %> <%= format_date @watering.date, long: true %></h1>
   <h4><%= time_ago @watering.date %></h4>
-  <strong>Plant:</strong>
+  <strong><%= t 'attributes.plant' %>:</strong>
   <div class="plantButton">
     <%= link_to watering.plant %>
   </div>
 
   <p>
-    <strong>Logged:</strong>
+    <strong><%= t 'attributes.logged' %>:</strong>
     <%= format_time watering.created_at %>
   </p>
   <p>
-    <strong>Updated:</strong>
+    <strong><%= t 'attributes.updated' %>:</strong>
     <%= format_time watering.updated_at %>
   </p>
 
   <p>
-    <strong>Notes:</strong>
+    <strong><%= t 'attributes.notes' %>:</strong>
     <%= watering.notes ? watering.notes.gsub("\n",'<br>').html_safe : '' %>
   </p>
 

@@ -1,12 +1,12 @@
 <%= render @plant %>
 
 <p>
-  <%= link_to "Edit this plant", edit_plant_path(@plant) %> |
-  <%= link_to "Back to plants", plants_path %> |
-  <%= link_to "Water this plant", plant_water_path(@plant) %>
+  <%= link_to t('.edit_this_plant'), edit_plant_path(@plant) %> |
+  <%= link_to t('plants.back_to_plants'), plants_path %> |
+  <%= link_to t('.water_this_plant'), plant_water_path(@plant) %>
 
-  <%= button_to "Destroy this plant", @plant, method: :delete, onclick: "return confirm('Are you sure you want to delete this plant and all of its associated data?');" %>
+  <%= button_to t('.delete_plant'), @plant, method: :delete, onclick: "return confirm('#{t 'plants.messages.confirm_delete'}');" %>
 </p>
 
-<h3>Log:</h3>
+<h3><%= t '.log' %>:</h3>
 <%= render partial: 'waterings', locals: { waterings: @plant.waterings } %>

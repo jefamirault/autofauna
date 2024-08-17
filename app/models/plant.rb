@@ -59,17 +59,17 @@ class Plant < ApplicationRecord
       if days < 0
         style = 'color: #D81B60'
         if days == -1
-          text = 'Yesterday'
+          text = I18n.t 'time.yesterday'
         else
-          text = "#{days} days".html_safe
+          text = "#{days} #{I18n.t 'time.days'}".html_safe
         end
       elsif days == 0
         style = 'color: #0E487B'
-        text = 'Today'
+        text = I18n.t('time.today')
       elsif days == 1
-        text = 'Tomorrow'
+        text = I18n.t('time.tomorrow')
       else # days > 1
-        text = "#{days} days".html_safe
+        text = "#{days} #{I18n.t 'time.days'}".html_safe
       end
       "<span style=\"#{style}\">#{text}</span>".html_safe
     else

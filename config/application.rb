@@ -19,5 +19,6 @@ module PlantCare
     config.time_zone = 'Eastern Time (US & Canada)'
     config.active_record.default_timezone = :local # Or :utc
     # config.eager_load_paths << Rails.root.join("extras")
+    config.exceptions_app = self.routes
   end
 end

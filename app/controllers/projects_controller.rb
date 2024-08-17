@@ -28,7 +28,7 @@ class ProjectsController < ApplicationController
     @project.owner = current_user
     respond_to do |format|
       if @project.save
-        format.html { redirect_to project_url(@project), notice: "Project was successfully created." }
+        format.html { redirect_to project_url(@project), notice: t('projects.create_success') }
         format.json { render :show, status: :created, location: @project }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -44,7 +44,7 @@ class ProjectsController < ApplicationController
   def update
     respond_to do |format|
       if @project.update(project_params)
-        format.html { redirect_to project_url(@project), notice: "Project was successfully updated." }
+        format.html { redirect_to project_url(@project), notice: t('projects.update_success') }
         format.json { render :show, status: :ok, location: @project }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -56,25 +56,25 @@ class ProjectsController < ApplicationController
   def add_collaborator
     user = User.find_by_email collaborator_params[:email]
     if user.nil?
-      return redirect_to project_path(current_project), alert: 'Please enter a valid user email address.'
+      return redirect_to project_path(current_project), alert: t('errors.invalid_email')
     end
     if current_project.users.include? user
-      return redirect_to project_path(current_project), alert: 'User is already a collaborator on this project.'
+      return redirect_to project_path(current_project), alert: t('errors.user_already_added')
     end
     c = current_project.add_user_with_role user, collaborator_params[:role]
     if c
-      redirect_to project_path(current_project), notice: 'Collaborator added successfully.'
+      redirect_to project_path(current_project), notice: t('projects.messages.add_collaborator_success')
     else
-      redirect_to project_path(current_project), alert: 'Something went wrong.'
+      redirect_to project_path(current_project), alert: t('projects.messages.add_collaborator_error')
     end
   end
   def remove_collaborator
     user = User.find_by id: params[:user_id]
     collab = current_project.remove_user user
     if collab.destroyed?
-      redirect_to current_project, notice: 'User successfully removed from project.'
+      redirect_to current_project, notice: t('projects.messages.remove_collaborator_success')
     else
-      redirect_to current_project, alert: 'Something went wrong.'
+      redirect_to current_project, alert: t('projects.messages.remove_collaborator_error')
     end
   end
 

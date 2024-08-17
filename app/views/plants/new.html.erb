@@ -1,7 +1,7 @@
-<h1>New plant</h1>
+<h1><%= t 'plants.index.new_plant' %></h1>
 
 <%= render "form", plant: @plant %>
 
 <p>
-  <%= link_to "Back to plants", plants_path %>
+  <%= link_to t('actions.cancel'), plants_path %>
 </p>

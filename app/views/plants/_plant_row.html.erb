@@ -16,9 +16,9 @@
   </td>
   <td class="actionColumn">
     <% if plant.last_watering == Time.zone.now.to_date %>
-      <%= link_to 'Edit', edit_watering_path(plant.waterings.last) %>
+      <%= link_to t('plants.index.edit'), edit_watering_path(plant.waterings.last) %>
     <% else %>
-      <%= link_to 'Water', plant_water_path(plant), data: { turbo_stream: true } %>
+      <%= link_to t('plants.index.water'), plant_water_path(plant), data: { turbo_stream: true } %>
     <% end %>
   </td>
 </tr>

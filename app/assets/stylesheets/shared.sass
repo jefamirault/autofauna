@@ -61,10 +61,13 @@ header
 
 nav
   display: flex
+  flex-wrap: wrap
   a
     display: inline-block
+    white-space: nowrap
   .navItem, .button_to .navItem
     padding: 0 13px
+    white-space: nowrap
 
   .navItem, .button_to .navItem
     &:hover, &.selected
@@ -117,7 +120,7 @@ section#main
   background: rgba(255, 255, 255, 0.975)
   box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px
   border-radius: 25px
-  margin: 0 3vw 2em
+  margin: 0 3vw 6px
   padding: 0.5em 3vw 2em
   clear: both
 
@@ -330,3 +333,24 @@ a.purple
 
 p.large
   font-size: 120%
+
+footer
+  display: flex
+  justify-content: center
+  line-height: 44px
+  font-size: 110%
+
+#localizations
+  margin: 0
+  padding: 0
+  list-style-type: none
+  li
+    display: inline-block
+  a
+    display: inline-block
+    padding: 6px 8px
+    color: rgba(255,255,255,0.7)
+    transition: none
+    &:hover, &.selected
+      color: rgba(255,255,255,1)
+      text-decoration: none

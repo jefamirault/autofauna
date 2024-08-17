@@ -21,14 +21,14 @@ module ApplicationHelper
                if options[:precise]
                  time_ago_in_words date
                else
-                 'Today'
+                 t 'time.today'
                end
              else
                days_ago = (Time.zone.now.to_date - date.to_date).to_i
                if days_ago == 1
-                 'Yesterday'
+                 t 'time.yesterday'
                else
-                 "#{days_ago} days ago"
+                 t 'time.days_ago', days: days_ago
                end
              end
 
@@ -41,7 +41,8 @@ module ApplicationHelper
   end
 
   def nav_link(controller, options = {})
-    text = (options[:text] || controller).titleize
+
+    text = t(".#{options[:text] || controller}")
     action = options[:action] || 'index'
     path = options[:path] || send("#{controller}_path")
     if params[:controller] == controller && params[:action] == action

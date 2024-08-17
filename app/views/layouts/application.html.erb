@@ -18,7 +18,7 @@
   <header>
     <nav>
       <div id="currentProject" class="logged_in">
-        <%= link_to current_project || 'Select Project', projects_path %>
+        <%= link_to current_project || t('.current_project'), projects_path %>
       </div>
 
       <%= nav_link 'plants' %>
@@ -33,14 +33,14 @@
       <% end %>
 
       <% if current_project %>
-        <%= nav_link 'projects', action: 'show', text: 'Project Settings', path: project_path(current_project) %>
+        <%= nav_link 'projects', action: 'show', text: '.project_settings', path: project_path(current_project) %>
       <% end %>
 
       <% if user_signed_in? %>
-        <%= nav_link 'settings', text: 'Account Settings' %>
-        <%= button_to "Log Out", session_path, method: :delete, class: 'logout navItem' %>
+        <%= nav_link 'settings', text: '.account_settings' %>
+        <%= button_to t('.log_out'), session_path, method: :delete, class: 'logout navItem' %>
       <% else %>
-        <%= link_to "Log In", new_session_path %>
+        <%= link_to t('log_in'), new_session_path %>
       <% end %>
     </nav>
   </header>
@@ -52,5 +52,11 @@
     <%= yield %>
   </section>
 
+  <footer>
+    <ul id="localizations">
+      <li><%= link_to 'English', "?locale=en", class: (current_locale == 'en' ? 'selected' : '') %></li>
+      <li><%= link_to 'Español', "?locale=es", class: (current_locale == 'es' ? 'selected' : '') %></li>
+    </ul>
+  </footer>
   </body>
 </html>

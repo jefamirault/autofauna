@@ -12,6 +12,8 @@ Rails.application.configure do
   config.eager_load = false
 
   # Show full error reports.
+  # Normally set to true in Development
+  # Set to false in to test error pages
   config.consider_all_requests_local = true
 
   # Enable server timing

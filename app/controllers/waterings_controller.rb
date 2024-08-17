@@ -6,7 +6,7 @@ class WateringsController < ApplicationController
   # GET /waterings or /waterings.json
   def index
     if current_project.nil?
-      return redirect_to projects_path, notice: 'Please select a project.'
+      return redirect_to projects_path, notice: t('messages.please_select_project')
     end
     @waterings = current_project&.waterings&.sort_by(&:date).reverse
   end
@@ -34,8 +34,7 @@ class WateringsController < ApplicationController
 
     respond_to do |format|
       if @watering.save
-        format.html { redirect_to watering_url(@watering), notice: "Watering was successfully created." }
-        # format.html { redirect_to plant_water_path(@watering.plant), notice: "Watering was successfully created." }
+        format.html { redirect_to watering_url(@watering), notice: t('waterings.messages.create_success') }
         format.json { render :show, status: :created, location: @watering }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -48,7 +47,7 @@ class WateringsController < ApplicationController
   def update
     respond_to do |format|
       if @watering.update(watering_params)
-        format.html { redirect_to watering_url(@watering), notice: "Watering was successfully updated." }
+        format.html { redirect_to watering_url(@watering), notice: t('waterings.messages.watering_updated') }
         format.json { render :show, status: :ok, location: @watering }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -62,7 +61,7 @@ class WateringsController < ApplicationController
     @watering.destroy
 
     respond_to do |format|
-      format.html { redirect_to waterings_url, notice: "Watering was successfully destroyed." }
+      format.html { redirect_to waterings_url, notice: t("waterings.messages.delete_success") }
       format.json { head :no_content }
     end
   end

@@ -31,7 +31,7 @@ class Watering < ApplicationRecord
 
   def interval_text
     if interval >= 0
-      "#{interval} days"
+      "#{interval} #{I18n.t 'time.days'}"
     else
       "n/a"
     end
