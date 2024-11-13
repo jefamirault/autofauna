@@ -47,7 +47,7 @@ class WateringsController < ApplicationController
   def update
     respond_to do |format|
       if @watering.update(watering_params)
-        format.html { redirect_to watering_url(@watering), notice: t('waterings.messages.watering_updated') }
+        format.html { redirect_to plant_url(@watering.plant), notice: t('waterings.messages.watering_updated') }
         format.json { render :show, status: :ok, location: @watering }
       else
         format.html { render :edit, status: :unprocessable_entity }
