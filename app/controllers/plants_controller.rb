@@ -48,7 +48,9 @@ class PlantsController < ApplicationController
       end
 
       cutoff = by_last.find_index {|p| p.last_watering && p.last_watering < today} || by_last.size
-      @watered_today = by_last.take(cutoff).reject {|p| p.last_watering.nil?}
+      @watered_today = by_last.take(cutoff).reject {|p| p.last_watering.nil?}.sort do |a,b|
+        b.waterings.last.updated_at <=> a.waterings.last.updated_at
+      end
       @recently = by_last.drop(cutoff).reject {|p| p.last_watering.nil? || p.last_watering < Time.zone.now.to_date - 1.week}
     end
 
