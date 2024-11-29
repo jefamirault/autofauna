@@ -19,6 +19,7 @@ es:
       to_access: "a acceder tus proyectos o"
       sign_up: "registrar"
       to_create: "para hacer uno."
+      no_projects: "Crea tu primer proyecto para empezar"
     show:
       add_collaborator_by_email: "Agregar colaborador por correo electrónico:"
       add_collaborator: "Agregar colaborador"
@@ -106,7 +107,7 @@ es:
     update_password: "Actualizar contraseña"
     current_password: "Contraseña actual"
   messages:
-    please_select_project: "Seleccione un proyecto, por favor."
+    please_select_project: "Seleccione un proyecto para continuar."
   errors:
     page_not_found: "La página que estás buscando no existe."
     server_error: "Lo siento, algo salió mal. Este error se ha registrado automáticamente."

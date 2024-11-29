@@ -28,13 +28,18 @@ class ApplicationController < ActionController::Base
     end
   end
   def authorize_viewer(project = current_project)
-    unless authorized?(current_user, :viewer)
-      redirect_to projects_path,
-                  alert: t('errors.missing_viewer_permission')
+    unless authorized?(current_user, :viewer, project)
+      if project.nil?
+        redirect_to projects_path,
+                    notice: t('messages.please_select_project')
+      else
+        redirect_to projects_path,
+                    alert: t('errors.missing_viewer_permission')
+      end
     end
   end
   def authorize_editor(project = current_project)
-    unless authorized?(current_user, :editor)
+    unless authorized?(current_user, :editor, project)
       redirect_to request&.referer || plants_path,
                   alert: "You do not have Editor permissions for this project."
     end

@@ -12,9 +12,6 @@ class PlantsController < ApplicationController
 
   # GET /plants or /plants.json
   def index
-    if current_project.nil?
-      return redirect_to projects_path
-    end
     active = current_project.plants.where(archived: false).reject {|p| p.scheduled_watering.nil? }
     if active.size > 0
       by_next = active.sort do |a,b|
@@ -30,7 +27,8 @@ class PlantsController < ApplicationController
       end
 
       today = Time.zone.now.to_date
-      cutoff = by_next.find_index {|p| p.scheduled_watering > today} || 0
+      cutoff = by_next.find_index {|p| p.scheduled_watering > today} || by_next.count
+
       @needs_water = by_next.take cutoff
       @upcoming = by_next.drop cutoff
 
@@ -68,7 +66,6 @@ class PlantsController < ApplicationController
 
   # GET /plants/new
   def new
-    return redirect_to projects_path if current_project.nil?
     @plant = Plant.new project: current_project, uid: current_project.next_uid
   end
 

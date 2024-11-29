@@ -34,9 +34,14 @@
     <% end %>
     </tbody>
   </table>
+<% elsif user_signed_in? %>
+  <%= t '.no_projects' %>
 <% else %>
   <p class="large">
-    <%= link_to t('.log_in'), new_session_path %> <%= t '.to_access' %> <%= link_to t('.sign_up'), new_registration_path %> <%= t '.to_create' %>
+    <%= link_to t('.log_in'), new_session_path %>
+    <%= t '.to_access' %>
+    <%= link_to t('.sign_up'), new_registration_path %>
+    <%= t '.to_create' %>
   </p>
 <% end %>
 

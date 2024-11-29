@@ -19,6 +19,7 @@ en:
       to_access: "to access your projects or"
       sign_up: "sign up"
       to_create: "to create one."
+      no_projects: "Create your first project to begin."
     show:
       add_collaborator_by_email: "Add Collaborator by Email:"
       add_collaborator: "Add Collaborator"
@@ -106,7 +107,7 @@ en:
     update_password: "Update Password"
     current_password: "Current Password"
   messages:
-    please_select_project: "Please select a project."
+    please_select_project: "Select a project to continue."
   errors:
     page_not_found: "The page you were looking for doesn't exist."
     server_error: "Sorry, something went wrong. This error has been logged automatically."
