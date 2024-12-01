@@ -156,3 +156,10 @@ es:
   true: "Verdadero"
   false: "Falso"
   back_to_settings: "Volver a la configuración"
+  search: "Buscar"
+  text: "Texto"
+  plant_id: "Número de planta"
+  scheduled_after: 'Programado antes de'
+  scheduled_before: 'Programado después de'
+  archived: '¿Archivada?'
+  clear_search: 'Borrar búsqueda'

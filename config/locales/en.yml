@@ -156,3 +156,10 @@ en:
   true: "True"
   false: "False"
   back_to_settings: "Back to Settings"
+  search: "Search"
+  text: "Text"
+  plant_id: "Plant Number"
+  scheduled_after: 'Scheduled after'
+  scheduled_before: 'Scheduled before'
+  archived: 'Archived?'
+  clear_search: 'Clear Search'

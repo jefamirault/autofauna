@@ -12,7 +12,16 @@ class PlantsController < ApplicationController
 
   # GET /plants or /plants.json
   def index
-    active = current_project.plants.where(archived: false).reject {|p| p.scheduled_watering.nil? }
+    if params['q']
+      params['q']['project_id_eq'] = current_project.id
+      @q = Plant.ransack(params[:q])
+      @all = @q.result(distinct: true)
+      # active = @all.reject {|p| p.scheduled_watering.nil? }
+      active = @all
+    else
+      active = current_project.plants.where(archived: false) #.reject {|p| p.scheduled_watering.nil? }
+      @q = Plant.ransack
+    end
     if active.size > 0
       by_next = active.sort do |a,b|
         if a.scheduled_watering == b.scheduled_watering
@@ -21,13 +30,17 @@ class PlantsController < ApplicationController
           else
             a.location <=> b.location
           end
+        elsif a.scheduled_watering.nil?
+          1
+        elsif b.scheduled_watering.nil?
+          -1
         else
           a.scheduled_watering <=> b.scheduled_watering
         end
       end
 
       today = Time.zone.now.to_date
-      cutoff = by_next.find_index {|p| p.scheduled_watering > today} || by_next.count
+      cutoff = by_next.find_index {|p| p.scheduled_watering.nil? || p.scheduled_watering > today } || by_next.count
 
       @needs_water = by_next.take cutoff
       @upcoming = by_next.drop cutoff
@@ -51,8 +64,14 @@ class PlantsController < ApplicationController
       end
       @recently = by_last.drop(cutoff).reject {|p| p.last_watering.nil? || p.last_watering < Time.zone.now.to_date - 1.week}
     end
-
-    @unscheduled = current_project.plants.where(scheduled_watering: nil, archived: false)
+    if @upcoming
+      @upcoming = @upcoming - @watered_today
+      cutoff = @upcoming.find_index {|p| p.scheduled_watering.nil? } || @upcoming.size
+      @unscheduled = @upcoming.drop cutoff
+      @upcoming = @upcoming.take cutoff
+    else
+      @unscheduled = []
+    end
 
     respond_to do |format|
       format.json { @plants = current_project.plants }
@@ -125,7 +144,6 @@ class PlantsController < ApplicationController
     else
       redirect_to plants_path, alert: "No plants imported."
     end
-
   end
 
   private

@@ -5,6 +5,28 @@
   <%= link_to t('.export_plants'), plants_path(format: :json) %>
 </div>
 
+<h2><%= t 'search' %>:</h2>
+<%= search_form_for @q do |f| %>
+
+  <%= f.label :name_or_location_cont, t('text') + ':' %>
+  <%= f.search_field :name_or_location_cont %>
+  <br><br>
+  <%= f.label :uid_eq, t('plant_id') + ':' %>
+  <%= f.number_field :uid_eq %>
+  <br><br>
+  <%= f.label :scheduled_watering_gteq, t('scheduled_after') + ':' %>
+  <%= f.date_field :scheduled_watering_gteq %>
+  <br><br>
+  <%= f.label :scheduled_watering_lteq, t('scheduled_before') + ':' %>
+  <%= f.date_field :scheduled_watering_lteq %>
+  <br><br>
+  <%= f.label :archived_eq, t('archived') + ':' %>
+  <%= f.check_box :archived_eq %>
+  <br><br>
+  <%= f.submit %>
+  <%= link_to t('clear_search'), plants_path %>
+<% end %>
+
 <% if @watered_today&.any? %>
   <h2><%= t '.watered_today' %></h2>
   <table class="blue">
@@ -42,19 +64,6 @@
 <% else %>
   <p><%= t '.no_upcoming' %></p>
 <% end %>
-<h2><%= t '.recently_watered' %></h2>
-<% if @recently&.any? %>
-  <table class="blue">
-    <%= render 'plant_row_header' %>
-    <tbody>
-      <% @recently.each do |plant| %>
-        <%= render 'plant_row', plant: plant %>
-      <% end %>
-    </tbody>
-  </table>
-<% else %>
-  <p><%= t '.no_recent_watering' %></p>
-<% end %>
 
 <% if @unscheduled&.any? %>
   <h2><%= t '.unscheduled' %></h2>
@@ -67,6 +76,21 @@
     </tbody>
   </table>
 <% end  %>
+
+<h2><%= t '.recently_watered' %></h2>
+<% if @recently&.any? %>
+  <table class="blue">
+    <%= render 'plant_row_header' %>
+    <tbody>
+    <% @recently.each do |plant| %>
+      <%= render 'plant_row', plant: plant %>
+    <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p><%= t '.no_recent_watering' %></p>
+<% end %>
+
 <div style=" text-align: center;">
   <div class="plantButton">
     <%= link_to "+ #{t '.new_plant'}", new_plant_path %>

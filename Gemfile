@@ -81,3 +81,5 @@ gem 'capistrano-rbenv', '~> 2.1', '>= 2.1.4'
 group :staging, :production do
   gem 'pg'
 end
+
+gem 'ransack'

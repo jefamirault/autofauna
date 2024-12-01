@@ -5,6 +5,8 @@ class Plant < ApplicationRecord
   before_validation :strip_whitespace
   after_save_commit :determine_schedule_change
 
+  validates_uniqueness_of :uid, scope: :project_id
+
   def label
     "##{uid} #{name}"
   end
@@ -135,5 +137,12 @@ class Plant < ApplicationRecord
     starting_id = 1
     max = Plant.pluck(:uid).max
     max ? max + 1 : starting_id
+  end
+
+  def self.ransackable_attributes(auth_object = nil)
+    %w[uid name location manual_watering_frequency name pot scheduled_watering archived created_at updated_at]
+  end
+  def self.ransackable_associations(auth_object = nil)
+    []
   end
 end
