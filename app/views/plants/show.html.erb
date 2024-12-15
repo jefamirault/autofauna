@@ -3,7 +3,8 @@
 <p>
   <%= link_to t('.edit_this_plant'), edit_plant_path(@plant) %> |
   <%= link_to t('plants.back_to_plants'), plants_path %> |
-  <%= link_to t('.water_this_plant'), plant_water_path(@plant) %>
+  <%= link_to t('.water_this_plant'), plant_water_path(@plant) %> |
+  <%= link_to t('.export_plant'), plant_path(@plant, format: :json) %>
 
   <%= button_to t('.delete_plant'), @plant, method: :delete, onclick: "return confirm('#{t 'plants.messages.confirm_delete'}');" %>
 </p>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_13_121404) do
+ActiveRecord::Schema[7.1].define(version: 2024_12_08_162811) do
   create_table "collaborations", force: :cascade do |t|
     t.integer "user_id"
     t.integer "project_id"
@@ -25,10 +25,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_13_121404) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "archived", default: false
-    t.integer "watering_frequency"
-    t.boolean "manual_watering_frequency"
-    t.date "scheduled_watering"
+    t.date "date_scheduled_watering"
     t.integer "project_id"
+    t.integer "min_watering_freq"
+    t.integer "max_watering_freq"
+    t.integer "scheduled_watering_id"
+    t.date "date_last_watering"
+    t.integer "last_watering_id"
+    t.index ["last_watering_id"], name: "index_plants_on_last_watering_id"
+    t.index ["scheduled_watering_id"], name: "index_plants_on_scheduled_watering_id"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -55,6 +60,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_13_121404) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "interval"
+    t.boolean "fulfilled", default: true, null: false
   end
 
 end

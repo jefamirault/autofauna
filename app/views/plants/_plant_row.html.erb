@@ -2,17 +2,20 @@
   <td class="plantColumn" style="font-weight: 500">
     <%= link_to plant.label, plant_path(plant.id) %>
   </td>
+  <td class="nextWateringColumn" style="font-weight: 400">
+    <%= plant.time_until_watering_text %>
+  </td>
+  <td class="frequencyColumn">
+    <%= plant.watering_frequency_text %>
+  </td>
+  <td class="lastWateringColumn">
+    <%= time_ago plant.date_last_watering %>
+  </td>
   <td class="locationColumn">
     <%= plant.location %>
   </td>
   <td class="containerColumn">
     <%= plant.pot %>
-  </td>
-  <td class="scheduledColumn">
-    <%= plant.time_until_watering_text %>
-  </td>
-  <td class="wateredColumn">
-    <%= time_ago plant.last_watering %>
   </td>
   <td class="actionColumn">
     <% if plant.last_watering == Time.zone.now.to_date %>

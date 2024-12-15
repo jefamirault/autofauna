@@ -4,34 +4,33 @@
   </h1>
 
   <p>
-    <strong><%= t 'attributes.location' %>:</strong>
-    <%= plant.location %>
-  </p>
-
-  <p>
-    <strong><%= t 'attributes.container' %>:</strong>
-    <%= plant.pot %>
-  </p>
-
-
-  <p>
     <strong><%= t 'attributes.watered' %>:</strong>
-    <%= time_ago plant.last_watering %>
+    <% if plant.date_last_watering %>
+    <%= link_to time_ago(plant.date_last_watering), watering_path(plant.last_watering) %>
+    <% end %>
   </p>
 
   <p>
-    <strong><%= t 'attributes.scheduled_watering' %>:</strong>
+    <strong><%= t 'attributes.next_watering' %>:</strong>
     <%= @plant.time_until_watering_text %>
   </p>
 
   <p>
     <strong><%= t 'attributes.watering_frequency' %>:</strong>
-    <% if @plant.manual_watering_frequency %>
-      <%= @plant.watering_frequency_text %>
-    <% else %>
-      Auto
-    <% end %>
+    <%= @plant.watering_frequency_text %>
   </p>
+
+  <p>
+    <strong><%= t 'attributes.location' %>:</strong>
+    <%= plant.location %>
+  </p>
+
+  <% if @plant.container && @plant.container != '' %>
+    <p>
+      <strong><%= t 'attributes.container' %>:</strong>
+      <%= plant.pot %>
+    </p>
+  <% end %>
 
   <p>
     <strong><%= t 'attributes.archived' %>:</strong>

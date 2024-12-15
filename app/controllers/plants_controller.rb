@@ -12,67 +12,19 @@ class PlantsController < ApplicationController
 
   # GET /plants or /plants.json
   def index
-    if params['q']
-      params['q']['project_id_eq'] = current_project.id
-      @q = Plant.ransack(params[:q])
-      @all = @q.result(distinct: true)
-      # active = @all.reject {|p| p.scheduled_watering.nil? }
-      active = @all
+    default_search_params = {
+      archived_eq: false,
+      project_id_eq: current_project.id
+    }
+    if params['q'].nil?
+      params['q'] = default_search_params
     else
-      active = current_project.plants.where(archived: false) #.reject {|p| p.scheduled_watering.nil? }
-      @q = Plant.ransack
+      params['q'].merge! project_id_eq: current_project.id
     end
-    if active.size > 0
-      by_next = active.sort do |a,b|
-        if a.scheduled_watering == b.scheduled_watering
-          if a.location == b.location
-            a.uid <=> b.uid
-          else
-            a.location <=> b.location
-          end
-        elsif a.scheduled_watering.nil?
-          1
-        elsif b.scheduled_watering.nil?
-          -1
-        else
-          a.scheduled_watering <=> b.scheduled_watering
-        end
-      end
+    @q = Plant.ransack(params['q'])
 
-      today = Time.zone.now.to_date
-      cutoff = by_next.find_index {|p| p.scheduled_watering.nil? || p.scheduled_watering > today } || by_next.count
-
-      @needs_water = by_next.take cutoff
-      @upcoming = by_next.drop cutoff
-
-      # sort by last watered, then by location
-      by_last = active.sort do |a,b|
-        if a.last_watering == b.last_watering
-          a.location <=> b.location
-        elsif a.last_watering.nil?
-          -1
-        elsif b.last_watering.nil?
-          1
-        else
-          b.last_watering <=> a.last_watering
-        end
-      end
-
-      cutoff = by_last.find_index {|p| p.last_watering && p.last_watering < today} || by_last.size
-      @watered_today = by_last.take(cutoff).reject {|p| p.last_watering.nil?}.sort do |a,b|
-        b.waterings.last.updated_at <=> a.waterings.last.updated_at
-      end
-      @recently = by_last.drop(cutoff).reject {|p| p.last_watering.nil? || p.last_watering < Time.zone.now.to_date - 1.week}
-    end
-    if @upcoming
-      @upcoming = @upcoming - @watered_today
-      cutoff = @upcoming.find_index {|p| p.scheduled_watering.nil? } || @upcoming.size
-      @unscheduled = @upcoming.drop cutoff
-      @upcoming = @upcoming.take cutoff
-    else
-      @unscheduled = []
-    end
-
+    @q.sorts = 'uid desc' if @q.sorts.empty?
+    @plants = @q.result(distinct: true)
     respond_to do |format|
       format.json { @plants = current_project.plants }
       format.html
@@ -155,11 +107,13 @@ class PlantsController < ApplicationController
     def set_project
       if params[:project_id]
         set_current_project Project.find(params[:project_id])
+      elsif current_project.nil?
+        redirect_to projects_path
       end
     end
 
     # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:name, :uid, :project_id, :location, :pot, :archived, :watering_frequency, :manual_watering_frequency, :scheduled_watering)
+      params.require(:plant).permit(:name, :uid, :project_id, :location, :pot, :archived, :min_watering_freq, :max_watering_freq, :manual_watering_frequency, :date_scheduled_watering)
     end
 end

@@ -1,60 +1,70 @@
-<%= form_with(model: plant) do |form| %>
-  <% if plant.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(plant.errors.count, "error") %> prohibited this plant from being saved:</h2>
+<div class="formContainer">
+  <%= form_with(model: plant) do |form| %>
+    <% if plant.errors.any? %>
+      <div style="color: red">
+        <h2><%= pluralize(plant.errors.count, "error") %> prohibited this plant from being saved:</h2>
 
-      <ul>
-        <% plant.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
+        <ul>
+          <% plant.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%= form.hidden_field :project_id %>
+
+    <div>
+      <%= form.label :name, style: "display: block" %>
+      <%= form.text_field :name, autofocus: plant.new_record? %>
+    </div>
+
+    <div>
+      <%= form.label :uid, style: "display: block" %>
+      <%= form.number_field :uid %>
+    </div>
+
+    <div>
+      <%= form.label :location, style: "display: block" %>
+      <%= form.text_field :location %>
+    </div>
+
+    <div>
+      <%= form.label :pot, t('attributes.container'), style: "display: block" %>
+      <%= form.text_field :pot %>
+    </div>
+
+    <div>
+      <%= form.label :date_scheduled_watering, style: "display: block" %>
+      <%= form.date_field :date_scheduled_watering %>
+    </div>
+
+    <div class="rangeInputContainer">
+      <div style="width:100px">
+        <%= form.label :min_watering_freq, 'Min', style: "display: block" %>
+        <%= form.number_field :min_watering_freq %>
+      </div>
+      <div style="font-size: 200%;line-height: 40px;margin: 0 8px">
+        -
+      </div>
+      <div style="width:100px">
+        <%= form.label :max_watering_freq, 'Max', style: "display: block" %>
+        <%= form.number_field :max_watering_freq %>
+      </div>
+      <div style="font-size: 100%;line-height: 40px;margin: 0 8px;">
+        days
+      </div>
+    </div>
+
+    <div>
+      <%= form.label :archived, style: "display: block" %>
+      <%= form.check_box :archived %>
+    </div>
+
+    <br>
+    <div>
+      <% submit_text = t(plant.new_record? ? 'plants.create_plant' : 'plants.update_plant') %>
+      <%= form.submit submit_text %>
     </div>
   <% end %>
-
-  <%= form.hidden_field :project_id %>
-
-  <div>
-    <%= form.label :name, style: "display: block" %>
-    <%= form.text_field :name, autofocus: plant.new_record? %>
-  </div>
-
-  <div>
-    <%= form.label :uid, style: "display: block" %>
-    <%= form.number_field :uid %>
-  </div>
-
-  <div>
-    <%= form.label :location, style: "display: block" %>
-    <%= form.text_field :location %>
-  </div>
-
-  <div>
-    <%= form.label :pot, t('attributes.container'), style: "display: block" %>
-    <%= form.text_field :pot %>
-  </div>
-
-  <div>
-    <%= form.label :archived, style: "display: block" %>
-    <%= form.check_box :archived %>
-  </div>
-
-  <div>
-    <%= form.label :scheduled_watering, style: "display: block" %>
-    <%= form.date_field :scheduled_watering %>
-  </div>
-
-  <div>
-    <%= form.label :watering_frequency, style: "display: block" %>
-    <%= form.number_field :watering_frequency %>
-  </div>
-
-  <div>
-    <%= form.label :manual_watering_frequency, t('attributes.manual_watering_frequency'), style: "display: block" %>
-    <%= form.check_box :manual_watering_frequency %>
-  </div>
-  <br>
-  <div>
-    <% submit_text = t(plant.new_record? ? 'plants.create_plant' : 'plants.update_plant') %>
-    <%= form.submit submit_text %>
-  </div>
-<% end %>
+</div>
