@@ -4,7 +4,7 @@ class ChangePlantWateringFrequency < ActiveRecord::Migration[7.1]
     add_column :plants, :max_watering_freq, :integer
 
     Plant.all.each do |plant|
-      freq = plant.watering_frequency
+      freq = plant.read_attribute :watering_frequency
       if freq.nil?
         plant.min_watering_freq = nil
         plant.max_watering_freq = nil
