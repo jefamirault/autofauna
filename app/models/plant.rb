@@ -137,13 +137,14 @@ class Plant < ApplicationRecord
 
   def self.create_from_json(json, project)
     p = Plant.new do |p|
-      p.uid = Plant.next_uid
+      p.id = json['id']
+      p.uid = json['uid']
       p.project = project
       p.name = json['name']
       p.location = json['location']
       p.container = json['container']
-      p.min_watering_freq = json['min_watering_freq']
-      p.max_watering_freq = json['max_watering_freq']
+      p.min_watering_freq = json['min_watering_freq'] || json['watering_frequency']
+      p.max_watering_freq = json['max_watering_freq'] || json['watering_frequency']
       p.date_scheduled_watering = json['date_scheduled_watering']
       p.date_last_watering = json['date_last_watering']
       p.archived = json['archived']

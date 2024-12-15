@@ -66,6 +66,23 @@ class WateringsController < ApplicationController
     end
   end
 
+  def import
+
+  end
+
+  def process_file
+    json = params['waterings'].read
+    waterings = JSON.parse json
+    waterings = [waterings] if waterings.class == Hash
+    requested = waterings.count
+    created = waterings.map {|j| Watering.create_from_json j }.map {|w| w.new_record? ? 0 : 1 }.reduce :+
+    if created > 0
+      redirect_to waterings_path, notice: "Successully imported #{created} out of #{requested} watering#{requested > 1 ? 's' : ''}."
+    else
+      redirect_to waterings_path, alert: "No waterings imported."
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_watering

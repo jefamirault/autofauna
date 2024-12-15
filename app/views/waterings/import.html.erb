@@ -1,0 +1,6 @@
+<h1>Import Waterings</h1>
+
+<%= form_tag({:action => :process_file}, :multipart => true) do %>
+  <%= file_field_tag 'waterings' %>
+  <%= submit_tag 'Upload' %>
+<% end %>

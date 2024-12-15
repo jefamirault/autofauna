@@ -1,5 +1,10 @@
 <h1><%= t '.waterings' %></h1>
 
+<div style="float:right">
+  <%= link_to t('.import_waterings'), waterings_import_path %> |
+  <%= link_to t('.export_waterings'), waterings_path(format: :json) %>
+</div>
+
 <table class="waterings blue">
   <thead>
   <tr>

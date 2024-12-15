@@ -43,6 +43,18 @@ class Watering < ApplicationRecord
     end
   end
 
+  def self.create_from_json(json)
+    w = Watering.new do |w|
+      w.id = json['id']
+      w.plant_id = json['plant_id']
+      w.date = json['date']
+      w.notes = json['notes']
+      w.created_at = json['created_at']
+      w.updated_at = json['updated_at']
+    end
+    w.save
+    w
+  end
   private
 
   def set_fulfilled_status
