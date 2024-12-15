@@ -68,11 +68,9 @@ class Watering < ApplicationRecord
       later_waterings = plant.waterings.select {|w| w.date > self.date}
       later_waterings.each &:set_interval
     end
-  #
   end
 
   def update_last_watering
-    # byebug
     date = plant.waterings.fulfilled.order(:date).last&.date
     unless plant.date_last_watering == date
       plant.update date_last_watering: date
@@ -80,5 +78,6 @@ class Watering < ApplicationRecord
     unless plant.last_watering == self
       plant.update last_watering: self
     end
+    plant.update_watering_dates
   end
 end

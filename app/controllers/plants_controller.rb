@@ -23,8 +23,9 @@ class PlantsController < ApplicationController
     end
     @q = Plant.ransack(params['q'])
 
-    @q.sorts = 'uid desc' if @q.sorts.empty?
+    @q.sorts = 'date_sort_watering' if @q.sorts.empty?
     @plants = @q.result(distinct: true)
+    
     respond_to do |format|
       format.json { @plants = current_project.plants }
       format.html

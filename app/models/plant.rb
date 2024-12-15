@@ -106,8 +106,10 @@ class Plant < ApplicationRecord
         "#{max_watering_days * -1} days late"
       elsif max_watering_days == 0
         "Today"
-      else
+      elsif min_watering_days > 0
         "Water in #{min_watering_days} - #{max_watering_days} days"
+      else
+        "Water within #{max_watering_days} day#{max_watering_days > 1 ? 's' : ''}"
       end
     else
       "Unscheduled"
@@ -161,9 +163,23 @@ class Plant < ApplicationRecord
   end
 
   def self.ransackable_attributes(auth_object = nil)
-    %w[uid name location manual_watering_frequency name pot date_scheduled_watering date_last_watering archived created_at updated_at project_id, date_last_watering]
+    %w[uid name location name pot date_scheduled_watering date_last_watering
+        date_sort_watering min_watering_freq max_watering_freq date_min_watering date_max_watering
+        archived created_at updated_at project_id, date_last_watering]
   end
   def self.ransackable_associations(auth_object = nil)
     %w[]
+  end
+
+  # private
+
+  def update_watering_dates
+    dates = waterings.fulfilled.map &:date
+    self.date_last_watering = dates.last
+    self.date_min_watering = date_last_watering + min_watering_freq
+    self.date_max_watering = date_last_watering + max_watering_freq
+    # self.date_sort_watering = date_scheduled_watering || date_last_watering + (min_watering_freq + max_watering_freq) / 2
+    self.date_sort_watering = date_scheduled_watering || date_last_watering + max_watering_freq
+    save
   end
 end

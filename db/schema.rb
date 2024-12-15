@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_12_08_162811) do
+ActiveRecord::Schema[7.1].define(version: 2024_12_15_162611) do
   create_table "collaborations", force: :cascade do |t|
     t.integer "user_id"
     t.integer "project_id"
@@ -32,6 +32,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_08_162811) do
     t.integer "scheduled_watering_id"
     t.date "date_last_watering"
     t.integer "last_watering_id"
+    t.date "date_min_watering"
+    t.date "date_max_watering"
+    t.date "date_sort_watering"
     t.index ["last_watering_id"], name: "index_plants_on_last_watering_id"
     t.index ["scheduled_watering_id"], name: "index_plants_on_scheduled_watering_id"
   end
