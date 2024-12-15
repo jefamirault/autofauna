@@ -176,10 +176,15 @@ class Plant < ApplicationRecord
   def update_watering_dates
     dates = waterings.fulfilled.map &:date
     self.date_last_watering = dates.last
-    self.date_min_watering = date_last_watering + min_watering_freq
-    self.date_max_watering = date_last_watering + max_watering_freq
-    # self.date_sort_watering = date_scheduled_watering || date_last_watering + (min_watering_freq + max_watering_freq) / 2
-    self.date_sort_watering = date_scheduled_watering || date_last_watering + max_watering_freq
+    if self.date_last_watering
+      self.date_min_watering = min_watering_freq ? date_last_watering + min_watering_freq : nil
+      self.date_max_watering = max_watering_freq ? date_last_watering + max_watering_freq : nil
+      self.date_sort_watering = min_watering_freq && max_watering_freq ? date_scheduled_watering || date_last_watering + max_watering_freq : nil
+    else
+      self.date_min_watering = nil
+      self.date_max_watering = nil
+      self.date_sort_watering = nil
+    end
     save
   end
 end
