@@ -133,6 +133,7 @@ en:
     next_watering: "Next Watering"
     watered: "Watered"
     last_watered: "Last Watered"
+    last_watering: "Last Watering"
     watering_frequency: "Watering Frequency"
     frequency: "Frequency"
     archived: "Archived?"
