@@ -1,0 +1,19 @@
+<h1>Sensor Readings</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Temperature</th>
+      <th>Humidity</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @readings.each do |reading| %>
+      <tr>
+        <td><%= reading.temp %></td>
+        <td><%= reading.humidity %></td>
+        <td><%= format_date reading.datetime, time: true %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

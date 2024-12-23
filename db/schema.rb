@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_12_15_162611) do
+ActiveRecord::Schema[8.0].define(version: 2024_12_22_223618) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -18,6 +18,15 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_15_162611) do
     t.integer "user_id"
     t.integer "project_id"
     t.integer "role"
+  end
+
+  create_table "hygro_sensor_readings", force: :cascade do |t|
+    t.datetime "datetime"
+    t.integer "temperature"
+    t.integer "humidity"
+    t.integer "project_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "plants", force: :cascade do |t|
@@ -49,6 +58,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_15_162611) do
     t.boolean "active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "api_key"
   end
 
   create_table "users", force: :cascade do |t|

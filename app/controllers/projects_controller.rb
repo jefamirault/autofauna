@@ -88,7 +88,7 @@ class ProjectsController < ApplicationController
   end
 
   def project_params
-    params.require(:project).permit(:name)
+    params.require(:project).permit(:name, :api_key)
   end
 
   def collaborator_params
