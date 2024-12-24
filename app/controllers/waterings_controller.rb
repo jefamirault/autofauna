@@ -74,10 +74,11 @@ class WateringsController < ApplicationController
     json = params['waterings'].read
     waterings = JSON.parse json
     waterings = [waterings] if waterings.class == Hash
+    waterings.each {|w| w.delete 'url'}
     requested = waterings.count
-    created = waterings.map {|j| Watering.create_from_json j }.map {|w| w.new_record? ? 0 : 1 }.reduce :+
-    if created > 0
-      redirect_to waterings_path, notice: "Successully imported #{created} out of #{requested} watering#{requested > 1 ? 's' : ''}."
+    created = Watering.upsert_all waterings
+    if created.count > 0
+      redirect_to waterings_path, notice: "Successully imported #{created.count} out of #{requested} watering#{requested > 1 ? 's' : ''}."
     else
       redirect_to waterings_path, alert: "No waterings imported."
     end

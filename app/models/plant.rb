@@ -179,7 +179,7 @@ class Plant < ApplicationRecord
     if self.date_last_watering
       self.date_min_watering = min_watering_freq ? date_last_watering + min_watering_freq : nil
       self.date_max_watering = max_watering_freq ? date_last_watering + max_watering_freq : nil
-      self.date_sort_watering = min_watering_freq && max_watering_freq ? date_scheduled_watering || date_last_watering + max_watering_freq : nil
+      self.date_sort_watering = min_watering_freq && max_watering_freq ? date_scheduled_watering || date_last_watering + (max_watering_freq + min_watering_freq) / 2 : nil
     else
       self.date_min_watering = nil
       self.date_max_watering = nil

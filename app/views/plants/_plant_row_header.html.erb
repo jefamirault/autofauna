@@ -1,7 +1,7 @@
 <thead>
   <tr>
     <th class="plantColumn"><%= sort_link @q, :uid, t('plants.index.plant') %></th>
-    <th class="nextWateringColumn"><%= sort_link @q, :date_sort_watering, t('attributes.next_watering') %></th>
+    <th class="nextWateringColumn"><%= sort_link @q, :date_min_watering, t('attributes.next_watering') %></th>
     <th class="frequencyColumn"><%= sort_link @q, :min_watering_freq, t('attributes.frequency') %></th>
     <th class="wateredColumn"><%= sort_link @q, :date_last_watering, t('attributes.last_watering') %></th>
     <th class="locationColumn"><%= sort_link @q, :location, t('attributes.location') %></th>
