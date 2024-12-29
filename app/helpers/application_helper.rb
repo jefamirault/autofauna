@@ -1,7 +1,11 @@
 module ApplicationHelper
   def format_date(date, options = {})
     if options[:time]
-      date ? date.strftime('%A %-m/%-d/%y %r') : ""
+      if options[:long]
+        date ? date.strftime('%A %-m/%-d/%y %r') : ""
+      else
+        date ? date.strftime('%-m/%-d/%y %r') : ""
+      end
     elsif options[:long]
       date ? date.strftime('%A %-m/%-d/%y') : ""
     else
