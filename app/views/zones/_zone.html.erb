@@ -24,7 +24,7 @@
     <h2>Sensors</h2>
     <ul>
       <% zone.sensors.each do |sensor| %>
-        <li><%= sensor %></li>
+        <li><%= link_to sensor %></li>
       <% end %>
     </ul>
   <% else %>

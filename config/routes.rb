@@ -29,6 +29,8 @@ Rails.application.routes.draw do
     put 'remove_collaborator/:user_id', to: 'projects#remove_collaborator', as: 'remove_collaborator'
   end
 
+  get 'sensor_readings/import', to: 'sensor_readings#import'
+  post 'sensor_readings/import', to: 'sensor_readings#process_file'
   get 'transmit', to: 'sensor_readings#transmit', as: 'transmit'
   get 'sensor_readings', to: 'sensor_readings#readings', as: 'sensor_readings'
 

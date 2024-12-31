@@ -1,4 +1,5 @@
 json.extract! reading,  :id,
+              :sensor_id,
               :temperature,
               :humidity,
               :datetime,

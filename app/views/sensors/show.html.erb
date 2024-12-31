@@ -1,6 +1,6 @@
 <%= render @sensor %>
 
-<%= render 'sensor_readings/readings', readings: @sensor.readings, sensor_column: false %>
+<%= render 'sensor_readings/readings', readings: @readings, sensor_column: false %>
 
 <div>
   <%= link_to "Edit this sensor", edit_sensor_path(@sensor) %> |

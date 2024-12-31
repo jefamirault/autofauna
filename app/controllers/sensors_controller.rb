@@ -8,6 +8,7 @@ class SensorsController < ApplicationController
 
   # GET /sensors/1 or /sensors/1.json
   def show
+    @readings = @sensor.hygro_sensor_readings.order datetime: :desc
   end
 
   # GET /sensors/new
