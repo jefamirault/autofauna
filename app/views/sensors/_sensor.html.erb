@@ -1,6 +1,23 @@
 <div id="<%= dom_id sensor %>">
   <h1><%= sensor %></h1>
 
+  <% if sensor.hygro_sensor_readings.any? %>
+    <div>
+      <strong>Temperature:</strong>
+      <%= sensor.last_temp %>&deg;F
+      <div class="updateText">
+        <%= time_ago_in_words sensor.hygro_sensor_readings.last&.datetime %> ago
+      </div>
+    </div>
+    <div>
+      <strong>Humidity:</strong>
+      <%= sensor.hygro_sensor_readings.last&.humidity %>%
+      <div class="updateText">
+        <%= time_ago_in_words sensor.hygro_sensor_readings.last&.datetime %> ago
+      </div>
+    </div>
+  <% end %>
+
   <p>
     <strong>Zone:</strong>
     <%= link_to sensor.zone %>

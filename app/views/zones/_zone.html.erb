@@ -3,22 +3,27 @@
     <%= zone %>
   </h1>
 
+  <% if zone.hygro_sensor_readings.any? %>
+    <div>
+      <strong>Temperature:</strong>
+      <%= zone.last_temp %>&deg;F
+      <div class="updateText">
+        <%= time_ago_in_words zone.hygro_sensor_readings.last&.datetime %> ago
+      </div>
+    </div>
+    <div>
+      <strong>Humidity:</strong>
+      <%= zone.hygro_sensor_readings.last&.humidity %>%
+      <div class="updateText">
+        <%= time_ago_in_words zone.hygro_sensor_readings.last&.datetime %> ago
+      </div>
+    </div>
+  <% end %>
+
   <p>
     <strong>Description:</strong>
     <%= zone.description %>
   </p>
-
-  <% if zone.hygro_sensor_readings.any? %>
-    <p>
-      <strong>Temperature:</strong>
-      <%= zone.last_temp %>&deg;F at <%= format_date zone.hygro_sensor_readings.last&.datetime, time: true %>
-    </p>
-
-    <p>
-      <strong>Humidity:</strong>
-      <%= zone.hygro_sensor_readings.last&.humidity %>%
-    </p>
-  <% end %>
 
   <% if zone.sensors.any? %>
     <h2>Sensors</h2>
