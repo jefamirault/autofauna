@@ -1,38 +1,70 @@
 class SensorsController < ApplicationController
-  before_action :authorize_viewer, only: [:readings]
-  before_action :set_project
+  before_action :set_sensor, only: %i[ show edit update destroy ]
 
+  # GET /sensors or /sensors.json
   def index
-    required_params = %w(project_id API_KEY temp humidity)
-    params_present = required_params.map {|k| !params[k].nil? }.reduce :&
-    if params_present
-      project = Project.find params['project_id']
-      if project && !project.api_key.nil? && params['API_KEY'] == project.api_key
-        r = HygroSensorReading.new temperature: params['temp'], humidity: params['humidity'], datetime: Time.zone.now, project: project
-        if r.save
-        #   success
-          render html: "<h1>Hello Programmer!</h1><h2><code>#{r}</code></h2>".html_safe, layout: false
-        else
-          render html: '<h1>Malformed Request</h1>'.html_safe
-        end
+    @sensors = Sensor.where(project: current_project)
+  end
+
+  # GET /sensors/1 or /sensors/1.json
+  def show
+  end
+
+  # GET /sensors/new
+  def new
+    @sensor = Sensor.new
+  end
+
+  # GET /sensors/1/edit
+  def edit
+  end
+
+  # POST /sensors or /sensors.json
+  def create
+    @sensor = Sensor.new(sensor_params)
+
+    respond_to do |format|
+      if @sensor.save
+        format.html { redirect_to @sensor, notice: "Sensor was successfully created." }
+        format.json { render :show, status: :created, location: @sensor }
       else
-        render html: '<h1>Hello Arduino!</h1>'.html_safe, layout: false
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: @sensor.errors, status: :unprocessable_entity }
       end
-    else
-      render html: '<h1>Unauthorized</h1>'.html_safe
     end
   end
 
-  def readings
-    @readings = HygroSensorReading.where(project_id: current_project.id)&.order datetime: :desc
+  # PATCH/PUT /sensors/1 or /sensors/1.json
+  def update
+    respond_to do |format|
+      if @sensor.update(sensor_params)
+        format.html { redirect_to @sensor, notice: "Sensor was successfully updated." }
+        format.json { render :show, status: :ok, location: @sensor }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @sensor.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /sensors/1 or /sensors/1.json
+  def destroy
+    @sensor.destroy!
+
+    respond_to do |format|
+      format.html { redirect_to sensors_path, status: :see_other, notice: "Sensor was successfully destroyed." }
+      format.json { head :no_content }
+    end
   end
 
   private
-  def set_project
-    if params[:project_id]
-      set_current_project Project.find(params[:project_id])
-    elsif current_project.nil?
-      redirect_to projects_path
+    # Use callbacks to share common setup or constraints between actions.
+    def set_sensor
+      @sensor = Sensor.find(params.expect(:id))
     end
-  end
+
+    # Only allow a list of trusted parameters through.
+    def sensor_params
+      params.expect(sensor: [ :name, :zone_id, :location, :project_id, :description ])
+    end
 end

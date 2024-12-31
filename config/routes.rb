@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :sensors
+  resources :zones
   resource :session
   resources :registrations
   resource :password
@@ -27,8 +29,8 @@ Rails.application.routes.draw do
     put 'remove_collaborator/:user_id', to: 'projects#remove_collaborator', as: 'remove_collaborator'
   end
 
-  get 'sensors', to: 'sensors#index'
-  get 'sensors/readings', to: 'sensors#readings', as: 'sensor_readings'
+  get 'transmit', to: 'sensor_readings#transmit', as: 'transmit'
+  get 'sensor_readings', to: 'sensor_readings#readings', as: 'sensor_readings'
 
   match '/404' => 'errors#not_found', :via => :all
   match '/422' => 'errors#unprocessable_entity', :via => :all

@@ -4,7 +4,7 @@ module ApplicationHelper
       if options[:long]
         date ? date.strftime('%A %-m/%-d/%y %r') : ""
       else
-        date ? date.strftime('%-m/%-d/%y %r') : ""
+        date ? date.strftime('%r %-m/%-d/%y') : ""
       end
     elsif options[:long]
       date ? date.strftime('%A %-m/%-d/%y') : ""
@@ -24,6 +24,7 @@ module ApplicationHelper
       text = if date == Time.zone.now.to_date
                if options[:precise]
                  time_ago_in_words date
+                 byebug
                else
                  t 'time.today'
                end

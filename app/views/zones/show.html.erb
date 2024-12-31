@@ -1,0 +1,8 @@
+<%= render @zone %>
+
+<div>
+  <%= link_to "Edit this zone", edit_zone_path(@zone) %> |
+  <%= link_to "Back to zones", zones_path %>
+
+  <%= button_to "Destroy this zone", @zone, method: :delete %>
+</div>

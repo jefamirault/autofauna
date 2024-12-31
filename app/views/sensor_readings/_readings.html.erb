@@ -1,0 +1,26 @@
+<% # locals: readings: array, sensor_column: boolean %>
+<h1>Sensor Readings</h1>
+<table>
+  <thead>
+  <tr>
+    <% if sensor_column %>
+      <th>Sensor</th>
+    <% end %>
+    <th>Temperature</th>
+    <th>Humidity</th>
+    <th>Time</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% readings.each do |reading| %>
+    <tr>
+      <% if sensor_column %>
+        <td><%= link_to reading.sensor %></td>
+      <% end %>
+      <td><%= reading.temp %>&deg;F</td>
+      <td><%= reading.humidity %>%</td>
+      <td><%= format_date reading.datetime, time: true %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

@@ -4,7 +4,9 @@ class Project < ApplicationRecord
   has_many :collaborations
   has_many :collaborators, through: :collaborations, source: 'user'
 
-  has_many :HygroSensorReadings
+  has_many :sensors
+  has_many :hygro_sensor_readings
+
   def users
     [owner] + collaborators
   end
@@ -43,7 +45,7 @@ class Project < ApplicationRecord
 
   def next_uid
     starting_id = 1
-    max = self.plants.pluck(:uid).max
+    max = self.plants.pluck(:uid).reject(&:nil?).max
     max ? max + 1 : starting_id
   end
 end

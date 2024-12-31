@@ -1,0 +1,12 @@
+<% content_for :title, "Editing zone" %>
+
+<h1>Editing zone</h1>
+
+<%= render "form", zone: @zone %>
+
+<br>
+
+<div>
+  <%= link_to "Show this zone", @zone %> |
+  <%= link_to "Back to zones", zones_path %>
+</div>

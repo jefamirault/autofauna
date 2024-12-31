@@ -1,0 +1,35 @@
+<div id="<%= dom_id zone %>">
+  <h1>
+    <%= zone %>
+  </h1>
+
+  <p>
+    <strong>Description:</strong>
+    <%= zone.description %>
+  </p>
+
+  <% if zone.hygro_sensor_readings.any? %>
+    <p>
+      <strong>Temperature:</strong>
+      <%= zone.last_temp %>&deg;F at <%= format_date zone.hygro_sensor_readings.last&.datetime, time: true %>
+    </p>
+
+    <p>
+      <strong>Humidity:</strong>
+      <%= zone.hygro_sensor_readings.last&.humidity %>%
+    </p>
+  <% end %>
+
+  <% if zone.sensors.any? %>
+    <h2>Sensors</h2>
+    <ul>
+      <% zone.sensors.each do |sensor| %>
+        <li><%= sensor %></li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>This zone does not have any sensors.</p>
+  <% end %>
+
+
+</div>

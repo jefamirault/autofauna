@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_12_22_223618) do
+ActiveRecord::Schema[8.0].define(version: 2024_12_29_172104) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,6 +27,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_22_223618) do
     t.integer "project_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "sensor_id"
   end
 
   create_table "plants", force: :cascade do |t|
@@ -47,6 +48,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_22_223618) do
     t.date "date_min_watering"
     t.date "date_max_watering"
     t.date "date_sort_watering"
+    t.integer "zone_id"
     t.index ["last_watering_id"], name: "index_plants_on_last_watering_id"
     t.index ["scheduled_watering_id"], name: "index_plants_on_scheduled_watering_id"
   end
@@ -59,6 +61,16 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_22_223618) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "api_key"
+  end
+
+  create_table "sensors", force: :cascade do |t|
+    t.string "name"
+    t.integer "zone_id"
+    t.string "location"
+    t.integer "project_id"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade do |t|
@@ -77,5 +89,13 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_22_223618) do
     t.datetime "updated_at", null: false
     t.integer "interval"
     t.boolean "fulfilled", default: true, null: false
+  end
+
+  create_table "zones", force: :cascade do |t|
+    t.string "name"
+    t.integer "project_id"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 end
