@@ -100,8 +100,8 @@ class Plant < ApplicationRecord
       end
       "<span style=\"#{style}\">#{text}</span>".html_safe
     elsif date_last_watering && min_watering_freq && max_watering_freq
-      min_watering_days = ((date_last_watering + min_watering_freq.days) - Date.today).to_i
-      max_watering_days = ((date_last_watering + max_watering_freq.days) - Date.today).to_i
+      min_watering_days = ((date_last_watering + min_watering_freq.days) - Time.zone.now.to_date).to_i
+      max_watering_days = ((date_last_watering + max_watering_freq.days) - Time.zone.now.to_date).to_i
       if max_watering_days < 0
         "#{max_watering_days * -1} days late"
       elsif max_watering_days == 0
