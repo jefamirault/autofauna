@@ -24,7 +24,6 @@ module ApplicationHelper
       text = if date == Time.zone.now.to_date
                if options[:precise]
                  time_ago_in_words date
-                 byebug
                else
                  t 'time.today'
                end
@@ -50,8 +49,16 @@ module ApplicationHelper
     text = t(".#{options[:text] || controller}")
     action = options[:action] || 'index'
     path = options[:path] || send("#{controller}_path")
-    if params[:controller] == controller && params[:action] == action
-      nav_item(text, true)
+    if params[:controller] == controller # && params[:action] == action
+      if options[:action]
+        if params[:action] == action
+          nav_item(text, true)
+        else
+          link_to(text, path, class: 'navItem')
+        end
+      else
+        link_to(text, path, class: 'navItem')
+      end
     else
       link_to(text, path, class: 'navItem')
     end

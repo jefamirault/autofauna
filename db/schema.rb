@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_12_29_172104) do
+ActiveRecord::Schema[8.0].define(version: 2025_01_04_163358) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -28,6 +28,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_29_172104) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sensor_id"
+    t.string "error"
   end
 
   create_table "plants", force: :cascade do |t|
@@ -63,6 +64,20 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_29_172104) do
     t.string "api_key"
   end
 
+  create_table "sensor_types", force: :cascade do |t|
+    t.string "name"
+    t.integer "min_temp"
+    t.integer "max_temp"
+    t.integer "min_humidity"
+    t.integer "max_humidity"
+    t.float "accuracy_temp"
+    t.float "resolution_temp"
+    t.float "accuracy_humidity"
+    t.float "resolution_humidity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "sensors", force: :cascade do |t|
     t.string "name"
     t.integer "zone_id"
@@ -71,6 +86,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_29_172104) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "sensor_type_id"
   end
 
   create_table "users", force: :cascade do |t|

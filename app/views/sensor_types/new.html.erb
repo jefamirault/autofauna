@@ -1,0 +1,11 @@
+<% content_for :title, "New sensor type" %>
+
+<h1>New sensor type</h1>
+
+<%= render "form", sensor_type: @sensor_type %>
+
+<br>
+
+<div>
+  <%= link_to "Back to sensor types", sensor_types_path %>
+</div>

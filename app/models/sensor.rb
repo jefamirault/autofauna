@@ -1,6 +1,7 @@
 class Sensor < ApplicationRecord
   belongs_to :project
   belongs_to :zone
+  belongs_to :sensor_type
   has_many :hygro_sensor_readings
 
   def readings

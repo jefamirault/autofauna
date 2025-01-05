@@ -1,10 +1,12 @@
-<%= render @sensor %>
+<h1>Sensors</h1>
 
-<%= render 'sensor_readings/readings', readings: @readings, sensor_column: false %>
+<%= render @sensor %>
 
 <div>
   <%= link_to "Edit this sensor", edit_sensor_path(@sensor) %> |
   <%= link_to "Back to sensors", sensors_path %>
 
-  <%= button_to "Destroy this sensor", @sensor, method: :delete %>
+  <%= button_to "Destroy this sensor", @sensor, method: :delete, onclick: "return confirm('#{t 'sensors.messages.confirm_delete'}');" %>
 </div>
+
+<%= render 'sensor_readings/readings', readings: @readings, sensor_column: false %>

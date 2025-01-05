@@ -8,6 +8,7 @@
     <% end %>
     <th>Temperature</th>
     <th>Humidity</th>
+    <th>Error</th>
     <th>Time</th>
   </tr>
   </thead>
@@ -19,6 +20,7 @@
       <% end %>
       <td><%= reading.temp %>&deg;F</td>
       <td><%= reading.humidity %>%</td>
+      <td><%= reading.error %></td>
       <td><%= format_date reading.datetime, time: true %></td>
     </tr>
   <% end %>

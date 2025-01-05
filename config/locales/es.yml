@@ -87,7 +87,11 @@ es:
     messages:
       create_success: "El riego creado exitosamenta."
       watering_updated: "El riego se actualizó exitosamente."
+      confirm_delete: "¿Está seguro de que desea eliminar esta riego?"
       delete_success: "El riego fue eliminada exitosamente."
+  sensors:
+    messages:
+      confirm_delete: "¿Está seguro de que desea eliminar esta sensor?"
   log_in: "Iniciar seción"
   sign_up: "Registrar"
   email: "Email"

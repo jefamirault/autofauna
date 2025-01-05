@@ -1,0 +1,11 @@
+<%= render @sensor_type %>
+
+<div>
+  <%= link_to "Edit this sensor type", edit_sensor_type_path(@sensor_type) %> |
+  <%= link_to "Back to sensor types", sensor_types_path %>
+
+  <%= button_to "Destroy this sensor type", @sensor_type, method: :delete, onclick: "return confirm('#{t 'sensors.messages.confirm_delete'}');" %>
+</div>
+
+<h2>Sensors of this type:</h2>
+<%= render 'sensors/sensors', sensors: @sensor_type.sensors  %>

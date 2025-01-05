@@ -87,7 +87,11 @@ en:
     messages:
       create_success: "Watering was successfully created."
       watering_updated: "Watering was successfully updated."
+      confirm_delete: "Are you sure you want to delete this watering?"
       delete_success: "Watering deleted successfully."
+  sensors:
+    messages:
+      confirm_delete: "Are you sure you want to delete this Sensor?"
   log_in: "Log In"
   sign_up: "Sign Up"
   email: "Email"

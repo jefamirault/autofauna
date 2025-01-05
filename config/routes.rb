@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :sensor_types
   resources :sensors
   resources :zones
   resource :session

@@ -1,0 +1,14 @@
+<% content_for :title, "Sensor types" %>
+
+<h1>Sensor types</h1>
+
+<div id="sensor_types">
+  <% @sensor_types.each do |sensor_type| %>
+    <%= render sensor_type %>
+    <p>
+      <%= link_to "Show this sensor type", sensor_type %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New sensor type", new_sensor_type_path %>

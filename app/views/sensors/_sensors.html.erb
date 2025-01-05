@@ -1,0 +1,10 @@
+<div id="sensors">
+  <% sensors.each do |sensor| %>
+    <%= render sensor %>
+    <p>
+      <%= link_to "Show this sensor", sensor %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New sensor", new_sensor_path %>

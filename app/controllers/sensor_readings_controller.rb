@@ -9,7 +9,7 @@ class SensorReadingsController < ApplicationController
       project = Project.find params['project_id']
       sensor = Sensor.find params[:sensor_id]
       if project && !project.api_key.nil? && params['API_KEY'] == project.api_key
-        r = HygroSensorReading.new temperature: params['temp'], humidity: params['humidity'], datetime: Time.zone.now, project: project, sensor: sensor
+        r = HygroSensorReading.new temperature: params['temp'], humidity: params['humidity'], datetime: Time.zone.now, project: project, sensor: sensor, error: params['error']
         if r.save
         #   success
           render html: "<h1>Hello Programmer!</h1><h2><code>#{r}</code></h2>".html_safe, layout: false

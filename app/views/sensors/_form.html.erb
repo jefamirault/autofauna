@@ -12,6 +12,11 @@
   <% end %>
 
   <div>
+    <%= form.label :sensor_type_id, style: "display: block" %>
+    <%= form.collection_select :sensor_type_id, SensorType.all, :id, :name, { prompt: "Select a Sensor Type" } %>
+  </div>
+
+  <div>
     <%= form.label :name, style: "display: block" %>
     <%= form.text_field :name %>
   </div>

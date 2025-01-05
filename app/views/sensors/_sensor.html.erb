@@ -1,6 +1,16 @@
 <div id="<%= dom_id sensor %>">
   <h1><%= sensor %></h1>
 
+  <p>
+    <strong>Zone:</strong>
+    <%= link_to sensor.zone %>
+  </p>
+
+  <p>
+    <strong>Location:</strong>
+    <%= sensor.location %>
+  </p>
+
   <% if sensor.hygro_sensor_readings.any? %>
     <div>
       <strong>Temperature:</strong>
@@ -19,13 +29,8 @@
   <% end %>
 
   <p>
-    <strong>Zone:</strong>
-    <%= link_to sensor.zone %>
-  </p>
-
-  <p>
-    <strong>Location:</strong>
-    <%= sensor.location %>
+    <strong>Sensor Type:</strong>
+    <%= link_to sensor.sensor_type %>
   </p>
 
   <p>

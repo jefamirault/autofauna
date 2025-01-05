@@ -5,5 +5,6 @@
   <%= link_to t('waterings.all_waterings'), waterings_path %> |
   <%= link_to t('waterings.water_again'), plant_water_path(@watering.plant) %>
 
-  <%= button_to t('waterings.delete_watering'), @watering, method: :delete %>
+  <%= button_to t('waterings.delete_watering'), @watering, method: :delete, onclick: "return confirm('#{t 'waterings.messages.confirm_delete'}');" %>
+
 </p>

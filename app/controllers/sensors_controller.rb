@@ -66,6 +66,6 @@ class SensorsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def sensor_params
-      params.expect(sensor: [ :name, :zone_id, :location, :project_id, :description ])
+      params.expect(sensor: [ :sensor_type_id, :name, :zone_id, :location, :project_id, :description ])
     end
 end

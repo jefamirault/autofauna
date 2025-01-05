@@ -1,0 +1,46 @@
+<div id="<%= dom_id sensor_type %>">
+  <h1>
+    <%= sensor_type.name %>
+  </h1>
+
+  <p>
+    <strong>Min temp:</strong>
+    <%= sensor_type.min_temp %>&deg;F
+  </p>
+
+  <p>
+    <strong>Max temp:</strong>
+    <%= sensor_type.max_temp %>&deg;F
+  </p>
+
+  <p>
+    <strong>Min humidity:</strong>
+    <%= sensor_type.min_humidity %>%
+  </p>
+
+  <p>
+    <strong>Max humidity:</strong>
+    <%= sensor_type.max_humidity %>%
+  </p>
+
+  <p>
+    <strong>Accuracy temp:</strong>
+    &plusmn<%= sensor_type.accuracy_temp %>&deg;F
+  </p>
+
+  <p>
+    <strong>Resolution temp:</strong>
+    <%= sensor_type.resolution_temp %>&deg;F
+  </p>
+
+  <p>
+    <strong>Accuracy humidity:</strong>
+    &plusmn<%= sensor_type.accuracy_humidity %>%
+  </p>
+
+  <p>
+    <strong>Resolution humidity:</strong>
+    <%= sensor_type.resolution_humidity %>%
+  </p>
+
+</div>

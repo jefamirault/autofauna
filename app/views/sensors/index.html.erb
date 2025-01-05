@@ -1,16 +1,3 @@
-<p style="color: green"><%= notice %></p>
-
 <% content_for :title, "Sensors" %>
 
-<h1>Sensors</h1>
-
-<div id="sensors">
-  <% @sensors.each do |sensor| %>
-    <%= render sensor %>
-    <p>
-      <%= link_to "Show this sensor", sensor %>
-    </p>
-  <% end %>
-</div>
-
-<%= link_to "New sensor", new_sensor_path %>
+<%= render 'sensors', sensors: @sensors %>
