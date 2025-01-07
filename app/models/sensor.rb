@@ -19,4 +19,8 @@ class Sensor < ApplicationRecord
   def last_humidity
     hygro_sensor_readings.last&.humidity
   end
+
+  def name_with_latest
+    "#{self.name} (#{last_temp}&deg;F; #{last_humidity}% RH)".html_safe
+  end
 end

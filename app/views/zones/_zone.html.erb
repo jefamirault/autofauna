@@ -29,7 +29,13 @@
     <h2>Sensors</h2>
     <ul>
       <% zone.sensors.each do |sensor| %>
-        <li><%= link_to sensor %></li>
+        <li>
+          <% if sensor.hygro_sensor_readings.any? %>
+            <%= link_to sensor.name_with_latest, sensor %>
+          <% else %>
+            <%= link_to sensor %>
+          <% end %>
+        </li>
       <% end %>
     </ul>
   <% else %>
