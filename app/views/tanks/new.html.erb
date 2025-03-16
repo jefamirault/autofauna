@@ -1,0 +1,11 @@
+<% content_for :title, "New tank" %>
+
+<h1>New tank</h1>
+
+<%= render "form", tank: @tank %>
+
+<br>
+
+<div>
+  <%= link_to "Back to tanks", tanks_path %>
+</div>

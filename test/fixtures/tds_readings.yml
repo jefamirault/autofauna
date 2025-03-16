@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  datetime: 2025-01-26 16:30:20
+  zone_id: 1
+  tds: 1
+  sensor_id: 1
+
+two:
+  datetime: 2025-01-26 16:30:20
+  zone_id: 1
+  tds: 1
+  sensor_id: 1

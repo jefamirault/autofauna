@@ -28,6 +28,8 @@
       <%= nav_link 'sensors' %>
       <%= nav_link 'sensor_readings', action: 'readings', text: 'Sensor Readings', path: sensor_readings_path %>
       <%= nav_link 'sensor_types' %>
+      <%= nav_link 'tanks' %>
+      <%= nav_link 'tds_readings', text: 'TDS Readings' %>
     </nav>
 
 
@@ -37,11 +39,11 @@
       <% end %>
 
       <% if current_project %>
-        <%= nav_link 'projects', action: 'show', text: '.project_settings', path: project_path(current_project) %>
+        <%= nav_link 'projects', action: 'show', text: t('.project_settings'), path: project_path(current_project) %>
       <% end %>
 
       <% if user_signed_in? %>
-        <%= nav_link 'settings', text: '.account_settings' %>
+        <%= nav_link 'settings', text: t('.account_settings') %>
         <%= button_to t('.log_out'), session_path, method: :delete, class: 'logout navItem' %>
       <% else %>
         <%= link_to t('log_in'), new_session_path %>

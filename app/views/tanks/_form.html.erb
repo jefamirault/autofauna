@@ -1,0 +1,37 @@
+<%= form_with(model: tank) do |form| %>
+  <% if tank.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(tank.errors.count, "error") %> prohibited this tank from being saved:</h2>
+
+      <ul>
+        <% tank.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.label :description, style: "display: block" %>
+    <%= form.textarea :description %>
+  </div>
+
+  <div>
+    <%= form.label :zone_id, style: "display: block" %>
+    <%= form.number_field :zone_id %>
+  </div>
+
+  <div>
+    <%= form.label :location, style: "display: block" %>
+    <%= form.text_field :location %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

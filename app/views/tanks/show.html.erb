@@ -1,0 +1,8 @@
+<%= render @tank %>
+
+<div>
+  <%= link_to "Edit this tank", edit_tank_path(@tank) %> |
+  <%= link_to "Back to tanks", tanks_path %>
+
+  <%= button_to "Destroy this tank", @tank, method: :delete %>
+</div>

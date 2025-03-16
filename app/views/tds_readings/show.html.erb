@@ -1,0 +1,8 @@
+<%= render @tds_reading %>
+
+<div>
+  <%= link_to "Edit this tds reading", edit_tds_reading_path(@tds_reading) %> |
+  <%= link_to "Back to tds readings", tds_readings_path %>
+
+  <%= button_to "Destroy this tds reading", @tds_reading, method: :delete %>
+</div>

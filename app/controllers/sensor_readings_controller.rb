@@ -25,7 +25,7 @@ class SensorReadingsController < ApplicationController
   end
 
   def readings
-    @readings = HygroSensorReading.where(project_id: current_project.id)&.order datetime: :desc
+    @readings = HygroSensorReading.where(project_id: current_project.id)&.order(datetime: :desc).first 1000
   end
 
   def import
@@ -38,9 +38,9 @@ class SensorReadingsController < ApplicationController
     requested = sensor_readings.count
     created = sensor_readings.map {|j| HygroSensorReading.create_from_json j, current_project }.map {|p| p.new_record? ? 0 : 1 }.reduce :+
     if created > 0
-      redirect_to sensor_readings_path, notice: "Successully imported #{created} out of #{requested} sensor reading#{requested > 1 ? 's' : ''}."
+      redirect_to sensor_readings_path, notice: "Successfully imported #{created} out of #{requested} sensor reading#{requested > 1 ? 's' : ''}."
     else
-      redirect_to sensor_readings_path, alert: "No sensor readingsd imported."
+      redirect_to sensor_readings_path, alert: "No sensor readings imported."
     end
   end
 

@@ -1,0 +1,35 @@
+<%= form_with(model: tds_reading) do |form| %>
+  <% if tds_reading.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(tds_reading.errors.count, "error") %> prohibited this tds_reading from being saved:</h2>
+
+      <ul>
+        <% tds_reading.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :datetime, style: "display: block" %>
+    <%= form.datetime_field :datetime %>
+  </div>
+
+  <div>
+    <%= form.label :tank_id, style: "display: block" %>
+    <%#= form.number_field :tank_id %>
+
+    <%= form.select 'tank_id', options_from_collection_for_select(Tank.all, 'id', 'name') %>
+
+  </div>
+
+  <div>
+    <%= form.label :tds, style: "display: block" %>
+    <%= form.number_field :tds %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

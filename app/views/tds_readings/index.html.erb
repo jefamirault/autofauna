@@ -1,0 +1,14 @@
+<% content_for :title, "Tds readings" %>
+
+<h1>Tds readings</h1>
+
+<div id="tds_readings">
+  <% @tds_readings.each do |tds_reading| %>
+    <%= render tds_reading %>
+    <p>
+      <%= link_to "Show this tds reading", tds_reading %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New tds reading", new_tds_reading_path %>

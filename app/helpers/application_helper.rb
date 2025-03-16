@@ -46,7 +46,7 @@ module ApplicationHelper
 
   def nav_link(controller, options = {})
 
-    text = t(".#{options[:text] || controller}")
+    text = options[:text] || t(".#{controller}")
     action = options[:action] || 'index'
     path = options[:path] || send("#{controller}_path")
     if params[:controller] == controller # && params[:action] == action

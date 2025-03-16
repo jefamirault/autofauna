@@ -1,0 +1,14 @@
+<% content_for :title, "Tanks" %>
+
+<h1>Tanks</h1>
+
+<div id="tanks">
+  <% @tanks.each do |tank| %>
+    <%= render tank %>
+    <p>
+      <%= link_to "Show this tank", tank %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New tank", new_tank_path %>
