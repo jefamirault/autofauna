@@ -17,10 +17,10 @@ class WateringsController < ApplicationController
 
   # GET /waterings/new
   def new
-    @watering = Watering.create plant_id: params[:plant_id], date: Time.zone.now.to_date
+    @watering = Watering.new plant_id: params[:plant_id], date: Time.zone.now.to_date
     respond_to do |format|
       format.turbo_stream
-      format.html { redirect_to edit_watering_path(@watering) }
+      format.html
     end
   end
 

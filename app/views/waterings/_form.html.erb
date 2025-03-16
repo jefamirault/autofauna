@@ -15,6 +15,7 @@
     <%= form.label :plant, style: "display: block" %>
     <div class="plantButton">
       <%= link_to watering.plant %>
+      <%= form.hidden_field :plant_id, value: watering.plant.id %>
     </div>
 
     <div>
