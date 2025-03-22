@@ -3,7 +3,7 @@ class TdsReadingsController < ApplicationController
 
   # GET /tds_readings or /tds_readings.json
   def index
-    @tds_readings = TdsReading.all
+    @tds_readings = TdsReading.all.order datetime: :desc
   end
 
   # GET /tds_readings/1 or /tds_readings/1.json
