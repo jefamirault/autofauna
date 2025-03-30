@@ -25,8 +25,8 @@
     </div>
 
     <div>
-      <%= form.label :location, style: "display: block" %>
-      <%= form.text_field :location %>
+      <%= form.label :location_id, style: "display: block" %>
+      <%= form.collection_select :location_id, Location.all, :id, :name %>
     </div>
 
     <div>

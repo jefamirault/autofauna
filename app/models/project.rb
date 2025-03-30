@@ -4,6 +4,8 @@ class Project < ApplicationRecord
   has_many :collaborations
   has_many :collaborators, through: :collaborations, source: 'user'
 
+  has_many :zones
+  has_many :locations, through: :zones
   has_many :sensors
   has_many :hygro_sensor_readings
 

@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :locations
   resources :tds_readings
   resources :tanks
   resources :sensor_types

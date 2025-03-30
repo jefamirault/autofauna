@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_30_134756) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_30_164021) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -31,10 +31,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_30_134756) do
     t.string "error"
   end
 
+  create_table "locations", force: :cascade do |t|
+    t.integer "zone_id"
+    t.string "name"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "plants", force: :cascade do |t|
     t.string "name"
     t.integer "uid"
-    t.string "location"
     t.string "pot"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -48,7 +55,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_30_134756) do
     t.date "date_max_watering"
     t.date "date_sort_watering"
     t.integer "zone_id"
+    t.bigint "location_id"
     t.index ["last_watering_id"], name: "index_plants_on_last_watering_id"
+    t.index ["location_id"], name: "index_plants_on_location_id"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -127,4 +136,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_30_134756) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  add_foreign_key "plants", "locations"
 end

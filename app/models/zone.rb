@@ -1,5 +1,6 @@
 class Zone < ApplicationRecord
   belongs_to :project
+  has_many :locations, dependent: :destroy
   has_many :sensors
   has_many :hygro_sensor_readings, through: :sensors
 

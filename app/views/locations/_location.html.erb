@@ -1,0 +1,23 @@
+<div id="<%= dom_id location %>">
+  <p>
+    <strong>Location Name:</strong>
+    <%= location.name %>
+  </p>
+
+  <p>
+    <strong>Zone:</strong>
+    <%= location.zone ? link_to(location.zone) : '(None)' %>
+  </p>
+
+  <p>
+    <strong>Description:</strong>
+    <%= location.description %>
+  </p>
+
+  <p>
+    <strong>Plants:</strong>
+    <%= location.plants.count %>
+  </p>
+
+
+</div>
