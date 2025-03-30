@@ -2,17 +2,11 @@ class Watering < ApplicationRecord
   belongs_to :plant
   validates :date, presence: true
 
-  before_validation :set_fulfilled_status
-
   after_save_commit :update_watering_intervals
   after_destroy :update_watering_intervals
 
   after_save_commit :update_last_watering
   after_destroy :update_last_watering
-
-
-  scope :fulfilled, -> { where(fulfilled: true) }
-  scope :scheduled, -> { where(fulfilled: false) }
 
   # interval: integer # of days between this watering and the last watering for the same plant
   def interval
@@ -57,11 +51,6 @@ class Watering < ApplicationRecord
   end
   private
 
-  def set_fulfilled_status
-    # If watering date is in the future, mark as not fulfilled
-    self.fulfilled = date <= Date.today if date.present?
-  end
-
   def update_watering_intervals
     # created or deleted or date changed
     if previous_changes[:id] || self.destroyed? || previous_changes[:date]
@@ -71,7 +60,7 @@ class Watering < ApplicationRecord
   end
 
   def update_last_watering
-    date = plant.waterings.fulfilled.order(:date).last&.date
+    date = plant.waterings.order(:date).last&.date
     unless plant.date_last_watering == date
       plant.update date_last_watering: date
     end

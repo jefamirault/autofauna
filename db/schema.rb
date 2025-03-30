@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_01_26_213020) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_30_134756) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -39,11 +39,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_26_213020) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "archived", default: false
-    t.date "date_scheduled_watering"
     t.integer "project_id"
     t.integer "min_watering_freq"
     t.integer "max_watering_freq"
-    t.integer "scheduled_watering_id"
     t.date "date_last_watering"
     t.integer "last_watering_id"
     t.date "date_min_watering"
@@ -51,7 +49,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_26_213020) do
     t.date "date_sort_watering"
     t.integer "zone_id"
     t.index ["last_watering_id"], name: "index_plants_on_last_watering_id"
-    t.index ["scheduled_watering_id"], name: "index_plants_on_scheduled_watering_id"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -121,7 +118,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_26_213020) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "interval"
-    t.boolean "fulfilled", default: true, null: false
   end
 
   create_table "zones", force: :cascade do |t|

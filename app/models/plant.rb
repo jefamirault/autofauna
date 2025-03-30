@@ -2,7 +2,6 @@ class Plant < ApplicationRecord
   belongs_to :project
   has_many :waterings, -> { order 'waterings.date' }, dependent: :destroy
   belongs_to :last_watering, class_name: 'Watering', optional: true
-  belongs_to :scheduled_watering, class_name: 'Watering', optional: true
 
   before_validation :strip_whitespace
 
@@ -77,29 +76,11 @@ class Plant < ApplicationRecord
   end
 
   def time_until_watering
-    date_scheduled_watering ? (date_scheduled_watering - Time.zone.now.to_date).to_i : nil
+    date_min_watering ? (date_min_watering - Time.zone.now.to_date).to_i : nil
   end
 
   def time_until_watering_text
-    if date_scheduled_watering
-      days = time_until_watering
-      if days < 0
-        style = 'color: #D81B60'
-        if days == -1
-          text = I18n.t 'time.yesterday'
-        else
-          text = "#{days * -1} #{I18n.t 'time.days'} late".html_safe
-        end
-      elsif days == 0
-        style = 'color: #0E487B'
-        text = I18n.t('time.today')
-      elsif days == 1
-        text = I18n.t('time.tomorrow')
-      else # days > 1
-        text = "#{days} #{I18n.t 'time.days'}".html_safe
-      end
-      "<span style=\"#{style}\">#{text}</span>".html_safe
-    elsif date_last_watering && min_watering_freq && max_watering_freq
+    if date_last_watering && min_watering_freq && max_watering_freq
       min_watering_days = ((date_last_watering + min_watering_freq.days) - Time.zone.now.to_date).to_i
       max_watering_days = ((date_last_watering + max_watering_freq.days) - Time.zone.now.to_date).to_i
       if max_watering_days < 0
@@ -147,7 +128,6 @@ class Plant < ApplicationRecord
       p.container = json['container']
       p.min_watering_freq = json['min_watering_freq'] || json['watering_frequency']
       p.max_watering_freq = json['max_watering_freq'] || json['watering_frequency']
-      p.date_scheduled_watering = json['date_scheduled_watering']
       p.date_last_watering = json['date_last_watering']
       p.archived = json['archived']
       p.created_at = json['created_at']
@@ -163,7 +143,7 @@ class Plant < ApplicationRecord
   end
 
   def self.ransackable_attributes(auth_object = nil)
-    %w[uid name location name pot date_scheduled_watering date_last_watering
+    %w[uid name location name pot date_last_watering
         date_sort_watering min_watering_freq max_watering_freq date_min_watering date_max_watering
         archived created_at updated_at project_id, date_last_watering]
   end
@@ -174,12 +154,12 @@ class Plant < ApplicationRecord
   # private
 
   def update_watering_dates
-    dates = waterings.fulfilled.map &:date
+    dates = waterings.map &:date
     self.date_last_watering = dates.last
     if self.date_last_watering
       self.date_min_watering = min_watering_freq ? date_last_watering + min_watering_freq : nil
       self.date_max_watering = max_watering_freq ? date_last_watering + max_watering_freq : nil
-      self.date_sort_watering = min_watering_freq && max_watering_freq ? date_scheduled_watering || date_last_watering + (max_watering_freq + min_watering_freq) / 2 : nil
+      self.date_sort_watering = min_watering_freq && max_watering_freq ? date_last_watering + (max_watering_freq + min_watering_freq) / 2 : nil
     else
       self.date_min_watering = nil
       self.date_max_watering = nil

@@ -22,11 +22,6 @@
       <%= form.label :date, style: "display: block" %>
       <%= form.date_field :date, value: watering.date || Time.zone.now.to_date %>
     </div>
-    <br>
-    <div>
-      <%= form.label :fulfilled, 'Fulfilled?',  style: "display: block" %>
-      <%= form.check_box :fulfilled %>
-    </div>
 
     <div>
       <%= form.label :notes, style: "display: block" %>

@@ -15,13 +15,6 @@
     <%= f.number_field :uid_eq %>
     <br><br>
     <div class="rangeInputContainer">
-      <%= f.label :date_scheduled_watering_gteq, t('scheduled_after') + ':' %>
-      <%= f.date_field :date_scheduled_watering_gteq %>
-      <%= f.label :date_scheduled_watering_lteq, t('scheduled_before') + ':' %>
-      <%= f.date_field :date_scheduled_watering_lteq %>
-    </div>
-    <br>
-    <div class="rangeInputContainer">
       <%= f.label :date_last_watering_gteq, t('watered_after') + ':' %>
       <%= f.date_field :date_last_watering_gteq %>
       <%= f.label :date_last_watering_lteq, t('watered_before') + ':' %>
