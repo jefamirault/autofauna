@@ -54,7 +54,7 @@ class Watering < ApplicationRecord
   def update_watering_intervals
     # created or deleted or date changed
     if previous_changes[:id] || self.destroyed? || previous_changes[:date]
-      later_waterings = plant.waterings.select {|w| w.date > self.date}
+      later_waterings = plant.waterings.select {|w| w.date >= self.date}
       later_waterings.each &:set_interval
     end
   end
