@@ -89,7 +89,11 @@ class Plant < ApplicationRecord
       elsif max_watering_days == 0
         "Today"
       elsif min_watering_days > 0
-        "Water in #{min_watering_days} - #{max_watering_days} days"
+        if min_watering_freq == max_watering_freq
+          "Water in #{min_watering_days} day#{min_watering_days > 1 ? 's' : ''}"
+        else
+          "Water in #{min_watering_days} - #{max_watering_days} days"
+        end
       else
         "Water within #{max_watering_days} day#{max_watering_days > 1 ? 's' : ''}"
       end
@@ -144,12 +148,12 @@ class Plant < ApplicationRecord
   end
 
   def self.ransackable_attributes(auth_object = nil)
-    %w[uid name location name pot date_last_watering
+    %w[uid name pot date_last_watering location_id
         date_sort_watering min_watering_freq max_watering_freq date_min_watering date_max_watering
         archived created_at updated_at project_id, date_last_watering]
   end
   def self.ransackable_associations(auth_object = nil)
-    %w[]
+    %w[location]
   end
 
   # private

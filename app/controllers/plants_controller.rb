@@ -23,7 +23,7 @@ class PlantsController < ApplicationController
     end
     @q = Plant.ransack(params['q'])
 
-    @q.sorts = 'date_sort_watering' if @q.sorts.empty?
+    @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
     @plants = @q.result(distinct: true)
     
     respond_to do |format|

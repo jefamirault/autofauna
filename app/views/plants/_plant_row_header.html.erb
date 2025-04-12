@@ -1,10 +1,10 @@
 <thead>
   <tr>
     <th class="plantColumn"><%= sort_link @q, :uid, t('plants.index.plant') %></th>
-    <th class="nextWateringColumn"><%= sort_link @q, :date_min_watering, t('attributes.next_watering') %></th>
+    <th class="nextWateringColumn"><%= sort_link @q, :date_max_watering, ['date_max_watering asc', 'date_min_watering asc'], t('attributes.next_watering') %></th>
     <th class="frequencyColumn"><%= sort_link @q, :min_watering_freq, t('attributes.frequency') %></th>
     <th class="wateredColumn"><%= sort_link @q, :date_last_watering, t('attributes.last_watering') %></th>
-    <th class="locationColumn"><%= sort_link @q, :location, t('attributes.location') %></th>
+    <th class="locationColumn"><%= sort_link @q, :location_id, t('attributes.location') %></th>
     <th class="containerColumn"><%= sort_link @q, :pot, t('attributes.container') %></th>
     <th class="actionColumn"><%= t 'plants.index.action' %></th>
   </tr>
