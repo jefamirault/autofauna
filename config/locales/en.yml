@@ -172,3 +172,6 @@ en:
   scheduled_before: 'Scheduled before'
   archived: 'Archived?'
   clear_search: 'Clear Search'
+  log_entries:
+    create: 'Create Log Entry'
+    update: 'Update Log Entry'

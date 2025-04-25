@@ -1,0 +1,23 @@
+<table class="log_entries green">
+  <thead>
+  <tr>
+    <th class='dateColumn'><%= t 'attributes.date' %></th>
+    <th class='descriptionColumn'><%= t 'attributes.description' %></th>
+    <th class='updatedAtColumn'><%= t 'attributes.updated_at' %></th>
+    <th class='actionsColumn'><%= t 'attributes.actions' %></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% log_entries&.each do |log_entry| %>
+    <tr
+      data-controller="clickable-row"
+      data-clickable-row-url-value="<%= polymorphic_path([loggable, log_entry]) %>"
+      data-action="click->clickable-row#click">
+      <td class='dateColumn'><%= time_ago log_entry.timestamp %></td>
+      <td class='intervalColumn'><%= log_entry.description %></td>
+      <td class='updatedAtColumn'><%= log_entry.updated_at %></td>
+      <td class='actionsColumn'><%= link_to 'Edit', edit_plant_log_entry_path(plant_id: loggable.id, id: log_entry.id) %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

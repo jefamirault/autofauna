@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   post 'plants/import', to: 'plants#process_file'
   resources :plants do
     get 'water'
+    resources :log_entries
   end
 
   get 'waterings/import', to: 'waterings#import'

@@ -1,0 +1,3 @@
+<h1><%= t '.log_entries' %> for <%= link_to @loggable %></h1>
+
+<%= render partial: 'log_entries', locals: { log_entries: @log_entries, loggable: @loggable } %>

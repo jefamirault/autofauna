@@ -21,7 +21,7 @@ module ApplicationHelper
     if date.nil?
       nil
     else
-      text = if date == Time.zone.now.to_date
+      text = if date.to_date == Time.zone.now.to_date
                if options[:precise]
                  time_ago_in_words date
                else

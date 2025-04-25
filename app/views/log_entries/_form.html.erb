@@ -1,0 +1,36 @@
+<div class="formContainer">
+  <%= form_with(model: [@plant, log_entry], local: true, url: plant_log_entry_form_path(plant: @plant, log_entry: log_entry)) do |form| %>
+    <% if log_entry.errors.any? %>
+      <div style="color: red">
+        <h2><%= pluralize(log_entry.errors.count, "error") %> prohibited this log entry from being saved:</h2>
+
+        <ul>
+          <% log_entry.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%= form.hidden_field :loggable_type %>
+    <%= form.hidden_field :loggable_id %>
+    <%= form.hidden_field :user_id %>
+
+    <div>
+      <%= form.label :description, t('attributes.description'), style: "display: block" %>
+      <%= form.text_field :description %>
+    </div>
+
+
+    <div>
+      <%= form.label :timestamp, style: "display: block" %>
+      <%= form.datetime_select :timestamp %>
+    </div>
+
+    <br>
+    <div>
+      <% submit_text = t(log_entry.new_record? ? 'log_entries.create' : 'log_entries.update') %>
+      <%= form.submit submit_text %>
+    </div>
+  <% end %>
+</div>

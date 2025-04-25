@@ -1,0 +1,7 @@
+<h1><%= t 'new_log_entry_for' %> <%= @log_entry.loggable %></h1>
+
+<%= render partial: "log_entries/form", locals: { log_entry: @log_entry } %>
+
+<p>
+  <%= link_to t('actions.cancel'), plant_path(id: params[:plant_id]) %>
+</p>

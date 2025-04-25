@@ -9,5 +9,10 @@
   <%= button_to t('.delete_plant'), @plant, method: :delete, onclick: "return confirm('#{t 'plants.messages.confirm_delete'}');" %>
 </p>
 
-<h3><%= t '.log' %>:</h3>
+<h3><%= t '.log' %></h3>
+<%= link_to t('new_log_entry'), new_plant_log_entry_path(@plant) %>
+<%= render partial: 'log_entries/log_entries', locals: { log_entries: @log_entries, loggable: @plant} %>
+
+<h3>Waterings</h3>
+<%= link_to t('.new_watering'), plant_water_path(@plant) %>
 <%= render partial: 'waterings', locals: { waterings: @plant.waterings } %>

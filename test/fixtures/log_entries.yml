@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  entry_type: MyString
+  description: MyText
+  loggable: one
+  loggable_type: Loggable
+  user: one
+  timestamp: 2025-04-26 07:26:12
+
+two:
+  entry_type: MyString
+  description: MyText
+  loggable: two
+  loggable_type: Loggable
+  user: two
+  timestamp: 2025-04-26 07:26:12

@@ -4,6 +4,7 @@ class Plant < ApplicationRecord
   has_one :zone, through: :location
   has_many :waterings, -> { order 'waterings.date' }, dependent: :destroy
   belongs_to :last_watering, class_name: 'Watering', optional: true
+  has_many :log_entries, as: :loggable, dependent: :destroy
 
   before_validation :strip_whitespace
 

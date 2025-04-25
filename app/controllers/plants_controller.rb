@@ -34,6 +34,7 @@ class PlantsController < ApplicationController
 
   # GET /plants/1 or /plants/1.json
   def show
+    @log_entries = @plant.log_entries.reverse
   end
 
   # GET /plants/new

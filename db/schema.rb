@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_25_133331) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_26_112611) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -37,6 +37,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_25_133331) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "log_entries", force: :cascade do |t|
+    t.string "entry_type"
+    t.text "description"
+    t.string "loggable_type", null: false
+    t.bigint "loggable_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "timestamp"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["loggable_type", "loggable_id"], name: "index_log_entries_on_loggable"
+    t.index ["user_id"], name: "index_log_entries_on_user_id"
   end
 
   create_table "plants", force: :cascade do |t|
@@ -139,5 +152,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_25_133331) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "log_entries", "users"
   add_foreign_key "plants", "locations"
 end
