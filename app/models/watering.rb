@@ -8,6 +8,12 @@ class Watering < ApplicationRecord
   after_save_commit :update_last_watering
   after_destroy :update_last_watering
 
+  enum :units, {
+    'cups' => 0,
+    'oz' => 1,
+    'mL' => 2
+  }
+
   # interval: integer # of days between this watering and the last watering for the same plant
   def interval
     if super.nil?
@@ -49,6 +55,12 @@ class Watering < ApplicationRecord
     w.save
     w
   end
+
+  def print_volume
+    return nil if self.volume.nil?
+    "#{sprintf('%g', self.volume)} #{self.units}"
+  end
+
   private
 
   def update_watering_intervals

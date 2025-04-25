@@ -16,6 +16,11 @@
   </p>
 
   <p>
+    <strong><%= t 'attributes.volume' %>:</strong>
+    <%= watering.print_volume %>
+  </p>
+
+  <p>
     <strong><%= t 'attributes.notes' %>:</strong>
     <%= watering.notes ? watering.notes.gsub("\n",'<br>').html_safe : '' %>
   </p>

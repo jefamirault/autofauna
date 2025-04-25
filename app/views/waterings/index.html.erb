@@ -10,6 +10,7 @@
   <tr>
     <th class='plantColumn'><%= t 'attributes.plant' %></th>
     <th class='dateColumn'><%= t 'attributes.date' %></th>
+    <th class='dateColumn'><%= t 'attributes.volume' %></th>
     <th class='intervalColumn'><%= t 'attributes.interval' %></th>
     <th class='notesColumn'><%= t 'attributes.notes' %></th>
   </tr>
@@ -19,6 +20,7 @@
     <tr>
       <td class='plantColumn'><%= link_to watering.plant, watering_path(watering.id) %></td>
       <td class='dateColumn'><%= time_ago watering.date %></td>
+      <td class='dateColumn'><%= watering.print_volume %></td>
       <td class='intervalColumn'><%= watering.interval_text %></td>
       <td class='notesColumn'><%= watering.notes %></td>
     </tr>

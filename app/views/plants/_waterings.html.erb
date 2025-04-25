@@ -3,6 +3,7 @@
   <thead>
   <tr>
     <th><%= t 'attributes.date' %></th>
+    <th><%= t 'attributes.volume' %></th>
     <th><%= t 'attributes.interval' %></th>
     <th><%= t 'attributes.notes' %></th>
   </tr>
@@ -11,6 +12,7 @@
   <% waterings.reverse.each do |watering| %>
     <tr>
       <td><%= link_to format_date(watering.date), watering %></td>
+      <td><%= watering.print_volume %></td>
       <td><%= watering.interval_text %></td>
       <td><%= watering.notes %></td>
     </tr>

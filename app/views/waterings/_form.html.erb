@@ -24,6 +24,16 @@
     </div>
 
     <div>
+      <%= form.label :volume, style: "display: block" %>
+      <%= form.number_field :volume, step: 'any' %>
+    </div>
+
+    <div>
+      <%= form.label :units, style: "display: block" %>
+      <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units) %>
+    </div>
+
+    <div>
       <%= form.label :notes, style: "display: block" %>
       <%= form.text_area :notes, autofocus: watering.notes.nil? || watering.notes == '' %>
     </div>

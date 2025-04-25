@@ -92,6 +92,6 @@ class WateringsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def watering_params
-      params.require(:watering).permit(:plant_id, :date, :notes)
+      params.require(:watering).permit(:plant_id, :date, :notes, :volume, :units)
     end
 end
