@@ -9,6 +9,8 @@ class Plant < ApplicationRecord
 
   validates_uniqueness_of :uid, scope: :project_id
 
+  after_save_commit :sync_watering_dates_if_schedule_changed
+
   def container
     self.pot
   end
@@ -158,6 +160,12 @@ class Plant < ApplicationRecord
   end
 
   # private
+
+  def sync_watering_dates_if_schedule_changed
+    if previous_changes[:min_watering_freq] || previous_changes[:max_watering_freq]
+      update_watering_dates
+    end
+  end
 
   def update_watering_dates
     dates = waterings.map &:date
