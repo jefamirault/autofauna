@@ -25,6 +25,11 @@
     <%= plant.location %>
   </p>
 
+  <p>
+    <strong><%= t 'attributes.zone' %>:</strong>
+    <%= plant.zone %>
+  </p>
+
   <% if @plant.container && @plant.container != '' %>
     <p>
       <strong><%= t 'attributes.container' %>:</strong>

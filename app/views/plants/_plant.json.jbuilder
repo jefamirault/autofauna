@@ -1,6 +1,7 @@
 json.extract! plant,  :id,
                       :name,
                       :uid,
+                      :zone,
                       :location,
                       :container,
                       :min_watering_freq,

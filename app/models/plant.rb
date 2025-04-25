@@ -1,6 +1,7 @@
 class Plant < ApplicationRecord
   belongs_to :project
   belongs_to :location, optional: true
+  has_one :zone, through: :location
   has_many :waterings, -> { order 'waterings.date' }, dependent: :destroy
   belongs_to :last_watering, class_name: 'Watering', optional: true
 

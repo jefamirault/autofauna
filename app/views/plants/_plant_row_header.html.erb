@@ -5,6 +5,7 @@
     <th class="frequencyColumn"><%= sort_link @q, :min_watering_freq, t('attributes.frequency') %></th>
     <th class="wateredColumn"><%= sort_link @q, :date_last_watering, t('attributes.last_watering') %></th>
     <th class="locationColumn"><%= sort_link @q, :location_id, t('attributes.location') %></th>
+    <th class="zoneColumn"><%= t('attributes.zone') %></th>
     <th class="containerColumn"><%= sort_link @q, :pot, t('attributes.container') %></th>
     <th class="actionColumn"><%= t 'plants.index.action' %></th>
   </tr>
