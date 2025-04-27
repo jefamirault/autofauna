@@ -1,9 +1,11 @@
 class SensorTypesController < ApplicationController
   before_action :set_sensor_type, only: %i[ show edit update destroy ]
+  before_action :authorize_viewer, only: [:index, :show]
+  before_action :authorize_editor, except: [:index, :show]
 
   # GET /sensor_types or /sensor_types.json
   def index
-    @sensor_types = SensorType.all
+    @sensor_types = current_project.sensor_types
   end
 
   # GET /sensor_types/1 or /sensor_types/1.json
@@ -65,6 +67,6 @@ class SensorTypesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def sensor_type_params
-      params.expect(sensor_type: [ :name, :min_temp, :max_temp, :min_humidity, :max_humidity, :accuracy_temp, :resolution_temp, :accuracy_humidity, :resolution_humidity ])
+      params.expect(sensor_type: [ :name, :min_temp, :max_temp, :min_humidity, :max_humidity, :accuracy_temp, :resolution_temp, :accuracy_humidity, :resolution_humidity, :project_id ])
     end
 end

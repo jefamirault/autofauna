@@ -5,9 +5,11 @@ class Project < ApplicationRecord
   has_many :collaborators, through: :collaborations, source: 'user'
 
   has_many :zones
-  has_many :locations, through: :zones
+  has_many :locations
   has_many :sensors
   has_many :hygro_sensor_readings
+  has_many :sensor_types
+  has_many :tanks
 
   def users
     [owner] + collaborators

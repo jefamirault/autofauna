@@ -39,10 +39,10 @@
 </p>
 
 <ul>
-  <% @project.collaborations.each do |c| %>
+  <% @project.collaborations.reject{|c| c.user.nil? }.each do |c| %>
     <li>
       <%= c.user %> - <%= t "roles.#{c.role}" %>
-      (<%= link_to t('actions.remove'), project_remove_collaborator_path(current_project, user_id: c.user.id), data: { "turbo-method": :put } %>)
+      (<%= link_to t('actions.remove'), project_remove_collaborator_path(current_project, user_id: c.user&.id), data: { "turbo-method": :put } %>)
     </li>
   <% end %>
 </ul>

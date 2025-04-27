@@ -1,5 +1,7 @@
 class SensorsController < ApplicationController
   before_action :set_sensor, only: %i[ show edit update destroy ]
+  before_action :authorize_viewer, only: [:index, :show]
+  before_action :authorize_editor, except: [:index, :show]
 
   # GET /sensors or /sensors.json
   def index

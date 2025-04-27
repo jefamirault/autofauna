@@ -26,7 +26,7 @@
 
     <div>
       <%= form.label :location_id, style: "display: block" %>
-      <%= form.collection_select :location_id, Location.all, :id, :name %>
+      <%= form.collection_select :location_id, current_project.locations, :id, :name %>
     </div>
 
     <div>

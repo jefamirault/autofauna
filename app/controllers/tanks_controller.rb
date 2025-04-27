@@ -1,9 +1,11 @@
 class TanksController < ApplicationController
   before_action :set_tank, only: %i[ show edit update destroy ]
+  before_action :authorize_viewer, only: [:index, :show]
+  before_action :authorize_editor, except: [:index, :show]
 
   # GET /tanks or /tanks.json
   def index
-    @tanks = Tank.all
+    @tanks = current_project.tanks
   end
 
   # GET /tanks/1 or /tanks/1.json
@@ -65,6 +67,6 @@ class TanksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def tank_params
-      params.expect(tank: [ :name, :capacity, :capacity_units, :description, :zone_id, :location ])
+      params.expect(tank: [ :name, :capacity, :capacity_units, :description, :zone_id, :location, :project_id ])
     end
 end

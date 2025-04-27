@@ -1,9 +1,11 @@
 class LocationsController < ApplicationController
   before_action :set_location, only: %i[ show edit update destroy ]
+  before_action :authorize_viewer, only: [:index, :show]
+  before_action :authorize_editor, except: [:index, :show]
 
   # GET /locations or /locations.json
   def index
-    @locations = Location.all
+    @locations = current_project.locations
   end
 
   # GET /locations/1 or /locations/1.json
@@ -65,6 +67,6 @@ class LocationsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def location_params
-      params.expect(location: [ :zone_id, :name, :description])
+      params.expect(location: [ :zone_id, :name, :description, :project_id])
     end
 end

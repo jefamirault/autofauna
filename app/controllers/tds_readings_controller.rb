@@ -1,9 +1,11 @@
 class TdsReadingsController < ApplicationController
   before_action :set_tds_reading, only: %i[ show edit update destroy ]
+  before_action :authorize_viewer, only: [:index, :show]
+  before_action :authorize_editor, except: [:index, :show]
 
   # GET /tds_readings or /tds_readings.json
   def index
-    @tds_readings = TdsReading.all.order datetime: :desc
+    @tds_readings = current_project.tanks.map(&:tds_readings).reduce(:+)&.sort {|a,b| b.datetime <=> a.datetime}
   end
 
   # GET /tds_readings/1 or /tds_readings/1.json

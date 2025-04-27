@@ -11,9 +11,11 @@
     </div>
   <% end %>
 
+  <%= form.hidden_field :project_id, value: location&.project_id || current_project.id %>
+
   <div>
     <%= form.label :zone_id, style: "display: block" %>
-    <%= form.collection_select :zone_id, current_project.zones, :id, :name %>
+    <%= form.select :zone_id, options_from_collection_for_select(current_project.zones, :id, :name, location&.zone&.id), prompt: '-- Select Zone --' %>
   </div>
 
   <div>

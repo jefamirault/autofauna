@@ -1,7 +1,9 @@
 class Location < ApplicationRecord
   belongs_to :zone, optional: true
   has_many :plants
-
+  belongs_to :project
+  validates_presence_of :name
+  
   def to_s
     self.name
   end

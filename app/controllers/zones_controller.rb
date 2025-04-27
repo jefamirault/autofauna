@@ -1,5 +1,7 @@
 class ZonesController < ApplicationController
   before_action :set_zone, only: %i[ show edit update destroy ]
+  before_action :authorize_viewer, only: [:index, :show]
+  before_action :authorize_editor, except: [:index, :show]
 
   # GET /zones or /zones.json
   def index

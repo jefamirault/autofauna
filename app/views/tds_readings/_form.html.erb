@@ -13,7 +13,7 @@
 
   <div>
     <%= form.label :tank_id, style: "display: block" %>
-    <%= form.select 'tank_id', options_from_collection_for_select(Tank.all, 'id', 'name', tds_reading&.tank&.id), prompt: '-- Select Tank --' %>
+    <%= form.select 'tank_id', options_from_collection_for_select(current_project.tanks, 'id', 'name', tds_reading&.tank&.id), prompt: '-- Select Tank --' %>
   </div>
 
   <div>

@@ -21,7 +21,7 @@ class PlantsController < ApplicationController
     else
       params['q'].merge! project_id_eq: current_project.id
     end
-    @q = Plant.ransack(params['q'])
+    @q = current_project.plants.ransack(params['q'])
 
     @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
     @plants = @q.result(distinct: true)
