@@ -5,18 +5,23 @@
   </p>
 
   <p>
-    <strong>Description:</strong>
-    <%= tank.description %>
+    <strong>Capacity:</strong>
+    <%= tank.print_capacity %>
   </p>
 
   <p>
-    <strong>Zone:</strong>
-    <%= tank.zone %>
+    <strong>Description:</strong>
+    <%= tank.description&.gsub("\n",'<br>')&.html_safe %>
   </p>
 
   <p>
     <strong>Location:</strong>
     <%= tank.location %>
+  </p>
+
+  <p>
+    <strong>Zone:</strong>
+    <%= tank.zone %>
   </p>
 
 </div>

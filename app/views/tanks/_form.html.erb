@@ -17,6 +17,16 @@
   </div>
 
   <div>
+    <%= form.label :capacity, style: "display: block" %>
+    <%= form.number_field :capacity, step: 'any' %>
+  </div>
+
+  <div>
+    <%= form.label :capacity_units, 'Units', style: "display: block" %>
+    <%= form.select :capacity_units, options_for_select(Tank.capacity_units.map {|k,v| [k, k]}, tank.capacity_units) %>
+  </div>
+
+  <div>
     <%= form.label :description, style: "display: block" %>
     <%= form.textarea :description %>
   </div>

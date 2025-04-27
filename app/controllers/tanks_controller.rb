@@ -65,6 +65,6 @@ class TanksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def tank_params
-      params.expect(tank: [ :name, :description, :zone_id, :location ])
+      params.expect(tank: [ :name, :capacity, :capacity_units, :description, :zone_id, :location ])
     end
 end
