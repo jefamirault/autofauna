@@ -1,14 +1,18 @@
-<% content_for :title, "Tds readings" %>
+<% content_for :title, "TDS Readings" %>
 
-<h1>Tds readings</h1>
+<h1>Total Dissolved Solids (TDS) Readings</h1>
+
+<%= link_to "+ New TDS Reading", new_tds_reading_path %>
 
 <div id="tds_readings">
   <% @tds_readings.each do |tds_reading| %>
     <%= render tds_reading %>
     <p>
-      <%= link_to "Show this tds reading", tds_reading %>
+      <%= link_to "Show this TDS Reading", tds_reading %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New tds reading", new_tds_reading_path %>
+<% if @tds_readings.count > 3 %>
+<%= link_to "+ New TDS Reading", new_tds_reading_path %>
+<% end %>

@@ -12,20 +12,17 @@
   <% end %>
 
   <div>
+    <%= form.label :tank_id, style: "display: block" %>
+    <%= form.select 'tank_id', options_from_collection_for_select(Tank.all, 'id', 'name', tds_reading&.tank&.id), prompt: '-- Select Tank --' %>
+  </div>
+
+  <div>
     <%= form.label :datetime, style: "display: block" %>
     <%= form.datetime_field :datetime, step: 'any' %>
   </div>
 
   <div>
-    <%= form.label :tank_id, style: "display: block" %>
-    <%#= form.number_field :tank_id %>
-
-    <%= form.select 'tank_id', options_from_collection_for_select(Tank.all, 'id', 'name') %>
-
-  </div>
-
-  <div>
-    <%= form.label :tds, style: "display: block" %>
+    <%= form.label :tds, 'Total Dissolved Solids (TDS)', style: "display: block" %>
     <%= form.number_field :tds %>
   </div>
 
