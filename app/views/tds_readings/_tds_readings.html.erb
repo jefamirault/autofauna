@@ -9,8 +9,8 @@
   <tbody>
     <% tds_readings.each do |tds_reading| %>
       <tr>
-        <td><%= time_ago tds_reading.datetime %></td>
-        <td><%= tds_reading.tds %></td>
+        <td><%= link_to(time_ago(tds_reading.datetime), tds_reading_path(tds_reading)) %></td>
+        <td><%= tds_reading.tds %>ppm</td>
         <td><%= tds_reading.updated_at != tds_reading.created_at ? tds_reading.updated_at : nil %></td>
       </tr>
     <% end %>

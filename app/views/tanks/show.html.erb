@@ -7,6 +7,8 @@
   <%= link_to "Back to Tanks", tanks_path %>
 </div>
 
+<h2>Total Dissolved Solids (TDS)</h2>
+<%= link_to '+ New TDS Reading', new_tds_reading_path(tank_id: @tank.id) %>
 <%= render partial: 'tds_readings/tds_readings', locals: { tds_readings: @tds_readings } %>
 
 <%= button_to "Destroy this tank", @tank, method: :delete, onclick: "return confirm('Are you sure you want to permanently delete this Tank?');" %>

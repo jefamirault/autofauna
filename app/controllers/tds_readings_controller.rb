@@ -14,7 +14,7 @@ class TdsReadingsController < ApplicationController
 
   # GET /tds_readings/new
   def new
-    @tds_reading = TdsReading.new datetime: Time.zone.now.to_datetime
+    @tds_reading = TdsReading.new datetime: Time.zone.now.to_datetime, tank_id: params[:tank_id]
   end
 
   # GET /tds_readings/1/edit
