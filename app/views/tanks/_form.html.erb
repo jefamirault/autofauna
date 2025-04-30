@@ -34,13 +34,8 @@
   </div>
 
   <div>
-    <%= form.label :zone_id, style: "display: block" %>
-    <%= form.number_field :zone_id %>
-  </div>
-
-  <div>
-    <%= form.label :location, style: "display: block" %>
-    <%= form.text_field :location %>
+    <%= form.label :location_id, style: "display: block" %>
+    <%= form.select :location_id, options_from_collection_for_select(current_project.locations, :id, :name, tank&.location&.id), prompt: '-- Select Location --' %>
   </div>
 
   <div>

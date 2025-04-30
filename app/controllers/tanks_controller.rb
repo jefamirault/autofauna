@@ -10,6 +10,7 @@ class TanksController < ApplicationController
 
   # GET /tanks/1 or /tanks/1.json
   def show
+    @tds_readings = @tank.tds_readings.reverse
   end
 
   # GET /tanks/new
@@ -67,6 +68,6 @@ class TanksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def tank_params
-      params.expect(tank: [ :name, :capacity, :capacity_units, :description, :zone_id, :location, :project_id ])
+      params.expect(tank: [ :name, :capacity, :capacity_units, :description, :location_id, :project_id ])
     end
 end

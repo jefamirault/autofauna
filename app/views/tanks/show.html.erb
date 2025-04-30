@@ -1,8 +1,12 @@
+<h1>Viewing Tank: <%= @tank %></h1>
+
 <%= render @tank %>
 
 <div>
-  <%= link_to "Edit this tank", edit_tank_path(@tank) %> |
-  <%= link_to "Back to tanks", tanks_path %>
-
-  <%= button_to "Destroy this tank", @tank, method: :delete %>
+  <%= link_to "Edit this Tank", edit_tank_path(@tank) %> |
+  <%= link_to "Back to Tanks", tanks_path %>
 </div>
+
+<%= render partial: 'tds_readings/tds_readings', locals: { tds_readings: @tds_readings } %>
+
+<%= button_to "Destroy this tank", @tank, method: :delete, onclick: "return confirm('Are you sure you want to permanently delete this Tank?');" %>

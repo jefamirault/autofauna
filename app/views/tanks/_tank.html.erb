@@ -24,4 +24,9 @@
     <%= tank.zone %>
   </p>
 
+  <p>
+    <strong>TDS:</strong>
+    <%= tank.last_tds %>ppm measured <%= time_ago tank.last_tds_reading&.datetime %>
+  </p>
+
 </div>

@@ -4,14 +4,7 @@
 
 <%= link_to "+ New TDS Reading", new_tds_reading_path %>
 
-<div id="tds_readings">
-  <% @tds_readings&.each do |tds_reading| %>
-    <%= render tds_reading %>
-    <p>
-      <%= link_to "Show this TDS Reading", tds_reading %>
-    </p>
-  <% end %>
-</div>
+<%= render partial: 'tds_readings', locals: { tds_readings: @tds_readings } %>
 
 <% if @tds_readings&.any? %>
 <%= link_to "+ New TDS Reading", new_tds_reading_path %>

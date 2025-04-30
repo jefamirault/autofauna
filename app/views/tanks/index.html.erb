@@ -2,13 +2,18 @@
 
 <h1>Tanks</h1>
 
+<%= link_to "+ New Tank", new_tank_path %>
+
 <div id="tanks">
   <% @tanks.each do |tank| %>
-    <%= render tank %>
-    <p>
-      <%= link_to "Show this tank", tank %>
-    </p>
+      <%= render tank %>
+      <p>
+        <%= link_to "Show this Tank", tank %>
+      </p>
   <% end %>
+
 </div>
 
-<%= link_to "New tank", new_tank_path %>
+<% if @tanks.any? %>
+    <%= link_to "+ New Tank", new_tank_path %>
+<% end %>
