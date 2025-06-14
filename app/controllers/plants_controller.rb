@@ -20,12 +20,38 @@ class PlantsController < ApplicationController
       params['q'] = default_search_params
     else
       params['q'].merge! project_id_eq: current_project.id
+      params['q'].merge! archived_eq: false
     end
     @q = current_project.plants.ransack(params['q'])
 
     @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
     @plants = @q.result(distinct: true)
     
+    respond_to do |format|
+      format.json { @plants = current_project.plants }
+      format.html
+    end
+  end
+
+  def archive
+    default_search_params = {
+      archived_eq: true,
+      project_id_eq: current_project.id
+    }
+    force_search_params = {
+
+    }
+    if params['q'].nil?
+      params['q'] = default_search_params
+    else
+      params['q'].merge! project_id_eq: current_project.id
+      params['q'].merge! archived_eq: true
+    end
+    @q = current_project.plants.ransack(params['q'])
+
+    @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
+    @plants = @q.result(distinct: true)
+
     respond_to do |format|
       format.json { @plants = current_project.plants }
       format.html

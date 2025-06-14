@@ -1,6 +1,6 @@
 <h1><%= t 'log_in' %></h1>
 
-<%= form_with model: @user, url: session_path do |form| %>
+<%= form_with model: @user || User.new, url: session_path do |form| %>
   <div class="field">
     <%= form.label :email, t('email') %>
     <%= form.email_field :email, autofocus: true %>

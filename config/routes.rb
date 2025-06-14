@@ -12,6 +12,7 @@ Rails.application.routes.draw do
 
   resources :users
 
+  get 'plants/archive', to: 'plants#archive'
   get 'plants/import', to: 'plants#import'
   post 'plants/import', to: 'plants#process_file'
   resources :plants do

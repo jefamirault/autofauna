@@ -1,7 +1,7 @@
 <div>
-  <h1 style="display:inline-block"><%= t '.plants' %></h1>
+  <h1 style="display:inline-block"><%= t '.plants_archive' %></h1>
   -
-  <%= link_to 'View Archived Plants', plants_archive_path %>
+  <%= link_to 'View Current Plants', plants_path %>
 </div>
 <div style="float:right">
   <%= link_to t('.import_plants'), plants_import_path %> |
@@ -9,30 +9,23 @@
 </div>
 
 <div class="formContainer">
-  <%= search_form_for @q do |f| %>
-    <%= f.search_field :name_or_location_name_cont, placeholder: 'Search Plants', autofocus: true %>
+  <%= search_form_for @q, url: plants_archive_path do |f| %>
+    <%= f.search_field :name_or_location_name_cont, placeholder: 'Search Plants Archive', autofocus: true %>
     <%= f.submit "&#128269;".html_safe %>
   <% end %>
 </div>
 <br>
-<div style="padding: 0;"><%= "#{@plants.size} Currently Active Plants" %>
+<div style="padding: 0;"><%= "#{@plants.size} Archived Plants" %>
   <%= params['q']['name_or_location_name_cont'] && params['q']['name_or_location_name_cont'] != '' ? " matching \"#{params['q']['name_or_location_name_cont']}\"" : ''%>
   <% if params['q']['name_or_location_name_cont'] && params['q']['name_or_location_name_cont'] != '' %>
-    - <%= link_to t('clear_search'), plants_path %>
+    - <%= link_to t('clear_search'), plants_archive_path %>
   <% end %>
 </div>
-
 <table class="blue">
-  <%= render 'plant_row_header' %>
+  <%= render 'plant_row_header', archive: true %>
   <tbody>
   <% @plants.each do |plant| %>
-    <%= render 'plant_row', plant: plant %>
+    <%= render 'plant_row', plant: plant, archive: true %>
   <% end %>
   </tbody>
 </table>
-
-<div style=" text-align: center;">
-  <div class="plantButton">
-    <%= link_to "+ #{t '.new_plant'}", new_plant_path %>
-  </div>
-</div>
