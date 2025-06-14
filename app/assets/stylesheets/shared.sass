@@ -3,6 +3,9 @@ $green: #004D40
 $lightgreen: rgba(0, 77, 64, 0.15)
 $lightgreensolid: rgb(217, 228, 226)
 
+// development
+$brightgreen: #008c4b
+
 $blue: #0E487B
 $lightblue: rgba(14, 72, 123, 0.1)
 
@@ -26,6 +29,9 @@ body
   background: linear-gradient( rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.3)), url("background1.jpg"), no-repeat
   background-size: cover
   background-attachment: fixed
+  
+  &.development
+    background-image: url("background2.jpg")
 a
   color: $purple
   text-decoration: none
@@ -59,6 +65,20 @@ header
   form
     padding: 0
 
+body.development
+  header
+    background: $brightgreen
+
+  nav
+    .navItem, .button_to .navItem
+      &:hover, &.selected
+        background: $lightgreensolid
+        color: $brightgreen
+
+    .navItem.selected
+      background: $lightgreensolid
+      color: $brightgreen
+
 nav
   display: flex
   flex-wrap: wrap
@@ -80,7 +100,6 @@ nav
     background: $lightgreensolid
     color: $darkgreen
     text-decoration: none
-
 
 #currentProject
   margin: 0
@@ -377,3 +396,10 @@ footer
 
 .cursor-pointer
   cursor: pointer
+
+#plant_search
+  display: flex
+  input[type=search]
+    padding: 16px 8px
+  input[type=submit]
+    flex: 1
