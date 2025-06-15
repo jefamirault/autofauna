@@ -1,3 +1,5 @@
+<% content_for :title, "Water #{@watering.plant}" %>
+
 <h1><%= t 'waterings.new_watering'%></h1>
 
 <%= render "form", watering: @watering %>

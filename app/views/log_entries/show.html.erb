@@ -1,3 +1,5 @@
+<% content_for :title, "Log Entry #{@loggable}" %>
+
 <h1><%= t '.log_entry' %> for <%= link_to @loggable %></h1>
 
 <%= render partial: 'log_entries', locals: { log_entries: [@log_entry], loggable: @loggable } %>

@@ -14,8 +14,8 @@ ssh $AUTOFAUNA_USER@$AUTOFAUNA_SERVER << 'EOF'
     cd /home/deploy/plant_care/db_backups
     ln -sf plant_care_db_${TIMESTAMP}.dump plant_care_db.dump
 
-    # Clean up old backups (keep last 14 days)
-    find /home/deploy/plant_care/db_backups -name "plant_care_db_*.dump" -mtime +14 -delete
+    # Clean up old backups (keep last 3 weeks)
+    find /home/deploy/plant_care/db_backups -name "plant_care_db_*.dump" -mtime +21 -delete
 EOF
 
 echo "Backup completed on $AUTOFAUNA_SERVER"
@@ -29,6 +29,6 @@ rails db:create
 pg_restore --no-owner --role=plant_care_development -d plant_care_development -h 127.0.0.1 -U plant_care_development db/backup/plant_care_db.dump
 rails db:environment:set RAILS_ENV=development
 
-echo "Complete."
+echo "Local database updated with latest backup"
 # Start rails development server if argument "start_server" is present
 [ "$1" = "start_server" ] && echo "Starting development server..." && rails s

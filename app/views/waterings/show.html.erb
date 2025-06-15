@@ -1,3 +1,7 @@
+<% content_for :title do %>
+  Watered #<%= @watering.plant.uid %> <%= @watering.plant.name %> <%= @watering.date.strftime '%a %-m/%-d/%y' %>
+<% end %>
+
 <%= render @watering %>
 
 <p>

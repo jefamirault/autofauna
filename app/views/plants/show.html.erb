@@ -1,5 +1,7 @@
+<% content_for :title do %>
+  #<%= @plant.uid %> <%= @plant.name %>
+<% end %>
 <%= render @plant %>
-
 <p>
   <%= link_to t('.edit_this_plant'), edit_plant_path(@plant) %> |
   <%= link_to t('plants.back_to_plants'), plants_path %> |
