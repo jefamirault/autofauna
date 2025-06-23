@@ -1,7 +1,8 @@
 Rails.application.routes.draw do
   resources :locations
-  resources :tds_readings
-  resources :tanks
+  resources :tanks do
+    resources :water_tests
+  end
   resources :sensor_types
   resources :sensors
   resources :zones

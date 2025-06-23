@@ -10,7 +10,7 @@ class TanksController < ApplicationController
 
   # GET /tanks/1 or /tanks/1.json
   def show
-    @tds_readings = @tank.tds_readings.reverse
+    @water_tests = @tank.water_tests.recent
   end
 
   # GET /tanks/new

@@ -30,7 +30,7 @@
     <br>
     <div>
       <% submit_text = t(log_entry.new_record? ? 'log_entries.create' : 'log_entries.update') %>
-      <%= form.submit submit_text %>
+      <%= form.submit submit_text, class: 'saveButton' %>
     </div>
   <% end %>
 </div>

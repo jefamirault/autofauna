@@ -1,0 +1,91 @@
+<div class="">
+  <div class="flex justify-between">
+    <div>
+      <h1 class="">Water Tests</h1>
+      <p class="">Test history for <%= @tank.name %></p>
+    </div>
+    <div class="flex">
+      <%= link_to tank_path(@tank), class: "" do %>
+        ← Back to Tank
+      <% end %>
+      <%= link_to new_tank_water_test_path(@tank), class: "" do %>
+        + New Test
+      <% end %>
+    </div>
+  </div>
+
+  <% if @water_tests.any? %>
+    <!-- Summary Cards -->
+    <% if @water_tests.first %>
+      <div class="">
+        <div class="">
+          <div class="">Latest pH</div>
+          <div class="">
+            <%= @water_tests.first.ph&.round(1) || "—" %>
+          </div>
+        </div>
+        <div class="">
+          <div class="">Temperature</div>
+          <div class="">
+            <% if @tank.last_recorded_temperature %>
+              <%= @tank.last_recorded_temperature_with_unit %> recorded <%= @tank.last_recorded_test_with_temperature.tested_at.strftime '%-I:%M%p %-m/%-d/%y' %>
+            <% else %>
+              —
+            <% end %>
+          </div>
+        </div>
+        <div class="">
+          <div class="">Ammonia</div>
+          <div class="">
+            <%= @water_tests.first.ammonia&.round(2) || "—" %>
+            <% if @water_tests.first.ammonia %>
+              <span class="">ppm</span>
+            <% end %>
+          </div>
+        </div>
+        <div class="">
+          <div class="">Total Tests</div>
+          <div class=""><%= @water_tests.count %></div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Tests Table -->
+    <%= render 'water_tests',  water_tests: @water_tests %>
+
+    <!-- Additional Info -->
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white p-6 rounded-lg shadow border">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Reference</h3>
+        <div class="space-y-2 text-sm">
+          <div><strong>Safe pH Range:</strong> 6.5 - 8.5 (varies by species)</div>
+          <div><strong>Ammonia:</strong> Should be 0 ppm</div>
+          <div><strong>Nitrite:</strong> Should be 0 ppm</div>
+          <div><strong>Nitrate:</strong> &lt; 20 ppm (freshwater), &lt; 10 ppm (marine)</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow border">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Testing Tips</h3>
+        <div class="space-y-2 text-sm text-gray-600">
+          <div>• Test weekly during cycling, then bi-weekly</div>
+          <div>• Test after water changes</div>
+          <div>• Keep test kits in cool, dry place</div>
+          <div>• Record unusual observations in notes</div>
+        </div>
+      </div>
+    </div>
+
+  <% else %>
+    <!-- Empty State -->
+    <div class="text-center py-12">
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No water tests yet</h3>
+      <p class="mt-1 text-sm text-gray-500">Get started by recording your first water test.</p>
+      <div class="mt-6">
+        <%= link_to new_tank_water_test_path(@tank), class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors" do %>
+          + Record First Test
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -59,7 +59,7 @@
     <br>
     <div>
       <% submit_text = t(plant.new_record? ? 'plants.create_plant' : 'plants.update_plant') %>
-      <%= form.submit submit_text %>
+      <%= form.submit submit_text, class: 'saveButton' %>
     </div>
   <% end %>
 </div>

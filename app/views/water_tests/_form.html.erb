@@ -1,0 +1,88 @@
+<%= form_with model: [@tank, @water_test], local: true, class: "space-y-6" do |form| %>
+  <% if @water_test.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-md p-4">
+      <h3 class="text-red-800 text-sm font-medium">Please fix the following errors:</h3>
+      <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+        <% @water_test.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div>
+      <%= form.label :tested_at, class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.datetime_local_field :tested_at,
+                                    value: (@water_test.tested_at&.strftime("%Y-%m-%dT%H:%M") || Time.current.strftime("%Y-%m-%dT%H:%M")),
+                                    class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <div>
+      <%= form.label :ph, "pH Level", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.number_field :ph, step: 0.1, min: 0, max: 14, placeholder: "0.0 - 14.0",
+                            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <div>
+      <%= form.label :tds, "TDS (ppm)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.number_field :tds, min: 0, placeholder: "Total Dissolved Solids",
+                            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2">
+      <div class="col-span-2">
+        <%= form.label :temperature, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.number_field :temperature, step: 0.1, placeholder: "Temperature",
+                              class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+      <div>
+        <%= form.label :temperature_unit, "Unit", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.select :temperature_unit, [['°F', 'F'], ['°C', 'C']], {},
+                        class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+    </div>
+
+    <div>
+      <%= form.label :nitrate, "Nitrate (ppm)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.number_field :nitrate, step: 0.1, min: 0, placeholder: "NO₃",
+                            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <div>
+      <%= form.label :nitrite, "Nitrite (ppm)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.number_field :nitrite, step: 0.1, min: 0, placeholder: "NO₂",
+                            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <div>
+      <%= form.label :ammonia, "Ammonia (ppm)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.number_field :ammonia, step: 0.1, min: 0, placeholder: "NH₃/NH₄⁺",
+                            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <div>
+      <%= form.label :kh, "KH (dKH)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.number_field :kh, step: 0.1, min: 0, placeholder: "Carbonate Hardness",
+                            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <div>
+      <%= form.label :gh, "GH (dKH)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.number_field :gh, step: 0.1, min: 0, placeholder: "General Hardness",
+                            class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.label :notes, class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.text_area :notes, rows: 3, placeholder: "Optional notes about this test...",
+                       class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+  </div>
+
+  <div class="flex justify-end space-x-3">
+    <%= link_to "Cancel", tank_path(@tank),
+                class: "px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors" %>
+    <%= form.submit class: "saveButton" %>
+  </div>
+<% end %>

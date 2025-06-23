@@ -140,7 +140,7 @@ h1
   clear: both
 h2
   font-size: 120%
-  padding-top: 1.5em
+  padding-top: 0.5em
 
 section#main
   background: rgba(255, 255, 255, 0.975)
@@ -199,11 +199,10 @@ table
 
 input[type=checkbox]
   transform: scale(1.5)
-input, input[type=submit], button[type=submit]
+input
   font-size: 120%
-input[type=submit], button[type=submit]
+.saveButton
   padding: 16px 48px
-
 
 // Responsive
 
@@ -403,3 +402,13 @@ footer
     padding: 16px 10px
   input[type=submit]
     flex: 1
+.link
+  @extend a
+  padding: 0 16px
+  margin: 0 4px
+.buttonLink
+  @extend .link
+  border: 0
+  background: none
+  font-size: 100%
+  cursor: pointer

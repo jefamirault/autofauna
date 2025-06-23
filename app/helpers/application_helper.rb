@@ -1,4 +1,10 @@
 module ApplicationHelper
+
+  def time_or_date(datetime)
+    return '' if datetime.nil?
+    format_string = datetime.today? ? '%I:%M %p' : datetime.strftime('%B %d, %Y')
+    datetime.strftime format_string
+  end
   def format_date(date, options = {})
     if options[:time]
       if options[:long]

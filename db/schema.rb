@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_30_181018) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_16_131445) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -121,20 +121,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_30_181018) do
     t.integer "location_id"
   end
 
-  create_table "tds_readings", force: :cascade do |t|
-    t.datetime "datetime"
-    t.integer "tank_id"
-    t.integer "tds"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "users", force: :cascade do |t|
     t.string "email"
     t.string "password_digest"
     t.boolean "admin"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "water_tests", force: :cascade do |t|
+    t.bigint "tank_id", null: false
+    t.jsonb "parameters", default: {}, null: false
+    t.datetime "tested_at"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["parameters"], name: "index_water_tests_on_parameters", using: :gin
+    t.index ["tank_id"], name: "index_water_tests_on_tank_id"
+    t.index ["tested_at"], name: "index_water_tests_on_tested_at"
   end
 
   create_table "waterings", force: :cascade do |t|
@@ -158,4 +162,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_30_181018) do
 
   add_foreign_key "log_entries", "users"
   add_foreign_key "plants", "locations"
+  add_foreign_key "water_tests", "tanks"
 end

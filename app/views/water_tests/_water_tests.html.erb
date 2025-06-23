@@ -1,0 +1,71 @@
+<table id="water_tests" class="min-w-full">
+  <thead class="">
+  <tr>
+    <th class="">Date</th>
+    <th class="">TDS</th>
+    <th class="">pH</th>
+    <th class="">Temp</th>
+    <th class="">NH₃</th>
+    <th class="">NO₂</th>
+    <th class="">NO₃</th>
+    <th class="">Actions</th>
+  </tr>
+  </thead>
+  <tbody class="">
+  <% water_tests.each do |test| %>
+    <tr class="">
+      <td class="">
+        <%= time_or_date test.tested_at %>
+      </td>
+      <td class="">
+        <%= test.tds || "—" %>
+      </td>
+      <td class="">
+        <% if test.ph %>
+                <span class="">
+                  <%= test.ph.round(1) %>
+                </span>
+        <% else %>
+          <span class="">—</span>
+        <% end %>
+      </td>
+      <td class="">
+        <%= test.temperature ? "#{test.temperature.round(1)}°#{test.temperature_unit}" : "—" %>
+      </td>
+      <td class="">
+        <% if test.ammonia %>
+                <span class="">
+                  <%= test.ammonia.round(2) %>
+                </span>
+        <% else %>
+          <span class="">—</span>
+        <% end %>
+      </td>
+      <td class="">
+        <% if test.nitrite %>
+                <span class="">
+                  <%= test.nitrite.round(2) %>
+                </span>
+        <% else %>
+          <span class="">—</span>
+        <% end %>
+      </td>
+      <td class="">
+        <%= test.nitrate ? test.nitrate.round(1) : "—" %>
+      </td>
+      <td class="">
+        <div class="flex">
+          <%= link_to edit_tank_water_test_path(@tank, test), class: "" do %>
+            Edit
+          <% end %>
+          <%= button_to tank_water_test_path(@tank, test), method: :delete,
+                        class: "buttonLink",
+                        onclick: "return confirm('Are you sure you want to permanently delete this Water Test?');" do %>
+            Delete
+          <% end %>
+        </div>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

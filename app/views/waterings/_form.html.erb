@@ -40,7 +40,7 @@
     <br>
     <div>
       <% submit_text = t(watering.new_record? ? 'waterings.create_watering' : 'waterings.update_watering') %>
-      <%= form.submit submit_text %>
+      <%= form.submit submit_text, class: 'saveButton' %>
     </div>
   <% end %>
 </div>
