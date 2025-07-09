@@ -8,7 +8,7 @@ class WateringsController < ApplicationController
     if current_project.nil?
       return redirect_to projects_path, notice: t('messages.please_select_project')
     end
-    @waterings = current_project&.waterings&.sort_by(&:date)&.reverse&.first 500
+    @waterings = current_project&.waterings&.sort_by{|w| [w.date, w.updated_at]}&.reverse&.first 500
   end
 
   # GET /waterings/1 or /waterings/1.json
