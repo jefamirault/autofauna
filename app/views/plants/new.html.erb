@@ -1,8 +1,11 @@
 <% content_for :title do %>
   New Plant
 <% end %>
-<h1><%= t 'plants.index.new_plant' %></h1>
-
+<h1 style="display:inline-block">
+  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= t 'plants.index.new_plant' %>
+</h1>
 <%= render "form", plant: @plant %>
 
 <p>

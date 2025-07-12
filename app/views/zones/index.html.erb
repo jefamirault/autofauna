@@ -1,14 +1,15 @@
 <% content_for :title, "Zones" %>
 
-<h1>Zones</h1>
-
+<h1 style="display:inline-block">
+  <%= link_to t('.locations'), locations_path, class: 'breadcrumb' %> <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %> <%= t '.zones' %>
+</h1>
 <div id="zones">
   <% @zones.each do |zone| %>
     <%= render zone %>
     <p>
-      <%= link_to "Show this zone", zone %>
+      <%= link_to "Show this Zone", zone %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New zone", new_zone_path %>
+<%= link_to "New Zone", new_zone_path %>

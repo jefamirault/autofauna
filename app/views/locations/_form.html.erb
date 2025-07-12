@@ -13,11 +13,12 @@
 
   <%= form.hidden_field :project_id, value: location&.project_id || current_project.id %>
 
-  <div>
-    <%= form.label :zone_id, style: "display: block" %>
-    <%= form.select :zone_id, options_from_collection_for_select(current_project.zones, :id, :name, location&.zone&.id), prompt: '-- Select Zone --' %>
-  </div>
-
+  <% unless current_project.zones.empty? %>
+    <div>
+      <%= form.label :zone_id, style: "display: block" %>
+      <%= form.select :zone_id, options_from_collection_for_select(current_project.zones, :id, :name, location&.zone&.id), prompt: '-- Select Zone --' %>
+    </div>
+  <% end %>
   <div>
     <%= form.label :name, style: "display: block" %>
     <%= form.text_field :name %>

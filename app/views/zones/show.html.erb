@@ -1,10 +1,17 @@
 <% content_for :title, "Zone: #{@zone}" %>
 
+<h1 style="display:inline-block">
+  <%= link_to t('.locations'), locations_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to t('.zones'), zones_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= @zone %>
+</h1>
 <%= render @zone %>
 
 <div>
-  <%= link_to "Edit this zone", edit_zone_path(@zone) %> |
-  <%= link_to "Back to zones", zones_path %>
+  <%= link_to "Edit this Zone", edit_zone_path(@zone) %> |
+  <%= link_to "Back to Zones", zones_path %>
 
-  <%= button_to "Destroy this zone", @zone, method: :delete %>
+  <%= button_to "Destroy this Zone", @zone, method: :delete, onclick: "return confirm('#{t 'zones.messages.confirm_delete'}');" %>
 </div>

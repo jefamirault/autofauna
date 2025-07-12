@@ -1,6 +1,12 @@
 <% content_for :title, "Water #{@watering.plant}" %>
 
-<h1><%= t 'waterings.new_watering'%></h1>
+<h1>
+  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @watering.plant, plant_path(@watering.plant), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= t 'waterings.new_watering'%>
+</h1>
 
 <%= render "form", watering: @watering %>
 

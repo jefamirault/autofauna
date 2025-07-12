@@ -1,12 +1,13 @@
 <% content_for :title, "Location: #{@location}" %>
 
-<h1>Viewing Location</h1>
-
+<h1>
+  <%= link_to t('.locations'), locations_path, class: 'breadcrumb' %> <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %> <%= @location %>
+</h1>
 <%= render @location %>
 
 <div>
-  <%= link_to "Edit this location", edit_location_path(@location) %> |
-  <%= link_to "Back to locations", locations_path %>
+  <%= link_to "Edit this Location", edit_location_path(@location) %> |
+  <%= link_to "Back to Locations", locations_path %>
 
-  <%= button_to "Destroy this location", @location, method: :delete %>
+  <%= button_to "Destroy this Location", @location, method: :delete, onclick: "return confirm('#{t 'locations.messages.confirm_delete'}');" %>
 </div>

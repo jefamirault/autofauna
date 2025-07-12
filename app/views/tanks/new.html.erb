@@ -1,11 +1,15 @@
 <% content_for :title, "New tank" %>
 
-<h1>New tank</h1>
+<h1>
+  <%= link_to t('.tanks'), tanks_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  New Tank
+</h1>
 
 <%= render "form", tank: @tank %>
 
 <br>
 
 <div>
-  <%= link_to "Back to tanks", tanks_path %>
+  <%= link_to "Back to Tanks", tanks_path %>
 </div>

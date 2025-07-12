@@ -2,6 +2,16 @@
   Watered #<%= @watering.plant.uid %> <%= @watering.plant.name %> <%= @watering.date.strftime '%a %-m/%-d/%y' %>
 <% end %>
 
+<h1 style="display:inline-block">
+  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @watering.plant, plant_path(@watering.plant), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to t('.waterings'), waterings_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= @watering.date.strftime '%a %-m/%-d/%y' %>
+</h1>
+
 <%= render @watering %>
 
 <p>

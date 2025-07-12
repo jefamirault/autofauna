@@ -1,6 +1,10 @@
 <% content_for :title, "Tank: #{@tank}" %>
 
-<h1><%= @tank %></h1>
+<h1>
+  <%= link_to t('.tanks'), tanks_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= @tank %>
+</h1>
 
 <%= render @tank %>
 

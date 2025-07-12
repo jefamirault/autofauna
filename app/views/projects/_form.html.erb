@@ -16,11 +16,12 @@
     <%= form.text_field :name, autofocus: project.new_record? %>
   </div>
 
-  <div>
-    <%= form.label :api_key, t('attributes.api_key'), style: "display: block" %>
-    <%= form.text_field :api_key %>
-  </div>
-
+  <% unless project.new_record? %>
+    <div>
+      <%= form.label :api_key, t('attributes.api_key'), style: "display: block" %>
+      <%= form.text_field :api_key %>
+    </div>
+  <% end %>
   <br>
   <div>
     <% submit_text = t(project.new_record? ? 'projects.create_project' : 'projects.update_project') %>

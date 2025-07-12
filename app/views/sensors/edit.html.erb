@@ -1,6 +1,12 @@
 <% content_for :title, "Edit Sensor: #{@sensor}" %>
 
-<h1>Editing sensor</h1>
+<h1>
+  <%= link_to t('.sensors'), sensors_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @sensor, sensor_path(@sensor), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  Edit
+</h1>
 
 <%= render "form", sensor: @sensor %>
 

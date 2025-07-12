@@ -24,10 +24,13 @@
       <%= form.number_field :uid %>
     </div>
 
-    <div>
-      <%= form.label :location_id, style: "display: block" %>
-      <%= form.collection_select :location_id, current_project.locations, :id, :name %>
-    </div>
+    <% locations = current_project.locations %>
+    <% unless locations.empty? %>
+      <div>
+        <%= form.label :location_id, style: "display: block" %>
+        <%= form.collection_select :location_id, locations, :id, :name %>
+      </div>
+    <% end %>
 
     <div>
       <%= form.label :pot, t('attributes.container'), style: "display: block" %>
@@ -51,10 +54,12 @@
       </div>
     </div>
 
-    <div>
-      <%= form.label :archived, style: "display: block" %>
-      <%= form.check_box :archived %>
-    </div>
+    <% unless @plant.new_record? %>
+      <div>
+        <%= form.label :archived, style: "display: block" %>
+        <%= form.check_box :archived %>
+      </div>
+    <% end %>
 
     <br>
     <div>

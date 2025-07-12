@@ -1,13 +1,7 @@
 <% content_for :title, 'Plants Archive' %>
-<div>
-  <h1 style="display:inline-block"><%= t '.plants_archive' %></h1>
-  -
-  <%= link_to 'View Current Plants', plants_path %>
-</div>
-<div style="float:right">
-  <%= link_to t('.import_plants'), plants_import_path %> |
-  <%= link_to t('.export_plants'), plants_path(format: :json) %>
-</div>
+<h1 style="display:inline-block">
+  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %> <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %> <%= t '.archive' %>
+</h1>
 
 <div class="formContainer">
   <%= search_form_for @q, url: plants_archive_path do |f| %>

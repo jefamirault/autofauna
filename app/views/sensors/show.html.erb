@@ -1,14 +1,18 @@
 <% content_for :title, "Sensor: #{@sensor}" %>
 
-<h1>Viewing Sensor</h1>
+<h1>
+  <%= link_to t('.sensors'), sensors_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= @sensor %>
+</h1>
 
 <%= render @sensor %>
 
 <div>
-  <%= link_to "Edit this sensor", edit_sensor_path(@sensor) %> |
-  <%= link_to "Back to sensors", sensors_path %>
+  <%= link_to "Edit this Sensor", edit_sensor_path(@sensor) %> |
+  <%= link_to "Back to Sensors", sensors_path %>
 
-  <%= button_to "Destroy this sensor", @sensor, method: :delete, onclick: "return confirm('#{t 'sensors.messages.confirm_delete'}');" %>
+  <%= button_to "Destroy this Sensor", @sensor, method: :delete, onclick: "return confirm('#{t 'sensors.messages.confirm_delete'}');" %>
 </div>
 
 <%= render 'sensor_readings/readings', readings: @readings, sensor_column: false %>

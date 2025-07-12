@@ -1,12 +1,7 @@
 <% content_for :title, 'Plants' %>
+
 <div>
   <h1 style="display:inline-block"><%= t '.plants' %></h1>
-  -
-  <%= link_to 'View Archived Plants', plants_archive_path %>
-</div>
-<div style="float:right">
-  <%= link_to t('.import_plants'), plants_import_path %> |
-  <%= link_to t('.export_plants'), plants_path(format: :json) %>
 </div>
 
 <div class="formContainer">
@@ -16,7 +11,7 @@
   <% end %>
 </div>
 <br>
-<div style="padding: 0;"><%= "#{@plants.size} Currently Active Plants" %>
+<div style="padding: 0;"><%= "#{@plants.size} Active Plants" %>
   <%= params['q']['name_or_location_name_cont'] && params['q']['name_or_location_name_cont'] != '' ? " matching \"#{params['q']['name_or_location_name_cont']}\"" : ''%>
   <% if params['q']['name_or_location_name_cont'] && params['q']['name_or_location_name_cont'] != '' %>
     - <%= link_to t('clear_search'), plants_path %>

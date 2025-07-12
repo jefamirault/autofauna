@@ -28,7 +28,8 @@ class ProjectsController < ApplicationController
     @project.owner = current_user
     respond_to do |format|
       if @project.save
-        format.html { redirect_to project_url(@project), notice: t('projects.create_success') }
+        set_current_project @project
+        format.html { redirect_to plants_path, notice: t('projects.create_success') }
         format.json { render :show, status: :created, location: @project }
       else
         format.html { render :new, status: :unprocessable_entity }

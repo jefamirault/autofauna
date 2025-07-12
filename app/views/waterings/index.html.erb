@@ -1,5 +1,7 @@
 <% content_for :title, 'Waterings' %>
-<h1><%= t '.waterings' %></h1>
+<h1 style="display:inline-block">
+  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %> <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %> <%= t '.waterings' %>
+</h1>
 
 <div style="float:right">
   <%= link_to t('.import_waterings'), waterings_import_path %> |

@@ -1,6 +1,13 @@
 <% content_for :title do %>
   #<%= @plant.uid %> <%= @plant.name %>
 <% end %>
+
+<h1>
+  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= @plant %>
+</h1>
+
 <%= render @plant %>
 <p>
   <%= link_to t('.edit_this_plant'), edit_plant_path(@plant) %> |

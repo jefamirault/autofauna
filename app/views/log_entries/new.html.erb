@@ -1,5 +1,12 @@
 <% content_for :title, "New Log Entry - #{@log_entry.loggable}" %>
-<h1><%= t 'new_log_entry_for' %> <%= @log_entry.loggable %></h1>
+
+<h1>
+  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @log_entry.loggable, plant_path(@log_entry.loggable), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= t 'new_log_entry' %>
+</h1>
 
 <%= render partial: "log_entries/form", locals: { log_entry: @log_entry } %>
 

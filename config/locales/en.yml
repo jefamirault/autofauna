@@ -33,7 +33,7 @@ en:
     name: "Name"
     owner: "Owner"
     collaborators: "Collaborators"
-    new_project: "New Projects"
+    new_project: "New Project"
     my_projects: "My Projects"
     create_project: "Create Project"
     update_project: "Update Project"
@@ -105,6 +105,7 @@ en:
   account:
     sign_in_success: "Signed in successfully."
     log_out_success: "You have been logged out."
+    confirm_logout: "Are you sure you want to log out?"
     new_password: "New Password"
     check_password_reset: "Check your email to reset your password."
     success_password_reset: "Password updated successfully. Please log in."

@@ -47,26 +47,23 @@ module ApplicationHelper
   end
 
   def nav_item(name, selected = false)
-    "<div class='navItem#{selected ? ' selected' : ''}'>#{name}</div>".html_safe
+    default_class = 'navItem'
+    "<a class='#{default_class}#{selected ? ' selected' : ''}'>#{name}</a>".html_safe
   end
 
   def nav_link(controller, options = {})
-
+    default_class = 'navItem'
     text = options[:text] || t(".#{controller}")
     action = options[:action] || 'index'
     path = options[:path] || send("#{controller}_path")
-    if params[:controller] == controller # && params[:action] == action
-      if options[:action]
+    if params[:controller] == controller
         if params[:action] == action
           nav_item(text, true)
         else
-          link_to(text, path, class: 'navItem')
+          link_to(text, path, class: default_class)
         end
-      else
-        link_to(text, path, class: 'navItem')
-      end
     else
-      link_to(text, path, class: 'navItem')
+      link_to(text, path, class: default_class)
     end
   end
 end

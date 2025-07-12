@@ -15,55 +15,88 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="<%= Rails.env %>">
-  <header>
-    <nav>
-      <div id="currentProject" class="logged_in">
-        <%= link_to current_project || t('.current_project'), projects_path %>
+  <body class="<%= Rails.env %> contents" data-controller="sidebar"
+        data-sidebar-minimized-class="sidebarMinimized">
+
+    <header>
+      <button data-sidebar-target="toggleButton"
+              data-action="click->sidebar#toggle"
+              class="collapseSidebar"
+              aria-label="Collapse sidebar">
+        <!-- Icon will be populated by Stimulus -->
+  <!--      If same icon for both directions, just put it here-->
+      </button>
+      <div id="logoContainer">
+        <%= image_tag 'autofauna_icon.png' %>
+        <div id="logoText">Autofauna</div>
       </div>
+    </header>
 
-      <%= nav_link 'plants' %>
-      <%= nav_link 'plants', action: 'new', text: 'New Plant', path: new_plant_path %>
-      <%= nav_link 'waterings' %>
-      <%= nav_link 'zones'%>
-      <%= nav_link 'locations'%>
-      <%= nav_link 'sensors' %>
-      <%= nav_link 'sensor_readings', action: 'readings', text: 'Sensor Readings', path: sensor_readings_path %>
-      <%= nav_link 'sensor_types' %>
-      <%= nav_link 'tanks' %>
-    </nav>
-
-
-    <nav class="logged_in">
-      <% if current_user&.admin? %>
-        <%= nav_link 'users' %>
-      <% end %>
-
+    <aside id="sidebar">
       <% if current_project %>
-        <%= nav_link 'projects', action: 'show', text: t('.project_settings'), path: project_path(current_project) %>
+        <div id="currentProject">
+          <%= current_project || t('.current_project') %>
+          <%= link_to icon('cog-6-tooth', variant: 'solid'), project_path(current_project), class: 'iconLink' %>
+        </div>
       <% end %>
+      <nav>
+        <%= nav_link 'plants', action: 'index' %>
+        <% if params[:controller] == 'plants' || params[:controller] == 'waterings' %>
+          <div class="indent">
+            <%= nav_link 'plants', action: 'new', text: "#{icon('plus')} New Plant".html_safe, path: new_plant_path %>
+            <%= nav_link 'waterings' %>
+            <%= nav_link 'plants', action: 'archive', text: 'Archive', path: plants_archive_path %>
+          </div>
+        <% end %>
+        <%= nav_link 'tanks' %>
+        <%= nav_link 'locations'%>
+        <% if params[:controller] == 'locations' || params[:controller] == 'zones' %>
+          <div class="indent">
+            <%= nav_link 'zones'%>
+          </div>
+        <% end %>
+        <%= nav_link 'sensors' %>
+        <% if params[:controller] == 'sensors' || params[:controller] == 'sensor_readings' || params[:controller] == 'sensor_types' %>
+          <div class="indent">
+            <%= nav_link 'sensor_readings', action: 'readings', text: 'Sensor Readings', path: sensor_readings_path %>
+            <%= nav_link 'sensor_types' %>
+          </div>
+        <% end %>
+      </nav>
+      <div class="fill"></div>
+      <nav class="logged_in">
+        <% if current_user&.admin? %>
+          <%= nav_link 'users' %>
+        <% end %>
 
-      <% if user_signed_in? %>
-        <%= nav_link 'settings', text: t('.account_settings') %>
-        <%= button_to t('.log_out'), session_path, method: :delete, class: 'logout navItem' %>
-      <% else %>
-        <%= link_to t('log_in'), new_session_path %>
-      <% end %>
-    </nav>
-  </header>
+        <% if current_project %>
+          <%= nav_link 'projects', action: 'show', text: t('.project_settings'), path: project_path(current_project) %>
+        <% end %>
 
-  <section id="main" class="<%= params[:controller] %>">
-    <div style="color: green"><%= notice %></div>
-    <div style="color: #f44"><%= alert %></div>
+        <% if user_signed_in? %>
+          <%= nav_link 'settings', text: t('.account_settings') %>
+          <%= button_to "#{icon('arrow-right-start-on-rectangle')}#{t('.log_out')}".html_safe, session_path, method: :delete, class: 'logout navItem', onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
+        <% else %>
+          <%= link_to t('log_in'), new_session_path, class: 'navItem' %>
+        <% end %>
+      </nav>
+    </aside>
 
-    <%= yield %>
-  </section>
+    <main class="<%= params[:controller] %>">
+      <div style="color: green"><%= notice %></div>
+      <div style="color: #f44"><%= alert %></div>
 
-  <footer>
-    <ul id="localizations">
-      <li><%= link_to 'English', "?locale=en", class: (current_locale == 'en' ? 'selected' : '') %></li>
-      <li><%= link_to 'Español', "?locale=es", class: (current_locale == 'es' ? 'selected' : '') %></li>
-    </ul>
-  </footer>
+      <section id="primary">
+        <%= yield %>
+      </section>
+
+      <footer>
+        <ul id="localizations">
+          <li><%= link_to 'English', "?locale=en", class: (current_locale == 'en' ? 'selected' : '') %></li>
+          <li><%= link_to 'Español', "?locale=es", class: (current_locale == 'es' ? 'selected' : '') %></li>
+        </ul>
+      </footer>
+    </main>
+
   </body>
 </html>

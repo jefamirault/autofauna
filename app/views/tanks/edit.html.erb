@@ -1,12 +1,18 @@
 <% content_for :title, "Edit Tank: #{@tank}" %>
 
-<h1>Editing Tank</h1>
+<h1>
+  <%= link_to t('.tanks'), tanks_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @tank, tank_path(@tank), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  Edit
+</h1>
 
 <%= render "form", tank: @tank %>
 
 <br>
 
 <div>
-  <%= link_to "Show this tank", @tank %> |
-  <%= link_to "Back to tanks", tanks_path %>
+  <%= link_to "Show this Tank", @tank %> |
+  <%= link_to "Back to Tanks", tanks_path %>
 </div>

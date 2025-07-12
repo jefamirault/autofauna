@@ -19,19 +19,6 @@ $lightpurple: #D81B60   // https://davidmathlogic.com/colorblind
 *
   transition: all 0.15s ease-out
 
-body
-  font-size: 125%
-  font-family: Roboto, verdana, sans-serif
-  font-weight: 400
-  margin: 0
-
-  background-color: #0a4b2e
-  background: linear-gradient( rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.3)), url("background1.jpg"), no-repeat
-  background-size: cover
-  background-attachment: fixed
-
-  &.development
-    background-image: url("background2.jpg")
 a
   color: $purple
   text-decoration: none
@@ -43,27 +30,6 @@ textarea
   font-family: Roboto, verdana, sans-serif
   width: 50%
   min-width: 8em
-
-header
-  display: flex
-  flex-wrap: wrap
-  justify-content: space-between
-  align-items: center
-  padding: 0 1em 0
-  margin: 0 0 2em
-  background: $green
-  color: white
-  box-shadow: rgba(0, 0, 0, 0.45) 0 5px 15px 3px
-  line-height: 56px
-
-  button
-    line-height: 56px
-
-  a
-    color: rgba(255, 255, 255, 0.75)
-
-  form
-    padding: 0
 
 body.development
   header
@@ -101,18 +67,8 @@ nav
     color: $darkgreen
     text-decoration: none
 
-#currentProject
-  margin: 0
-  padding: 0
-  font-weight: bold
-  font-size: 120%
-  a
-    padding: 0 24px
-
-    color: white
-    &:hover
-      text-decoration: none
-      color: rgba(255, 255, 255, 0.75)
+nav#sidebar
+  flex-direction: column
 
 form.button_to
   display: inline-block
@@ -142,14 +98,7 @@ h2
   font-size: 120%
   padding-top: 0.5em
 
-section#main
-  background: rgba(255, 255, 255, 0.975)
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px
-  border-radius: 25px
-  margin: 0 3vw 6px
-  padding: 0.5em 3vw 2em
-  clear: both
-
+main
   &.sessions, &.registrations, &.passwords, &.password_resets, &.settings
     max-width: 450px
     display: block
@@ -170,9 +119,8 @@ section#main
 input
   width: 100%
   box-sizing: border-box
-table
-  table-layout: fixed
 
+table
   th
     text-align: left
     font-weight: 500
@@ -181,21 +129,6 @@ table
     white-space: nowrap
     overflow: hidden
 
-  &.waterings
-    table-layout: auto
-    white-space: normal
-    .plantColumn
-      min-width: 200px
-      max-width: 0
-    .dateColumn
-      min-width: 120px
-      max-width: 0
-    .intervalColumn
-      min-width: 100px
-      max-width: 0
-    .notesColumn
-      min-width: 200px
-      max-width: 0
 
 input[type=checkbox]
   transform: scale(1.5)
@@ -204,89 +137,8 @@ input
 .saveButton
   padding: 16px 48px
 
-// Responsive
-
-.plantColumn
-  width: 200px
-.nextWateringColumn
-  width: 200px
-.zoneColumn
-  width: 218px
-.locationColumn
-  width: 218px
-.containerColumn
-  width: 125px
-.scheduledColumn
-  width: 140px
-.frequencyColumn
-  width: 140px
-.wateredColumn
-  width: 140px
-.actionColumn
-  width: 74px
-
-.collaboratorsColumn
-  width: 150px
-.plantsColumn
-  width: 100px
-.wateringsColumn
-  width: 100px
-.createdColumn
-  width: 150px
-
 .hide
   display: none
-
-@media (max-width: 1130px)
-  .wateredColumn, .collaboratorsColumn
-    display: none
-
-  // gradually reduce #main side padding from 34 (14 per side) until 0 between media queries
-  // section#main side padding at 1130px = 34px
-  // (1130 - 960) / 34 = 5
-  section#main
-    margin-left: calc((100% - 960px) / 5)
-    margin-right: calc((100% - 960px) / 5)
-
-@media (max-width: 960px)
-  .containerColumn
-    display: none
-  section#main
-    margin-right: 0
-    margin-left: 0
-  .logged_in
-    clear: both
-
-  .waterings
-    .intervalColumn
-      width: 0
-
-@media (max-width: 800px)
-  .wateringsColumn
-    display: none
-@media (max-width: 750px)
-  .scheduledColumn, .intervalColumn
-    display: none
-@media (max-width: 700px)
-  .plantsColumn
-    display: none
-@media (max-width: 600px)
-  .field, .submit
-    width: calc(100% - 18px)
-  .locationColumn
-    display: none
-  section#main
-    padding-right: 0
-    padding-left: 0
-  td, th
-    &:first-child
-     padding-left: 1em
-
-  h1, h2, h3, p, form
-    padding-left: 20px
-@media (max-width: 550px)
-  .ownerColumn
-    display: none
 
 h4
   color: #bbb
@@ -365,12 +217,6 @@ a.purple
 p.large
   font-size: 120%
 
-footer
-  display: flex
-  justify-content: center
-  line-height: 44px
-  font-size: 110%
-
 #localizations
   margin: 0
   padding: 0
@@ -412,3 +258,7 @@ footer
   background: none
   font-size: 100%
   cursor: pointer
+
+//  icons
+svg
+  vertical-align: middle

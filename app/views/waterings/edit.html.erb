@@ -1,6 +1,16 @@
 <% content_for :title, "Edit Watering #{@watering.plant}" %>
-<h1><%= t 'waterings.edit_watering'%></h1>
 
+<h1 style="display:inline-block">
+  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @watering.plant, plant_path(@watering.plant), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to t('.waterings'), waterings_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @watering.date.strftime('%a %-m/%-d/%y'), watering_path(@watering), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  Edit
+</h1>
 <%= render "form", watering: @watering %>
 
 <p>

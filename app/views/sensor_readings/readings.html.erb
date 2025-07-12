@@ -3,4 +3,8 @@
   <%= link_to t('.export_sensor_readings'), sensor_readings_path(format: :json) %>
 </div>
 
+<h1 style="display:inline-block">
+  <%= link_to t('.sensors'), sensors_path, class: 'breadcrumb' %> <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %> <%= t '.sensor_readings' %>
+</h1>
+
 <%= render 'readings', readings: @readings, sensor_column: true %>
