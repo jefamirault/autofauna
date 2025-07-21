@@ -8,10 +8,16 @@ class Watering < ApplicationRecord
   after_save_commit :update_last_watering
   after_destroy :update_last_watering
 
+  scope :recent, -> {
+    order(date: :desc, updated_at: :desc, )
+  }
   enum :units, {
     'cups' => 0,
     'oz' => 1,
-    'mL' => 2
+    'mL' => 2,
+    'gal' => 3,
+    'qt' => 4,
+    'L' => 5
   }
 
   # interval: integer # of days between this watering and the last watering for the same plant

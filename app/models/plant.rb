@@ -36,6 +36,10 @@ class Plant < ApplicationRecord
     super || waterings.any? ? waterings.last : nil
   end
 
+  def suggested_watering_unit
+    waterings.any? ? waterings.sort_by {|w| [w.date, w.updated_at]}.last.units : 'cups'
+  end
+
   def calculate_watering_frequency
     if waterings.count < 2
       return nil

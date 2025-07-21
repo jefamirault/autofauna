@@ -30,7 +30,7 @@
 
     <div>
       <%= form.label :units, style: "display: block" %>
-      <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units) %>
+      <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units || watering.plant.suggested_watering_unit) %>
     </div>
 
     <div>
