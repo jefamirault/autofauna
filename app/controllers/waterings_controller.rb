@@ -17,7 +17,7 @@ class WateringsController < ApplicationController
 
   # GET /waterings/new
   def new
-    @watering = Watering.new plant_id: params[:plant_id], date: Time.zone.now.to_date
+    @watering = Watering.new plant_id: params[:plant_id], date: Time.zone.now.to_date, volume: params[:volume], units: params[:units], notes: params[:notes]
     respond_to do |format|
       format.turbo_stream
       format.html
@@ -34,7 +34,7 @@ class WateringsController < ApplicationController
 
     respond_to do |format|
       if @watering.save
-        format.html { redirect_to watering_url(@watering), notice: t('waterings.messages.create_success') }
+        format.html { redirect_to plant_path(@watering.plant), notice: t('waterings.messages.create_success') }
         format.json { render :show, status: :created, location: @watering }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -61,7 +61,7 @@ class WateringsController < ApplicationController
     @watering.destroy
 
     respond_to do |format|
-      format.html { redirect_to waterings_url, notice: t("waterings.messages.delete_success") }
+      format.html { redirect_to plant_path(@watering.plant), notice: t("waterings.messages.delete_success") }
       format.json { head :no_content }
     end
   end

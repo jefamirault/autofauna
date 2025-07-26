@@ -22,7 +22,7 @@
       <% if plant.date_last_watering == Time.zone.now.to_date %>
         <%= link_to t('plants.index.edit'), edit_watering_path(plant.waterings.last) %>
       <% else %>
-        <%= link_to t('plants.index.water'), plant_water_path(plant), data: { turbo_stream: true } %>
+        <%= link_to t('plants.index.water'), plant_water_path(plant) %>
       <% end %>
     </td>
   <% end %>

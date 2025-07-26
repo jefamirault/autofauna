@@ -6,6 +6,7 @@
     <th><%= t 'attributes.volume' %></th>
     <th><%= t 'attributes.interval' %></th>
     <th><%= t 'attributes.notes' %></th>
+    <th><%= t 'plants.index.action' %></th>
   </tr>
   </thead>
   <tbody>
@@ -14,7 +15,9 @@
       <td><%= link_to format_date(watering.date), watering %></td>
       <td><%= watering.print_volume %></td>
       <td><%= watering.interval_text %></td>
-      <td><%= watering.notes %></td>
+      <td class="wateringNotesColumn"><%= watering.notes %></td>
+      <td><%= link_to 'Repeat Watering', plant_water_path(@plant, volume: watering.volume, units: watering.units, notes: watering.notes) %>
+      </td>
     </tr>
   <% end %>
   </tbody>

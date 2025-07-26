@@ -4,6 +4,12 @@
     <%= last_watering_text plant %>
   </p>
 
+  <% if @plant.last_watering %>
+    <p>
+      <%= link_to 'Repeat Last Watering', plant_water_path(@plant, volume: @plant.last_watering.volume, units: @plant.last_watering.units, notes: @plant.last_watering.notes) %>
+    </p>
+  <% end %>
+
   <p>
     <strong><%= t 'attributes.next_watering' %>:</strong>
     <%= @plant.time_until_watering_text %>

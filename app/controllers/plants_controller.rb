@@ -7,7 +7,7 @@ class PlantsController < ApplicationController
 
   def water
     @plant = Plant.find params[:plant_id]
-    redirect_to new_watering_path(plant_id: @plant.id)
+    redirect_to new_watering_path(plant_id: @plant.id, volume: params[:volume], units: params[:units], notes: params[:notes])
   end
 
   # GET /plants or /plants.json
