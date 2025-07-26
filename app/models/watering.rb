@@ -67,6 +67,10 @@ class Watering < ApplicationRecord
     "#{sprintf('%g', self.volume)} #{self.units}"
   end
 
+  def volume_and_notes
+    "#{print_volume} #{self.notes.nil? || self.notes == '' ? 'water' : self.notes}"
+  end
+
   private
 
   def update_watering_intervals

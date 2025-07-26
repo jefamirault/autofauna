@@ -8,24 +8,18 @@
       <%= plant.time_until_watering_text %>
     </td>
   <% end %>
-  <td class="frequencyColumn">
-    <%= plant.watering_frequency_text %>
-  </td>
   <td class="lastWateringColumn">
-    <%= time_ago plant.date_last_watering %>
+    <%= last_watering_text plant %>
   </td>
   <td class="locationColumn">
     <%= plant.location %>
-  </td>
-  <td class="zoneColumn">
-    <%= plant.zone %>
   </td>
   <td class="containerColumn">
     <%= plant.pot %>
   </td>
   <% unless archive %>
     <td class="actionColumn">
-      <% if plant.last_watering == Time.zone.now.to_date %>
+      <% if plant.date_last_watering == Time.zone.now.to_date %>
         <%= link_to t('plants.index.edit'), edit_watering_path(plant.waterings.last) %>
       <% else %>
         <%= link_to t('plants.index.water'), plant_water_path(plant), data: { turbo_stream: true } %>

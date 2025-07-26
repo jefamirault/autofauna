@@ -1,9 +1,7 @@
 <div id="<%= dom_id plant %>">
   <p>
     <strong><%= t 'attributes.watered' %>:</strong>
-    <% if plant.date_last_watering && plant.last_watering %>
-    <%= link_to time_ago(plant.date_last_watering), watering_path(plant.last_watering) %>
-    <% end %>
+    <%= last_watering_text plant %>
   </p>
 
   <p>

@@ -164,6 +164,20 @@ class Plant < ApplicationRecord
     %w[location]
   end
 
+  def location_with_zone
+    if location.nil?
+      nil
+    elsif zone.nil?
+      self.location
+    else
+      "#{self.location} - #{self.zone}"
+    end
+  end
+
+  def last_watering_text
+    self.last_watering&.watering_text
+  end
+
   # private
 
   def sync_watering_dates_if_schedule_changed

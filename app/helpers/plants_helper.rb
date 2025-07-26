@@ -6,4 +6,17 @@ module PlantsHelper
       plant_log_entries_path(options[:plant])
     end
   end
+
+  def last_watering_text(plant)
+    watering = plant.last_watering
+    if watering.nil?
+      'Never'
+    else
+      if watering.volume.nil? && (watering.notes.nil? || watering.notes == '')
+        time_ago plant.date_last_watering
+      else
+        "#{time_ago plant.date_last_watering} - #{watering.volume_and_notes}"
+      end
+    end
+  end
 end
