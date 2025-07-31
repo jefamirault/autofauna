@@ -41,3 +41,4 @@
 
 .rbenv-vars
 .byebug_history
+.env
