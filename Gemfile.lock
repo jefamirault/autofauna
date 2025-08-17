@@ -78,6 +78,7 @@ GEM
       sshkit (>= 1.6.1, != 1.7.0)
     base64 (0.2.0)
     bcrypt (3.1.20)
+    bcrypt_pbkdf (1.1.1)
     benchmark (0.4.0)
     bigdecimal (3.1.8)
     bindex (0.8.1)
@@ -121,6 +122,7 @@ GEM
       dotenv (= 3.1.8)
       railties (>= 6.1)
     drb (2.2.1)
+    ed25519 (1.4.0)
     erubi (1.13.0)
     ffi (1.17.0-x86_64-linux-gnu)
     globalid (1.2.1)
@@ -297,6 +299,7 @@ PLATFORMS
 
 DEPENDENCIES
   bcrypt (~> 3.1.7)
+  bcrypt_pbkdf (>= 1.0, < 2.0)
   bootsnap
   byebug
   capistrano (~> 3.11)
@@ -306,6 +309,7 @@ DEPENDENCIES
   capybara
   debug
   dotenv-rails
+  ed25519 (>= 1.2, < 2.0)
   importmap-rails
   jbuilder
   pg
