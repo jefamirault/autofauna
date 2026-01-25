@@ -109,3 +109,8 @@ cap production deploy
 ```
 
 Config in `config/deploy.rb` and `config/deploy/production.rb`
+
+**Server environment variables** are managed via rbenv-vars:
+- Location: `/home/deploy/autofauna/.rbenv-vars`
+- Contains `RAILS_MASTER_KEY` and other secrets
+- If credentials are regenerated locally, update `RAILS_MASTER_KEY` on server
