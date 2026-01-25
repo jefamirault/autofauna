@@ -21,6 +21,8 @@
     <td class="actionColumn">
       <% if plant.date_last_watering == Time.zone.now.to_date %>
         <%= link_to t('plants.index.edit'), edit_watering_path(plant.waterings.last) %>
+      <% elsif plant.last_watering %>
+        <%= link_to 'Water', plant_water_path(plant, volume: plant.last_watering.volume, units: plant.last_watering.units, notes: plant.last_watering.notes) %>
       <% else %>
         <%= link_to t('plants.index.water'), plant_water_path(plant) %>
       <% end %>
