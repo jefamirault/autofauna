@@ -22,6 +22,7 @@ set :deploy_to, "/home/deploy/#{fetch :application}"
 
 # Default value for :linked_files is []
 # append :linked_files, "config/database.yml", 'config/master.key'
+append 'config/master.key'
 
 # Default value for linked_dirs is []
 # append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "tmp/webpacker", "public/system", "vendor", "storage"
