@@ -11,7 +11,8 @@ export default class extends Controller {
     connect() {
         // Set initial state based on stored preference or default
         const stored = localStorage.getItem('sidebar-minimized')
-        this.minimizedValue = stored ? JSON.parse(stored) : false
+        const isMobile = window.innerWidth < 600
+        this.minimizedValue = stored ? JSON.parse(stored) : isMobile
         this.updateSidebar()
 
         // Initialize touch handling

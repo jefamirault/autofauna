@@ -66,4 +66,9 @@ module ApplicationHelper
       link_to(text, path, class: default_class)
     end
   end
+
+  def mobile_device?
+    user_agent = request.user_agent.to_s.downcase
+    user_agent.match?(/mobile|android|iphone|ipad|ipod|blackberry|iemobile|opera mini/)
+  end
 end
