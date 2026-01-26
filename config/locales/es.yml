@@ -80,6 +80,8 @@ es:
     all_plants: "Todas las plantas"
     create_plant: "Crear planta"
     update_plant: "Actualizar planta"
+    form:
+      select_graphic: "Seleccionar imagen..."
   waterings:
     index:
       waterings: "Riegos"
@@ -166,6 +168,7 @@ es:
     description: "Descripción"
     updated_at: "Actualizado el"
     volume: "Volumen"
+    graphic: "Imagen de Planta"
   roles:
     viewer: "Espectador"
     editor: "Editor"

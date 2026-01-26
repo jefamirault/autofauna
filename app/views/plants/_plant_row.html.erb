@@ -1,5 +1,12 @@
 <% archive ||= false %>
 <tr id="<%= dom_id plant %>">
+  <td class="graphicColumn">
+    <% if plant.graphic.present? %>
+      <%= link_to plant_path(plant.id) do %>
+        <%= image_tag plant.graphic_path, class: "plant-row-graphic", alt: "" %>
+      <% end %>
+    <% end %>
+  </td>
   <td class="plantColumn" style="font-weight: 500">
     <%= link_to plant.label, plant_path(plant.id) %>
   </td>

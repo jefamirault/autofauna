@@ -70,6 +70,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_26_204657) do
     t.date "date_sort_watering"
     t.integer "zone_id"
     t.bigint "location_id"
+    t.string "graphic"
     t.index ["last_watering_id"], name: "index_plants_on_last_watering_id"
     t.index ["location_id"], name: "index_plants_on_location_id"
   end

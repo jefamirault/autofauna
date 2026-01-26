@@ -2,9 +2,12 @@
   #<%= @plant.uid %> <%= @plant.name %>
 <% end %>
 
-<h1>
-  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+<h1 class="plant-header">
+  <% if @plant.graphic.present? %>
+    <%= link_to plants_path, class: 'plant-header-graphic-link' do %>
+      <%= image_tag @plant.graphic_path, class: "plant-header-graphic", alt: "#{@plant.name}" %>
+    <% end %>
+  <% end %>
   <%= @plant %>
 </h1>
 

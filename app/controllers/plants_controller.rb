@@ -116,6 +116,12 @@ class PlantsController < ApplicationController
     end
   end
 
+  def suggest_graphic
+    name = params[:name]
+    matched_graphic = Plant.match_graphic_for_name(name)
+    render json: { graphic: matched_graphic }
+  end
+
   def import
 
   end
@@ -148,6 +154,6 @@ class PlantsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:name, :uid, :project_id, :zone_id, :location_id, :pot, :archived, :min_watering_freq, :max_watering_freq, :manual_watering_frequency)
+      params.require(:plant).permit(:name, :uid, :project_id, :zone_id, :location_id, :pot, :archived, :min_watering_freq, :max_watering_freq, :manual_watering_frequency, :graphic)
     end
 end

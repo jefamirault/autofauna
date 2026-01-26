@@ -1,4 +1,6 @@
 class Plant < ApplicationRecord
+  include PlantGraphics
+
   belongs_to :project
   belongs_to :location, optional: true
   has_one :zone, through: :location
@@ -170,7 +172,7 @@ class Plant < ApplicationRecord
   def self.ransackable_attributes(auth_object = nil)
     %w[uid name pot date_last_watering location_id
         date_sort_watering min_watering_freq max_watering_freq date_min_watering date_max_watering
-        archived created_at updated_at project_id, date_last_watering]
+        archived created_at updated_at project_id date_last_watering graphic]
   end
   def self.ransackable_associations(auth_object = nil)
     %w[location]

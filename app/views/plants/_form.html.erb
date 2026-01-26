@@ -1,5 +1,10 @@
 <div class="formContainer">
-  <%= form_with(model: plant) do |form| %>
+  <% graphic_paths = Plant.available_graphics.map { |g| [g, image_path("plant_graphics/#{g}.png")] }.to_h %>
+  <%= form_with(model: plant, data: {
+    controller: "plant-graphic",
+    plant_graphic_suggest_url_value: suggest_graphic_plants_path,
+    plant_graphic_paths_value: graphic_paths.to_json
+  }) do |form| %>
     <% if plant.errors.any? %>
       <div style="color: red">
         <h2><%= pluralize(plant.errors.count, "error") %> prohibited this plant from being saved:</h2>
@@ -16,7 +21,10 @@
 
     <div>
       <%= form.label :name, style: "display: block" %>
-      <%= form.text_field :name, autofocus: plant.new_record? %>
+      <%= form.text_field :name, autofocus: plant.new_record?, data: {
+        plant_graphic_target: "nameInput",
+        action: "input->plant-graphic#nameChanged"
+      } %>
     </div>
 
     <div>
@@ -60,6 +68,25 @@
         <%= form.check_box :archived %>
       </div>
     <% end %>
+
+    <div class="plant-graphic-selector">
+      <div class="graphic-select-container">
+        <div>
+          <%= form.label :graphic, t('attributes.graphic'), style: "display: block" %>
+          <%= form.select :graphic,
+            [[t('plants.form.select_graphic'), ""]] + Plant.graphics_for_select,
+            {},
+            {
+              data: {
+                plant_graphic_target: "graphicSelect",
+                action: "change->plant-graphic#graphicChanged"
+              }
+            }
+          %>
+        </div>
+        <%= image_tag "", alt: "Plant graphic preview", class: "plant-graphic-preview-image", data: { plant_graphic_target: "preview" }, style: "display: none;" %>
+      </div>
+    </div>
 
     <br>
     <div>

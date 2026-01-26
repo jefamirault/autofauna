@@ -19,6 +19,9 @@ Rails.application.routes.draw do
   resources :plants do
     get 'water'
     resources :log_entries
+    collection do
+      get :suggest_graphic
+    end
   end
 
   get 'waterings/import', to: 'waterings#import'
