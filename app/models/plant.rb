@@ -70,7 +70,7 @@ class Plant < ApplicationRecord
   def watering_frequency_text
     return '' if min_watering_freq.nil? && max_watering_freq.nil?
     if min_watering_freq == max_watering_freq
-      "#{min_watering_freq} day#{min_watering_freq == 1 ? '' : 's'}"
+      "Every #{min_watering_freq} day#{min_watering_freq == 1 ? '' : 's'}"
     else
       "#{min_watering_freq} - #{max_watering_freq} days"
     end
@@ -95,7 +95,7 @@ class Plant < ApplicationRecord
       if max_watering_days < 0
         "#{max_watering_days * -1} days late"
       elsif max_watering_days == 0
-        "Today"
+        "Water today"
       elsif min_watering_days > 0
         if min_watering_freq == max_watering_freq
           "Water in #{min_watering_days} day#{min_watering_days > 1 ? 's' : ''}"
@@ -107,6 +107,18 @@ class Plant < ApplicationRecord
       end
     else
       "Unscheduled"
+    end
+  end
+
+  def watering_urgency
+    return :none unless date_last_watering && max_watering_freq
+    max_watering_days = ((date_last_watering + max_watering_freq.days) - Time.zone.now.to_date).to_i
+    if max_watering_days < 0
+      :urgent
+    elsif max_watering_days == 0
+      :today
+    else
+      :normal
     end
   end
 

@@ -9,19 +9,15 @@
 </h1>
 
 <%= render @plant %>
-<p>
-  <%= link_to t('.edit_this_plant'), edit_plant_path(@plant) %> |
-  <%= link_to t('plants.back_to_plants'), plants_path %> |
-  <%= link_to t('.water_this_plant'), plant_water_path(@plant) %> |
-  <%= link_to t('.export_plant'), plant_path(@plant, format: :json) %>
-
-  <%= button_to t('.delete_plant'), @plant, method: :delete, onclick: "return confirm('#{t 'plants.messages.confirm_delete'}');" %>
+<p class="plant-actions">
+  <%= link_to t('.edit_this_plant'), edit_plant_path(@plant), class: 'link' %>
+  <%= link_to t('.export_plant'), plant_path(@plant, format: :json), class: 'link' %>
+  <%= link_to t('plants.all_plants'), plants_path, class: 'link' %>
 </p>
 
-<h3><%= t '.log' %></h3>
-<%= link_to t('new_log_entry'), new_plant_log_entry_path(@plant) %>
-<%= render partial: 'log_entries/log_entries', locals: { log_entries: @log_entries, loggable: @plant} %>
-
-<h3>Waterings</h3>
-<%= link_to t('.new_watering'), plant_water_path(@plant) %>
-<%= render partial: 'waterings', locals: { waterings: @plant.waterings } %>
+<%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant), class: 'link' %>
+<%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>
+<h3><%= t '.timeline' %></h3>
+<%= render partial: 'timeline', locals: { timeline: @timeline, plant: @plant } %>
+<%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant), class: 'link' %>
+<%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>

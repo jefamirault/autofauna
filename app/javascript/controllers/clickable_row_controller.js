@@ -16,6 +16,12 @@ export default class extends Controller {
             return
         }
 
+        // Prevent click if user is selecting text
+        const selection = window.getSelection()
+        if (selection && selection.toString().length > 0) {
+            return
+        }
+
         Turbo.visit(this.urlValue)
     }
 

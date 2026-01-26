@@ -15,3 +15,7 @@
 <p>
   <%= link_to t('actions.discard_changes'), @plant %>
 </p>
+
+<p>
+  <%= button_to t('plants.show.delete_plant'), @plant, method: :delete, class: 'buttonLink', onclick: "return confirm('#{t 'plants.messages.confirm_delete'}');" %>
+</p>

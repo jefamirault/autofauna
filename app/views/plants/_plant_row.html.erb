@@ -9,7 +9,7 @@
     </td>
   <% end %>
   <td class="lastWateringColumn">
-    <%= last_watering_text plant %>
+    <%= last_watering_text(plant).html_safe %>
   </td>
   <td class="locationColumn">
     <%= plant.location %>

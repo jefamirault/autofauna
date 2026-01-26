@@ -1,47 +1,56 @@
-<div id="<%= dom_id plant %>">
-  <p>
-    <strong><%= t 'attributes.watered' %>:</strong>
-    <%= last_watering_text plant %>
-  </p>
+<div id="<%= dom_id plant %>" class="plant-info-card">
+  <div class="plant-info-grid">
+    <div class="plant-info-section watering-section <%= @plant.watering_urgency %>">
+      <%= link_to plant_water_path(@plant, volume: @plant.last_watering&.volume, units: @plant.last_watering&.units, notes: @plant.last_watering&.notes), class: "water-icon-link #{@plant.watering_urgency}", aria: { label: t('plants.plant.water_this_plant') } do %>
+        <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
+        </svg>
+        <span class="water-helper-text click-text">Click</span>
+        <span class="water-helper-text tap-text">Tap</span>
+      <% end %>
+      <div class="watering-text">
+        <div class="watering-suggestion">
+          <%= @plant.time_until_watering_text %> 🕐
+        </div>
+        <div class="watering-history">
+          <%= t('attributes.last_watered') %> <%= time_ago(@plant.date_last_watering) || t('time.never') %>
+        </div>
+        <div class="watering-details">
+          <strong class="watering-volume"><%= @plant.last_watering&.print_volume || '—' %></strong>
+          <% if @plant.last_watering&.notes.present? %>
+            <span class="watering-notes-text"><%= @plant.last_watering.notes %></span>
+          <% end %>
+        </div>
+      </div>
+    </div>
 
-  <% if @plant.last_watering %>
-    <p>
-      <%= link_to 'Repeat Last Watering', plant_water_path(@plant, volume: @plant.last_watering.volume, units: @plant.last_watering.units, notes: @plant.last_watering.notes) %>
-    </p>
-  <% end %>
-
-  <p>
-    <strong><%= t 'attributes.next_watering' %>:</strong>
-    <%= @plant.time_until_watering_text %>
-  </p>
-
-  <p>
-    <strong><%= t 'attributes.watering_frequency' %>:</strong>
-    <%= @plant.watering_frequency_text %>
-  </p>
-
-  <p>
-    <strong><%= t 'attributes.location' %>:</strong>
-    <%= plant.location %>
-  </p>
-
-  <p>
-    <strong><%= t 'attributes.zone' %>:</strong>
-    <%= plant.zone %>
-  </p>
-
-  <% if @plant.container && @plant.container != '' %>
-    <p>
-      <strong><%= t 'attributes.container' %>:</strong>
-      <%= plant.pot %>
-    </p>
-  <% end %>
-
-  <p>
-    <strong><%= t 'attributes.archived' %>:</strong>
-    <%= t @plant.archived %>
-  </p>
-
-
-
+    <div class="plant-info-section location-section">
+      <div class="info-row">
+        <span class="label"><%= t 'attributes.location' %>:</span>
+        <span class="value"><%= plant.location %></span>
+      </div>
+      <div class="info-row">
+        <span class="label"><%= t 'attributes.zone' %>:</span>
+        <span class="value"><%= plant.zone %></span>
+      </div>
+      <% if @plant.watering_frequency_text.present? %>
+        <div class="info-row">
+          <span class="label"><%= t 'attributes.frequency' %>:</span>
+          <span class="value"><%= plant.watering_frequency_text %></span>
+        </div>
+      <% end %>
+      <% if @plant.container.present? %>
+        <div class="info-row">
+          <span class="label"><%= t 'attributes.container' %>:</span>
+          <span class="value"><%= plant.pot %></span>
+        </div>
+      <% end %>
+      <% if @plant.archived %>
+        <div class="info-row archived">
+          <span class="label"><%= t 'attributes.archived' %>:</span>
+          <span class="value"><%= t @plant.archived %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
 </div>

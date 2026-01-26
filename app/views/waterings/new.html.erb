@@ -11,5 +11,5 @@
 <%= render "form", watering: @watering %>
 
 <p>
-  <%= link_to t('actions.discard_changes'), @watering %>
+  <%= link_to t('actions.discard_changes'), plant_path(@watering.plant) %>
 </p>

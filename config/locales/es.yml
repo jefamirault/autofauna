@@ -64,6 +64,12 @@ es:
       water_this_plant: "Regar esta planta"
       delete_plant: "Eliminar planta"
       log: "Registro"
+      timeline: "Línea de tiempo"
+      new_watering: "Nuevo riego"
+      export_plant: "Exportar planta"
+      plants: "Plantas"
+    plant:
+      water_this_plant: "Regar esta planta"
     edit:
       editing_plant: "Editando planta"
     messages:
@@ -71,7 +77,7 @@ es:
       create_success: "La planta fue creada exitosamente."
       delete_success: "La planta fue eliminada exitosamente."
       confirm_delete: "¿Está seguro de que desea eliminar esta planta y todos sus datos asociados?"
-    back_to_plants: "Volver a las plantas"
+    all_plants: "Todas las plantas"
     create_plant: "Crear planta"
     update_plant: "Actualizar planta"
   waterings:
@@ -84,6 +90,7 @@ es:
     delete_watering: "Eliminar esta riego"
     create_watering: "Crear riego"
     update_watering: "Actualizar riego"
+    repeat_watering: "Repetir riego"
     messages:
       create_success: "El riego creado exitosamenta."
       watering_updated: "El riego se actualizó exitosamente."
@@ -124,8 +131,9 @@ es:
     today: "Hoy"
     tomorrow: "Mañana"
     yesterday: "Ayer"
-    days_ago: "Hace %{days} días"
+    days_ago: "hace %{days} días"
     days: "días"
+    never: "Nunca"
   attributes:
     name: "Nombre"
     created: "Creado"
@@ -151,6 +159,13 @@ es:
     collaborations: "Colaboradores"
     account_created: "Cuenta creada"
     account_updated: "Cuenta actualizada"
+    type: "Tipo"
+    when: "Cuándo"
+    details: "Detalles"
+    actions: "Acciones"
+    description: "Descripción"
+    updated_at: "Actualizado el"
+    volume: "Volumen"
   roles:
     viewer: "Espectador"
     editor: "Editor"
@@ -170,6 +185,11 @@ es:
   scheduled_before: 'Programado después de'
   archived: '¿Archivada?'
   clear_search: 'Borrar búsqueda'
+  new_log_entry: 'Nueva entrada de registro'
+  timeline:
+    log_entry: 'Entrada de registro'
+    watering: 'Riego'
+    watered: 'Regado'
   log_entries:
     create: 'Crear una entrada de registro'
     update: 'Atualizar entrada de registro'

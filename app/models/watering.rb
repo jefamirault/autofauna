@@ -68,20 +68,26 @@ class Watering < ApplicationRecord
   end
 
   def volume_and_notes
-    "#{print_volume} #{self.notes.nil? || self.notes == '' ? 'water' : self.notes}"
+    "<strong>#{print_volume}</strong> #{self.notes.nil? || self.notes == '' ? 'water' : self.notes}".html_safe
   end
 
   private
 
   def update_watering_intervals
+    # Skip if plant is being destroyed
+    return if plant.destroyed?
+
     # created or deleted or date changed
     if previous_changes[:id] || self.destroyed? || previous_changes[:date]
-      later_waterings = plant.waterings.select {|w| w.date >= self.date}
+      later_waterings = plant.waterings.reject(&:frozen?).select {|w| w.date >= self.date}
       later_waterings.each &:set_interval
     end
   end
 
   def update_last_watering
+    # Skip if plant is being destroyed
+    return if plant.destroyed?
+
     date = plant.waterings.order(:date).last&.date
     unless plant.date_last_watering == date
       plant.update date_last_watering: date

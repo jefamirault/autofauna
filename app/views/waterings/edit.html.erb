@@ -16,3 +16,7 @@
 <p>
   <%= link_to t('actions.discard_changes'), @watering %>
 </p>
+
+<p>
+  <%= button_to t('waterings.delete_watering'), @watering, method: :delete, class: 'buttonLink', onclick: "return confirm('#{t 'waterings.messages.confirm_delete'}');" %>
+</p>

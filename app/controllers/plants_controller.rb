@@ -61,6 +61,12 @@ class PlantsController < ApplicationController
   # GET /plants/1 or /plants/1.json
   def show
     @log_entries = @plant.log_entries.reverse
+
+    # Combine log entries and waterings into a single timeline
+    log_items = @log_entries.map { |entry| { type: :log_entry, date: entry.timestamp, object: entry } }
+    watering_items = @plant.waterings.map { |watering| { type: :watering, date: watering.date.to_datetime, object: watering } }
+
+    @timeline = (log_items + watering_items).sort_by { |item| item[:date] }.reverse
   end
 
   # GET /plants/new

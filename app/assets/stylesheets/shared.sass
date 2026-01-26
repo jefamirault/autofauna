@@ -5,6 +5,7 @@ $lightgreensolid: rgb(217, 228, 226)
 
 // development
 $brightgreen: #008c4b
+$greygreen: #2c4944
 
 $blue: #0E487B
 $lightblue: rgba(14, 72, 123, 0.1)
@@ -236,15 +237,239 @@ p.large
     flex: 1
 .link
   @extend a
-  padding: 0 16px
-  margin: 0 4px
+  display: inline-block
+  padding: 8px 16px
+  margin: 4px
+  background: #517c68
+  //border: 1px solid #2a7954
+  border-radius: 6px
+  font-size: 95%
+  color: white
+  &:hover
+    background: #1ba562
+    color: white
+    text-decoration: none
 .buttonLink
   @extend .link
-  border: 0
-  background: none
-  font-size: 100%
+  font-family: Roboto, verdana, sans-serif
   cursor: pointer
 
 //  icons
 svg
   vertical-align: middle
+
+// Timeline table with mixed row colors
+table.timeline
+  width: 100%
+  table-layout: fixed
+
+  .whenColumn
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+    width: 100%
+
+  tbody
+    tr.log-entry-row
+      &:hover
+        background: rgba(0, 77, 64, 0.25)
+      td
+        border-color: $lightgreen !important
+      &:nth-child(odd)
+        background: $lightgreen
+        &:hover
+          background: rgba(0, 77, 64, 0.25)
+        td:first-child
+          border-left: 2px solid transparent
+        td:last-child
+          border-right: 2px solid transparent
+      &:nth-child(even) td
+        border-top: 2px solid $lightgreen
+        border-bottom: 2px solid $lightgreen
+      &:nth-child(even) td:first-child
+        border-left: 2px solid $lightgreen
+      &:nth-child(even) td:last-child
+        border-right: 2px solid $lightgreen
+
+    tr.watering-row
+      &:hover
+        background: rgba(14, 72, 123, 0.2)
+      td
+        border-color: $lightblue !important
+      &:nth-child(odd)
+        background: $lightblue
+        &:hover
+          background: rgba(14, 72, 123, 0.2)
+        td:first-child
+          border-left: 2px solid transparent
+        td:last-child
+          border-right: 2px solid transparent
+      &:nth-child(even) td
+        border-top: 2px solid $lightblue
+        border-bottom: 2px solid $lightblue
+      &:nth-child(even) td:first-child
+        border-left: 2px solid $lightblue
+      &:nth-child(even) td:last-child
+        border-right: 2px solid $lightblue
+
+  .metadata, .notes, .interval
+    font-size: 90%
+    color: #666
+
+  .updated-at
+    float: right
+    font-size: 0.85em
+
+  .timeline-icon
+    font-size: 1.3em
+    margin: 0 0.3em
+
+  .watering-notes
+    margin-left: 0.3em
+
+  .no-volume
+    color: #bbb
+    margin: 0 0.5em
+
+  .watering-time, .entry-time
+    margin-left: 1.5em
+
+  .typeColumn
+    font-weight: 500
+    white-space: nowrap
+
+  .detailsColumn
+    div
+      margin: 2px 0
+
+// Plant info card
+.plant-info-card
+  margin: 1.5rem 0
+
+  .plant-info-grid
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: 1.5rem
+
+    @media (max-width: 750px)
+      grid-template-columns: 1fr
+
+  .plant-info-section
+    background: $lightgreen
+    border-radius: 8px
+    border-left: 4px solid $green
+
+    &:not(.watering-section)
+      padding: 1rem 1.25rem
+
+  .info-row
+    display: flex
+    justify-content: space-between
+    padding: 0.4rem 0
+    border-bottom: 1px solid rgba(0, 77, 64, 0.1)
+
+    &:last-of-type
+      border-bottom: none
+
+    &.primary
+      font-size: 1.1em
+
+    &.archived
+      color: $yellow
+
+    .label
+      color: $darkgreen
+      font-weight: 500
+
+    .value
+      color: #333
+      text-align: right
+
+  .watering-section
+    display: flex
+    align-items: stretch
+    background: $lightblue
+    border-left-color: $blue
+
+    &.urgent .watering-suggestion
+      color: $yellow
+
+    &.today .watering-suggestion
+      color: $green
+
+  .water-icon-link
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    order: 2
+    padding: 1rem
+    border-radius: 0 4px 4px 0
+    text-decoration: none
+    flex: 1
+
+    &:hover
+      background: rgba(14, 72, 123, 0.15)
+      text-decoration: none
+
+    &.normal
+      color: $blue
+
+    &.urgent
+      color: $yellow
+
+    &.none
+      color: #999
+
+    &.today
+      color: $green
+
+  .water-icon
+    width: 4em
+    height: 4em
+
+  .water-helper-text
+    //font-size: 0.9em
+    margin-top: 0.5em
+    //opacity: 0.5
+    color: #888
+
+  .click-text
+    display: none
+    @media (hover: hover)
+      display: inline
+
+  .tap-text
+    display: inline
+    @media (hover: hover)
+      display: none
+
+  .watering-text
+    flex: 1
+    order: 1
+    user-select: text
+    text-align: center
+    padding: 1rem 1.25rem
+    display: flex
+    flex-direction: column
+    justify-content: space-around
+
+  .watering-suggestion
+    font-size: 1.5em
+    color: $blue
+    margin-bottom: 0.25rem
+
+  .watering-history
+    color: #888
+    font-size: 0.85em
+    margin-bottom: 1rem
+
+  .watering-details
+    color: #444
+
+    .watering-notes-text
+      color: #888
+      font-size: 0.85em
+
+.plant-actions
+  margin: 1rem 0
