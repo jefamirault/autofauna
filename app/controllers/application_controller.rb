@@ -84,10 +84,20 @@ class ApplicationController < ActionController::Base
     current_user.present?
   end
   helper_method :user_signed_in?
+
+  def show_project_ui?
+    current_user&.advanced_mode?
+  end
+  helper_method :show_project_ui?
   def login(user)
     Current.user = user
     reset_session
     cookies.encrypted[:user_id] = { value: user.id, expires: 6.months }
+
+    # Ensure user has at least one project (for existing users)
+    if user.projects.empty? && Collaboration.where(user: user).empty?
+      user.projects.create(name: "My Plants")
+    end
   end
 
   def logout

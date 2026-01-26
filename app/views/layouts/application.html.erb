@@ -33,7 +33,7 @@
     </header>
 
     <aside id="sidebar">
-      <% if current_project %>
+      <% if current_project && show_project_ui? %>
         <div id="currentProject">
           <%= current_project || t('.current_project') %>
           <%= link_to icon('cog-6-tooth', variant: 'solid'), project_path(current_project), class: 'iconLink' %>
@@ -69,7 +69,7 @@
           <%= nav_link 'users' %>
         <% end %>
 
-        <% if current_project %>
+        <% if current_project && show_project_ui? %>
           <%= nav_link 'projects', action: 'show', text: t('.project_settings'), path: project_path(current_project) %>
         <% end %>
 

@@ -7,7 +7,8 @@ class RegistrationsController < ApplicationController
     @user = User.new registration_params
     if @user.save
       login @user
-      redirect_to root_path
+      set_current_project @user.projects.first
+      redirect_to plants_path
     else
       render :new, status: :unprocessable_entity
     end

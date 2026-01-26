@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_16_131445) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_26_204657) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -127,6 +127,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_16_131445) do
     t.boolean "admin"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "advanced_mode", default: false
   end
 
   create_table "water_tests", force: :cascade do |t|

@@ -4,6 +4,8 @@ class User < ApplicationRecord
   has_many :collaborations
   has_many :projects, foreign_key: :owner_id
 
+  after_create :create_default_project
+
   validates :email, presence: true
   normalizes :email, with: -> { _1.strip.downcase }
   validates :email, uniqueness: true
@@ -18,5 +20,11 @@ class User < ApplicationRecord
 
   def to_s
     self.email
+  end
+
+  private
+
+  def create_default_project
+    projects.create(name: "My Plants")
   end
 end

@@ -4,8 +4,18 @@ class ProjectsController < ApplicationController
   before_action :authenticate, only: [:new, :create]
   before_action :authorize_viewer, only: [:show]
   before_action :authorize_editor, except: [:show, :index, :new, :create]
+  before_action :require_advanced_mode, only: [:show, :edit, :new]
 
   def index
+    # Non-advanced users should be auto-routed to their single project
+    if current_user && !current_user.advanced_mode?
+      project = current_user.projects.first || Collaboration.find_by(user: current_user)&.project
+      if project
+        set_current_project(project)
+        return redirect_to plants_path
+      end
+    end
+
     if !current_user&.admin?
       ownerships = current_user&.projects || []
       collaborations = Collaboration.where(user: current_user).map &:project
@@ -80,6 +90,12 @@ class ProjectsController < ApplicationController
   end
 
   private
+
+  def require_advanced_mode
+    unless current_user&.advanced_mode? || current_user&.admin?
+      redirect_to plants_path
+    end
+  end
 
   def set_project
     @project = Project.find params[:id]
