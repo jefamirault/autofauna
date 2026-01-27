@@ -18,14 +18,11 @@
   <% end %>
 </div>
 
-<table class="blue plant-cards">
-  <%= render 'plant_row_header' %>
-  <tbody>
+<div class="plant-cards">
   <% @plants.each do |plant| %>
     <%= render 'plant_row', plant: plant %>
   <% end %>
-  </tbody>
-</table>
+</div>
 
 <div style=" text-align: center;">
   <div class="plantButton">

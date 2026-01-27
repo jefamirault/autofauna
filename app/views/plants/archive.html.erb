@@ -16,11 +16,8 @@
     - <%= link_to t('clear_search'), plants_archive_path %>
   <% end %>
 </div>
-<table class="blue plant-cards">
-  <%= render 'plant_row_header', archive: true %>
-  <tbody>
+<div class="plant-cards">
   <% @plants.each do |plant| %>
     <%= render 'plant_row', plant: plant, archive: true %>
   <% end %>
-  </tbody>
-</table>
+</div>

@@ -256,3 +256,83 @@ Behavior:
 | Plants Index on mobile | Table with horizontal scroll, columns cut off | Stacked card layout, all info visible |
 | Tap nav link on mobile | Sidebar stays open, user must close manually | Sidebar auto-closes |
 | Navigate between pages (mobile) | Sidebar flashes open then animates closed | Sidebar stays closed instantly |
+
+---
+
+# Agent Log: Plants Index Card Layout Refactor
+
+**Date:** 2026-01-26
+**Task:** Refactor Plants index to flexbox card layout with urgency-based color coding
+
+## Summary
+
+Refactored the Plants index from table-based layout to a clean flexbox card layout. Added watering urgency-based color coding for rows and water buttons. The layout is now a 3-column structure: plant graphic, details, and full-height water button.
+
+## Changes Made
+
+### Views
+
+- **`app/views/plants/_plant_row.html.erb`** - Complete rewrite
+  - Changed from `<tr>/<td>` table structure to `<div>` flexbox structure
+  - 3-column layout: graphic, details, water button
+  - Added `watering_urgency` class to card for CSS color targeting
+  - Water button now uses SVG droplet icon instead of text
+  - Uses placeholder.png when plant has no graphic selected
+
+- **`app/views/plants/index.html.erb`**
+  - Changed from `<table class="blue plant-cards">` to `<div class="plant-cards">`
+  - Removed table header render
+
+- **`app/views/plants/archive.html.erb`**
+  - Same changes as index (div container instead of table)
+
+- **`app/views/plants/edit.html.erb`**
+  - Changed delete button class from `buttonLink` to `buttonLinkDanger`
+
+### Stylesheets
+
+- **`app/assets/stylesheets/plants.sass`** - Complete rewrite of card styles
+  - Color variables for urgency states (green, blue, yellow + light variants)
+  - `.plant-cards` - flex column container with gap
+  - `.plant-card` - flex row with urgency-based background colors
+  - `.plant-card-graphic` - column 1, no margins, 100x100 image
+  - `.plant-card-details` - column 2, with padding, contains name/watering/meta
+  - `.water-icon-link` - column 3, full height, urgency-colored icon
+  - Overflow handling for long watering notes (text-overflow: ellipsis)
+
+- **`app/assets/stylesheets/shared.sass`**
+  - Added `.buttonLinkDanger` class for red delete buttons
+
+## Card Structure
+
+```
+.plant-card (display: flex)
+├── .plant-card-graphic     (column 1: 100x100 image, no margins)
+├── .plant-card-details     (column 2: padding, flex: 1)
+│   ├── .plant-card-name
+│   ├── .plant-card-watering
+│   └── .plant-card-meta
+│       ├── .plant-card-last-watering
+│       ├── .plant-card-location
+│       └── .plant-card-container
+└── .water-icon-link        (column 3: full height, SVG icon)
+```
+
+## Urgency Color Coding
+
+| Status | Background | Border/Icon Color | Text Color |
+|--------|------------|-------------------|------------|
+| normal | $lightblue | $blue | $blue |
+| today | $lightgreen | $green | $green |
+| urgent | $lightyellow | $yellow | $yellow |
+| none | light grey | #999 | #999 |
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| Full-height water button | Entire right side of card is clickable |
+| Urgency colors | Row background and icon color reflect watering status |
+| Placeholder graphic | Plants without graphic show placeholder.png |
+| Ellipsis overflow | Long watering notes truncate with ellipsis |
+| Red delete button | Delete button on edit page uses danger styling |

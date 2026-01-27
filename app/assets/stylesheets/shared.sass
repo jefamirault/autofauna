@@ -257,6 +257,13 @@ p.large
   font-family: Roboto, verdana, sans-serif
   cursor: pointer
 
+.buttonLinkDanger
+  @extend .buttonLink
+  background: #7c5151
+  color: white
+  &:hover
+    background: #a52f2f
+
 //  icons
 svg
   vertical-align: middle
@@ -406,8 +413,7 @@ table.timeline
     align-items: center
     justify-content: center
     order: 2
-    padding: 1rem
-    border-radius: 0 4px 4px 0
+    padding: 2rem
     text-decoration: none
     flex: 1
 
