@@ -48,6 +48,19 @@ body
   &.development
     background-image: url("background2.jpg")
 
+// Support for early sidebarMinimized class on html element (prevents FOUC)
+html.sidebarMinimized body
+  @media (max-width: 600px)
+    grid-template-rows: 4rem 0 1fr auto
+    aside#sidebar
+      opacity: 0
+      pointer-events: none
+
+  @media (min-width: 600px)
+    grid-template-columns: 0 1fr
+    aside#sidebar
+      pointer-events: none
+      opacity: 0
 
 body.development
   header

@@ -185,3 +185,74 @@ Implemented a plant graphics feature that allows users to select a profile pictu
 1. Add PNG file to `app/assets/images/plant_graphics/`
 2. Filename becomes the graphic name (e.g., `rose.png` → "Rose" in dropdown)
 3. No code changes required - automatically detected
+
+---
+
+# Agent Log: Mobile UX Improvements
+
+**Date:** 2026-01-26
+**Task:** Improve mobile experience for Plants Index and navigation
+
+## Summary
+
+Implemented three mobile UX improvements:
+1. Responsive card layout for Plants Index on mobile screens
+2. Auto-close navigation menu when selecting an item on mobile
+3. Fix FOUC (flash of unstyled content) when navigating between pages
+
+## Changes Made
+
+### 1. Mobile Plants Index Card Layout
+
+**File:** `app/assets/stylesheets/plants.sass`
+
+Added responsive styles for screens ≤600px that transform the table into stacked cards:
+
+| Row | Content |
+|-----|---------|
+| 1 | Graphic (48px) + Plant Name + Action Button |
+| 2 | Watering suggestion with "Water:" prefix |
+| 3 | Last watering with "Last:" prefix |
+| 4 | Location (📍) + Container (🪴) side-by-side |
+
+Features:
+- Flexbox with `order` property for column reordering
+- Blue left border accent for card styling
+- Touch-friendly action buttons with active states
+- Automatic support for archive page (fewer columns)
+
+### 2. Mobile Nav Auto-Close
+
+**Files:**
+- `app/javascript/controllers/sidebar_controller.js` - Added `closeOnMobile()` method
+- `app/views/layouts/application.html.erb` - Added Stimulus action to nav elements
+
+Behavior:
+- When user taps a nav link on mobile (<600px), sidebar closes automatically
+- Desktop behavior unchanged
+- State persisted to localStorage
+
+### 3. Sidebar FOUC Fix
+
+**Problem:** After closing sidebar and navigating, sidebar would flash open then animate closed again.
+
+**Root Cause:** Sidebar state was only applied after Stimulus controller connected, and global `transition: all 0.15s` caused visible animation.
+
+**Solution:** Apply sidebar state before render using inline script.
+
+**Files Modified:**
+
+| File | Change |
+|------|--------|
+| `app/views/layouts/application.html.erb` | Added inline `<script>` in `<head>` to apply `sidebarMinimized` and `no-transition` classes before render |
+| `app/assets/stylesheets/layout.sass` | Added `html.sidebarMinimized body` selectors for early class support |
+| `app/assets/stylesheets/shared.sass` | Added `html.no-transition *` rule to disable transitions during load |
+| `app/javascript/controllers/sidebar_controller.js` | Remove `no-transition` after connect; manage class on both `html` and `body` |
+
+## Behavior Changes
+
+| Scenario | Before | After |
+|----------|--------|-------|
+| Plants Index on mobile | Table with horizontal scroll, columns cut off | Stacked card layout, all info visible |
+| Tap nav link on mobile | Sidebar stays open, user must close manually | Sidebar auto-closes |
+| Navigate between pages (mobile) | Sidebar flashes open then animates closed | Sidebar stays closed instantly |

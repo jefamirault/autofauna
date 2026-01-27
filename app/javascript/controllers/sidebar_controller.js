@@ -17,6 +17,11 @@ export default class extends Controller {
 
         // Initialize touch handling
         this.initializeTouchHandling()
+
+        // Re-enable transitions after initial state is applied
+        requestAnimationFrame(() => {
+            document.documentElement.classList.remove('no-transition')
+        })
     }
 
     disconnect() {
@@ -137,18 +142,30 @@ export default class extends Controller {
         localStorage.setItem('sidebar-minimized', JSON.stringify(this.minimizedValue))
     }
 
+    closeOnMobile() {
+        const isMobile = window.innerWidth < 600
+        if (isMobile && !this.minimizedValue) {
+            this.minimizedValue = true
+            this.updateSidebar()
+            localStorage.setItem('sidebar-minimized', JSON.stringify(this.minimizedValue))
+        }
+    }
+
     updateSidebar() {
         const button = this.toggleButtonTarget
         const body = document.body
+        const html = document.documentElement
 
         if (this.minimizedValue) {
             // Minimize sidebar - add class to body for grid layout change
             body.classList.add(...this.minimizedClasses)
+            html.classList.add(...this.minimizedClasses)
             button.innerHTML = this.getExpandIcon()
             button.setAttribute('aria-label', 'Expand sidebar')
         } else {
             // Maximize sidebar - remove class from body
             body.classList.remove(...this.minimizedClasses)
+            html.classList.remove(...this.minimizedClasses)
             button.innerHTML = this.getCollapseIcon()
             button.setAttribute('aria-label', 'Collapse sidebar')
         }

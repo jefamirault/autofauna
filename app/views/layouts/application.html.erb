@@ -3,6 +3,21 @@
   <head>
     <title><%= yield(:title).empty? ? "#{params[:controller].titleize} - #{params[:action].titleize}" : yield(:title) %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <script>
+      // Apply sidebar state before render to prevent FOUC
+      (function() {
+        try {
+          var stored = localStorage.getItem('sidebar-minimized');
+          var isMobile = window.innerWidth < 600;
+          var shouldMinimize = stored ? JSON.parse(stored) : isMobile;
+          if (shouldMinimize) {
+            document.documentElement.classList.add('sidebarMinimized');
+          }
+          // Disable transitions until JS loads
+          document.documentElement.classList.add('no-transition');
+        } catch (e) {}
+      })();
+    </script>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -39,7 +54,7 @@
           <%= link_to icon('cog-6-tooth', variant: 'solid'), project_path(current_project), class: 'iconLink' %>
         </div>
       <% end %>
-      <nav>
+      <nav data-action="click->sidebar#closeOnMobile">
         <%= nav_link 'plants', action: 'index' %>
         <% if params[:controller] == 'plants' || params[:controller] == 'waterings' %>
           <div class="indent">
@@ -64,7 +79,7 @@
         <% end %>
       </nav>
       <div class="fill"></div>
-      <nav class="logged_in">
+      <nav class="logged_in" data-action="click->sidebar#closeOnMobile">
         <% if current_user&.admin? %>
           <%= nav_link 'users' %>
         <% end %>

@@ -1,3 +1,5 @@
+$lightgreen: rgba(0, 77, 64, 0.15)
+
 // Plants > Index
 .graphicColumn
   width: 64px
@@ -9,20 +11,6 @@
   object-fit: contain
   vertical-align: middle
 
-.plantColumn
-  max-width: 12rem
-
-.nextWateringColumn
-  max-width: 10rem
-
-.lastWateringColumn
-  max-width: 15rem
-
-.locationColumn
-  max-width: 12rem
-
-.containerColumn
-  max-width: 6rem
 
 // Plants > Show
 .wateringNotesColumn
@@ -64,3 +52,102 @@
   width: 128px
   height: 128px
   object-fit: contain
+
+// Card layout styles for plant index (all screen sizes)
+table.blue.plant-cards
+  thead
+    display: none
+
+  tbody tr
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    padding: 0.75rem 0.5rem
+    margin-bottom: 0.5rem
+    background: rgba(255, 255, 255, 0.5)
+    background: $lightgreen
+    border-left: 3px solid #0E487B
+    border-radius: 4px
+
+    &:active
+      background: rgba(14, 72, 123, 0.1)
+
+    // Reset alternating row styles for card layout
+    &:nth-child(odd), &:nth-child(even)
+      //background: rgba(255, 255, 255, 0.5)
+      td
+        border: none
+
+  tbody td
+    padding: 0.25rem 0.5rem
+    white-space: normal
+    overflow: visible
+    max-width: none
+
+  // Row 1: Graphic + Name + Action
+  .graphicColumn
+    width: 64px
+    padding: 0 0.5rem 0 0
+    order: 1
+
+  .plant-row-graphic
+    width: 64px
+    height: 64px
+
+  .plantColumn
+    flex: 1
+    min-width: 0
+    order: 2
+    font-size: 1.1em
+
+  .actionColumn
+    order: 3
+    width: auto
+    padding-left: 0.5rem
+    a
+      display: inline-block
+      padding: 0.5rem 1rem
+      background: rgba(14, 72, 123, 0.1)
+      border-radius: 4px
+      font-weight: 500
+      &:active
+        background: rgba(14, 72, 123, 0.2)
+
+  // Row 2: Suggestion (full width)
+  .nextWateringColumn
+    order: 4
+    width: 100%
+    padding-top: 0.5rem
+    color: #0E487B
+    font-weight: 500
+    &::before
+      content: "💧"
+      color: #666
+
+  // Row 3: Last Watering (full width)
+  .lastWateringColumn
+    order: 5
+    width: 100%
+    font-size: 0.9em
+    color: #666
+    &::before
+      content: "⌛"
+
+  // Row 4: Location + Container (side by side)
+  .locationColumn
+    order: 6
+    width: 50%
+    font-size: 0.85em
+    color: #888
+    &::before
+      content: "📍"
+      font-style: normal
+
+  .containerColumn
+    order: 7
+    width: 50%
+    font-size: 0.85em
+    color: #888
+    &::before
+      content: "🪴 "
+      font-style: normal
