@@ -336,3 +336,76 @@ Refactored the Plants index from table-based layout to a clean flexbox card layo
 | Placeholder graphic | Plants without graphic show placeholder.png |
 | Ellipsis overflow | Long watering notes truncate with ellipsis |
 | Red delete button | Delete button on edit page uses danger styling |
+
+---
+
+# Agent Log: Plant Card UI Enhancements
+
+**Date:** 2026-01-28
+**Task:** Improve plant card layout, responsive text, and edit form safety
+
+## Summary
+
+Redesigned the plant card layout from 3 columns to a structured layout with UID, name above graphic, responsive long/short text for watering info, selective bold formatting, and a safer archived checkbox on the edit form.
+
+## Changes Made
+
+### Views
+
+- **`app/views/plants/_plant_row.html.erb`** - Restructured card layout
+  - Plant label (UID + name) displayed above graphic in a fixed-width column
+  - Watering suggestion moved to first item in details column
+  - Last watering split into separate time and info lines (with 🧪 icon for info)
+  - Jar icon (🫙) replaces plant pot icon for container
+  - Entire water column is now a single clickable link (not just the icon)
+  - "Click to Water" / "Tap to Water" helper text beneath water button
+  - Long/short text spans with `.long-text` / `.short-text` classes for responsive display
+  - `.html_safe` used for watering text containing `<strong>` tags
+
+- **`app/views/plants/_form.html.erb`** - Safer archived checkbox
+  - Checkbox and label displayed inline in `.archived-checkbox` wrapper
+  - Added `data-confirm` dialog to prevent accidental archiving
+
+### Models
+
+- **`app/models/plant.rb`**
+  - `time_until_watering_text` — added `<strong>` tags around key parts (e.g. "Watering **5 days late**", "Water **today**", "Water in **3 days**")
+  - `time_until_watering_short_text` — new method for mobile-friendly abbreviated text with `<strong>` tags
+
+### Helpers
+
+- **`app/helpers/plants_helper.rb`**
+  - `last_watering_time_text` — now returns "Last watered **X days ago**" with `<strong>` tag
+  - `last_watering_time_short_text` — new method returning abbreviated "**X days**" with `<strong>` tag
+  - `last_watering_info_text` — new method returning volume/notes or nil
+
+### Stylesheets
+
+- **`app/assets/stylesheets/plants.sass`**
+  - Fixed-width graphic column (160px desktop, 120px mobile) with `max-width` constraint
+  - Plant name truncates with ellipsis for long names
+  - Graphic image has `min-width: 120px` to prevent shrinking
+  - `.plant-card-water-col` styled as the clickable link container with hover states
+  - `.plant-card-watering` no longer has blanket `font-weight: 500` (bold is selective via `<strong>`)
+  - `.long-text` / `.short-text` / `.desktop-only` / `.mobile-only` responsive visibility classes
+  - `.archived-checkbox` — inline flex layout with normal-scale checkbox
+  - Mobile breakpoint (768px) swaps long/short text and adjusts sizing
+
+## Card Structure
+
+```
+.plant-card (display: flex)
+├── .plant-card-graphic-col  (fixed width: 160px / 120px mobile)
+│   ├── .plant-card-name     (plant.label: "#uid name", truncates)
+│   └── .plant-card-graphic  (120px image, min-width enforced)
+├── .plant-card-details      (flex: 1)
+│   ├── .plant-card-watering (💧 suggestion, long/short text)
+│   └── .plant-card-meta
+│       ├── .plant-card-last-watering-time (⌛ long/short text)
+│       ├── .plant-card-last-watering-info (🧪 volume/notes)
+│       ├── .plant-card-location (📍)
+│       └── .plant-card-container (🫙)
+└── .plant-card-water-col    (clickable link, full height)
+    ├── .water-icon (SVG droplet)
+    └── .plant-card-water-helper (Click/Tap to Water)
+```

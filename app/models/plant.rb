@@ -95,20 +95,44 @@ class Plant < ApplicationRecord
       min_watering_days = ((date_last_watering + min_watering_freq.days) - Time.zone.now.to_date).to_i
       max_watering_days = ((date_last_watering + max_watering_freq.days) - Time.zone.now.to_date).to_i
       if max_watering_days < 0
-        "#{max_watering_days * -1} days late"
+        "Watering <strong>#{max_watering_days * -1} days late</strong>"
       elsif max_watering_days == 0
-        "Water today"
+        "Water <strong>Today</strong>"
       elsif min_watering_days > 0
         if min_watering_freq == max_watering_freq
-          "Water in #{min_watering_days} day#{min_watering_days > 1 ? 's' : ''}"
+          "Water in <strong>#{min_watering_days} day#{min_watering_days > 1 ? 's' : ''}</strong>"
         else
-          "Water in #{min_watering_days} - #{max_watering_days} days"
+          "Water in <strong>#{min_watering_days} - #{max_watering_days} days</strong>"
         end
       else
-        "Water within #{max_watering_days} day#{max_watering_days > 1 ? 's' : ''}"
+        "Water within <strong>#{max_watering_days} day#{max_watering_days > 1 ? 's' : ''}</strong>"
       end
     else
       "Unscheduled"
+    end
+  end
+
+  def time_until_watering_short_text
+    if date_last_watering && min_watering_freq && max_watering_freq
+      max_watering_days = ((date_last_watering + max_watering_freq.days) - Time.zone.now.to_date).to_i
+      if max_watering_days < 0
+        "<strong>#{max_watering_days * -1} days late</strong>"
+      elsif max_watering_days == 0
+        "<strong>Today</strong>"
+      else
+        min_watering_days = ((date_last_watering + min_watering_freq.days) - Time.zone.now.to_date).to_i
+        if min_watering_days > 0
+          if min_watering_freq == max_watering_freq
+            "<strong>#{min_watering_days} day#{min_watering_days > 1 ? 's' : ''}</strong>"
+          else
+            "<strong>#{min_watering_days} - #{max_watering_days} days</strong>"
+          end
+        else
+          "<strong>#{max_watering_days} day#{max_watering_days > 1 ? 's' : ''}</strong>"
+        end
+      end
+    else
+      "—"
     end
   end
 

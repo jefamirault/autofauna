@@ -19,4 +19,36 @@ module PlantsHelper
       end
     end
   end
+
+  def last_watering_time_text(plant)
+    watering = plant.last_watering
+    if watering.nil?
+      'Never'
+    else
+      "Last watered <strong>#{time_ago plant.date_last_watering}</strong>"
+    end
+  end
+
+  def last_watering_time_short_text(plant)
+    watering = plant.last_watering
+    if watering.nil?
+      'Never'
+    else
+      days_ago = (Time.zone.now.to_date - plant.date_last_watering.to_date).to_i
+      if days_ago == 0
+        '<strong>Today</strong>'
+      elsif days_ago == 1
+        '<strong>1 day</strong>'
+      else
+        "<strong>#{days_ago} days</strong>"
+      end
+    end
+  end
+
+  def last_watering_info_text(plant)
+    watering = plant.last_watering
+    return nil if watering.nil?
+    return nil if watering.volume.nil? && (watering.notes.nil? || watering.notes == '')
+    watering.volume_and_notes
+  end
 end

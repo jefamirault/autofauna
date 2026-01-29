@@ -1,45 +1,57 @@
 <% archive ||= false %>
 <div id="<%= dom_id plant %>" class="plant-card <%= plant.watering_urgency %>">
-  <%= link_to plant_path(plant.id), class: "plant-card-graphic" do %>
-    <%= image_tag plant.graphic.present? ? plant.graphic_path : "plant_graphics/placeholder.png", alt: "" %>
-  <% end %>
-  <div class="plant-card-details">
+  <div class="plant-card-graphic-col">
     <div class="plant-card-name">
       <%= link_to plant.label, plant_path(plant.id) %>
     </div>
+    <%= link_to plant_path(plant.id), class: "plant-card-graphic" do %>
+      <%= image_tag plant.graphic.present? ? plant.graphic_path : "plant_graphics/placeholder.png", alt: "" %>
+    <% end %>
+  </div>
+  <div class="plant-card-details">
     <% unless archive %>
       <div class="plant-card-watering">
-        💧 <%= plant.time_until_watering_text %>
+        💧 <span class="long-text"><%= plant.time_until_watering_text.html_safe %></span><span class="short-text"><%= plant.time_until_watering_short_text.html_safe %></span>
       </div>
     <% end %>
     <div class="plant-card-meta">
-      <span class="plant-card-last-watering">⌛ <%= last_watering_text(plant).html_safe %></span>
+      <div class="plant-card-last-watering-time">⌛ <span class="long-text"><%= last_watering_time_text(plant).html_safe %></span><span class="short-text"><%= last_watering_time_short_text(plant).html_safe %></span></div>
+      <% info = last_watering_info_text(plant) %>
+      <% if info.present? %>
+        <div class="plant-card-last-watering-info">🧪 <%= info %></div>
+      <% end %>
       <% if plant.location.present? %>
         <span class="plant-card-location">📍 <%= plant.location %></span>
       <% end %>
       <% if plant.pot.present? %>
-        <span class="plant-card-container">🪴 <%= plant.pot %></span>
+        <span class="plant-card-container">🫙 <%= plant.pot %></span>
       <% end %>
     </div>
   </div>
   <% unless archive %>
     <% if plant.date_last_watering == Time.zone.now.to_date %>
-      <%= link_to edit_watering_path(plant.waterings.last), class: "water-icon-link #{plant.watering_urgency}" do %>
+      <%= link_to edit_watering_path(plant.waterings.last), class: "plant-card-water-col water-icon-link #{plant.watering_urgency}" do %>
         <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
         </svg>
+        <span class="plant-card-water-helper desktop-only">Click to Water</span>
+        <span class="plant-card-water-helper mobile-only">Tap to Water</span>
       <% end %>
     <% elsif plant.last_watering %>
-      <%= link_to plant_water_path(plant, volume: plant.last_watering.volume, units: plant.last_watering.units, notes: plant.last_watering.notes), class: "water-icon-link #{plant.watering_urgency}" do %>
+      <%= link_to plant_water_path(plant, volume: plant.last_watering.volume, units: plant.last_watering.units, notes: plant.last_watering.notes), class: "plant-card-water-col water-icon-link #{plant.watering_urgency}" do %>
         <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
         </svg>
+        <span class="plant-card-water-helper desktop-only">Click to Water</span>
+        <span class="plant-card-water-helper mobile-only">Tap to Water</span>
       <% end %>
     <% else %>
-      <%= link_to plant_water_path(plant), class: "water-icon-link #{plant.watering_urgency}" do %>
+      <%= link_to plant_water_path(plant), class: "plant-card-water-col water-icon-link #{plant.watering_urgency}" do %>
         <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
         </svg>
+        <span class="plant-card-water-helper desktop-only">Click to Water</span>
+        <span class="plant-card-water-helper mobile-only">Tap to Water</span>
       <% end %>
     <% end %>
   <% end %>

@@ -10,7 +10,7 @@
       <% end %>
       <div class="watering-text">
         <div class="watering-suggestion">
-          <%= @plant.time_until_watering_text %> 🕐
+          <%= @plant.time_until_watering_text.html_safe %> 🕐
         </div>
         <div class="watering-history">
           <%= t('attributes.last_watered') %> <%= time_ago(@plant.date_last_watering) || t('time.never') %>

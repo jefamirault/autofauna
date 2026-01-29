@@ -47,6 +47,15 @@ $lightyellow: rgba(206, 154, 0, 0.2)
   height: 128px
   object-fit: contain
 
+// Archived Checkbox (Edit form)
+.archived-checkbox
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  input[type=checkbox]
+    transform: scale(1)
+    width: auto
+
 // Plant Cards (Index/Archive)
 .plant-cards
   display: flex
@@ -55,6 +64,7 @@ $lightyellow: rgba(206, 154, 0, 0.2)
 
 .plant-card
   display: flex
+  align-items: stretch
   border-radius: 4px
   background: $lightblue
 
@@ -78,66 +88,98 @@ $lightyellow: rgba(206, 154, 0, 0.2)
   &.none
     background: rgba(153, 153, 153, 0.1)
 
-// Column 1: Plant graphic (no margins)
+// Column 2: Name + Graphic
+.plant-card-graphic-col
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  flex: 0 0 160px
+  min-width: 0
+  max-width: 160px
+  overflow: hidden
+  padding: 0.5rem 0.25rem
+
 .plant-card-graphic
   display: flex
   align-items: center
   flex-shrink: 0
   overflow: hidden
-  padding-left: 0.75em
 
   img
-    width: 100px
-    height: 100px
+    width: 120px
+    min-width: 120px
+    height: 120px
     object-fit: contain
     display: block
 
-// Column 2: Details (with padding)
+.plant-card-name
+  font-size: 1.1em
+  font-weight: 500
+  text-align: center
+  margin-bottom: 0.25rem
+  max-width: 100%
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+  a
+    color: inherit
+    text-decoration: none
+    opacity: 0.9
+    &:hover
+      text-decoration: underline
+
+// Column 3: Details
 .plant-card-details
   flex: 1
   min-width: 0
   padding: 0.5rem 0.75rem
   overflow: hidden
-
-.plant-card-name
-  font-size: 1.1em
-  font-weight: 500
-  a
-    color: inherit
-    text-decoration: none
-    &:hover
-      text-decoration: underline
+  display: flex
+  flex-direction: column
+  justify-content: space-between
 
 .plant-card-watering
-  font-weight: 500
   color: $blue
-  margin-top: 0.25rem
+  margin-bottom: 0.75rem
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
 
 .plant-card-meta
   display: flex
-  flex-wrap: wrap
-  gap: 0.5rem 1rem
-  margin-top: 0.25rem
+  flex: 1
+  justify-content: space-around
+  flex-direction: column
+  gap: 0.15rem
   font-size: 0.85em
   color: #666
   overflow: hidden
 
-.plant-card-last-watering
+.plant-card-last-watering-time
   overflow: hidden
   text-overflow: ellipsis
   white-space: nowrap
-  max-width: 100%
+
+.plant-card-last-watering-info
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+  padding-left: 0
 
 .plant-card-location,
 .plant-card-container
   white-space: nowrap
+  overflow: hidden
+  text-overflow: ellipsis
 
-// Column 3: Water button (full height, no margins)
-.water-icon-link
+// Column 4: Water button + helper text
+.plant-card-water-col
   display: flex
+  flex-direction: column
   align-items: center
   justify-content: center
-  padding: 0 2rem
+  padding: 0.5rem 1.5rem
   border-radius: 0 4px 4px 0
   text-decoration: none
   color: $blue
@@ -163,5 +205,48 @@ $lightyellow: rgba(206, 154, 0, 0.2)
     color: #999
 
 .water-icon
-  width: 2em
-  height: 2em
+  width: 3em
+  height: 3em
+
+.plant-card-water-helper
+  font-size: 0.7em
+  color: #999
+  margin-top: 0.25rem
+  white-space: nowrap
+
+// Responsive visibility
+.desktop-only
+  display: inline
+
+.mobile-only
+  display: none
+
+.short-text
+  display: none
+
+.long-text
+  display: inline
+
+@media (max-width: 768px)
+  .desktop-only
+    display: none
+  .mobile-only
+    display: inline
+
+  .short-text
+    display: inline
+  .long-text
+    display: none
+
+  //.plant-card-graphic
+    img
+      width: 90px
+      height: 90px
+
+  .plant-card-graphic-col
+    flex: 0 0 120px
+    max-width: 120px
+
+  .plant-card-water-col
+    padding: 0.5rem 0.25rem
+

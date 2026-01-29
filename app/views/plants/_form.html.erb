@@ -63,9 +63,9 @@
     </div>
 
     <% unless @plant.new_record? %>
-      <div>
-        <%= form.label :archived, style: "display: block" %>
+      <div class="archived-checkbox">
         <%= form.check_box :archived %>
+        <%= form.label :archived %>
       </div>
     <% end %>
 
