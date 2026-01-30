@@ -145,23 +145,24 @@ $lightyellow: rgba(206, 154, 0, 0.2)
   overflow: hidden
   text-overflow: ellipsis
   white-space: nowrap
+  font-size: 1.1em
 
 .plant-card-meta
-  display: flex
-  flex: 1
-  justify-content: space-around
-  flex-direction: column
-  gap: 0.15rem
-  font-size: 0.85em
+  display: grid
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr)
+  gap: 0.15rem 1rem
+  font-size: 1.05em
   color: #666
   overflow: hidden
+  flex: 1
 
 .plant-card-last-watering-time
   overflow: hidden
   text-overflow: ellipsis
   white-space: nowrap
 
-.plant-card-last-watering-info
+.plant-card-last-watering-volume,
+.plant-card-last-watering-notes
   overflow: hidden
   text-overflow: ellipsis
   white-space: nowrap
@@ -190,14 +191,17 @@ $lightyellow: rgba(206, 154, 0, 0.2)
 
   &.normal
     color: $blue
+    background: rgba(14, 72, 123, 0.05)
 
   &.today
     color: $green
+    background: rgba(0, 77, 64, 0.05)
     &:hover
       background: $lightgreen
 
   &.urgent
     color: $yellow
+    background: rgba(206, 154, 0, 0.07)
     &:hover
       background: $lightyellow
 
@@ -228,6 +232,11 @@ $lightyellow: rgba(206, 154, 0, 0.2)
   display: inline
 
 @media (max-width: 768px)
+  .plant-card-meta
+    grid-template-columns: 1fr
+    font-size: 0.85em
+
+@media (max-width: 480px)
   .desktop-only
     display: none
   .mobile-only
@@ -238,15 +247,18 @@ $lightyellow: rgba(206, 154, 0, 0.2)
   .long-text
     display: none
 
-  //.plant-card-graphic
-    img
-      width: 90px
-      height: 90px
-
   .plant-card-graphic-col
     flex: 0 0 120px
     max-width: 120px
 
   .plant-card-water-col
     padding: 0.5rem 0.25rem
+
+  .plant-card-name
+    white-space: normal
+    word-break: break-word
+
+  section#primary
+    padding-left: 0
+    padding-right: 0
 

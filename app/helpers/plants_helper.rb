@@ -25,7 +25,7 @@ module PlantsHelper
     if watering.nil?
       'Never'
     else
-      "Last watered <strong>#{time_ago plant.date_last_watering}</strong>"
+      "Watered <strong>#{time_ago plant.date_last_watering}</strong>"
     end
   end
 
@@ -45,10 +45,15 @@ module PlantsHelper
     end
   end
 
-  def last_watering_info_text(plant)
+  def last_watering_volume_text(plant)
     watering = plant.last_watering
-    return nil if watering.nil?
-    return nil if watering.volume.nil? && (watering.notes.nil? || watering.notes == '')
-    watering.volume_and_notes
+    return nil if watering.nil? || watering.volume.nil?
+    watering.print_volume
+  end
+
+  def last_watering_notes_text(plant)
+    watering = plant.last_watering
+    return nil if watering.nil? || watering.notes.blank?
+    watering.notes
   end
 end

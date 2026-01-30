@@ -401,11 +401,17 @@ table.timeline
     background: $lightblue
     border-left-color: $blue
 
-    &.urgent .watering-suggestion
-      color: $yellow
+    &.urgent
+      background: $lightyellow
+      border-left-color: $yellow
+      .watering-suggestion
+        color: $yellow
 
-    &.today .watering-suggestion
-      color: $green
+    &.today
+      background: $lightgreen
+      border-left-color: $green
+      .watering-suggestion
+        color: $green
 
   .water-icon-link
     display: flex
@@ -423,15 +429,22 @@ table.timeline
 
     &.normal
       color: $blue
-
-    &.urgent
-      color: $yellow
-
-    &.none
-      color: #999
+      background: rgba(14, 72, 123, 0.05)
 
     &.today
       color: $green
+      background: rgba(0, 77, 64, 0.05)
+      &:hover
+        background: $lightgreen
+
+    &.urgent
+      color: $yellow
+      background: rgba(206, 154, 0, 0.07)
+      &:hover
+        background: $lightyellow
+
+    &.none
+      color: #999
 
   .water-icon
     width: 4em

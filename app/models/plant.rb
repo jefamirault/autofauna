@@ -95,7 +95,8 @@ class Plant < ApplicationRecord
       min_watering_days = ((date_last_watering + min_watering_freq.days) - Time.zone.now.to_date).to_i
       max_watering_days = ((date_last_watering + max_watering_freq.days) - Time.zone.now.to_date).to_i
       if max_watering_days < 0
-        "Watering <strong>#{max_watering_days * -1} days late</strong>"
+        late_days = max_watering_days * -1
+        "Watering <strong>#{late_days} #{late_days == 1 ? 'day' : 'days'} late</strong>"
       elsif max_watering_days == 0
         "Water <strong>Today</strong>"
       elsif min_watering_days > 0
@@ -116,7 +117,8 @@ class Plant < ApplicationRecord
     if date_last_watering && min_watering_freq && max_watering_freq
       max_watering_days = ((date_last_watering + max_watering_freq.days) - Time.zone.now.to_date).to_i
       if max_watering_days < 0
-        "<strong>#{max_watering_days * -1} days late</strong>"
+        late_days = max_watering_days * -1
+        "<strong>#{late_days} #{late_days == 1 ? 'day' : 'days'} late</strong>"
       elsif max_watering_days == 0
         "<strong>Today</strong>"
       else

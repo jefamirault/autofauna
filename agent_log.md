@@ -402,10 +402,79 @@ Redesigned the plant card layout from 3 columns to a structured layout with UID,
 │   ├── .plant-card-watering (💧 suggestion, long/short text)
 │   └── .plant-card-meta
 │       ├── .plant-card-last-watering-time (⌛ long/short text)
-│       ├── .plant-card-last-watering-info (🧪 volume/notes)
+│       ├── .plant-card-last-watering-volume (💧)
+│       ├── .plant-card-last-watering-notes (📝)
+│       ├── .plant-card-last-watering-time (⌛ long/short text)
 │       ├── .plant-card-location (📍)
 │       └── .plant-card-container (🫙)
 └── .plant-card-water-col    (clickable link, full height)
     ├── .water-icon (SVG droplet)
     └── .plant-card-water-helper (Click/Tap to Water)
 ```
+
+---
+
+# Agent Log: Plant Card Grid, Watering Splits, Pluralization & Show Page Polish
+
+**Date:** 2026-01-29
+**Task:** Responsive grid for plant card details, split watering info, fix pluralization, and Show page color theming
+
+## Summary
+
+Multiple improvements to the plant card on both Index and Show pages: responsive CSS grid for meta attributes, split last watering info into separate volume/notes fields, fixed "1 days late" pluralization bug, added urgency-based color theming to the Show page, and various responsive breakpoint refinements.
+
+## Changes Made
+
+### Models
+
+- **`app/models/plant.rb`**
+  - Fixed `time_until_watering_text` and `time_until_watering_short_text` to use `late_days == 1 ? 'day' : 'days'` instead of unconditional "days"
+
+### Helpers
+
+- **`app/helpers/plants_helper.rb`**
+  - Removed `last_watering_info_text` method
+  - Added `last_watering_volume_text(plant)` — returns volume string or nil
+  - Added `last_watering_notes_text(plant)` — returns notes string or nil
+  - Changed "Last watered" to "Watered" in `last_watering_time_text`
+
+### Views
+
+- **`app/views/plants/_plant_row.html.erb`** (Index card)
+  - Replaced single `.plant-card-last-watering-info` with separate `.plant-card-last-watering-volume` (💧) and `.plant-card-last-watering-notes` (📝)
+  - Reordered meta slots: volume, notes, last watered time, location, container
+  - Changed watering suggestion emoji from 💧 to 🕐
+
+- **`app/views/plants/_plant.html.erb`** (Show page)
+  - Updated helper text from "Click"/"Tap" to "Click to Water"/"Tap to Water"
+
+### Stylesheets
+
+- **`app/assets/stylesheets/plants.sass`** (Index page)
+  - `.plant-card-meta` now uses CSS grid: `grid-template-columns: minmax(0, 275px) minmax(0, 1fr)`
+  - Font size `1.05em` on desktop grid
+  - `.plant-card-watering` font size `1.1em`, never reduced at any breakpoint
+  - Replaced `.plant-card-last-watering-info` styles with `.plant-card-last-watering-volume` and `.plant-card-last-watering-notes`
+  - Water icon link: added subtle default backgrounds per urgency (blue `0.05`, green `0.05`, yellow `0.07` opacity)
+  - **768px breakpoint**: only grid → 1 column and meta font size → `0.85em`
+  - **480px breakpoint** (new): long/short text switch, desktop/mobile visibility, graphic column shrink, water col padding reduction, `.plant-card-name` word wrap, `section#primary` side padding → 0
+
+- **`app/assets/stylesheets/shared.sass`** (Show page)
+  - `.watering-section` urgency-based backgrounds: blue (normal), green (today), yellow (urgent) with matching `border-left-color`
+  - `.water-icon-link` urgency-based subtle default backgrounds with hover states
+
+## Responsive Breakpoints
+
+| Breakpoint | Changes |
+|------------|---------|
+| Desktop (>768px) | 2-column grid (275px max + 1fr), font 1.05em, long text, full padding |
+| ≤768px | 1-column grid, font 0.85em, long text still shown, padding unchanged |
+| ≤480px | Short text replaces long text, desktop/mobile visibility swap, plant name wraps, section margins → 0 |
+
+## Urgency Color Scheme (Index + Show)
+
+| Urgency | Card Background | Water Button Default | Water Button Hover |
+|---------|----------------|---------------------|--------------------|
+| normal | $lightblue | rgba(14,72,123, 0.05) | rgba(14,72,123, 0.15) |
+| today | $lightgreen | rgba(0,77,64, 0.05) | $lightgreen |
+| urgent | $lightyellow | rgba(206,154,0, 0.07) | $lightyellow |

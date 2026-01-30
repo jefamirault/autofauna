@@ -11,15 +11,19 @@
   <div class="plant-card-details">
     <% unless archive %>
       <div class="plant-card-watering">
-        💧 <span class="long-text"><%= plant.time_until_watering_text.html_safe %></span><span class="short-text"><%= plant.time_until_watering_short_text.html_safe %></span>
+        🕐 <span class="long-text"><%= plant.time_until_watering_text.html_safe %></span><span class="short-text"><%= plant.time_until_watering_short_text.html_safe %></span>
       </div>
     <% end %>
     <div class="plant-card-meta">
-      <div class="plant-card-last-watering-time">⌛ <span class="long-text"><%= last_watering_time_text(plant).html_safe %></span><span class="short-text"><%= last_watering_time_short_text(plant).html_safe %></span></div>
-      <% info = last_watering_info_text(plant) %>
-      <% if info.present? %>
-        <div class="plant-card-last-watering-info">🧪 <%= info %></div>
+      <% volume = last_watering_volume_text(plant) %>
+      <% if volume.present? %>
+        <div class="plant-card-last-watering-volume">💧 <%= volume %></div>
       <% end %>
+      <% notes = last_watering_notes_text(plant) %>
+      <% if notes.present? %>
+        <div class="plant-card-last-watering-notes">📝 <%= notes %></div>
+      <% end %>
+      <div class="plant-card-last-watering-time">⌛ <span class="long-text"><%= last_watering_time_text(plant).html_safe %></span><span class="short-text"><%= last_watering_time_short_text(plant).html_safe %></span></div>
       <% if plant.location.present? %>
         <span class="plant-card-location">📍 <%= plant.location %></span>
       <% end %>
