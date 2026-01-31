@@ -52,6 +52,8 @@ Rails.application.routes.draw do
   get 'shared/plants/:token', to: 'shared_plants#show', as: 'shared_plant'
   post 'shared/plants/:token/waterings', to: 'shared_plants#create_watering', as: 'shared_plant_waterings'
 
+  get '/.well-known/assetlinks.json', to: 'static#assetlinks'
+
   match '/404' => 'errors#not_found', :via => :all
   match '/422' => 'errors#unprocessable_entity', :via => :all
   match '/500' => 'errors#internal_server_error', :via => :all
