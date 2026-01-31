@@ -31,4 +31,4 @@ rails db:environment:set RAILS_ENV=development
 
 echo "Local database updated with latest backup"
 # Start rails development server if argument "start_server" is present
-[ "$1" = "start_server" ] && echo "Starting development server..." && rails s
+[ "$1" = "-s" ] && echo "Starting development server..." && rails s
