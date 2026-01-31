@@ -68,6 +68,12 @@ es:
       new_watering: "Nuevo riego"
       export_plant: "Exportar planta"
       plants: "Plantas"
+      share_link: "Enlace compartido"
+      create_share_link: "Crear enlace compartido"
+      revoke_share: "Revocar enlace"
+      revoke_confirm: "¿Estás seguro? Cualquier persona con el enlace actual ya no podrá ver esta planta."
+      regenerate_share: "Regenerar enlace"
+      regenerate_confirm: "¿Estás seguro? Esto creará un nuevo enlace y el anterior dejará de funcionar."
     plant:
       water_this_plant: "Regar esta planta"
     edit:
@@ -77,6 +83,9 @@ es:
       create_success: "La planta fue creada exitosamente."
       delete_success: "La planta fue eliminada exitosamente."
       confirm_delete: "¿Está seguro de que desea eliminar esta planta y todos sus datos asociados?"
+      share_created: "Enlace compartido creado. Cualquier persona con el enlace puede ver esta planta."
+      share_revoked: "Enlace compartido revocado."
+      share_regenerated: "Enlace compartido regenerado. El enlace anterior ya no funcionará."
     all_plants: "Todas las plantas"
     create_plant: "Crear planta"
     update_plant: "Actualizar planta"
@@ -193,6 +202,9 @@ es:
     log_entry: 'Entrada de registro'
     watering: 'Riego'
     watered: 'Regado'
+  shared_plants:
+    not_found_message: "Este enlace no parece funcionar."
+    not_found_contact: "Por favor, contacta al propietario de la planta para obtener ayuda."
   log_entries:
     create: 'Crear una entrada de registro'
     update: 'Atualizar entrada de registro'

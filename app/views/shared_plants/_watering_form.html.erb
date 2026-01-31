@@ -1,0 +1,39 @@
+<div class="formContainer">
+  <%= form_with(model: watering, url: shared_plant_waterings_path(token: plant.share_token)) do |form| %>
+    <% if watering.errors.any? %>
+      <div style="color: red">
+        <h2><%= pluralize(watering.errors.count, "error") %> prohibited this watering from being saved:</h2>
+
+        <ul>
+          <% watering.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= form.label :date, style: "display: block" %>
+      <%= form.date_field :date, value: watering.date || Time.zone.now.to_date %>
+    </div>
+
+    <div>
+      <%= form.label :volume, style: "display: block" %>
+      <%= form.number_field :volume, step: 'any' %>
+    </div>
+
+    <div>
+      <%= form.label :units, style: "display: block" %>
+      <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units || plant.suggested_watering_unit) %>
+    </div>
+
+    <div>
+      <%= form.label :notes, style: "display: block" %>
+      <%= form.text_area :notes %>
+    </div>
+    <br>
+    <div>
+      <%= form.submit t('waterings.create_watering'), class: 'saveButton' %>
+    </div>
+  <% end %>
+</div>

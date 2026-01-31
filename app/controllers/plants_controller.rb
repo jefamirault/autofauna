@@ -1,6 +1,6 @@
 class PlantsController < ApplicationController
   before_action :set_project
-  before_action :set_plant, only: %i[ show edit update destroy ]
+  before_action :set_plant, only: %i[ show edit update destroy create_share revoke_share regenerate_share ]
   before_action :authenticate, only: [:new]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
@@ -136,6 +136,21 @@ class PlantsController < ApplicationController
     else
       redirect_to plants_path, alert: "No plants imported."
     end
+  end
+
+  def create_share
+    @plant.generate_share_token!
+    redirect_to plant_path(@plant), notice: t('plants.messages.share_created')
+  end
+
+  def revoke_share
+    @plant.revoke_share_token!
+    redirect_to plant_path(@plant), notice: t('plants.messages.share_revoked')
+  end
+
+  def regenerate_share
+    @plant.regenerate_share_token!
+    redirect_to plant_path(@plant), notice: t('plants.messages.share_regenerated')
   end
 
   private

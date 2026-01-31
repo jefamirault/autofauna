@@ -18,6 +18,19 @@
   <%= link_to t('plants.all_plants'), plants_path, class: 'link' %>
 </p>
 
+<div class="share-section">
+  <h3><%= t('plants.show.share_link') %></h3>
+  <% if @plant.shared? %>
+    <div class="share-link-container">
+      <input type="text" class="share-link-input" value="<%= shared_plant_url(@plant.share_token) %>" readonly onclick="this.select()">
+      <%= button_to t('plants.show.revoke_share'), revoke_share_plant_path(@plant), method: :delete, class: 'buttonLinkDanger danger', data: { confirm: t('plants.show.revoke_confirm') } %>
+      <%= button_to t('plants.show.regenerate_share'), regenerate_share_plant_path(@plant), method: :post, class: 'buttonLinkDanger danger', data: { confirm: t('plants.show.regenerate_confirm') } %>
+    </div>
+  <% else %>
+    <%= button_to t('plants.show.create_share_link'), create_share_plant_path(@plant), method: :post, class: 'buttonLink' %>
+  <% end %>
+</div>
+
 <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant), class: 'link' %>
 <%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>
 <h3><%= t '.timeline' %></h3>

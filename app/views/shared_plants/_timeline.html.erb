@@ -1,0 +1,30 @@
+<%# expected local: timeline, plant %>
+<table class="timeline">
+  <tbody>
+  <% timeline&.each do |item| %>
+    <% if item[:type] == :log_entry %>
+      <% log_entry = item[:object] %>
+      <tr class="log-entry-row green">
+        <td class='whenColumn'>
+          <span class='timeline-icon'>📝</span>
+          <%= log_entry.description %>
+          <span class='entry-time'>🕐 <%= time_ago log_entry.timestamp %></span>
+          <% if log_entry.updated_at - log_entry.created_at > 1.minute %><span class='metadata updated-at'>Updated <%= time_ago_in_words log_entry.updated_at %> ago</span><% end %>
+        </td>
+      </tr>
+    <% elsif item[:type] == :watering %>
+      <% watering = item[:object] %>
+      <tr class="watering-row blue">
+        <td class='whenColumn'>
+          <span class='timeline-icon'>💧</span>
+          <% if watering.volume.present? %><strong><%= watering.print_volume %></strong><% else %><span class='no-volume'>—</span><% end %>
+          <% if watering.notes.present? %><span class='watering-notes'><%= watering.notes %></span><% end %>
+          <span class='watering-time'>🕐 <%= time_ago watering.date %></span>
+          <% if watering.interval %><span class='interval'>(<%= watering.interval_text %>)</span><% end %>
+          <% if watering.updated_at - watering.created_at > 1.minute %><span class='metadata updated-at'>Updated <%= time_ago_in_words watering.updated_at %> ago</span><% end %>
+        </td>
+      </tr>
+    <% end %>
+  <% end %>
+  </tbody>
+</table>

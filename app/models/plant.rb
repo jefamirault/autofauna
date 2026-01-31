@@ -30,6 +30,26 @@ class Plant < ApplicationRecord
     label
   end
 
+  def generate_share_token!
+    if share_token.nil?
+      update!(share_token: SecureRandom.urlsafe_base64(16), share_enabled: true)
+    else
+      update!(share_enabled: true)
+    end
+  end
+
+  def revoke_share_token!
+    update!(share_enabled: false)
+  end
+
+  def regenerate_share_token!
+    update!(share_token: SecureRandom.urlsafe_base64(16), share_enabled: true)
+  end
+
+  def shared?
+    share_token.present? && share_enabled?
+  end
+
   def first_watering
     waterings.any? ? waterings.first.date.to_date : nil
   end

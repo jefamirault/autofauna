@@ -22,6 +22,11 @@ Rails.application.routes.draw do
     collection do
       get :suggest_graphic
     end
+    member do
+      post 'share', to: 'plants#create_share', as: 'create_share'
+      delete 'share', to: 'plants#revoke_share', as: 'revoke_share'
+      post 'regenerate_share', to: 'plants#regenerate_share', as: 'regenerate_share'
+    end
   end
 
   get 'waterings/import', to: 'waterings#import'
@@ -43,6 +48,9 @@ Rails.application.routes.draw do
   post 'sensor_readings/import', to: 'sensor_readings#process_file'
   get 'transmit', to: 'sensor_readings#transmit', as: 'transmit'
   get 'sensor_readings', to: 'sensor_readings#readings', as: 'sensor_readings'
+
+  get 'shared/plants/:token', to: 'shared_plants#show', as: 'shared_plant'
+  post 'shared/plants/:token/waterings', to: 'shared_plants#create_watering', as: 'shared_plant_waterings'
 
   match '/404' => 'errors#not_found', :via => :all
   match '/422' => 'errors#unprocessable_entity', :via => :all

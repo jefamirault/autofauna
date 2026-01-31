@@ -1,0 +1,70 @@
+<% content_for :title do %>
+  #<%= @plant.uid %> <%= @plant.name %>
+<% end %>
+
+<h1 class="plant-header">
+  <% if @plant.graphic.present? %>
+    <%= image_tag @plant.graphic_path, class: "plant-header-graphic", alt: "#{@plant.name}" %>
+  <% end %>
+  <%= @plant %>
+</h1>
+
+<div id="<%= dom_id @plant %>" class="plant-info-card">
+  <div class="plant-info-grid">
+    <div class="plant-info-section watering-section <%= @plant.watering_urgency %>">
+      <div class="watering-text">
+        <div class="watering-suggestion">
+          <%= @plant.time_until_watering_text.html_safe %> 🕐
+        </div>
+        <div class="watering-history">
+          <%= t('attributes.last_watered') %> <%= time_ago(@plant.date_last_watering) || t('time.never') %>
+        </div>
+        <div class="watering-details">
+          <strong class="watering-volume"><%= @plant.last_watering&.print_volume || '—' %></strong>
+          <% if @plant.last_watering&.notes.present? %>
+            <span class="watering-notes-text"><%= @plant.last_watering.notes %></span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="plant-info-section location-section">
+      <div class="info-row">
+        <span class="label"><%= t 'attributes.location' %>:</span>
+        <span class="value"><%= @plant.location %></span>
+      </div>
+      <div class="info-row">
+        <span class="label"><%= t 'attributes.zone' %>:</span>
+        <span class="value"><%= @plant.zone %></span>
+      </div>
+      <% if @plant.watering_frequency_text.present? %>
+        <div class="info-row">
+          <span class="label"><%= t 'attributes.frequency' %>:</span>
+          <span class="value"><%= @plant.watering_frequency_text %></span>
+        </div>
+      <% end %>
+      <% if @plant.container.present? %>
+        <div class="info-row">
+          <span class="label"><%= t 'attributes.container' %>:</span>
+          <span class="value"><%= @plant.pot %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<details class="watering-toggle" <%= 'open' if @watering&.errors&.any? %>>
+  <summary class="water-icon-link <%= @plant.watering_urgency %>" aria-label="<%= t('plants.plant.water_this_plant', default: 'Water this plant') %>">
+    <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
+    </svg>
+    <span class="water-helper-text click-text">Click to Water</span>
+    <span class="water-helper-text tap-text">Tap to Water</span>
+  </summary>
+  <h3><%= t 'waterings.create_watering' %></h3>
+  <%= render partial: 'shared_plants/watering_form',
+             locals: { watering: @watering || Watering.new(date: Time.zone.now.to_date), plant: @plant } %>
+</details>
+
+<h3><%= t 'plants.show.timeline' %></h3>
+<%= render partial: 'shared_plants/timeline', locals: { timeline: @timeline, plant: @plant } %>

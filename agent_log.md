@@ -478,3 +478,76 @@ Multiple improvements to the plant card on both Index and Show pages: responsive
 | normal | $lightblue | rgba(14,72,123, 0.05) | rgba(14,72,123, 0.15) |
 | today | $lightgreen | rgba(0,77,64, 0.05) | $lightgreen |
 | urgent | $lightyellow | rgba(206,154,0, 0.07) | $lightyellow |
+
+---
+
+# Agent Log: Share Link Improvements
+
+**Date:** 2026-01-31
+**Task:** Friendly shared link errors + reusable/regeneratable tokens
+
+## Summary
+
+Added `share_enabled` boolean to plants so revoking a share link disables access without deleting the token. This allows "Create Share Link" to re-enable the same URL after revoking, and a new "Regenerate Link" button to generate a fresh token (invalidating the old one). Invalid or disabled share links now show a friendly error page instead of a 500.
+
+## Changes Made
+
+### Database
+
+- **New migration:** `db/migrate/20260131160000_add_share_enabled_to_plants.rb`
+  - Adds `share_enabled` boolean column (default `false`)
+  - Backfills existing shared plants: `Plant.where.not(share_token: nil).update_all(share_enabled: true)`
+
+### Models
+
+- **`app/models/plant.rb`**
+  - `shared?` now checks both `share_token.present?` and `share_enabled?`
+  - `generate_share_token!` only generates a new token if nil, always sets `share_enabled: true`
+  - `revoke_share_token!` sets `share_enabled: false` instead of deleting the token
+  - New `regenerate_share_token!` generates a fresh token and sets `share_enabled: true`
+
+### Controllers
+
+- **`app/controllers/plants_controller.rb`**
+  - Added `regenerate_share` to `before_action :set_plant` list
+  - New `regenerate_share` action calls `regenerate_share_token!` and redirects with flash
+
+- **`app/controllers/shared_plants_controller.rb`**
+  - `set_plant` uses `find_by` instead of `find_by!`
+  - Renders `not_found` view with shared layout and 404 status if plant is nil or `share_enabled?` is false
+
+### Routes
+
+- **`config/routes.rb`**
+  - Added `post 'regenerate_share'` to plants member block
+
+### Views
+
+- **`app/views/shared_plants/not_found.html.erb`** (new)
+  - Friendly error page: "This link doesn't seem to work. If you think this is an error, contact the owner."
+
+- **`app/views/plants/show.html.erb`**
+  - Added "Regenerate Link" button with confirmation warning when plant is shared
+
+### Locales
+
+- **`config/locales/en.yml`** + **`config/locales/es.yml`**
+  - `plants.show.regenerate_share` / `plants.show.regenerate_confirm`
+  - `plants.messages.share_regenerated`
+  - `shared_plants.not_found_message` / `shared_plants.not_found_contact`
+
+## Behavior Changes
+
+| Scenario | Before | After |
+|----------|--------|-------|
+| Revoke share link | Token deleted, URL permanently broken | Token kept, `share_enabled` set to false, URL returns friendly 404 |
+| Create share link after revoking | New token generated, new URL | Same token re-enabled, same URL works again |
+| Regenerate link | N/A | New token generated, old URL shows friendly 404 |
+| Invalid/disabled token visited | 500 error (RecordNotFound) | Friendly "link doesn't work" page (404) |
+
+## Required Action
+
+Run database migration:
+```bash
+bin/rails db:migrate
+```

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_26_204657) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_31_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -71,8 +71,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_26_204657) do
     t.integer "zone_id"
     t.bigint "location_id"
     t.string "graphic"
+    t.string "share_token"
+    t.boolean "share_enabled", default: false
     t.index ["last_watering_id"], name: "index_plants_on_last_watering_id"
     t.index ["location_id"], name: "index_plants_on_location_id"
+    t.index ["share_token"], name: "index_plants_on_share_token", unique: true
   end
 
   create_table "projects", force: :cascade do |t|
