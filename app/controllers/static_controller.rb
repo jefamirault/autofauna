@@ -6,7 +6,7 @@ class StaticController < ApplicationController
       "target" => {
         "namespace" => "android_app",
         "package_name" => "org.autofauna.twa",
-        "sha256_cert_fingerprints" => ["19:78:DA:EF:25:40:95:D1:16:CF:31:20:24:FD:7D:00:67:02:A2:FF:63:91:DD:DB:73:D3:C9:F4:BD:6D:CC:8B"]
+        "sha256_cert_fingerprints" => ["98:68:BD:E5:B4:E8:1F:DA:46:60:8A:04:1F:D2:27:D4:5D:C5:8D:B7:85:DB:88:6A:F3:50:39:59:03:96:55:B6"]
       }
     }]
   end
