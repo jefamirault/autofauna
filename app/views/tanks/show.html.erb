@@ -9,13 +9,13 @@
 <%= render @tank %>
 
 <div>
-  <%= link_to "Edit this Tank", edit_tank_path(@tank) %> |
-  <%= link_to "Back to Tanks", tanks_path %>
+  <%= link_to "✏️ Edit this Tank", edit_tank_path(@tank) %> |
+  <%= link_to "↩️ Back to Tanks", tanks_path %>
 </div>
 
 <h2>Water Parameters</h2>
 <%= link_to new_tank_water_test_path(@tank), class: "" do %>
-  + New Test
+  🧪 New Test
 <% end %>
 <%= render 'water_tests/water_tests', water_tests: @water_tests %>
 

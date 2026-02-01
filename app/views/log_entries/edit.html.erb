@@ -5,5 +5,5 @@
 <%= render partial: "log_entries/form", locals: { log_entry: @log_entry } %>
 
 <p>
-  <%= link_to t('actions.cancel'), plant_path(id: params[:plant_id]), class: 'link' %>
+  <%= link_to "❌ #{t('actions.cancel')}", plant_path(id: params[:plant_id]), class: 'link' %>
 </p>

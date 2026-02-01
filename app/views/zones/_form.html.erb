@@ -24,6 +24,6 @@
   </div>
 
   <div>
-    <%= form.submit class: 'saveButton' %>
+    <%= form.submit "💾 #{zone.new_record? ? 'Create' : 'Update'} Zone", class: 'saveButton' %>
   </div>
 <% end %>

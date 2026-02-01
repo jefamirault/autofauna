@@ -9,8 +9,8 @@
 <%= render @sensor %>
 
 <div>
-  <%= link_to "Edit this Sensor", edit_sensor_path(@sensor) %> |
-  <%= link_to "Back to Sensors", sensors_path %>
+  <%= link_to "✏️ Edit this Sensor", edit_sensor_path(@sensor) %> |
+  <%= link_to "↩️ Back to Sensors", sensors_path %>
 
   <%= button_to "🗑️ Destroy this Sensor", @sensor, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('#{t 'sensors.messages.confirm_delete'}');" %>
 </div>

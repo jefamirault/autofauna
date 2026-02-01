@@ -39,6 +39,6 @@
   </div>
 
   <div>
-    <%= form.submit class: 'saveButton' %>
+    <%= form.submit "💾 #{tank.new_record? ? 'Create' : 'Update'} Tank", class: 'saveButton' %>
   </div>
 <% end %>

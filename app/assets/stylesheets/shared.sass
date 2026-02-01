@@ -34,6 +34,10 @@ textarea
   font-family: Roboto, verdana, sans-serif
   width: 50%
   min-width: 8em
+  box-sizing: border-box
+  @media (max-width: 600px)
+    width: 100%
+    min-width: 0
 
 nav
   display: flex
@@ -322,7 +326,8 @@ table.yellow
 .plantButton
   display: inline-block
   background: $lightgreen
-  width: 300px
+  max-width: 300px
+  width: 100%
   font-size: 120%
   border: 1px solid #444
   border-radius: 13px
@@ -669,6 +674,8 @@ table.timeline
   border-radius: 4px
   background: #f9f9f9
   font-family: monospace
+  @media (max-width: 600px)
+    min-width: 0
 
   &:focus
     outline: none

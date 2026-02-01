@@ -59,6 +59,6 @@
   </div>
 
   <div>
-    <%= form.submit %>
+    <%= form.submit "💾 #{sensor_type.new_record? ? 'Create' : 'Update'} Sensor Type", class: 'saveButton' %>
   </div>
 <% end %>

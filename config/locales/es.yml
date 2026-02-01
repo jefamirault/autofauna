@@ -35,8 +35,8 @@ es:
     collaborators: "Colaboradores"
     new_project: "Nuevo Proyecto"
     my_projects: "Mis Proyectos"
-    create_project: "Crear proyecto"
-    update_project: "Actualizar Project"
+    create_project: "💾 Crear proyecto"
+    update_project: "💾 Actualizar Project"
     edit_project: "Editar Proyecto"
     all_projects: "Todos Proyectos"
     create_success: "El proyecto fue creado exitosamente."
@@ -87,8 +87,8 @@ es:
       share_revoked: "Enlace compartido revocado."
       share_regenerated: "Enlace compartido regenerado. El enlace anterior ya no funcionará."
     all_plants: "Todas las plantas"
-    create_plant: "Crear planta"
-    update_plant: "Actualizar planta"
+    create_plant: "💾 Crear planta"
+    update_plant: "💾 Actualizar planta"
     form:
       select_graphic: "Seleccionar imagen..."
   waterings:
@@ -99,8 +99,8 @@ es:
     all_waterings: "Todos riegos"
     water_again: "Riegar esta planta otra vez"
     delete_watering: "Eliminar esta riego"
-    create_watering: "Crear riego"
-    update_watering: "Actualizar riego"
+    create_watering: "💾 Crear riego"
+    update_watering: "💾 Actualizar riego"
     repeat_watering: "Repetir riego"
     messages:
       create_success: "El riego creado exitosamenta."
@@ -110,14 +110,14 @@ es:
   sensors:
     messages:
       confirm_delete: "¿Está seguro de que desea eliminar esta sensor?"
-  log_in: "Iniciar seción"
-  sign_up: "Registrar"
+  log_in: "🔐 Iniciar seción"
+  sign_up: "✨ Registrar"
   email: "Email"
   password: "Contraseña"
   password_confirmation: "Confirmación de contraseña"
-  forgot_password: "¿Olvidaste tu contraseña?"
-  reset_your_password: "Restablecer su contraseña"
-  reset_password: "Restablecer contraseña"
+  forgot_password: "🔑 ¿Olvidaste tu contraseña?"
+  reset_your_password: "🔑 Restablecer su contraseña"
+  reset_password: "🔑 Restablecer contraseña"
   account:
     sign_in_success: "Has iniciado sesión correctamente."
     log_out_success: "Se ha cerrado la sesión."
@@ -126,7 +126,7 @@ es:
     success_password_reset: "Contraseña actualizada con éxito. Por favor, inicie sesión."
     password_update_success: "Contraseña actualizada con éxito."
     link_expired: "Inténtalo de nuevo. El enlace anterior ha expirado."
-    update_password: "Actualizar contraseña"
+    update_password: "🔑 Actualizar contraseña"
     current_password: "Contraseña actual"
     delete_account: "Eliminar cuenta"
     confirm_delete_account: "¿Estás seguro? Esto eliminará permanentemente tu cuenta y todos tus datos. Esta acción no se puede deshacer."
@@ -199,7 +199,7 @@ es:
     cancel: 'Cancelar'
   true: "Verdadero"
   false: "Falso"
-  back_to_settings: "Volver a la configuración"
+  back_to_settings: "⚙️ Volver a la configuración"
   search: "Buscar"
   text: "Texto"
   plant_id: "Número de planta"
@@ -216,8 +216,8 @@ es:
     not_found_message: "Este enlace no parece funcionar."
     not_found_contact: "Por favor, contacta al propietario de la planta para obtener ayuda."
   log_entries:
-    create: 'Crear una entrada de registro'
-    update: 'Atualizar entrada de registro'
+    create: '💾 Crear una entrada de registro'
+    update: '💾 Atualizar entrada de registro'
 
   date:
     month_names: [ ~, enero, febrero, marzo, abril, mayo, junio, julio, agosto, septiembre, octobre, noviembre, deciembre ]

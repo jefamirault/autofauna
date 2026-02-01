@@ -25,7 +25,7 @@
           <%= user.collaborations.count %>
         </td>
         <td>
-          <%= button_to user.login_enabled? ? "Enabled" : "Disabled", user_path(user, user: { login_enabled: !user.login_enabled }), method: :patch, class: user.login_enabled? ? 'buttonLink' : 'buttonLinkDanger' %>
+          <%= button_to user.login_enabled? ? "✅ Enabled" : "🚫 Disabled", user_path(user, user: { login_enabled: !user.login_enabled }), method: :patch, class: user.login_enabled? ? 'buttonLink' : 'buttonLinkDanger' %>
         </td>
       </tr>
     <% end %>

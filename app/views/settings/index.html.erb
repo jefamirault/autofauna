@@ -20,9 +20,9 @@
 
 <div class="settings-card">
   <h2>🛡️ <%= t 'account.security' %></h2>
-  <%= link_to t('account.update_password'), edit_password_path, class: 'link' %>
+  <%= link_to "🔑 #{t('account.update_password')}", edit_password_path, class: 'link' %>
   <br><br>
-  <%= button_to t('layouts.application.log_out'), session_path, class: 'buttonLink', method: :delete, onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
+  <%= button_to "🚪 #{t('layouts.application.log_out')}", session_path, class: 'buttonLink', method: :delete, onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
 </div>
 
 <button class="buttonLinkDanger" onclick="document.getElementById('danger-zone').style.display='block'; this.style.display='none';">🗑️ <%= t 'account.delete_account' %></button>

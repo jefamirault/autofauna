@@ -30,6 +30,6 @@
   </div>
 
   <div>
-    <%= form.submit class: 'saveButton' %>
+    <%= form.submit "💾 #{location.new_record? ? 'Create' : 'Update'} Location", class: 'saveButton' %>
   </div>
 <% end %>

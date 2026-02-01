@@ -81,8 +81,8 @@
   </div>
 
   <div class="flex justify-end space-x-3">
-    <%= link_to "Cancel", tank_path(@tank),
+    <%= link_to "❌ Cancel", tank_path(@tank),
                 class: "px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors" %>
-    <%= form.submit class: "saveButton" %>
+    <%= form.submit "💾 #{@water_test.new_record? ? 'Create' : 'Update'} Water Test", class: "saveButton" %>
   </div>
 <% end %>
