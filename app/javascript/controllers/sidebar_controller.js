@@ -12,8 +12,11 @@ export default class extends Controller {
         // Set initial state based on stored preference or default
         const stored = localStorage.getItem('sidebar-minimized')
         const isMobile = window.innerWidth < 600
-        this.minimizedValue = stored ? JSON.parse(stored) : isMobile
+        this.minimizedValue = isMobile || (stored ? JSON.parse(stored) : false)
         this.updateSidebar()
+
+        this.handleResize = this.handleResize.bind(this)
+        window.addEventListener('resize', this.handleResize)
 
         // Initialize touch handling
         this.initializeTouchHandling()
@@ -25,8 +28,15 @@ export default class extends Controller {
     }
 
     disconnect() {
-        // Clean up touch event listeners
+        window.removeEventListener('resize', this.handleResize)
         this.removeTouchHandling()
+    }
+
+    handleResize() {
+        if (window.innerWidth < 600 && !this.minimizedValue) {
+            this.minimizedValue = true
+            this.updateSidebar()
+        }
     }
 
     initializeTouchHandling() {

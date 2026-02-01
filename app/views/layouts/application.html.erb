@@ -9,7 +9,7 @@
         try {
           var stored = localStorage.getItem('sidebar-minimized');
           var isMobile = window.innerWidth < 600;
-          var shouldMinimize = stored ? JSON.parse(stored) : isMobile;
+          var shouldMinimize = isMobile || (stored ? JSON.parse(stored) : false);
           if (shouldMinimize) {
             document.documentElement.classList.add('sidebarMinimized');
           }

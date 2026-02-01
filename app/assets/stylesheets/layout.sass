@@ -18,7 +18,7 @@ body
   grid-template-areas: "header header" "sidebar main"
   @media (max-width: 600px) // narrow screen
     grid-template-columns: 1fr
-    grid-template-rows: 4rem 705px 1fr auto
+    grid-template-rows: 4rem auto 1fr auto
     grid-template-areas: "header" "sidebar" "main" "footer"
     &.sidebarMinimized
       grid-template-rows: 4rem 0 1fr auto
@@ -162,6 +162,8 @@ section#primary
     flex-direction: column
   aside#sidebar
     width: 100%
+    .fill
+      flex: 0
 
 aside#sidebar
   grid-area: sidebar
