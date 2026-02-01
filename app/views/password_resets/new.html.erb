@@ -1,18 +1,19 @@
-<h1><%= t 'reset_your_password' %></h1>
+<div class="settings-card auth-card">
+  <h2><%= t 'reset_your_password' %></h2>
 
-<%= form_with model: User.new, url: password_reset_path do |form| %>
-  <div class="field">
-    <%= form.label :email %>
-    <%= form.email_field :email, autofocus: true %>
+  <%= form_with model: User.new, url: password_reset_path do |form| %>
+    <div class="field">
+      <%= form.label :email %>
+      <%= form.email_field :email, autofocus: true %>
+    </div>
+
+    <div class="submit">
+      <%= form.submit t('reset_password'), class: 'saveButton' %>
+    </div>
+  <% end %>
+
+  <div class="auth-links">
+    <%= link_to t('log_in'), new_session_path, class: 'link' %>
+    <%= link_to t('sign_up'), new_registration_path, class: 'link' %>
   </div>
-
-  <div class="submit">
-    <%= form.submit t('reset_password'), class: 'saveButton' %>
-  </div>
-<% end %>
-
-<br>
-<%= link_to t('log_in'), new_session_path %>
-<br>
-<br>
-<%= link_to t('sign_up'), new_registration_path %>
+</div>

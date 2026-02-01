@@ -90,10 +90,6 @@ h2
 
 main
   &.sessions, &.registrations, &.passwords, &.password_resets, &.settings
-    display: block
-    margin-left: auto
-    margin-right: auto
-
     label
       display: block
       font-size: 85%
@@ -106,9 +102,20 @@ main
       margin-top: 1em
 
   &.sessions, &.registrations, &.passwords, &.password_resets
-    max-width: 450px
+    section#primary
+      background: transparent
+      display: flex
+      flex-direction: column
+      align-items: center
+      justify-content: center
+      .settings-card
+        width: 100%
+        max-width: 450px
   &.settings
-    max-width: 600px
+    section#primary
+      max-width: 600px
+      margin-left: auto
+      margin-right: auto
 
 input
   width: 100%
@@ -189,7 +196,7 @@ table.yellow
 
 // Settings cards
 .settings-card
-  background: $lightgreen
+  background: white
   border-radius: 8px
   border-left: 4px solid $green
   padding: 1rem 1.25rem
@@ -223,6 +230,36 @@ table.yellow
 
     h2
       color: #7c5151
+
+// Auth card (extends settings-card for auth pages)
+.auth-card
+  @extend .settings-card
+  padding: 1.5rem 2rem
+  text-align: center
+
+  h2
+    font-weight: 500
+    margin-bottom: 1rem
+
+  form
+    text-align: left
+
+.auth-links
+  margin-top: 1.5rem
+  display: flex
+  flex-wrap: wrap
+  justify-content: center
+  gap: 0.5rem
+
+.auth-errors
+  background: rgba(124, 81, 81, 0.1)
+  border-left: 3px solid #7c5151
+  border-radius: 4px
+  padding: 0.75rem 1rem
+  margin-bottom: 1rem
+  text-align: left
+  color: #7c5151
+  font-size: 0.9em
 
 .plantButton
   display: inline-block
