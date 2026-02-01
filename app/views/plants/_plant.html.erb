@@ -10,15 +10,16 @@
       <% end %>
       <div class="watering-text">
         <div class="watering-suggestion">
-          <%= @plant.time_until_watering_text.html_safe %> 🕐
+          🕐 <%= @plant.time_until_watering_text.html_safe %>
         </div>
         <div class="watering-history">
-          <%= t('attributes.last_watered') %> <%= time_ago(@plant.date_last_watering) || t('time.never') %>
+          ⌛ <%= t('attributes.last_watered') %> <%= time_ago(@plant.date_last_watering) || t('time.never') %>
         </div>
         <div class="watering-details">
-          <strong class="watering-volume"><%= @plant.last_watering&.print_volume || '—' %></strong>
+          <strong class="watering-volume">💧 <%= @plant.last_watering&.print_volume || '—' %> water</strong>
+          <br>
           <% if @plant.last_watering&.notes.present? %>
-            <span class="watering-notes-text"><%= @plant.last_watering.notes %></span>
+            <span class="watering-notes-text">📝 <%= @plant.last_watering.notes %></span>
           <% end %>
         </div>
       </div>
@@ -26,22 +27,22 @@
 
     <div class="plant-info-section location-section">
       <div class="info-row">
-        <span class="label"><%= t 'attributes.location' %>:</span>
+        <span class="label">📍 <%= t 'attributes.location' %>:</span>
         <span class="value"><%= plant.location %></span>
       </div>
       <div class="info-row">
-        <span class="label"><%= t 'attributes.zone' %>:</span>
+        <span class="label">🌎 <%= t 'attributes.zone' %>:</span>
         <span class="value"><%= plant.zone %></span>
       </div>
       <% if @plant.watering_frequency_text.present? %>
         <div class="info-row">
-          <span class="label"><%= t 'attributes.frequency' %>:</span>
+          <span class="label">⏳ <%= t 'attributes.frequency' %>:</span>
           <span class="value"><%= plant.watering_frequency_text %></span>
         </div>
       <% end %>
       <% if @plant.container.present? %>
         <div class="info-row">
-          <span class="label"><%= t 'attributes.container' %>:</span>
+          <span class="label">🫙 <%= t 'attributes.container' %>:</span>
           <span class="value"><%= plant.pot %></span>
         </div>
       <% end %>
