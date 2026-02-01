@@ -4,4 +4,4 @@
 
 <%= render partial: 'log_entries', locals: { log_entries: [@log_entry], loggable: @loggable } %>
 
-<%= button_to t('.delete_log_entry'), plant_log_entry_path(plant_id: @loggable.id, id: @log_entry.id), method: :delete, onclick: "return confirm('#{t 'log_entries.messages.confirm_delete'}');" %>
+<%= button_to "🗑️ #{t('.delete_log_entry')}", plant_log_entry_path(plant_id: @loggable.id, id: @log_entry.id), method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('#{t 'log_entries.messages.confirm_delete'}');" %>

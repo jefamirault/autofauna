@@ -14,9 +14,9 @@
 <%= render "form", watering: @watering %>
 
 <p>
-  <%= link_to t('actions.discard_changes'), @watering %>
+  <%= link_to t('actions.discard_changes'), @watering, class: 'link' %>
 </p>
 <br>
 <p>
-  <%= button_to t('waterings.delete_watering'), @watering, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('#{t 'waterings.messages.confirm_delete'}');" %>
+  <%= button_to "🗑️ #{t('waterings.delete_watering')}", @watering, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('#{t 'waterings.messages.confirm_delete'}');" %>
 </p>

@@ -59,9 +59,9 @@
             Edit
           <% end %>
           <%= button_to tank_water_test_path(@tank, test), method: :delete,
-                        class: "buttonLink",
+                        class: "buttonLinkDanger",
                         onclick: "return confirm('Are you sure you want to permanently delete this Water Test?');" do %>
-            Delete
+            🗑️ Delete
           <% end %>
         </div>
       </td>

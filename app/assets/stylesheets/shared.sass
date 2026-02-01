@@ -71,9 +71,6 @@ form.button_to
     &:hover
       cursor: pointer
 
-.formContainer
-  max-width: 500px
-
 .rangeInputContainer
   display: flex
   align-items: flex-end
@@ -89,7 +86,7 @@ h2
   padding-top: 0.5em
 
 main
-  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings
+  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings, &.plants
     label
       display: block
       font-size: 85%
@@ -117,6 +114,20 @@ main
         @media (max-width: 400px)
           input:not([type="submit"])
             font-size: 0.875em
+  &.plants
+    &.new, &.edit, &.create, &.update
+      section#primary
+        background: transparent
+        display: flex
+        flex-direction: column
+        align-items: center
+        justify-content: center
+        .settings-card
+          width: 100%
+          max-width: 450px
+          @media (max-width: 600px)
+            width: calc(100% - 2rem)
+            margin: 0 1rem
   &.settings
     section#primary
       max-width: 600px
@@ -125,9 +136,14 @@ main
     .settings-card
       background: rgba(0, 77, 64, 0.15)
 
-input
+input, select
   width: 100%
   box-sizing: border-box
+
+select
+  font-size: 120%
+  padding: 4px 8px
+  font-family: Roboto, verdana, sans-serif
 
 table
   th
@@ -145,6 +161,15 @@ input
   font-size: 120%
 .saveButton
   padding: 16px 48px
+  background: #517c68
+  color: white
+  border: none
+  border-radius: 6px
+  font-family: Roboto, verdana, sans-serif
+  font-size: 100%
+  cursor: pointer
+  &:hover
+    background: #1ba562
 
 .hide
   display: none
@@ -367,6 +392,20 @@ p.large
   @extend .link
   font-family: Roboto, verdana, sans-serif
   cursor: pointer
+  border: none
+  button
+    background: #517c68
+    color: white
+    border: none
+    border-radius: 6px
+    padding: 8px 16px
+    margin: 4px
+    font-family: Roboto, verdana, sans-serif
+    font-size: 95%
+    cursor: pointer
+    &:hover
+      background: #1ba562
+      color: white
 
 .buttonLinkDanger
   @extend .buttonLink
@@ -374,6 +413,10 @@ p.large
   color: white
   &:hover
     background: #a52f2f
+  button
+    background: #7c5151
+    &:hover
+      background: #a52f2f
 
 //  icons
 svg

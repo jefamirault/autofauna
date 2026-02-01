@@ -25,7 +25,7 @@
   <%= button_to t('layouts.application.log_out'), session_path, class: 'buttonLink', method: :delete, onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
 </div>
 
-<button class="buttonLinkDanger" onclick="document.getElementById('danger-zone').style.display='block'; this.style.display='none';"><%= t 'account.delete_account' %></button>
+<button class="buttonLinkDanger" onclick="document.getElementById('danger-zone').style.display='block'; this.style.display='none';">🗑️ <%= t 'account.delete_account' %></button>
 
 <div class="settings-card danger" id="danger-zone" style="display: none;">
   <h2><%= t 'account.danger_zone' %></h2>
@@ -35,7 +35,7 @@
       <%= f.password_field :password, required: true %>
     </div>
     <div class="submit">
-      <%= f.submit t('account.delete_account'), class: 'buttonLinkDanger', onclick: "return confirm('#{j t('account.confirm_delete_account')}');" %>
+      <%= f.submit "🗑️ #{t('account.delete_account')}", class: 'buttonLinkDanger', onclick: "return confirm('#{j t('account.confirm_delete_account')}');" %>
     </div>
   <% end %>
 </div>

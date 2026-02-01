@@ -1,97 +1,94 @@
-<div class="formContainer">
-  <% graphic_paths = Plant.available_graphics.map { |g| [g, image_path("plant_graphics/#{g}.png")] }.to_h %>
-  <%= form_with(model: plant, data: {
-    controller: "plant-graphic",
-    plant_graphic_suggest_url_value: suggest_graphic_plants_path,
-    plant_graphic_paths_value: graphic_paths.to_json
-  }) do |form| %>
-    <% if plant.errors.any? %>
-      <div style="color: red">
-        <h2><%= pluralize(plant.errors.count, "error") %> prohibited this plant from being saved:</h2>
+<% graphic_paths = Plant.available_graphics.map { |g| [g, image_path("plant_graphics/#{g}.png")] }.to_h %>
+<%= form_with(model: plant, data: {
+  controller: "plant-graphic",
+  plant_graphic_suggest_url_value: suggest_graphic_plants_path,
+  plant_graphic_paths_value: graphic_paths.to_json
+}) do |form| %>
+  <% if plant.errors.any? %>
+    <div class="auth-errors">
+      <h2><%= pluralize(plant.errors.count, "error") %> prohibited this plant from being saved:</h2>
 
-        <ul>
-          <% plant.errors.each do |error| %>
-            <li><%= error.full_message %></li>
-          <% end %>
-        </ul>
-      </div>
-    <% end %>
-
-    <%= form.hidden_field :project_id %>
-
-    <div>
-      <%= form.label :name, "🪪 Name", style: "display: block" %>
-      <%= form.text_field :name, autofocus: plant.new_record?, data: {
-        plant_graphic_target: "nameInput",
-        action: "input->plant-graphic#nameChanged"
-      } %>
-    </div>
-
-    <div>
-      <%= form.label :uid, "🌐 UID", style: "display: block" %>
-      <%= form.number_field :uid %>
-    </div>
-
-    <% locations = current_project.locations %>
-    <% unless locations.empty? %>
-      <div>
-        <%= form.label :location_id, "📍 Location", style: "display: block" %>
-        <%= form.collection_select :location_id, locations, :id, :name %>
-      </div>
-    <% end %>
-
-    <div>
-      <%= form.label :pot, "🫙 #{t('attributes.container')}", style: "display: block" %>
-      <%= form.text_field :pot %>
-    </div>
-
-    <div class="rangeInputContainer">
-      <div style="width:100px">
-        <%= form.label :min_watering_freq, '⏳ Min', style: "display: block" %>
-        <%= form.number_field :min_watering_freq %>
-      </div>
-      <div style="font-size: 200%;line-height: 40px;margin: 0 8px">
-        -
-      </div>
-      <div style="width:100px">
-        <%= form.label :max_watering_freq, '⌛ Max', style: "display: block" %>
-        <%= form.number_field :max_watering_freq %>
-      </div>
-      <div style="font-size: 100%;line-height: 40px;margin: 0 8px;">
-        days
-      </div>
-    </div>
-
-
-    <div class="plant-graphic-selector">
-      <div class="graphic-select-container">
-        <div>
-          <%= form.label :graphic, t('attributes.graphic'), style: "display: block" %>
-          <%= form.select :graphic,
-            [[t('plants.form.select_graphic'), ""]] + Plant.graphics_for_select,
-            {},
-            {
-              data: {
-                plant_graphic_target: "graphicSelect",
-                action: "change->plant-graphic#graphicChanged"
-              }
-            }
-          %>
-        </div>
-        <%= image_tag "", alt: "Plant graphic preview", class: "plant-graphic-preview-image", data: { plant_graphic_target: "preview" }, style: "display: none;" %>
-      </div>
-    </div>
-
-    <% unless @plant.new_record? %>
-      <div class="archived-checkbox">
-        <%= form.label :archived, "🗄️ Archived?" %>
-        <%= form.check_box :archived %>
-      </div>
-    <% end %>
-    <br>
-    <div>
-      <% submit_text = t(plant.new_record? ? 'plants.create_plant' : 'plants.update_plant') %>
-      <%= form.submit submit_text, class: 'saveButton' %>
+      <ul>
+        <% plant.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
     </div>
   <% end %>
-</div>
+
+  <%= form.hidden_field :project_id %>
+
+  <div class="field">
+    <%= form.label :name, "🪪 Name" %>
+    <%= form.text_field :name, autofocus: plant.new_record?, data: {
+      plant_graphic_target: "nameInput",
+      action: "input->plant-graphic#nameChanged"
+    } %>
+  </div>
+
+  <div class="field">
+    <%= form.label :uid, "🌐 UID" %>
+    <%= form.number_field :uid %>
+  </div>
+
+  <% locations = current_project.locations %>
+  <% unless locations.empty? %>
+    <div class="field">
+      <%= form.label :location_id, "📍 Location" %>
+      <%= form.collection_select :location_id, locations, :id, :name %>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :pot, "🫙 #{t('attributes.container')}" %>
+    <%= form.text_field :pot %>
+  </div>
+
+  <div class="rangeInputContainer">
+    <div class="range-field">
+      <%= form.label :min_watering_freq, '⏳ Min' %>
+      <%= form.number_field :min_watering_freq %>
+    </div>
+    <div class="range-dash">
+      -
+    </div>
+    <div class="range-field">
+      <%= form.label :max_watering_freq, '⌛ Max' %>
+      <%= form.number_field :max_watering_freq %>
+    </div>
+    <div class="range-label">
+      days
+    </div>
+  </div>
+
+
+  <div class="plant-graphic-selector">
+    <div class="graphic-select-container">
+      <div>
+        <%= form.label :graphic, t('attributes.graphic') %>
+        <%= form.select :graphic,
+          [[t('plants.form.select_graphic'), ""]] + Plant.graphics_for_select,
+          {},
+          {
+            data: {
+              plant_graphic_target: "graphicSelect",
+              action: "change->plant-graphic#graphicChanged"
+            }
+          }
+        %>
+      </div>
+      <%= image_tag "", alt: "Plant graphic preview", class: "plant-graphic-preview-image", data: { plant_graphic_target: "preview" }, style: "display: none;" %>
+    </div>
+  </div>
+
+  <% unless @plant.new_record? %>
+    <div class="archived-checkbox">
+      <%= form.label :archived, "🗄️ Archived?" %>
+      <%= form.check_box :archived %>
+    </div>
+  <% end %>
+  <div class="submit">
+    <% submit_text = t(plant.new_record? ? 'plants.create_plant' : 'plants.update_plant') %>
+    <%= form.submit submit_text, class: 'saveButton' %>
+  </div>
+<% end %>

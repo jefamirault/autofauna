@@ -1,13 +1,15 @@
-<% content_for :title do %>
-  New Plant
-<% end %>
-<h1 style="display:inline-block">
-  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= t 'plants.index.new_plant' %>
-</h1>
-<%= render "form", plant: @plant %>
+<div class="settings-card">
+  <% content_for :title do %>
+    New Plant
+  <% end %>
+  <h1 style="display:inline-block">
+    <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    <%= t 'plants.index.new_plant' %>
+  </h1>
+  <%= render "form", plant: @plant %>
 
-<p>
-  <%= link_to t('actions.cancel'), plants_path %>
-</p>
+  <p>
+    <%= link_to t('actions.cancel'), plants_path, class: 'link' %>
+  </p>
+</div>

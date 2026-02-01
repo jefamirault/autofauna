@@ -19,4 +19,4 @@
 <% end %>
 <%= render 'water_tests/water_tests', water_tests: @water_tests %>
 
-<%= button_to "Destroy this tank", @tank, method: :delete, class: 'buttonLink', onclick: "return confirm('Are you sure you want to permanently delete this Tank?');" %>
+<%= button_to "🗑️ Destroy this tank", @tank, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('Are you sure you want to permanently delete this Tank?');" %>

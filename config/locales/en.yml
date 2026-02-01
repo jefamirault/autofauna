@@ -198,7 +198,7 @@ en:
     remove: "Remove"
     back: "Back"
     cancel_edit: "Cancel Edit"
-    discard_changes: "Discard Changes"
+    discard_changes: "Cancel"
     cancel: 'Cancel'
   true: "True"
   false: "False"
