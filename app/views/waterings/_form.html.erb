@@ -25,7 +25,7 @@
 
     <div>
       <%= form.label :volume, style: "display: block" %>
-      <%= form.number_field :volume, step: 'any' %>
+      <%= form.number_field :volume, step: 'any', placeholder: "e.g. 2.0" %>
     </div>
 
     <div>
@@ -35,7 +35,7 @@
 
     <div>
       <%= form.label :notes, style: "display: block" %>
-      <%= form.text_area :notes, autofocus: watering.notes.nil? || watering.notes == '' %>
+      <%= form.text_area :notes, autofocus: watering.notes.nil? || watering.notes == '', placeholder: "e.g. Tap water" %>
     </div>
     <br>
     <div>

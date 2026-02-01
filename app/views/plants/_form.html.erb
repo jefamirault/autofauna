@@ -20,15 +20,20 @@
 
   <div class="field">
     <%= form.label :name, "🪪 Name" %>
-    <%= form.text_field :name, autofocus: plant.new_record?, data: {
+    <%= form.text_field :name, autofocus: plant.new_record?, placeholder: "e.g. Pothos", data: {
       plant_graphic_target: "nameInput",
       action: "input->plant-graphic#nameChanged"
     } %>
   </div>
 
   <div class="field">
-    <%= form.label :uid, "🌐 UID" %>
-    <%= form.number_field :uid %>
+    <%= form.label :uid, "🌐 Number" %>
+    <% if plant.persisted? %>
+      <%= form.number_field :uid %>
+    <% else %>
+      <span>#<%= plant.uid %></span>
+      <%= form.hidden_field :uid %>
+    <% end %>
   </div>
 
   <% locations = current_project.locations %>
@@ -41,24 +46,22 @@
 
   <div class="field">
     <%= form.label :pot, "🫙 #{t('attributes.container')}" %>
-    <%= form.text_field :pot %>
+    <%= form.text_field :pot, placeholder: "e.g. Clay pot" %>
   </div>
 
+  <%= form.label :min_watering_freq, '⏳ Watering Frequency' %>
   <div class="rangeInputContainer">
+    <div class="range-label">Every</div>
     <div class="range-field">
-      <%= form.label :min_watering_freq, '⏳ Min' %>
-      <%= form.number_field :min_watering_freq %>
+      <%= form.number_field :min_watering_freq, placeholder: "e.g. 7" %>
     </div>
-    <div class="range-dash">
-      -
-    </div>
-    <div class="range-field">
-      <%= form.label :max_watering_freq, '⌛ Max' %>
-      <%= form.number_field :max_watering_freq %>
-    </div>
-    <div class="range-label">
-      days
-    </div>
+    <% if plant.persisted? %>
+      <div class="range-dash">-</div>
+      <div class="range-field">
+        <%= form.number_field :max_watering_freq %>
+      </div>
+    <% end %>
+    <div class="range-label">days</div>
   </div>
 
 

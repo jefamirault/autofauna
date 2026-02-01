@@ -11,7 +11,7 @@
   <% end %>
 </div>
 <br>
-<div style="padding: 0;"><%= "#{@plants.size} Active Plants" %>
+<div style="padding: 0 0.75rem;"><%= "#{@plants.size} Active Plants" %>
   <%= params['q']['name_or_location_name_cont'] && params['q']['name_or_location_name_cont'] != '' ? " matching \"#{params['q']['name_or_location_name_cont']}\"" : ''%>
   <% if params['q']['name_or_location_name_cont'] && params['q']['name_or_location_name_cont'] != '' %>
     - <%= link_to t('clear_search'), plants_path %>
