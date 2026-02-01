@@ -15,21 +15,11 @@
       </div>
     <% end %>
     <div class="plant-card-meta">
-      <% volume = last_watering_volume_text(plant) %>
-      <% if volume.present? %>
-        <div class="plant-card-last-watering-volume">💧 <%= volume %></div>
-      <% end %>
-      <% notes = last_watering_notes_text(plant) %>
-      <% if notes.present? %>
-        <div class="plant-card-last-watering-notes">📝 <%= notes %></div>
-      <% end %>
+      <div class="plant-card-last-watering-volume">💧 <%= last_watering_volume_text(plant) || "–" %></div>
+      <div class="plant-card-last-watering-notes">📝 <%= last_watering_notes_text(plant) || "–" %></div>
       <div class="plant-card-last-watering-time">⌛ <span class="long-text"><%= last_watering_time_text(plant).html_safe %></span><span class="short-text"><%= last_watering_time_short_text(plant).html_safe %></span></div>
-      <% if plant.location.present? %>
-        <span class="plant-card-location">📍 <%= plant.location %></span>
-      <% end %>
-      <% if plant.pot.present? %>
-        <span class="plant-card-container">🫙 <%= plant.pot %></span>
-      <% end %>
+      <span class="plant-card-location">📍 <%= plant.location.presence || "–" %></span>
+      <span class="plant-card-container">🫙 <%= plant.pot.presence || "–" %></span>
     </div>
   </div>
   <% unless archive %>

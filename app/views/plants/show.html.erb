@@ -31,9 +31,13 @@
   <% end %>
 </div>
 
-<%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant), class: 'link' %>
-<%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>
+<div class="plant-actions">
+  <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant), class: 'link' %>
+  <%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>
+</div>
 <h3><%= t '.timeline' %></h3>
 <%= render partial: 'timeline', locals: { timeline: @timeline, plant: @plant } %>
-<%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant), class: 'link' %>
-<%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>
+<div class="plant-actions">
+  <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant), class: 'link' %>
+  <%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>
+</div>

@@ -64,7 +64,7 @@ class Watering < ApplicationRecord
 
   def print_volume
     return nil if self.volume.nil?
-    "#{sprintf('%g', self.volume)} #{self.units}"
+    "#{sprintf('%g', self.volume)} #{self.units} water"
   end
 
   def volume_and_notes

@@ -254,23 +254,33 @@ $lightyellow: rgba(206, 154, 0, 0.2)
     grid-template-columns: 1fr
     font-size: 0.85em
 
-@media (max-width: 480px)
+@media (max-width: 500px)
   .desktop-only
     display: none
   .mobile-only
     display: inline
 
-  .short-text
-    display: inline
-  .long-text
-    display: none
+
+  .plant-card
+    display: grid
+    grid-template-columns: auto 1fr
+    grid-template-rows: 1fr auto
 
   .plant-card-graphic-col
+    grid-row: 1 / -1
     flex: 0 0 120px
     max-width: 120px
 
+  .plant-card-details
+    grid-column: 2
+    grid-row: 1
+
   .plant-card-water-col
-    padding: 0.5rem 0.25rem
+    grid-column: 2
+    grid-row: 2
+    flex-direction: row
+    border-radius: 0 0 4px 0
+    padding: 0.5rem
 
   .plant-card-name
     white-space: normal
@@ -280,13 +290,7 @@ $lightyellow: rgba(206, 154, 0, 0.2)
     padding-left: 0
     padding-right: 0
 
-@media (max-width: 500px)
-  .plant-card
-    flex-wrap: wrap
-
-  .plant-card-water-col
-    flex: 0 0 100%
-    flex-direction: row
-    border-radius: 0 0 4px 4px
-    padding: 0.5rem
+  .plant-actions, .share-section
+    margin-left: 16px
+    margin-right: 16px
 
