@@ -551,3 +551,114 @@ Run database migration:
 ```bash
 bin/rails db:migrate
 ```
+
+---
+
+# Agent Log: Account Deletion + Settings Restyle
+
+**Date:** 2026-01-31
+**Task:** Add account deletion with async data cleanup, restyle settings page, add `login_enabled` admin control
+
+## Summary
+
+Added account deletion functionality with a restyled card-based settings page. Deletion is async — the user's `login_enabled` flag is set to `false` immediately, then a background job destroys all their data. Admins can toggle `login_enabled` per user from `/users`. The settings page now uses a card layout consistent with the plant info cards.
+
+## Changes Made
+
+### Database
+
+- **`db/migrate/..._change_log_entries_user_id_nullify_on_delete.rb`**
+  - Allows null `user_id` on `log_entries`
+  - Replaces FK with `ON DELETE NULLIFY` so log entries survive user deletion
+
+- **`db/migrate/..._add_login_enabled_to_users.rb`**
+  - Adds `login_enabled` boolean column (default: `true`, not null)
+
+### Models
+
+- **`app/models/user.rb`**
+  - Added `dependent: :destroy` to `has_many :projects` and `has_many :collaborations`
+
+- **`app/models/project.rb`**
+  - Added `dependent: :destroy` to all child associations (plants, zones, locations, sensors, etc.)
+  - Reordered associations so `plants` is destroyed before `locations` (FK dependency)
+
+- **`app/models/log_entry.rb`**
+  - Changed `belongs_to :user` to `optional: true`
+
+### Jobs
+
+- **`app/jobs/delete_user_data_job.rb`** (new)
+  - Finds user by ID and calls `destroy`
+  - Handles `ActiveRecord::RecordNotFound` gracefully
+
+### Controllers
+
+- **`app/controllers/settings_controller.rb`**
+  - Added `before_action :authenticate`
+  - `destroy` action: verifies password, sets `login_enabled: false`, enqueues `DeleteUserDataJob`, clears session, redirects with scheduled-deletion message
+
+- **`app/controllers/sessions_controller.rb`**
+  - Rejects login when `login_enabled` is `false` with "account disabled" message
+
+- **`app/controllers/users_controller.rb`**
+  - Added `update` action for admins to toggle `login_enabled`
+
+### Routes
+
+- **`config/routes.rb`**
+  - Added `delete 'settings', to: 'settings#destroy'`
+
+### Views
+
+- **`app/views/settings/index.html.erb`** — Restyled with three cards:
+  - Account Information card (email, created, updated)
+  - Security card (update password, log out)
+  - "Delete Account" button that reveals the Danger Zone card with password form and confirmation dialog
+
+- **`app/views/users/index.html.erb`**
+  - Added "Login Enabled" column with toggle button per user
+
+### Stylesheets
+
+- **`app/assets/stylesheets/shared.sass`**
+  - Added `.settings-card` styles (green-themed, border-left accent)
+  - `.settings-card.danger` variant (red-themed)
+  - Settings page widened to 600px (auth pages remain at 450px)
+
+### Translations
+
+- **`config/locales/en.yml`** + **`config/locales/es.yml`**
+  - `account.delete_account`, `account.confirm_delete_account`, `account.delete_account_success` (scheduled deletion message), `account.password_required`, `account.incorrect_password`, `account.security`, `account.danger_zone`, `account.account_information`
+  - `errors.account_disabled`
+  - `attributes.login_enabled`
+
+### Scripts
+
+- **`util/clone_production_db_to_local.sh`**
+  - Added `rails db:migrate` after pg_restore
+
+## Deletion Flow
+
+1. User clicks "Delete Account" button — reveals danger zone card
+2. User enters password and confirms — controller verifies password
+3. `login_enabled` set to `false` immediately
+4. `DeleteUserDataJob` enqueued for async destruction
+5. Session cleared, redirected to login with "scheduled for deletion" notice
+6. If user tries to log back in before job runs — "account disabled" error
+
+## Behavior Changes
+
+| Scenario | Before | After |
+|----------|--------|-------|
+| Settings page | Plain text list | Card-based layout with sections |
+| Delete account | N/A | Password-confirmed async deletion |
+| Re-login after deletion | N/A | Blocked by `login_enabled: false` |
+| Admin user management | View-only user list | Can toggle `login_enabled` per user |
+
+## Required Action
+
+Run database migrations:
+```bash
+bin/rails db:migrate
+```
