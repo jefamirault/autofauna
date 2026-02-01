@@ -1,0 +1,6 @@
+<% if notice.present? %>
+  <div class="flash-notice"><%= icon('check-circle', variant: 'solid') %><span><%= notice %></span></div>
+<% end %>
+<% if alert.present? %>
+  <div class="flash-alert"><%= icon('exclamation-circle', variant: 'solid') %><span><%= alert %></span></div>
+<% end %>

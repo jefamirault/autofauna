@@ -107,8 +107,7 @@
     </aside>
 
     <main class="<%= params[:controller] %>">
-      <div style="color: green"><%= notice %></div>
-      <div style="color: #f44"><%= alert %></div>
+      <%= render 'layouts/flash' %>
 
       <section id="primary">
         <%= yield %>
