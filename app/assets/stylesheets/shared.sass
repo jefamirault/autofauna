@@ -90,7 +90,6 @@ h2
 
 main
   &.sessions, &.registrations, &.passwords, &.password_resets, &.settings
-    max-width: 450px
     display: block
     margin-left: auto
     margin-right: auto
@@ -105,6 +104,11 @@ main
         padding: 4px 8px
     .submit
       margin-top: 1em
+
+  &.sessions, &.registrations, &.passwords, &.password_resets
+    max-width: 450px
+  &.settings
+    max-width: 600px
 
 input
   width: 100%
@@ -182,6 +186,43 @@ table.yellow
     background: $lightyellow
   td
     border-color: $lightyellow !important
+
+// Settings cards
+.settings-card
+  background: $lightgreen
+  border-radius: 8px
+  border-left: 4px solid $green
+  padding: 1rem 1.25rem
+  margin-bottom: 1.5rem
+
+  h2
+    margin-top: 0
+    color: $darkgreen
+    font-size: 1.1em
+
+  .info-row
+    display: flex
+    justify-content: space-between
+    padding: 0.4rem 0
+    border-bottom: 1px solid rgba(0, 77, 64, 0.1)
+
+    &:last-of-type
+      border-bottom: none
+
+    .label
+      color: $darkgreen
+      font-weight: 500
+
+    .value
+      color: #333
+      text-align: right
+
+  &.danger
+    background: rgba(124, 81, 81, 0.1)
+    border-left-color: #7c5151
+
+    h2
+      color: #7c5151
 
 .plantButton
   display: inline-block

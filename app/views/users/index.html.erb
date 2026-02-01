@@ -6,6 +6,7 @@
       <th>Email</th>
       <th><%= t 'attributes.projects' %></th>
       <th><%= t 'attributes.collaborations' %></th>
+      <th><%= t 'attributes.login_enabled' %></th>
     </tr>
   </thead>
   <tbody>
@@ -22,6 +23,9 @@
         </td>
         <td>
           <%= user.collaborations.count %>
+        </td>
+        <td>
+          <%= button_to user.login_enabled? ? "Enabled" : "Disabled", user_path(user, user: { login_enabled: !user.login_enabled }), method: :patch, class: user.login_enabled? ? 'buttonLink' : 'buttonLinkDanger' %>
         </td>
       </tr>
     <% end %>

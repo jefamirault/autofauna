@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   root "plants#index"
 
   get 'settings', to: 'settings#index'
+  delete 'settings', to: 'settings#destroy'
   get 'en', to: 'settings#english'
   get 'es', to: 'settings#spanish'
 

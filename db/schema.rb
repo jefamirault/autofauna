@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_31_160000) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_01_025216) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -45,7 +45,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_160000) do
     t.text "description"
     t.string "loggable_type", null: false
     t.bigint "loggable_id", null: false
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.datetime "timestamp"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -132,6 +132,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_160000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "advanced_mode", default: false
+    t.boolean "login_enabled", default: true, null: false
   end
 
   create_table "water_tests", force: :cascade do |t|
@@ -165,7 +166,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_160000) do
     t.datetime "updated_at", null: false
   end
 
-  add_foreign_key "log_entries", "users"
+  add_foreign_key "log_entries", "users", on_delete: :nullify
   add_foreign_key "plants", "locations"
   add_foreign_key "water_tests", "tanks"
 end

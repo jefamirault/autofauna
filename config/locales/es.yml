@@ -128,6 +128,14 @@ es:
     link_expired: "Inténtalo de nuevo. El enlace anterior ha expirado."
     update_password: "Actualizar contraseña"
     current_password: "Contraseña actual"
+    delete_account: "Eliminar cuenta"
+    confirm_delete_account: "¿Estás seguro? Esto eliminará permanentemente tu cuenta y todos tus datos. Esta acción no se puede deshacer."
+    delete_account_success: "Tu cuenta ha sido programada para eliminación. Puede tomar hasta 24 horas para que todos tus datos sean eliminados de nuestros sistemas."
+    password_required: "Ingresa tu contraseña para confirmar"
+    incorrect_password: "Contraseña incorrecta."
+    security: "Seguridad"
+    danger_zone: "Zona de peligro"
+    account_information: "Información de la cuenta"
   messages:
     please_select_project: "Seleccione un proyecto para continuar."
   errors:
@@ -137,6 +145,7 @@ es:
     login_required: "Tienes que iniciar sesión para hacer esto."
     invalid_email: "Ingrese una dirección de correo electrónico de usuario válida."
     invalid_email_or_password: "Correo electrónico o contraseña no válidos."
+    account_disabled: "Esta cuenta ha sido deshabilitada."
     user_already_added: "El usuario ya es colaborador de este proyecto."
   time:
     today: "Hoy"
@@ -168,6 +177,7 @@ es:
     updated: "Actualizado"
     projects: "Proyectos"
     collaborations: "Colaboradores"
+    login_enabled: "Inicio de sesión habilitado"
     account_created: "Cuenta creada"
     account_updated: "Cuenta actualizada"
     type: "Tipo"

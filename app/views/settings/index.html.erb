@@ -2,21 +2,40 @@
 
 <h1><%= t 'layouts.application.account_settings' %></h1>
 
-<p>
-  <strong>Email:</strong>
-  <%= current_user.email %>
-</p>
-<p>
-  <strong><%= t 'attributes.account_created' %>:</strong>
-  <%= format_time current_user.created_at %>
-</p>
-<p>
-  <strong><%= t 'attributes.account_updated' %>:</strong>
-  <%= format_time current_user.updated_at %>
-</p>
+<div class="settings-card">
+  <h2><%= t 'account.account_information' %></h2>
+  <div class="info-row">
+    <span class="label">Email</span>
+    <span class="value"><%= current_user.email %></span>
+  </div>
+  <div class="info-row">
+    <span class="label"><%= t 'attributes.account_created' %></span>
+    <span class="value"><%= format_time current_user.created_at %></span>
+  </div>
+  <div class="info-row">
+    <span class="label"><%= t 'attributes.account_updated' %></span>
+    <span class="value"><%= format_time current_user.updated_at %></span>
+  </div>
+</div>
 
-<br>
-<%= link_to t('account.update_password'), edit_password_path %>
-<br>
-<br>
-<%= button_to t('layouts.application.log_out'), session_path, class: 'saveButton', method: :delete, onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
+<div class="settings-card">
+  <h2><%= t 'account.security' %></h2>
+  <%= link_to t('account.update_password'), edit_password_path, class: 'link' %>
+  <br><br>
+  <%= button_to t('layouts.application.log_out'), session_path, class: 'buttonLink', method: :delete, onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
+</div>
+
+<button class="buttonLinkDanger" onclick="document.getElementById('danger-zone').style.display='block'; this.style.display='none';"><%= t 'account.delete_account' %></button>
+
+<div class="settings-card danger" id="danger-zone" style="display: none;">
+  <h2><%= t 'account.danger_zone' %></h2>
+  <%= form_with url: settings_path, method: :delete, local: true do |f| %>
+    <div class="field">
+      <%= f.label :password, t('account.password_required') %>
+      <%= f.password_field :password, required: true %>
+    </div>
+    <div class="submit">
+      <%= f.submit t('account.delete_account'), class: 'buttonLinkDanger', onclick: "return confirm('#{j t('account.confirm_delete_account')}');" %>
+    </div>
+  <% end %>
+</div>

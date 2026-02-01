@@ -1,8 +1,8 @@
 class User < ApplicationRecord
   has_secure_password
 
-  has_many :collaborations
-  has_many :projects, foreign_key: :owner_id
+  has_many :collaborations, dependent: :destroy
+  has_many :projects, foreign_key: :owner_id, dependent: :destroy
 
   after_create :create_default_project
 

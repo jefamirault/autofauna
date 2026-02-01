@@ -28,6 +28,7 @@ rails db:drop
 rails db:create
 pg_restore --no-owner --role=autofauna_development -d autofauna_development -h 127.0.0.1 -U autofauna_development db/backup/autofauna_db.dump
 rails db:environment:set RAILS_ENV=development
+rails db:migrate
 
 echo "Local database updated with latest backup"
 # Start rails development server if argument "start_server" is present

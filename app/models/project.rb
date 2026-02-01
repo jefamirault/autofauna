@@ -1,22 +1,22 @@
 class Project < ApplicationRecord
   belongs_to :owner, foreign_key: 'owner_id', class_name: 'User'
 
-  has_many :collaborations
+  has_many :collaborations, dependent: :destroy
   has_many :collaborators, through: :collaborations, source: 'user'
 
-  has_many :zones
-  has_many :locations
-  has_many :sensors
-  has_many :hygro_sensor_readings
-  has_many :sensor_types
-  has_many :tanks
+  has_many :plants, dependent: :destroy
+  has_many :waterings, through: :plants
+
+  has_many :zones, dependent: :destroy
+  has_many :locations, dependent: :destroy
+  has_many :sensors, dependent: :destroy
+  has_many :hygro_sensor_readings, dependent: :destroy
+  has_many :sensor_types, dependent: :destroy
+  has_many :tanks, dependent: :destroy
 
   def users
     [owner] + collaborators
   end
-
-  has_many :plants
-  has_many :waterings, through: :plants
 
   def add_viewer(user)
     add_user_with_role user, :viewer

@@ -131,6 +131,14 @@ en:
     link_expired: "Please try again. The previous link has expired."
     update_password: "Update Password"
     current_password: "Current Password"
+    delete_account: "Delete Account"
+    confirm_delete_account: "Are you sure? This will permanently delete your account and all your data. This action cannot be undone."
+    delete_account_success: "Your account has been scheduled for deletion. It may take up to 24 hours for all your data to be removed from our systems."
+    password_required: "Enter your password to confirm"
+    incorrect_password: "Incorrect password."
+    security: "Security"
+    danger_zone: "Danger Zone"
+    account_information: "Account Information"
   messages:
     please_select_project: "Select a project to continue."
   errors:
@@ -140,6 +148,7 @@ en:
     login_required: "You must be logged in order to do that."
     invalid_email: "Please enter a valid user email address."
     invalid_email_or_password: "Invalid email or password."
+    account_disabled: "This account has been disabled."
     user_already_added: "User is already a collaborator on this project."
   time:
     today: "Today"
@@ -171,6 +180,7 @@ en:
     updated: "Updated"
     projects: "Projects"
     collaborations: "Collaborations"
+    login_enabled: "Login Enabled"
     account_created: "Account Created"
     account_updated: "Account Updated"
     type: "Type"

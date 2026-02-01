@@ -5,7 +5,10 @@ class SessionsController < ApplicationController
 
   def create
     @user = User.authenticate_by(session_params)
-    if @user.present?
+    if @user.present? && !@user.login_enabled?
+      flash[:alert] = t('errors.account_disabled')
+      render :new, status: :unprocessable_entity
+    elsif @user.present?
       login @user
       auto_select_project_for(@user)
       redirect_to plants_path, notice: t('account.sign_in_success')
