@@ -79,12 +79,14 @@
             <%= nav_link 'zones'%>
           </div>
         <% end %>
-        <%= nav_link 'sensors' %>
-        <% if params[:controller] == 'sensors' || params[:controller] == 'sensor_readings' || params[:controller] == 'sensor_types' %>
-          <div class="indent">
-            <%= nav_link 'sensor_readings', action: 'readings', text: 'Sensor Readings', path: sensor_readings_path %>
-            <%= nav_link 'sensor_types' %>
-          </div>
+        <% if current_user&.advanced_mode? %>
+          <%= nav_link 'sensors' %>
+          <% if params[:controller] == 'sensors' || params[:controller] == 'sensor_readings' || params[:controller] == 'sensor_types' %>
+            <div class="indent">
+              <%= nav_link 'sensor_readings', action: 'readings', text: 'Sensor Readings', path: sensor_readings_path %>
+              <%= nav_link 'sensor_types' %>
+            </div>
+          <% end %>
         <% end %>
       </nav>
       <div class="fill"></div>
