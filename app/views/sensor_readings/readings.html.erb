@@ -1,6 +1,6 @@
 <div style="float:right">
-  <%= link_to t('.import_sensor_readings'), sensor_readings_import_path %> |
-  <%= link_to t('.export_sensor_readings'), sensor_readings_path(format: :json) %>
+  <%= link_to "📥 Import Sensor Readings", sensor_readings_import_path, class: 'link' %>
+  <%= link_to "📤 Export Sensor Readings", sensor_readings_path(format: :json), class: 'link' %>
 </div>
 
 <h1 style="display:inline-block">

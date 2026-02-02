@@ -3,16 +3,16 @@
 <h1>Locations</h1>
 
 <% unless @locations.empty? %>
-    <%= link_to "View Zones", zones_path %>
+    <%= link_to "🗺️ View Zones", zones_path, class: 'link' %>
 <% end %>
 
 <div id="locations">
   <% @locations.each do |location| %>
     <%= render location %>
     <p>
-      <%= link_to "Show this Location", location %>
+      <%= link_to "📍 Show this Location", location, class: 'link' %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New Location", new_location_path %>
+<%= link_to "➕ New Location", new_location_path, class: 'link' %>

@@ -7,9 +7,9 @@
   <% @zones.each do |zone| %>
     <%= render zone %>
     <p>
-      <%= link_to "Show this Zone", zone %>
+      <%= link_to "🗺️ Show this Zone", zone, class: 'link' %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New Zone", new_zone_path %>
+<%= link_to "➕ New Zone", new_zone_path, class: 'link' %>

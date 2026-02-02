@@ -7,9 +7,9 @@
   <% @sensor_types.each do |sensor_type| %>
     <%= render sensor_type %>
     <p>
-      <%= link_to "Show this Sensor Type", sensor_type %>
+      <%= link_to "🏷️ Show this Sensor Type", sensor_type, class: 'link' %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New Sensor Type", new_sensor_type_path %>
+<%= link_to "➕ New Sensor Type", new_sensor_type_path, class: 'link' %>

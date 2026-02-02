@@ -6,8 +6,8 @@
 <%= render @location %>
 
 <div>
-  <%= link_to "✏️ Edit this Location", edit_location_path(@location) %> |
-  <%= link_to "↩️ Back to Locations", locations_path %>
+  <%= link_to "✏️ Edit this Location", edit_location_path(@location), class: 'link' %>
+  <%= link_to "↩️ Back to Locations", locations_path, class: 'link' %>
 
   <%= button_to "🗑️ Destroy this Location", @location, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('#{t 'locations.messages.confirm_delete'}');" %>
 </div>

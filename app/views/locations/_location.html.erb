@@ -6,7 +6,7 @@
 
   <p>
     <strong>Zone:</strong>
-    <%= location.zone ? link_to(location.zone) : '(None)' %>
+    <%= location.zone ? link_to(location.zone, location.zone, class: 'link') : '(None)' %>
   </p>
 
   <p>

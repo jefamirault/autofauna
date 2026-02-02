@@ -64,27 +64,27 @@
         </div>
       <% end %>
       <nav data-action="click->sidebar#closeOnMobile">
-        <%= nav_link 'plants', action: 'index' %>
+        <%= nav_link 'plants', action: 'index', text: '🌱 Plants' %>
         <% if params[:controller] == 'plants' || params[:controller] == 'waterings' %>
           <div class="indent">
-            <%= nav_link 'plants', action: 'new', text: "#{icon('plus')} New Plant".html_safe, path: new_plant_path %>
-            <%= nav_link 'waterings' %>
-            <%= nav_link 'plants', action: 'archive', text: 'Archive', path: plants_archive_path %>
+            <%= nav_link 'plants', action: 'new', text: '✏️ New Plant', path: new_plant_path %>
+            <%= nav_link 'waterings', text: '💧 Waterings' %>
+            <%= nav_link 'plants', action: 'archive', text: '🗃️ Archive', path: plants_archive_path %>
           </div>
         <% end %>
-        <%= nav_link 'tanks' %>
-        <%= nav_link 'locations'%>
+        <%= nav_link 'tanks', text: '🐟 Tanks' %>
+        <%= nav_link 'locations', text: '📍 Locations' %>
         <% if params[:controller] == 'locations' || params[:controller] == 'zones' %>
           <div class="indent">
-            <%= nav_link 'zones'%>
+            <%= nav_link 'zones', text: '🌎 Zones' %>
           </div>
         <% end %>
         <% if current_user&.advanced_mode? %>
-          <%= nav_link 'sensors' %>
+          <%= nav_link 'sensors', text: '📡 Sensors' %>
           <% if params[:controller] == 'sensors' || params[:controller] == 'sensor_readings' || params[:controller] == 'sensor_types' %>
             <div class="indent">
-              <%= nav_link 'sensor_readings', action: 'readings', text: 'Sensor Readings', path: sensor_readings_path %>
-              <%= nav_link 'sensor_types' %>
+              <%= nav_link 'sensor_readings', action: 'readings', text: '📊 Sensor Readings', path: sensor_readings_path %>
+              <%= nav_link 'sensor_types', text: '🏷️ Sensor Types' %>
             </div>
           <% end %>
         <% end %>
@@ -92,15 +92,15 @@
       <div class="fill"></div>
       <nav class="logged_in" data-action="click->sidebar#closeOnMobile">
         <% if current_user&.admin? %>
-          <%= nav_link 'users' %>
+          <%= nav_link 'users', text: '👥 Users' %>
         <% end %>
 
         <% if current_project && show_project_ui? %>
-          <%= nav_link 'projects', action: 'show', text: t('.project_settings'), path: project_path(current_project) %>
+          <%= nav_link 'projects', action: 'show', text: "🔧 #{t('.project_settings')}", path: project_path(current_project) %>
         <% end %>
 
         <% if user_signed_in? %>
-          <%= nav_link 'settings', text: t('.account_settings') %>
+          <%= nav_link 'settings', text: "⚙️ #{t('.account_settings')}" %>
           <%= button_to "#{icon('arrow-right-start-on-rectangle')}#{t('.log_out')}".html_safe, session_path, method: :delete, class: 'logout navItem', onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
         <% else %>
           <%= link_to t('log_in'), new_session_path, class: 'navItem' %>

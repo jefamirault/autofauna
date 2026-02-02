@@ -54,12 +54,12 @@
 </ul>
 
 <p>
-  <%= link_to t('projects.edit_project'), edit_project_path(@project) %>
+  <%= link_to "✏️ " + t('projects.edit_project'), edit_project_path(@project), class: 'link' %>
   <br>
 <div>
-  <%= link_to t('.import_plants'), plants_import_path %> |
-  <%= link_to t('.export_plants'), plants_path(format: :json) %>
+  <%= link_to "📥 " + t('.import_plants'), plants_import_path, class: 'link' %>
+  <%= link_to "📤 " + t('.export_plants'), plants_path(format: :json), class: 'link' %>
 </div>
   <br>
-  <%= link_to t('projects.all_projects'), projects_path(@project) %>
+  <%= link_to "↩️ " + t('projects.all_projects'), projects_path(@project), class: 'link' %>
 </p>
