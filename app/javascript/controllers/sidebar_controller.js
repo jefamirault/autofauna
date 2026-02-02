@@ -18,8 +18,25 @@ export default class extends Controller {
         this.handleResize = this.handleResize.bind(this)
         window.addEventListener('resize', this.handleResize)
 
+        // Initialize scroll handling for mobile
+        this.lastScrollTop = 0
+        this.handleScroll = this.handleScroll.bind(this)
+        const main = document.querySelector('main')
+        if (main) {
+            main.addEventListener('scroll', this.handleScroll, { passive: true })
+        }
+
         // Initialize touch handling
         this.initializeTouchHandling()
+
+        // Mobile: detect downward swipe on sidebar itself to minimize
+        this.handleSidebarTouchStart = this.handleSidebarTouchStart.bind(this)
+        this.handleSidebarTouchEnd = this.handleSidebarTouchEnd.bind(this)
+        const sidebar = document.getElementById('sidebar')
+        if (sidebar && window.innerWidth < 600) {
+            sidebar.addEventListener('touchstart', this.handleSidebarTouchStart, { passive: true })
+            sidebar.addEventListener('touchend', this.handleSidebarTouchEnd, { passive: true })
+        }
 
         // Re-enable transitions after initial state is applied
         requestAnimationFrame(() => {
@@ -29,7 +46,35 @@ export default class extends Controller {
 
     disconnect() {
         window.removeEventListener('resize', this.handleResize)
+        const main = document.querySelector('main')
+        if (main) {
+            main.removeEventListener('scroll', this.handleScroll)
+        }
         this.removeTouchHandling()
+        const sidebar = document.getElementById('sidebar')
+        if (sidebar) {
+            sidebar.removeEventListener('touchstart', this.handleSidebarTouchStart)
+            sidebar.removeEventListener('touchend', this.handleSidebarTouchEnd)
+        }
+    }
+
+    handleSidebarTouchStart(e) {
+        this.sidebarTouchStartY = e.touches[0].clientY
+    }
+
+    handleSidebarTouchEnd(e) {
+        const deltaY = this.sidebarTouchStartY - e.changedTouches[0].clientY
+        if (deltaY >= 30) {
+            this.closeOnMobile()
+        }
+    }
+
+    handleScroll(e) {
+        const scrollTop = e.target.scrollTop
+        if (window.innerWidth < 600 && !this.minimizedValue && scrollTop > this.lastScrollTop) {
+            this.closeOnMobile()
+        }
+        this.lastScrollTop = scrollTop
     }
 
     handleResize() {
