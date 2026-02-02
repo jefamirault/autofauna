@@ -28,6 +28,41 @@ $lightyellow: rgba(206, 154, 0, 0.2)
   line-height: 40px
   margin: 0 8px
 
+// Autocomplete dropdown
+.autocomplete-wrapper
+  position: relative
+
+.autocomplete-list
+  display: none
+  position: absolute
+  top: 100%
+  left: 0
+  right: 0
+  z-index: 10
+  background: white
+  border: 1px solid #ccc
+  border-radius: 4px
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15)
+  list-style: none
+  margin: 2px 0 0
+  padding: 4px 0
+  max-height: 240px
+  overflow-y: auto
+
+.autocomplete-item
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  padding: 6px 10px
+  cursor: pointer
+  &:hover, &.active
+    background: $lightblue
+
+.autocomplete-thumb
+  width: 32px
+  height: 32px
+  object-fit: contain
+
 // Plant Graphic Selector (Form)
 .plant-graphic-selector
   margin: 1rem 0

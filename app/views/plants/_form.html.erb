@@ -20,21 +20,23 @@
 
   <div class="field">
     <%= form.label :name, "🪪 Name" %>
-    <%= form.text_field :name, autofocus: plant.new_record?, placeholder: "e.g. Pothos", data: {
-      plant_graphic_target: "nameInput",
-      action: "input->plant-graphic#nameChanged"
-    } %>
+    <div class="autocomplete-wrapper">
+      <%= form.text_field :name, autofocus: plant.new_record?, placeholder: "e.g. Pothos", autocomplete: "off", data: {
+        plant_graphic_target: "nameInput",
+        action: "input->plant-graphic#nameChanged keydown->plant-graphic#nameKeydown"
+      } %>
+      <ul class="autocomplete-list" data-plant-graphic-target="suggestions"></ul>
+    </div>
   </div>
 
-  <div class="field">
-    <%= form.label :uid, "🌐 Number" %>
-    <% if plant.persisted? %>
+  <% if plant.persisted? %>
+    <div class="field">
+      <%= form.label :uid, "🌐 Number" %>
       <%= form.number_field :uid %>
-    <% else %>
-      <span>#<%= plant.uid %></span>
-      <%= form.hidden_field :uid %>
-    <% end %>
-  </div>
+    </div>
+  <% else %>
+    <%= form.hidden_field :uid %>
+  <% end %>
 
   <% locations = current_project.locations %>
   <% unless locations.empty? %>
