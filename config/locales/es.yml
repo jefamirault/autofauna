@@ -10,6 +10,14 @@ es:
       log_out: "Finalizar la sesión"
       project_settings: "Configuración del proyecto"
       account_settings: "Configuraciones de la cuenta"
+      new_plant: "Nueva planta"
+      archive: "Archivo"
+      tanks: "Tanques"
+      locations: "Ubicaciones"
+      zones: "Zonas"
+      sensors: "Sensores"
+      sensor_readings: "Lecturas de sensores"
+      sensor_types: "Tipos de sensores"
   projects:
     index:
       select_project: "Seleccione un proyecto"
@@ -23,6 +31,8 @@ es:
     show:
       add_collaborator_by_email: "Agregar colaborador por correo electrónico:"
       add_collaborator: "Agregar colaborador"
+      import_plants: "Importar Plantas"
+      export_plants: "Exportar Plantas"
     messages:
       add_collaborator_success: "Colaborador agregado exitosamente al proyecto."
       add_collaborator_error: "Error al agregar colaborador al proyecto."
@@ -44,6 +54,7 @@ es:
   plants:
     index:
       plants: 'Plantas'
+      search_plants: "Buscar plantas"
       import_plants: "Importar plantas"
       export_plants: "Exportar plantas"
       needs_watering: "Necesita riego"
@@ -86,14 +97,58 @@ es:
       share_created: "Enlace compartido creado. Cualquier persona con el enlace puede ver esta planta."
       share_revoked: "Enlace compartido revocado."
       share_regenerated: "Enlace compartido regenerado. El enlace anterior ya no funcionará."
+    new:
+      plants: "Plantas"
+    archive:
+      plants: "Plantas"
+      archive: "Archivo"
+      search_plants_archive: "Buscar archivo de plantas"
+    water_button:
+      click: "Clic para regar"
+      tap: "Toca para regar"
+    watering_status:
+      late:
+        one: "Riego <strong>%{days} día tarde</strong>"
+        other: "Riego <strong>%{days} días tarde</strong>"
+      today: "Regar <strong>hoy</strong>"
+      in_days:
+        one: "Regar en <strong>%{days} día</strong>"
+        other: "Regar en <strong>%{days} días</strong>"
+      in_range: "Regar en <strong>%{min} - %{max} días</strong>"
+      within:
+        one: "Regar dentro de <strong>%{days} día</strong>"
+        other: "Regar dentro de <strong>%{days} días</strong>"
+      unscheduled: "No programado"
+      short_late:
+        one: "<strong>%{days} día tarde</strong>"
+        other: "<strong>%{days} días tarde</strong>"
+      short_today: "<strong>Hoy</strong>"
+      short_in_days:
+        one: "<strong>%{days} día</strong>"
+        other: "<strong>%{days} días</strong>"
+      short_in_range: "<strong>%{min} - %{max} días</strong>"
+      short_within:
+        one: "<strong>%{days} día</strong>"
+        other: "<strong>%{days} días</strong>"
     all_plants: "Todas las plantas"
     create_plant: "💾 Crear planta"
     update_plant: "💾 Actualizar planta"
     form:
       select_graphic: "Seleccionar imagen..."
   waterings:
-    index:
+    new:
+      plants: "Plantas"
+    edit:
+      plants: "Plantas"
       waterings: "Riegos"
+    show:
+      plants: "Plantas"
+      waterings: "Riegos"
+    index:
+      plants: "Plantas"
+      waterings: "Riegos"
+      import_waterings: "Importar riegos"
+      export_waterings: "Exportar riegos"
     watered_on: "Regado el"
     edit_watering: "Editar riego"
     all_waterings: "Todos riegos"
@@ -110,6 +165,64 @@ es:
   sensors:
     messages:
       confirm_delete: "¿Está seguro de que desea eliminar esta sensor?"
+    show:
+      sensors: "Sensores"
+    new:
+      sensors: "Sensores"
+    edit:
+      sensors: "Sensores"
+  tanks:
+    show:
+      tanks: "Tanques"
+    new:
+      tanks: "Tanques"
+    edit:
+      tanks: "Tanques"
+  locations:
+    show:
+      locations: "Ubicaciones"
+    new:
+      locations: "Ubicaciones"
+    edit:
+      locations: "Ubicaciones"
+    index:
+      new_location: "Nueva ubicación"
+    messages:
+      confirm_delete: "¿Está seguro de que desea eliminar esta ubicación?"
+  zones:
+    index:
+      locations: "Ubicaciones"
+      zones: "Zonas"
+    show:
+      locations: "Ubicaciones"
+      zones: "Zonas"
+    new:
+      locations: "Ubicaciones"
+      zones: "Zonas"
+    edit:
+      locations: "Ubicaciones"
+      zones: "Zonas"
+    messages:
+      confirm_delete: "¿Está seguro de que desea eliminar esta zona?"
+  sensor_readings:
+    readings:
+      sensors: "Sensores"
+      sensor_readings: "Lecturas de sensores"
+  sensor_types:
+    index:
+      sensors: "Sensores"
+      sensor_types: "Tipos de sensores"
+    show:
+      sensors: "Sensores"
+      sensor_types: "Tipos de sensores"
+    new:
+      sensors: "Sensores"
+      sensor_types: "Tipos de sensores"
+    edit:
+      sensors: "Sensores"
+      sensor_types: "Tipos de sensores"
+  tds_readings: "Lecturas de TDS"
+  project_settings: "Configuración del proyecto"
   log_in: "🔐 Iniciar seción"
   welcome: "Bienvenido"
   sign_up_heading: "Registrar"
@@ -124,6 +237,7 @@ es:
   account:
     sign_in_success: "Has iniciado sesión correctamente."
     log_out_success: "Se ha cerrado la sesión."
+    confirm_logout: "¿Estás seguro de que deseas cerrar sesión?"
     new_password: "Nueva contraseña"
     check_password_reset: "Revisa tu correo electrónico para restablecer tu contraseña."
     success_password_reset: "Contraseña actualizada con éxito. Por favor, inicie sesión."
@@ -190,6 +304,8 @@ es:
     description: "Descripción"
     updated_at: "Actualizado el"
     volume: "Volumen"
+    units: "Unidades"
+    zone: "Zona"
     graphic: "Imagen de Planta"
   roles:
     viewer: "Espectador"

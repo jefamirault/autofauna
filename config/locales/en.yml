@@ -10,6 +10,14 @@ en:
       log_out: "Log Out"
       project_settings: "Project Settings"
       account_settings: "Account Settings"
+      new_plant: "New Plant"
+      archive: "Archive"
+      tanks: "Tanks"
+      locations: "Locations"
+      zones: "Zones"
+      sensors: "Sensors"
+      sensor_readings: "Sensor Readings"
+      sensor_types: "Sensor Types"
   projects:
     index:
       select_project: "Select a Project"
@@ -23,6 +31,8 @@ en:
     show:
       add_collaborator_by_email: "Add Collaborator by Email:"
       add_collaborator: "Add Collaborator"
+      import_plants: "Import Plants"
+      export_plants: "Export Plants"
     messages:
       add_collaborator_success: "Collaborator successfully added to project."
       add_collaborator_error: "Failed to add collaborator to project."
@@ -44,6 +54,7 @@ en:
   plants:
     index:
       plants: 'Plants'
+      search_plants: "Search Plants"
       import_plants: "Import Plants"
       export_plants: "Export Plants"
       needs_watering: "Needs Watering"
@@ -86,14 +97,58 @@ en:
       share_created: "Share link created. Anyone with the link can now view this plant."
       share_revoked: "Share link revoked."
       share_regenerated: "Share link regenerated. The old link will no longer work."
+    new:
+      plants: "Plants"
+    archive:
+      plants: "Plants"
+      archive: "Archive"
+      search_plants_archive: "Search Plants Archive"
+    water_button:
+      click: "Click to Water"
+      tap: "Tap to Water"
+    watering_status:
+      late:
+        one: "Watering <strong>%{days} day late</strong>"
+        other: "Watering <strong>%{days} days late</strong>"
+      today: "Water <strong>Today</strong>"
+      in_days:
+        one: "Water in <strong>%{days} day</strong>"
+        other: "Water in <strong>%{days} days</strong>"
+      in_range: "Water in <strong>%{min} - %{max} days</strong>"
+      within:
+        one: "Water within <strong>%{days} day</strong>"
+        other: "Water within <strong>%{days} days</strong>"
+      unscheduled: "Unscheduled"
+      short_late:
+        one: "<strong>%{days} day late</strong>"
+        other: "<strong>%{days} days late</strong>"
+      short_today: "<strong>Today</strong>"
+      short_in_days:
+        one: "<strong>%{days} day</strong>"
+        other: "<strong>%{days} days</strong>"
+      short_in_range: "<strong>%{min} - %{max} days</strong>"
+      short_within:
+        one: "<strong>%{days} day</strong>"
+        other: "<strong>%{days} days</strong>"
     all_plants: "All Plants"
     create_plant: "💾 Create Plant"
     update_plant: "💾 Update Plant"
     form:
       select_graphic: "Select a graphic..."
   waterings:
-    index:
+    new:
+      plants: "Plants"
+    edit:
+      plants: "Plants"
       waterings: "Waterings"
+    show:
+      plants: "Plants"
+      waterings: "Waterings"
+    index:
+      plants: "Plants"
+      waterings: "Waterings"
+      import_waterings: "Import Waterings"
+      export_waterings: "Export Waterings"
     watered_on: "Watered on"
     edit_watering: "Edit Watering"
     all_waterings: "All Waterings"
@@ -110,6 +165,62 @@ en:
   sensors:
     messages:
       confirm_delete: "Are you sure you want to delete this Sensor?"
+    show:
+      sensors: "Sensors"
+    new:
+      sensors: "Sensors"
+    edit:
+      sensors: "Sensors"
+  tanks:
+    show:
+      tanks: "Tanks"
+    new:
+      tanks: "Tanks"
+    edit:
+      tanks: "Tanks"
+  locations:
+    show:
+      locations: "Locations"
+    new:
+      locations: "Locations"
+    edit:
+      locations: "Locations"
+    index:
+      new_location: "New Location"
+    messages:
+      confirm_delete: "Are you sure you want to delete this Location?"
+  zones:
+    index:
+      locations: "Locations"
+      zones: "Zones"
+    show:
+      locations: "Locations"
+      zones: "Zones"
+    new:
+      locations: "Locations"
+      zones: "Zones"
+    edit:
+      locations: "Locations"
+      zones: "Zones"
+    messages:
+      confirm_delete: "Are you sure you want to delete this Zone?"
+  sensor_readings:
+    readings:
+      sensors: "Sensors"
+      sensor_readings: "Sensor Readings"
+  sensor_types:
+    index:
+      sensors: "Sensors"
+      sensor_types: "Sensor Types"
+    show:
+      sensors: "Sensors"
+      sensor_types: "Sensor Types"
+    new:
+      sensors: "Sensors"
+      sensor_types: "Sensor Types"
+    edit:
+      sensors: "Sensors"
+      sensor_types: "Sensor Types"
   tds_readings: "TDS Readings"
   project_settings: "Project Settings"
   log_in: "🔐 Log In"
@@ -193,6 +304,8 @@ en:
     description: "Description"
     updated_at: "Updated At"
     volume: "Volume"
+    units: "Units"
+    zone: "Zone"
     graphic: "Plant Graphic"
   roles:
     viewer: "Viewer"

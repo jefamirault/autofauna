@@ -116,20 +116,20 @@ class Plant < ApplicationRecord
       max_watering_days = ((date_last_watering + max_watering_freq.days) - Time.zone.now.to_date).to_i
       if max_watering_days < 0
         late_days = max_watering_days * -1
-        "Watering <strong>#{late_days} #{late_days == 1 ? 'day' : 'days'} late</strong>"
+        I18n.t("plants.watering_status.late", count: late_days, days: late_days)
       elsif max_watering_days == 0
-        "Water <strong>Today</strong>"
+        I18n.t("plants.watering_status.today")
       elsif min_watering_days > 0
         if min_watering_freq == max_watering_freq
-          "Water in <strong>#{min_watering_days} day#{min_watering_days > 1 ? 's' : ''}</strong>"
+          I18n.t("plants.watering_status.in_days", count: min_watering_days, days: min_watering_days)
         else
-          "Water in <strong>#{min_watering_days} - #{max_watering_days} days</strong>"
+          I18n.t("plants.watering_status.in_range", min: min_watering_days, max: max_watering_days)
         end
       else
-        "Water within <strong>#{max_watering_days} day#{max_watering_days > 1 ? 's' : ''}</strong>"
+        I18n.t("plants.watering_status.within", count: max_watering_days, days: max_watering_days)
       end
     else
-      "Unscheduled"
+      I18n.t("plants.watering_status.unscheduled")
     end
   end
 
@@ -138,19 +138,19 @@ class Plant < ApplicationRecord
       max_watering_days = ((date_last_watering + max_watering_freq.days) - Time.zone.now.to_date).to_i
       if max_watering_days < 0
         late_days = max_watering_days * -1
-        "<strong>#{late_days} #{late_days == 1 ? 'day' : 'days'} late</strong>"
+        I18n.t("plants.watering_status.short_late", count: late_days, days: late_days)
       elsif max_watering_days == 0
-        "<strong>Today</strong>"
+        I18n.t("plants.watering_status.short_today")
       else
         min_watering_days = ((date_last_watering + min_watering_freq.days) - Time.zone.now.to_date).to_i
         if min_watering_days > 0
           if min_watering_freq == max_watering_freq
-            "<strong>#{min_watering_days} day#{min_watering_days > 1 ? 's' : ''}</strong>"
+            I18n.t("plants.watering_status.short_in_days", count: min_watering_days, days: min_watering_days)
           else
-            "<strong>#{min_watering_days} - #{max_watering_days} days</strong>"
+            I18n.t("plants.watering_status.short_in_range", min: min_watering_days, max: max_watering_days)
           end
         else
-          "<strong>#{max_watering_days} day#{max_watering_days > 1 ? 's' : ''}</strong>"
+          I18n.t("plants.watering_status.short_within", count: max_watering_days, days: max_watering_days)
         end
       end
     else

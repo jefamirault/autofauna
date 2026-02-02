@@ -19,7 +19,7 @@
   <%= form.hidden_field :project_id %>
 
   <div class="field">
-    <%= form.label :name, "🪪 Name" %>
+    <%= form.label :name, "🪪 #{t('attributes.name')}" %>
     <div class="autocomplete-wrapper">
       <%= form.text_field :name, autofocus: plant.new_record?, placeholder: "e.g. Pothos", autocomplete: "off", data: {
         plant_graphic_target: "nameInput",
@@ -41,7 +41,7 @@
   <% locations = current_project.locations %>
   <% unless locations.empty? %>
     <div class="field">
-      <%= form.label :location_id, "📍 Location" %>
+      <%= form.label :location_id, "📍 #{t('attributes.location')}" %>
       <%= form.collection_select :location_id, locations, :id, :name %>
     </div>
   <% end %>

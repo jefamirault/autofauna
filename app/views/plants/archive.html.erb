@@ -5,7 +5,7 @@
 
 <div class="formContainer">
   <%= search_form_for @q, url: plants_archive_path do |f| %>
-    <%= f.search_field :name_or_location_name_cont, placeholder: 'Search Plants Archive', autofocus: true %>
+    <%= f.search_field :name_or_location_name_cont, placeholder: t('plants.archive.search_plants_archive'), autofocus: true %>
     <%= f.submit "&#128269;".html_safe %>
   <% end %>
 </div>

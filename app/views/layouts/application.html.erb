@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="<%= I18n.locale %>">
   <head>
     <title><%= yield(:title).empty? ? "#{params[:controller].titleize} - #{params[:action].titleize}" : yield(:title) %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -64,27 +64,27 @@
         </div>
       <% end %>
       <nav data-action="click->sidebar#closeOnMobile">
-        <%= nav_link 'plants', action: 'index', text: '🌱 Plants' %>
+        <%= nav_link 'plants', action: 'index', text: "🌱 #{t('.plants')}" %>
         <% if params[:controller] == 'plants' || params[:controller] == 'waterings' %>
           <div class="indent">
-            <%= nav_link 'plants', action: 'new', text: '✏️ New Plant', path: new_plant_path %>
-            <%= nav_link 'waterings', text: '💧 Waterings' %>
-            <%= nav_link 'plants', action: 'archive', text: '🗃️ Archive', path: plants_archive_path %>
+            <%= nav_link 'plants', action: 'new', text: "✏️ #{t('.new_plant')}", path: new_plant_path %>
+            <%= nav_link 'waterings', text: "💧 #{t('.waterings')}" %>
+            <%= nav_link 'plants', action: 'archive', text: "🗃️ #{t('.archive')}", path: plants_archive_path %>
           </div>
         <% end %>
-        <%= nav_link 'tanks', text: '🐟 Tanks' %>
-        <%= nav_link 'locations', text: '📍 Locations' %>
+        <%= nav_link 'tanks', text: "🐟 #{t('.tanks')}" %>
+        <%= nav_link 'locations', text: "📍 #{t('.locations')}" %>
         <% if params[:controller] == 'locations' || params[:controller] == 'zones' %>
           <div class="indent">
-            <%= nav_link 'zones', text: '🌎 Zones' %>
+            <%= nav_link 'zones', text: "🌎 #{t('.zones')}" %>
           </div>
         <% end %>
         <% if current_user&.advanced_mode? %>
-          <%= nav_link 'sensors', text: '📡 Sensors' %>
+          <%= nav_link 'sensors', text: "📡 #{t('.sensors')}" %>
           <% if params[:controller] == 'sensors' || params[:controller] == 'sensor_readings' || params[:controller] == 'sensor_types' %>
             <div class="indent">
-              <%= nav_link 'sensor_readings', action: 'readings', text: '📊 Sensor Readings', path: sensor_readings_path %>
-              <%= nav_link 'sensor_types', text: '🏷️ Sensor Types' %>
+              <%= nav_link 'sensor_readings', action: 'readings', text: "📊 #{t('.sensor_readings')}", path: sensor_readings_path %>
+              <%= nav_link 'sensor_types', text: "🏷️ #{t('.sensor_types')}" %>
             </div>
           <% end %>
         <% end %>
@@ -92,7 +92,7 @@
       <div class="fill"></div>
       <nav class="logged_in" data-action="click->sidebar#closeOnMobile">
         <% if current_user&.admin? %>
-          <%= nav_link 'users', text: '👥 Users' %>
+          <%= nav_link 'users', text: "👥 #{t('.users')}" %>
         <% end %>
 
         <% if current_project && show_project_ui? %>
