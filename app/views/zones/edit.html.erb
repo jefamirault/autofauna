@@ -1,13 +1,22 @@
 <% content_for :title, "Edit Zone: #{@zone}" %>
 
+<div class="settings-card">
+  <h1>
+    <%= link_to t('.locations'), locations_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    <%= link_to t('.zones'), zones_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    <%= link_to @zone, zone_path(@zone), class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    Edit
+  </h1>
 
-<h1>Editing Zone</h1>
+  <%= render "form", zone: @zone %>
 
-<%= render "form", zone: @zone %>
-
-<br>
-
-<div>
-  <%= link_to "🗺️ Show this Zone", @zone, class: 'link' %>
-  <%= link_to "↩️ Back to Zones", zones_path, class: 'link' %>
+  <p>
+    <%= link_to "❌ Discard changes", @zone, class: 'link' %>
+  </p>
+  <p>
+    <%= button_to "🗑️ Destroy this Zone", @zone, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('#{t 'zones.messages.confirm_delete'}');" %>
+  </p>
 </div>

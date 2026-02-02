@@ -1,9 +1,35 @@
 <% content_for :title, "Location: #{@location}" %>
 
 <h1>
-  <%= link_to t('.locations'), locations_path, class: 'breadcrumb' %> <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %> <%= @location %>
+  <%= link_to t('.locations'), locations_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= @location %>
 </h1>
-<%= render @location %>
+
+<div class="info-card">
+  <div class="info-card-grid">
+    <div class="info-card-section">
+      <div class="info-row">
+        <span class="label">Name</span>
+        <span class="value"><%= @location.name %></span>
+      </div>
+      <div class="info-row">
+        <span class="label">Zone</span>
+        <span class="value"><%= @location.zone || '—' %></span>
+      </div>
+      <% if @location.description.present? %>
+        <div class="info-row">
+          <span class="label">Description</span>
+          <span class="value"><%= @location.description %></span>
+        </div>
+      <% end %>
+      <div class="info-row">
+        <span class="label">Plants</span>
+        <span class="value"><%= @location.plants.count %></span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div>
   <%= link_to "✏️ Edit this Location", edit_location_path(@location), class: 'link' %>

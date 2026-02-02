@@ -1,9 +1,11 @@
-<h1>
-  <%= link_to t('.tanks'), tanks_path, class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= link_to @tank, tank_path(@tank), class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  New Water Test
-</h1>
+<div class="settings-card">
+  <h1>
+    <%= link_to t('.tanks'), tanks_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    <%= link_to @tank, tank_path(@tank), class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    New Water Test
+  </h1>
 
-<%= render 'form' %>
+  <%= render 'form' %>
+</div>

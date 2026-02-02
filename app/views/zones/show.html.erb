@@ -1,13 +1,55 @@
 <% content_for :title, "Zone: #{@zone}" %>
 
-<h1 style="display:inline-block">
+<h1>
   <%= link_to t('.locations'), locations_path, class: 'breadcrumb' %>
   <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
   <%= link_to t('.zones'), zones_path, class: 'breadcrumb' %>
   <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
   <%= @zone %>
 </h1>
-<%= render @zone %>
+
+<div class="info-card">
+  <div class="info-card-grid">
+    <div class="info-card-section">
+      <div class="info-row">
+        <span class="label">Name</span>
+        <span class="value"><%= @zone.name %></span>
+      </div>
+      <% if @zone.description.present? %>
+        <div class="info-row">
+          <span class="label">Description</span>
+          <span class="value"><%= @zone.description %></span>
+        </div>
+      <% end %>
+      <% if @zone.hygro_sensor_readings.any? %>
+        <div class="info-row">
+          <span class="label">Temperature</span>
+          <span class="value"><%= @zone.last_temp %>&deg;F</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Humidity</span>
+          <span class="value"><%= @zone.last_humidity %>%</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<% if @zone.sensors.any? %>
+  <h2>Sensors</h2>
+  <div class="resource-cards">
+    <% @zone.sensors.each do |sensor| %>
+      <%= link_to sensor, class: 'resource-card' do %>
+        <div class="resource-card-name"><%= sensor.name %></div>
+        <div class="resource-card-meta">
+          <% if sensor.hygro_sensor_readings.any? %>
+            <%= sensor.last_temp %>&deg;F · <%= sensor.last_humidity %>% RH
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
 
 <div>
   <%= link_to "✏️ Edit this Zone", edit_zone_path(@zone), class: 'link' %>

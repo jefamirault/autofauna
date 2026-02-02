@@ -6,7 +6,44 @@
   <%= @sensor %>
 </h1>
 
-<%= render @sensor %>
+<div class="info-card">
+  <div class="info-card-grid">
+    <div class="info-card-section">
+      <div class="info-row">
+        <span class="label">Name</span>
+        <span class="value"><%= @sensor.name %></span>
+      </div>
+      <div class="info-row">
+        <span class="label">Zone</span>
+        <span class="value"><%= link_to @sensor.zone, @sensor.zone %></span>
+      </div>
+      <div class="info-row">
+        <span class="label">Location</span>
+        <span class="value"><%= @sensor.location %></span>
+      </div>
+      <div class="info-row">
+        <span class="label">Type</span>
+        <span class="value"><%= link_to @sensor.sensor_type, @sensor.sensor_type %></span>
+      </div>
+      <% if @sensor.hygro_sensor_readings.any? %>
+        <div class="info-row">
+          <span class="label">Temperature</span>
+          <span class="value"><%= @sensor.last_temp %>&deg;F</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Humidity</span>
+          <span class="value"><%= @sensor.last_humidity %>%</span>
+        </div>
+      <% end %>
+      <% if @sensor.description.present? %>
+        <div class="info-row">
+          <span class="label">Description</span>
+          <span class="value"><%= @sensor.description %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
 
 <div>
   <%= link_to "✏️ Edit this Sensor", edit_sensor_path(@sensor), class: 'link' %>

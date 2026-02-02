@@ -662,3 +662,93 @@ Run database migrations:
 ```bash
 bin/rails db:migrate
 ```
+
+---
+
+# Agent Log: Cards Layout for Tanks, Locations, Zones, Sensors, and Sensor Types
+
+**Date:** 2026-02-01
+**Task:** Introduce card-based layouts for resource index/show/edit/new pages
+
+## Summary
+
+Converted Tanks, Locations, Zones, Sensors, Sensor Types, and Water Tests views from plain text/table layouts to a consistent card-based design system matching the Plants pages. Renamed plant-specific CSS classes to generic names for reuse across all resources.
+
+## Changes Made
+
+### Stylesheets
+
+- **`app/assets/stylesheets/shared.sass`**
+  - Renamed `.plant-info-card` → `.info-card`, `.plant-info-grid` → `.info-card-grid`, `.plant-info-section` → `.info-card-section`
+  - Added `.resource-cards` (flex column container) and `.resource-card` (clickable card with hover state) for index pages
+  - Added form centering for `main.tanks`, `main.locations`, `main.zones`, `main.sensors`, `main.sensor_types`, `main.water_tests` on new/edit/create/update actions
+  - Extended label/field styling selector to include all new resource controllers
+
+### Views — Plants
+
+- **`app/views/plants/_plant.html.erb`** — Updated class names to `.info-card`, `.info-card-grid`, `.info-card-section`
+
+### Views — Tanks
+
+- **`app/views/tanks/_tank.html.erb`** — Rewritten as compact `.resource-card` (name + capacity + location)
+- **`app/views/tanks/index.html.erb`** — Uses `.resource-cards` container, removed "Show this Tank" links
+- **`app/views/tanks/show.html.erb`** — Uses `.info-card` with `.info-row` label/value pairs
+- **`app/views/tanks/edit.html.erb`** — Wrapped in `.settings-card` with breadcrumbs
+- **`app/views/tanks/new.html.erb`** — Wrapped in `.settings-card` with breadcrumbs
+
+### Views — Locations
+
+- **`app/views/locations/_location.html.erb`** — Compact `.resource-card` (name + zone + plant count)
+- **`app/views/locations/index.html.erb`** — Uses `.resource-cards` container
+- **`app/views/locations/show.html.erb`** — Uses `.info-card` layout
+- **`app/views/locations/edit.html.erb`** — Wrapped in `.settings-card`
+- **`app/views/locations/new.html.erb`** — Wrapped in `.settings-card`
+
+### Views — Zones
+
+- **`app/views/zones/_zone.html.erb`** — Compact `.resource-card` (name + temp/humidity + sensor count)
+- **`app/views/zones/index.html.erb`** — Uses `.resource-cards` container
+- **`app/views/zones/show.html.erb`** — Uses `.info-card` with inline sensor list as `.resource-cards`
+- **`app/views/zones/edit.html.erb`** — Wrapped in `.settings-card`
+- **`app/views/zones/new.html.erb`** — Wrapped in `.settings-card`
+
+### Views — Sensors
+
+- **`app/views/sensors/_sensor.html.erb`** — Compact `.resource-card` (name + zone + readings)
+- **`app/views/sensors/_sensors.html.erb`** — Uses `.resource-cards` wrapper
+- **`app/views/sensors/show.html.erb`** — Uses `.info-card` with all sensor details
+- **`app/views/sensors/edit.html.erb`** — Wrapped in `.settings-card`
+- **`app/views/sensors/new.html.erb`** — Wrapped in `.settings-card`
+
+### Views — Sensor Types
+
+- **`app/views/sensor_types/_sensor_type.html.erb`** — Compact `.resource-card` (name + temp/humidity ranges)
+- **`app/views/sensor_types/index.html.erb`** — Uses `.resource-cards` container
+- **`app/views/sensor_types/show.html.erb`** — Uses `.info-card` with all specs
+- **`app/views/sensor_types/edit.html.erb`** — Wrapped in `.settings-card`
+- **`app/views/sensor_types/new.html.erb`** — Wrapped in `.settings-card`
+
+### Views — Water Tests
+
+- **`app/views/water_tests/new.html.erb`** — Wrapped in `.settings-card`
+- **`app/views/water_tests/edit.html.erb`** — Wrapped in `.settings-card`
+- **`app/views/water_tests/_form.html.erb`** — Removed all Tailwind classes, uses app styles (`.field`, `.submit`, `.auth-errors`, `.saveButton`)
+- **`app/views/water_tests/_water_tests.html.erb`** — Removed empty `class=""` attributes
+- **`app/views/water_tests/index.html.erb`** — Removed Tailwind classes, simplified layout
+
+## Design System
+
+| Component | Usage | CSS Class |
+|-----------|-------|-----------|
+| Resource card | Index page list items (clickable) | `.resource-card` inside `.resource-cards` |
+| Info card | Show page detail display | `.info-card` > `.info-card-grid` > `.info-card-section` with `.info-row` |
+| Settings card | Edit/New form wrapper | `.settings-card` |
+
+## Behavior Changes
+
+| Scenario | Before | After |
+|----------|--------|-------|
+| Index pages | Plain text with separate "Show" links | Clickable cards linking to show page |
+| Show pages | Rendered index partial with raw HTML | Structured info-card with label/value rows |
+| Edit/New pages | Unstyled forms | Centered `.settings-card` matching Plants pattern |
+| Water test form | Tailwind utility classes | App's native form styles |

@@ -1,6 +1,47 @@
 <% content_for :title, "Sensor Type: #{@sensor_type}" %>
 
-<%= render @sensor_type %>
+<h1>
+  <%= link_to t('.sensors'), sensors_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to t('.sensor_types'), sensor_types_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= @sensor_type %>
+</h1>
+
+<div class="info-card">
+  <div class="info-card-grid">
+    <div class="info-card-section">
+      <div class="info-row">
+        <span class="label">Name</span>
+        <span class="value"><%= @sensor_type.name %></span>
+      </div>
+      <div class="info-row">
+        <span class="label">Temp Range</span>
+        <span class="value"><%= @sensor_type.min_temp %>&ndash;<%= @sensor_type.max_temp %>&deg;F</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Humidity Range</span>
+        <span class="value"><%= @sensor_type.min_humidity %>&ndash;<%= @sensor_type.max_humidity %>%</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Accuracy (Temp)</span>
+        <span class="value">&plusmn;<%= @sensor_type.accuracy_temp %>&deg;F</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Resolution (Temp)</span>
+        <span class="value"><%= @sensor_type.resolution_temp %>&deg;F</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Accuracy (Humidity)</span>
+        <span class="value">&plusmn;<%= @sensor_type.accuracy_humidity %>%</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Resolution (Humidity)</span>
+        <span class="value"><%= @sensor_type.resolution_humidity %>%</span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div>
   <%= link_to "✏️ Edit this sensor type", edit_sensor_type_path(@sensor_type), class: 'link' %>
@@ -10,4 +51,4 @@
 </div>
 
 <h2>Sensors of this type:</h2>
-<%= render 'sensors/sensors', sensors: @sensor_type.sensors  %>
+<%= render 'sensors/sensors', sensors: @sensor_type.sensors %>

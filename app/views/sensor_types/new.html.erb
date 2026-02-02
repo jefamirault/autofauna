@@ -1,11 +1,17 @@
 <% content_for :title, "New Sensor Type" %>
 
-<h1>New Sensor Type</h1>
+<div class="settings-card">
+  <h1>
+    <%= link_to t('.sensors'), sensors_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    <%= link_to t('.sensor_types'), sensor_types_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    New Sensor Type
+  </h1>
 
-<%= render "form", sensor_type: @sensor_type %>
+  <%= render "form", sensor_type: @sensor_type %>
 
-<br>
-
-<div>
-  <%= link_to "Back to Sensor Types", sensor_types_path %>
+  <p>
+    <%= link_to "❌ Cancel", sensor_types_path, class: 'link' %>
+  </p>
 </div>

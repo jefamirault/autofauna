@@ -1,14 +1,15 @@
 <% content_for :title, "New location" %>
 
-<h1 style="display:inline-block">
-  <%= link_to t('.locations'), locations_path, class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= t 'locations.index.new_location' %>
-</h1>
-<%= render "form", location: @location %>
+<div class="settings-card">
+  <h1>
+    <%= link_to t('.locations'), locations_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    <%= t 'locations.index.new_location' %>
+  </h1>
 
-<br>
+  <%= render "form", location: @location %>
 
-<div>
-  <%= link_to "↩️ Back to Locations", locations_path, class: 'link' %>
+  <p>
+    <%= link_to "❌ Cancel", locations_path, class: 'link' %>
+  </p>
 </div>

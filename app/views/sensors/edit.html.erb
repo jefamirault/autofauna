@@ -1,18 +1,20 @@
 <% content_for :title, "Edit Sensor: #{@sensor}" %>
 
-<h1>
-  <%= link_to t('.sensors'), sensors_path, class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= link_to @sensor, sensor_path(@sensor), class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  Edit
-</h1>
+<div class="settings-card">
+  <h1>
+    <%= link_to t('.sensors'), sensors_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    <%= link_to @sensor, sensor_path(@sensor), class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    Edit
+  </h1>
 
-<%= render "form", sensor: @sensor %>
+  <%= render "form", sensor: @sensor %>
 
-<br>
-
-<div>
-  <%= link_to "📡 Show this Sensor", @sensor, class: 'link' %>
-  <%= link_to "↩️ Back to Sensors", sensors_path, class: 'link' %>
+  <p>
+    <%= link_to "❌ Discard changes", @sensor, class: 'link' %>
+  </p>
+  <p>
+    <%= button_to "🗑️ Destroy this Sensor", @sensor, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('#{t 'sensors.messages.confirm_delete'}');" %>
+  </p>
 </div>

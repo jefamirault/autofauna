@@ -6,7 +6,30 @@
   <%= @tank %>
 </h1>
 
-<%= render @tank %>
+<div class="info-card">
+  <div class="info-card-grid">
+    <div class="info-card-section">
+      <div class="info-row">
+        <span class="label">Name</span>
+        <span class="value"><%= @tank.name %></span>
+      </div>
+      <div class="info-row">
+        <span class="label">Capacity</span>
+        <span class="value"><%= @tank.print_capacity || '—' %></span>
+      </div>
+      <div class="info-row">
+        <span class="label">Location</span>
+        <span class="value"><%= @tank.location %></span>
+      </div>
+      <% if @tank.description.present? %>
+        <div class="info-row">
+          <span class="label">Description</span>
+          <span class="value"><%= @tank.description %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
 
 <div>
   <%= link_to "✏️ Edit this Tank", edit_tank_path(@tank), class: 'link' %>

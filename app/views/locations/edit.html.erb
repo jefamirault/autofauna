@@ -1,12 +1,20 @@
 <% content_for :title, "Edit Location: #{@location}" %>
 
-<h1>Editing location</h1>
+<div class="settings-card">
+  <h1>
+    <%= link_to t('.locations'), locations_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    <%= link_to @location, location_path(@location), class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    Edit
+  </h1>
 
-<%= render "form", location: @location %>
+  <%= render "form", location: @location %>
 
-<br>
-
-<div>
-  <%= link_to "📍 Show this Location", @location, class: 'link' %>
-  <%= link_to "↩️ Back to Locations", locations_path, class: 'link' %>
+  <p>
+    <%= link_to "❌ Discard changes", @location, class: 'link' %>
+  </p>
+  <p>
+    <%= button_to "🗑️ Destroy this Location", @location, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('#{t 'locations.messages.confirm_delete'}');" %>
+  </p>
 </div>

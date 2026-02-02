@@ -1,14 +1,14 @@
 <% content_for :title, "Sensor Types" %>
 
-<h1 style="display:inline-block">
-  <%= link_to t('.sensors'), sensors_path, class: 'breadcrumb' %> <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %> <%= t '.sensor_types' %>
+<h1>
+  <%= link_to t('.sensors'), sensors_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= t '.sensor_types' %>
 </h1>
-<div id="sensor_types">
+
+<div class="resource-cards">
   <% @sensor_types.each do |sensor_type| %>
     <%= render sensor_type %>
-    <p>
-      <%= link_to "🏷️ Show this Sensor Type", sensor_type, class: 'link' %>
-    </p>
   <% end %>
 </div>
 

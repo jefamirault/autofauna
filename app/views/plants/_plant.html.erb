@@ -1,6 +1,6 @@
-<div id="<%= dom_id plant %>" class="plant-info-card">
-  <div class="plant-info-grid">
-    <div class="plant-info-section watering-section <%= @plant.watering_urgency %>">
+<div id="<%= dom_id plant %>" class="info-card">
+  <div class="info-card-grid">
+    <div class="info-card-section watering-section <%= @plant.watering_urgency %>">
       <%= link_to plant_water_path(@plant, volume: @plant.last_watering&.volume, units: @plant.last_watering&.units, notes: @plant.last_watering&.notes), class: "water-icon-link #{@plant.watering_urgency}", aria: { label: t('plants.plant.water_this_plant') } do %>
         <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <div class="plant-info-section location-section">
+    <div class="info-card-section location-section">
       <div class="info-row">
         <span class="label">📍 <%= t 'attributes.location' %>:</span>
         <span class="value"><%= plant.location %></span>

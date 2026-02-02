@@ -4,16 +4,12 @@
 
 <%= link_to "➕ New Tank", new_tank_path, class: 'link' %>
 
-<div id="tanks">
+<div class="resource-cards">
   <% @tanks.each do |tank| %>
-      <%= render tank %>
-      <p>
-        <%= link_to "🐟 Show this Tank", tank, class: 'link' %>
-      </p>
+    <%= render tank %>
   <% end %>
-
 </div>
 
 <% if @tanks.any? %>
-    <%= link_to "➕ New Tank", new_tank_path, class: 'link' %>
+  <%= link_to "➕ New Tank", new_tank_path, class: 'link' %>
 <% end %>

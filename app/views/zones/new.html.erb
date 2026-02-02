@@ -1,11 +1,17 @@
 <% content_for :title, "New Zone" %>
 
-<h1>New zone</h1>
+<div class="settings-card">
+  <h1>
+    <%= link_to t('.locations'), locations_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    <%= link_to t('.zones'), zones_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    New Zone
+  </h1>
 
-<%= render "form", zone: @zone %>
+  <%= render "form", zone: @zone %>
 
-<br>
-
-<div>
-  <%= link_to "↩️ Back to Zones", zones_path, class: 'link' %>
+  <p>
+    <%= link_to "❌ Cancel", zones_path, class: 'link' %>
+  </p>
 </div>

@@ -87,7 +87,7 @@ h2
   padding-top: 0.5em
 
 main
-  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings, &.plants
+  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings, &.plants, &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests
     label
       display: block
       font-size: 85%
@@ -120,6 +120,20 @@ main
           input:not([type="submit"])
             font-size: 0.875em
   &.plants
+    &.new, &.edit, &.create, &.update
+      section#primary
+        background: transparent
+        display: flex
+        flex-direction: column
+        align-items: center
+        justify-content: center
+        .settings-card
+          width: 100%
+          max-width: 450px
+          @media (max-width: 600px)
+            width: calc(100% - 2rem)
+            margin: 0 1rem
+  &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests
     &.new, &.edit, &.create, &.update
       section#primary
         background: transparent
@@ -527,11 +541,37 @@ table.timeline
     div
       margin: 2px 0
 
-// Plant info card
-.plant-info-card
+// Generic resource index cards
+.resource-cards
+  display: flex
+  flex-direction: column
+  gap: 0.5rem
+
+.resource-card
+  display: block
+  background: $lightblue
+  border-left: 4px solid $blue
+  border-radius: 8px
+  padding: 0.75rem 1rem
+  text-decoration: none
+  color: inherit
+  &:hover
+    filter: brightness(0.95)
+    text-decoration: none
+  .resource-card-name
+    font-size: 1.1em
+    font-weight: 500
+    color: #333
+  .resource-card-meta
+    color: #666
+    font-size: 0.95em
+    margin-top: 0.25rem
+
+// Info card
+.info-card
   margin: 1.5rem 0
 
-  .plant-info-grid
+  .info-card-grid
     display: grid
     grid-template-columns: 1fr 1fr
     gap: 1.5rem
@@ -539,7 +579,7 @@ table.timeline
     @media (max-width: 750px)
       grid-template-columns: 1fr
 
-  .plant-info-section
+  .info-card-section
     background: $lightgreen
     border-radius: 8px
     border-left: 4px solid $green

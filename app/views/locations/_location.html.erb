@@ -1,23 +1,7 @@
-<div id="<%= dom_id location %>">
-  <p>
-    <strong>Location Name:</strong>
-    <%= location.name %>
-  </p>
-
-  <p>
-    <strong>Zone:</strong>
-    <%= location.zone ? link_to(location.zone, location.zone, class: 'link') : '(None)' %>
-  </p>
-
-  <p>
-    <strong>Description:</strong>
-    <%= location.description %>
-  </p>
-
-  <p>
-    <strong>Plants:</strong>
-    <%= location.plants.count %>
-  </p>
-
-
-</div>
+<%= link_to location, class: 'resource-card' do %>
+  <div class="resource-card-name"><%= location.name %></div>
+  <div class="resource-card-meta">
+    <% if location.zone %>Zone: <%= location.zone %> · <% end %>
+    <%= pluralize(location.plants.count, 'plant') %>
+  </div>
+<% end %>
