@@ -988,3 +988,94 @@ Email/Password Conversion (guest_conversions#create)
 │   └── Else → "Incorrect password" error
 └── Else → convert guest in-place
 ```
+
+---
+
+# Agent Log: Fix Google Sign-In Button Not Rendering (Turbo Navigation)
+
+**Date:** 2026-02-03
+**Task:** Fix Google button not appearing when navigating to login via Turbo
+
+## Problem
+
+The "Sign in with Google" button didn't appear when navigating from "/" to the login page via Turbo drive. The previous fix handled re-rendering after Turbo navigation, but didn't account for initialization.
+
+### Root Cause
+
+Google's GSI library has two components:
+- `#g_id_onload` div — contains config (client_id, callback URL) that Google auto-processes on initial page load
+- `.g_id_signin` div — where the button renders
+
+When first loading "/" (no login form), Google initializes but finds no `#g_id_onload` config. When Turbo navigates to login, the config div appears but Google doesn't re-scan it. The `renderButton()` call fails because `google.accounts.id.initialize()` was never called with the configuration.
+
+## Solution
+
+Call `google.accounts.id.initialize()` with config extracted from `#g_id_onload` data attributes before each `renderButton()` call.
+
+## Changes Made
+
+### JavaScript
+
+- **`app/javascript/application.js`**
+  - Updated `renderGoogleButton()` to also find `#g_id_onload` element
+  - Added `google.accounts.id.initialize()` call before `renderButton()` with config from data attributes (`client_id`, `login_uri`, `auto_select`)
+  - Guard condition now requires both `gSignInEl` and `gIdOnload` to be present
+
+### Controllers
+
+- **`app/controllers/plants_controller.rb`**
+  - Moved `before_action :authenticate` to run first (before `set_project`) for all actions
+  - Previously only ran for `:new` action
+
+- **`app/controllers/application_controller.rb`**
+  - Simplified `authenticate` method to redirect silently to login (removed flash message and referer fallback)
+
+## Behavior Changes
+
+| Scenario | Before | After |
+|----------|--------|-------|
+| Navigate to login via Turbo from "/" | Button doesn't appear | Button renders correctly |
+| Visit Plants Index when not logged in | Redirects to "Select Project" with flash message | Silently redirects to login |
+
+---
+
+# Agent Log: Fix Google Sign-In Flow (Missing ux_mode)
+
+**Date:** 2026-02-03
+**Task:** Fix Google sign-in not completing after account selection
+
+## Problem
+
+After adding `google.accounts.id.initialize()` to fix button rendering on Turbo navigation, the sign-in flow was broken. Users could click the button and select their Google account, but then stayed on the login page with nothing happening.
+
+## Root Cause
+
+The manual `initialize()` call was missing `ux_mode: "redirect"`.
+
+Google's Identity Services defaults to `ux_mode: "popup"` which expects a JavaScript callback function to handle the response. The HTML `#g_id_onload` div uses `data-login_uri` which implies redirect mode — when Google auto-initializes from HTML attributes, it infers redirect mode from the presence of `login_uri`. But the manual `initialize()` call didn't specify this, so it defaulted to popup mode with no callback configured. After the user selected their account, Google had nowhere to send the response.
+
+## Solution
+
+Added `ux_mode: "redirect"` to the initialize call to match the HTML configuration.
+
+## Changes Made
+
+### JavaScript
+
+- **`app/javascript/application.js`**
+  - Added `ux_mode: "redirect"` parameter to `google.accounts.id.initialize()` call
+
+```javascript
+google.accounts.id.initialize({
+  client_id: gIdOnload.dataset.client_id,
+  login_uri: gIdOnload.dataset.login_uri,
+  ux_mode: "redirect",  // Added
+  auto_select: gIdOnload.dataset.auto_prompt !== "false"
+});
+```
+
+## Behavior Changes
+
+| Scenario | Before | After |
+|----------|--------|-------|
+| Click Google button → select account | Stays on login page, nothing happens | Redirects to callback URL, completes authentication |

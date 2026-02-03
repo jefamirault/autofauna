@@ -1,7 +1,7 @@
 class PlantsController < ApplicationController
+  before_action :authenticate
   before_action :set_project
   before_action :set_plant, only: %i[ show edit update destroy create_share revoke_share regenerate_share ]
-  before_action :authenticate, only: [:new]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
 

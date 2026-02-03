@@ -32,7 +32,7 @@
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="window.googleLoaded=true; window.dispatchEvent(new Event('google-loaded'))"></script>
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/service-worker.js');

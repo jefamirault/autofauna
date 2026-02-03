@@ -18,7 +18,7 @@ class ApplicationController < ActionController::Base
   helper_method :current_locale
 
   def authenticate
-    redirect_to request&.referer || new_session_path, alert: t('errors.login_required') unless user_signed_in?
+    redirect_to new_session_path unless user_signed_in?
   end
 
   def authorize_admin
