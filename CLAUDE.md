@@ -24,6 +24,9 @@ bin/rails routes           # Show routes
 cap production deploy
 ```
 
+**Note:** When running `rails` commands, use the project's `bin/rails` directly and ensure you `cd` into the project directory first. The global `rails` binary is not the project's — it will show `rails new` usage instead of running project commands.
+- Chain with cd: `cd /home/jef/autofauna && bin/rails <command>`
+
 ## Domain Model
 
 ```

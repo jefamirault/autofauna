@@ -11,6 +11,10 @@ Rails.application.routes.draw do
   resource :password
   resource :password_reset
 
+  post 'guest', to: 'guests#create'
+  resource :guest_conversion, only: [:new, :create]
+  post 'auth/google/callback', to: 'google_auth#callback'
+
   resources :users
 
   get 'plants/archive', to: 'plants#archive'

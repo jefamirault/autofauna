@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_01_025216) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_03_030540) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -133,6 +133,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_01_025216) do
     t.datetime "updated_at", null: false
     t.boolean "advanced_mode", default: false
     t.boolean "login_enabled", default: true, null: false
+    t.boolean "guest", default: false, null: false
+    t.string "google_uid"
+    t.string "avatar_url"
+    t.index ["google_uid"], name: "index_users_on_google_uid", unique: true
   end
 
   create_table "water_tests", force: :cascade do |t|

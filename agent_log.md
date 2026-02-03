@@ -752,3 +752,153 @@ Converted Tanks, Locations, Zones, Sensors, Sensor Types, and Water Tests views 
 | Show pages | Rendered index partial with raw HTML | Structured info-card with label/value rows |
 | Edit/New pages | Unstyled forms | Centered `.settings-card` matching Plants pattern |
 | Water test form | Tailwind utility classes | App's native form styles |
+
+---
+
+# Agent Log: Guest Accounts + Google Authentication
+
+**Date:** 2026-02-02
+**Task:** Allow anonymous "guest" usage and Google sign-in
+
+## Summary
+
+Added two features: (1) server-side guest accounts that let users try the app without signing up, with a conversion flow to create a permanent account; (2) Google Authentication via Google Identity Services, allowing sign-in/sign-up with a Google account. Guest accounts can also be converted via Google sign-in.
+
+## Design Decision
+
+Guest users are real `User` records with `guest: true` rather than localStorage-based sessions. This means guests get the full app experience immediately, and "converting" to a real account just adds email/password to the existing record — zero data migration needed.
+
+## Changes Made
+
+### Database
+
+- **`db/migrate/20260203030540_add_guest_and_google_to_users.rb`**
+  - `guest` boolean (default: false, not null)
+  - `google_uid` string with unique index
+  - `avatar_url` string
+
+### Models
+
+- **`app/models/user.rb`**
+  - `has_secure_password validations: false` — disables default password validations so guests can exist without passwords
+  - Password validation conditional: only required when not a guest and record is new or password changed
+  - Email validation conditional: only required when not a guest
+  - `convert_from_guest!(email:, password:, password_confirmation:)` — converts guest to email/password account
+  - `convert_from_guest_google!(email:, google_uid:, avatar_url:)` — converts guest via Google
+  - `to_s` returns email or "Guest"
+
+### Controllers
+
+- **`app/controllers/guests_controller.rb`** (new)
+  - `POST /guest` — creates anonymous guest user with random password, logs in, auto-selects default project, redirects to plants
+
+- **`app/controllers/guest_conversions_controller.rb`** (new)
+  - `GET /guest_conversion/new` — form with email + password fields + Google button
+  - `POST /guest_conversion` — calls `convert_from_guest!`, redirects with success message
+  - Restricted to guest users only
+
+- **`app/controllers/google_auth_controller.rb`** (new)
+  - `skip_forgery_protection` for callback (Google posts cross-origin)
+  - Handles 4 cases:
+    1. Existing user with matching `google_uid` → log in
+    2. Current guest user → convert via Google
+    3. Existing user with matching email → link Google account, log in
+    4. New user → create account with Google info
+  - `verify_google_token` — validates JWT via Google's tokeninfo endpoint, checks `aud` matches client_id and `email_verified` is true
+
+### Routes
+
+- **`config/routes.rb`**
+  - `post 'guest', to: 'guests#create'`
+  - `resource :guest_conversion, only: [:new, :create]`
+  - `post 'auth/google/callback', to: 'google_auth#callback'`
+
+### Views
+
+- **`app/views/guest_conversions/new.html.erb`** (new)
+  - Email/password form in `.settings-card.auth-card`
+  - Google sign-in button below separator
+
+- **`app/views/sessions/new.html.erb`** (modified)
+  - Added "Try without signing up" guest button
+  - Added Google sign-in button with separator
+
+- **`app/views/registrations/new.html.erb`** (modified)
+  - Added Google sign-in button with separator
+
+- **`app/views/layouts/application.html.erb`** (modified)
+  - Google Identity Services script tag in `<head>`
+  - Guest banner after flash messages: "You're using a guest account. Create an account"
+
+### Stylesheets
+
+- **`app/assets/stylesheets/shared.sass`**
+  - `.guest-banner` — yellow background, centered text
+  - `.guest-banner-link` — underlined dark link
+  - `.auth-separator` — "or" divider line between form and alternative auth
+  - `.guestButton` — full-width guest CTA button
+
+### Translations
+
+- **`config/locales/en.yml`** + **`config/locales/es.yml`**
+  - `guest.try_without_signing_up`, `guest.banner_message`, `guest.create_account`, `guest.save_account`, `guest.conversion_success`, `guest.or`
+  - `google_auth.invalid_token`
+
+### Background Tasks
+
+- **`lib/tasks/guests.rake`** (new)
+  - `rake guests:cleanup` — destroys guest accounts older than 30 days
+
+## Authentication Flow
+
+```
+Login Page
+├── Email/Password → sessions#create
+├── "Try without signing up" → guests#create → plants#index (as guest)
+└── Google Sign-In → google_auth#callback → plants#index
+
+Guest Banner (persistent for guest users)
+└── "Create an account" → guest_conversions#new
+    ├── Email/Password form → guest_conversions#create
+    └── Google Sign-In → google_auth#callback (case 2: convert guest)
+```
+
+## Google Auth Cases
+
+| Case | Condition | Action |
+|------|-----------|--------|
+| 1 | `google_uid` matches existing user | Log in |
+| 2 | Current user is guest | Convert guest to Google account |
+| 3 | Email matches existing user | Link Google to existing account, log in |
+| 4 | No match | Create new user with Google info |
+
+## Required Setup
+
+1. Run migration: `cd /home/jef/autofauna && bin/rails db:migrate`
+2. Set up Google Cloud Console OAuth credentials
+3. Store client ID: `EDITOR="nano" bin/rails credentials:edit` → add `google.client_id`
+
+## Bugs Fixed During Implementation
+
+- **CSRF error on Google callback** — Google posts cross-origin, so `skip_forgery_protection` added (safe because JWT `aud` claim is verified)
+- **`Net::HTTP` uninitialized constant** — Added `require "net/http"` to controller
+
+---
+
+# Agent Log: Fix Google Sign-In Button After Turbo Navigation
+
+**Date:** 2026-02-02
+**Task:** Re-render Google Sign-In button after Turbo drive navigation
+
+## Problem
+
+Google's GSI library scans the DOM once on initial page load. Turbo drive navigation swaps page content without a full reload, so the `.g_id_signin` element is replaced but Google never re-renders the button into it.
+
+## Solution
+
+Added a `turbo:load` event listener in `app/javascript/application.js` that detects the Google sign-in element and calls `google.accounts.id.renderButton()` to re-render it after each Turbo navigation.
+
+## Changes Made
+
+- **`app/javascript/application.js`**
+  - Added `turbo:load` listener that finds `.g_id_signin` and calls `google.accounts.id.renderButton()` with the same options as the declarative attributes (standard type, large size, outline theme, 400px width)

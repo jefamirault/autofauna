@@ -32,6 +32,7 @@
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/service-worker.js');
@@ -54,6 +55,11 @@
         <%= image_tag 'autofauna_icon.png' %>
         <div id="logoText">Autofauna</div>
       </div>
+      <% if user_signed_in? %>
+        <div id="headerEmail">
+          <%= current_user.guest? ? t('guest.guest') : current_user.email %>
+        </div>
+      <% end %>
     </header>
 
     <aside id="sidebar">
@@ -101,7 +107,7 @@
 
         <% if user_signed_in? %>
           <%= nav_link 'settings', text: "⚙️ #{t('.account_settings')}" %>
-          <%= button_to "#{icon('arrow-right-start-on-rectangle')}#{t('.log_out')}".html_safe, session_path, method: :delete, class: 'logout navItem', onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
+          <%= button_to "🚪 #{t('.log_out')}", session_path, method: :delete, class: 'logout navItem', onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
         <% else %>
           <%= link_to t('log_in'), new_session_path, class: 'navItem' %>
         <% end %>
@@ -110,6 +116,13 @@
 
     <main class="<%= params[:controller] %> <%= params[:action] %>">
       <%= render 'layouts/flash' %>
+
+      <% if current_user&.guest? %>
+        <div class="guest-banner">
+          <%= t('guest.banner_message') %>
+          <%= link_to t('guest.create_account'), new_guest_conversion_path, class: 'guest-banner-link' %>
+        </div>
+      <% end %>
 
       <section id="primary">
         <%= yield %>

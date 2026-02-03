@@ -30,6 +30,15 @@
     </div>
   <% end %>
 
+  <div class="auth-separator"><span><%= t 'guest.or' %></span></div>
+
+  <div id="g_id_onload"
+       data-client_id="<%= Rails.application.credentials.dig(:google, :client_id) %>"
+       data-login_uri="<%= auth_google_callback_url %>"
+       data-auto_prompt="false">
+  </div>
+  <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-width="400"></div>
+
   <div class="auth-links">
     <%= link_to t('log_in'), new_session_path, class: 'link' %>
     <%= link_to t('forgot_password'), new_password_reset_path, class: 'link' %>

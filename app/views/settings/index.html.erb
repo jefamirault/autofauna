@@ -9,6 +9,18 @@
     <span class="value"><%= current_user.email %></span>
   </div>
   <div class="info-row">
+    <span class="label"><%= t 'account.account_type' %>:</span>
+    <span class="value">
+      <% if current_user.guest? %>
+        <%= t 'account.guest_account' %> — <%= link_to t('guest.create_account'), new_guest_conversion_path %>
+      <% elsif current_user.google_uid.present? %>
+        <%= t 'account.google_account' %>
+      <% else %>
+        <%= t 'account.email_password_account' %>
+      <% end %>
+    </span>
+  </div>
+  <div class="info-row">
     <span class="label"><%= t 'attributes.account_created' %>:</span>
     <span class="value"><%= format_time current_user.created_at %></span>
   </div>
@@ -20,22 +32,26 @@
 
 <div class="settings-card">
   <h2>🛡️ <%= t 'account.security' %></h2>
-  <%= link_to "#{t('account.update_password')}", edit_password_path, class: 'link' %>
-  <br><br>
+  <% unless current_user.guest? || current_user.google_uid.present? %>
+    <%= link_to "#{t('account.update_password')}", edit_password_path, class: 'link' %>
+    <br><br>
+  <% end %>
   <%= button_to "🚪 #{t('layouts.application.log_out')}", session_path, class: 'buttonLink', method: :delete, onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
 </div>
 
-<button class="buttonLinkDanger" onclick="document.getElementById('danger-zone').style.display='block'; this.style.display='none';">🗑️ <%= t 'account.delete_account' %></button>
+<% unless current_user.guest? || current_user.google_uid.present? %>
+  <button class="buttonLinkDanger" onclick="document.getElementById('danger-zone').style.display='block'; this.style.display='none';">🗑️ <%= t 'account.delete_account' %></button>
 
-<div class="settings-card danger" id="danger-zone" style="display: none;">
-  <h2><%= t 'account.danger_zone' %></h2>
-  <%= form_with url: settings_path, method: :delete, local: true do |f| %>
-    <div class="field">
-      <%= f.label :password, t('account.password_required') %>
-      <%= f.password_field :password, required: true %>
-    </div>
-    <div class="submit">
-      <%= f.submit "🗑️ #{t('account.delete_account')}", class: 'buttonLinkDanger', onclick: "return confirm('#{j t('account.confirm_delete_account')}');" %>
-    </div>
-  <% end %>
-</div>
+  <div class="settings-card danger" id="danger-zone" style="display: none;">
+    <h2><%= t 'account.danger_zone' %></h2>
+    <%= form_with url: settings_path, method: :delete, local: true do |f| %>
+      <div class="field">
+        <%= f.label :password, t('account.password_required') %>
+        <%= f.password_field :password, required: true %>
+      </div>
+      <div class="submit">
+        <%= f.submit "🗑️ #{t('account.delete_account')}", class: 'buttonLinkDanger', onclick: "return confirm('#{j t('account.confirm_delete_account')}');" %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

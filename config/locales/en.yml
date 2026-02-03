@@ -253,6 +253,10 @@ en:
     security: "Security"
     danger_zone: "Danger Zone"
     account_information: "Account Information"
+    account_type: "Account Type"
+    guest_account: "Guest Account"
+    google_account: "Google Account"
+    email_password_account: "Email & Password"
   messages:
     please_select_project: "Select a project to continue."
   errors:
@@ -334,6 +338,16 @@ en:
   shared_plants:
     not_found_message: "This link doesn't seem to work."
     not_found_contact: "Please contact the plant owner for assistance."
+  guest:
+    try_without_signing_up: "Proceed as Guest"
+    banner_message: "You're using a guest account."
+    create_account: "Create an account"
+    save_account: "💾 Create Account"
+    conversion_success: "Your account has been created! Your data has been preserved."
+    or: "or"
+    guest: "Guest"
+  google_auth:
+    invalid_token: "Google sign-in failed. Please try again."
   log_entries:
     create: '💾 Create Log Entry'
     update: '💾 Update Log Entry'
