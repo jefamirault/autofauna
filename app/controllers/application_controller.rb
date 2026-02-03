@@ -28,13 +28,14 @@ class ApplicationController < ActionController::Base
     end
   end
   def authorize_viewer(project = current_project)
+    auto_select_project(current_user) if current_user && project.nil?
+    project = current_project  # Re-fetch after auto-select
+
     unless authorized?(current_user, :viewer, project)
       if project.nil?
-        redirect_to projects_path,
-                    notice: t('messages.please_select_project')
+        redirect_to new_session_path
       else
-        redirect_to projects_path,
-                    alert: t('errors.missing_viewer_permission')
+        redirect_to plants_path, alert: t('errors.missing_viewer_permission')
       end
     end
   end
@@ -101,14 +102,10 @@ class ApplicationController < ActionController::Base
   end
 
   def auto_select_project(user)
-    return if user.advanced_mode?
+    return if current_project.present?
 
-    if user.projects.count == 1
-      set_current_project(user.projects.first)
-    elsif user.projects.empty?
-      collaborations = Collaboration.where(user: user)
-      set_current_project(collaborations.first.project) if collaborations.count == 1
-    end
+    project = user.projects.first || Collaboration.find_by(user: user)&.project
+    set_current_project(project) if project
   end
 
   def logout

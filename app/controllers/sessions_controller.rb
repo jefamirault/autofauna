@@ -10,7 +10,7 @@ class SessionsController < ApplicationController
       render :new, status: :unprocessable_entity
     elsif @user.present?
       login @user
-      auto_select_project_for(@user)
+      auto_select_project(@user)
       redirect_to plants_path, notice: t('account.sign_in_success')
     else
       flash[:alert] = t('errors.invalid_email_or_password')
@@ -23,21 +23,6 @@ class SessionsController < ApplicationController
   end
 
   private
-
-  def auto_select_project_for(user)
-    return if user.advanced_mode?
-
-    # Auto-select if user has exactly one owned project
-    if user.projects.count == 1
-      set_current_project(user.projects.first)
-    # Or if they're a collaborator on exactly one project total
-    elsif user.projects.empty?
-      collaborations = Collaboration.where(user: user)
-      if collaborations.count == 1
-        set_current_project(collaborations.first.project)
-      end
-    end
-  end
 
   def session_params
     params.require(:user).permit(:email, :password)

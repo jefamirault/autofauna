@@ -49,7 +49,8 @@ class SensorReadingsController < ApplicationController
     if params[:project_id]
       set_current_project Project.find(params[:project_id])
     elsif current_project.nil?
-      redirect_to projects_path
+      auto_select_project(current_user)
+      redirect_to new_session_path unless current_project
     end
   end
 end

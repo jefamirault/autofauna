@@ -7,22 +7,8 @@ class ProjectsController < ApplicationController
   before_action :require_advanced_mode, only: [:show, :edit, :new]
 
   def index
-    # Non-advanced users should be auto-routed to their single project
-    if current_user && !current_user.advanced_mode?
-      project = current_user.projects.first || Collaboration.find_by(user: current_user)&.project
-      if project
-        set_current_project(project)
-        return redirect_to plants_path
-      end
-    end
-
-    if !current_user&.admin?
-      ownerships = current_user&.projects || []
-      collaborations = Collaboration.where(user: current_user).map &:project
-      @projects = ownerships + collaborations
-    else
-      @projects = Project.all
-    end
+    auto_select_project(current_user) if current_user
+    redirect_to plants_path
   end
 
   def show

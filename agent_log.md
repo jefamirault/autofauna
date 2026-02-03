@@ -1079,3 +1079,54 @@ google.accounts.id.initialize({
 | Scenario | Before | After |
 |----------|--------|-------|
 | Click Google button → select account | Stays on login page, nothing happens | Redirects to callback URL, completes authentication |
+
+---
+
+# Agent Log: Remove "Select a Project" Page
+
+**Date:** 2026-02-03
+**Task:** Remove project selection page and auto-select projects for all users
+
+## Summary
+
+Removed the `/projects` index page that required users to manually select a project. Users now always have a project automatically selected. Redirects that previously went to project selection now go to the login page (if not logged in) or plants page (if logged in).
+
+## Changes Made
+
+### Controllers
+
+- **`app/controllers/application_controller.rb`**
+  - `auto_select_project(user)` — Simplified: removed `advanced_mode?` check, now always selects first owned project or first collaboration if no owned projects; returns early if `current_project` already present
+  - `authorize_viewer` — Now calls `auto_select_project` if project is nil before authorization check; redirects to `new_session_path` (not `projects_path`) when no project; redirects to `plants_path` (not `projects_path`) for permission errors
+
+- **`app/controllers/plants_controller.rb`**
+  - `set_project` — Now calls `auto_select_project` when `current_project` is nil; redirects to `new_session_path` if still no project after auto-select
+
+- **`app/controllers/sensor_readings_controller.rb`**
+  - `set_project` — Same changes as plants_controller
+
+- **`app/controllers/waterings_controller.rb`**
+  - `index` — Now calls `auto_select_project` when `current_project` is nil; redirects to `new_session_path` if still no project
+
+- **`app/controllers/projects_controller.rb`**
+  - `index` — Simplified to just auto-select and redirect to `plants_path`; removed advanced_mode branching and project list rendering
+
+- **`app/controllers/sessions_controller.rb`**
+  - `create` — Changed `auto_select_project_for(@user)` to `auto_select_project(@user)` (uses ApplicationController method)
+  - Deleted `auto_select_project_for` private method (was duplicating ApplicationController logic)
+
+## Behavior Changes
+
+| Scenario | Before | After |
+|----------|--------|-------|
+| No project selected, visit `/plants` | Redirected to `/projects` with "Please select a project" | Auto-selects first project, shows plants |
+| No project selected, no projects exist | Redirected to `/projects` | Redirected to login page |
+| Visit `/projects` directly | Shows project list (advanced users) or redirects to plants (regular users) | Always redirects to plants |
+| Authorization failure (no project) | "Please select a project" message, redirect to `/projects` | Redirect to login page |
+| Authorization failure (no permission) | Redirect to `/projects` | Redirect to `/plants` with error |
+
+## Edge Cases Handled
+
+1. **User has no projects**: The `login` method in ApplicationController already creates a default "My Plants" project if user has none
+2. **Invalid project in cookie**: `get_project_from_session` returns nil, then `auto_select_project` picks a valid one
+3. **User loses access to current project**: `authorize_viewer` fails authorization and redirects appropriately

@@ -6,7 +6,8 @@ class WateringsController < ApplicationController
   # GET /waterings or /waterings.json
   def index
     if current_project.nil?
-      return redirect_to projects_path, notice: t('messages.please_select_project')
+      auto_select_project(current_user)
+      return redirect_to new_session_path unless current_project
     end
     @waterings = current_project&.waterings&.sort_by{|w| [w.date, w.updated_at]}&.reverse&.first 500
   end
