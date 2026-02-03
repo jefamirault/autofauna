@@ -100,6 +100,17 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def auto_select_project(user)
+    return if user.advanced_mode?
+
+    if user.projects.count == 1
+      set_current_project(user.projects.first)
+    elsif user.projects.empty?
+      collaborations = Collaboration.where(user: user)
+      set_current_project(collaborations.first.project) if collaborations.count == 1
+    end
+  end
+
   def logout
     Current.project = nil
     Current.user = nil

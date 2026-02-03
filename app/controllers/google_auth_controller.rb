@@ -18,15 +18,25 @@ class GoogleAuthController < ApplicationController
     # Case 1: Existing user with matching google_uid
     user = User.find_by(google_uid: google_uid)
     if user
+      was_guest = current_user&.guest?
+      user.merge_guest!(current_user) if was_guest
       login user
       auto_select_project(user)
-      redirect_to plants_path, notice: t("account.sign_in_success")
+      redirect_to plants_path, notice: t(was_guest ? "guest.conversion_success" : "account.sign_in_success")
       return
     end
 
-    # Case 3: Current user is a guest -> convert
+    # Case 3: Current user is a guest -> convert or merge
     if current_user&.guest?
-      current_user.convert_from_guest_google!(email: email, google_uid: google_uid, avatar_url: avatar_url)
+      existing_user = User.find_by(email: email)
+      if existing_user
+        existing_user.update!(google_uid: google_uid, avatar_url: avatar_url)
+        existing_user.merge_guest!(current_user)
+        login existing_user
+        auto_select_project(existing_user)
+      else
+        current_user.convert_from_guest_google!(email: email, google_uid: google_uid, avatar_url: avatar_url)
+      end
       redirect_to plants_path, notice: t("guest.conversion_success")
       return
     end
@@ -71,14 +81,4 @@ class GoogleAuthController < ApplicationController
     nil
   end
 
-  def auto_select_project(user)
-    return if user.advanced_mode?
-
-    if user.projects.count == 1
-      set_current_project(user.projects.first)
-    elsif user.projects.empty?
-      collaborations = Collaboration.where(user: user)
-      set_current_project(collaborations.first.project) if collaborations.count == 1
-    end
-  end
 end

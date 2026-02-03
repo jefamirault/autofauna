@@ -902,3 +902,89 @@ Added a `turbo:load` event listener in `app/javascript/application.js` that dete
 
 - **`app/javascript/application.js`**
   - Added `turbo:load` listener that finds `.g_id_signin` and calls `google.accounts.id.renderButton()` with the same options as the declarative attributes (standard type, large size, outline theme, 400px width)
+
+---
+
+# Agent Log: Merge Guest Data on Auth with Existing Account
+
+**Date:** 2026-02-02
+**Task:** When a guest authenticates and an account already exists with that email, merge guest data into the existing account
+
+## Problem
+
+When a guest user authenticated (via Google or email/password) and a pre-existing account had that email, the guest's data (plants, projects, etc.) was being lost instead of merged into the existing account.
+
+## Root Cause
+
+In `GoogleAuthController#callback`, Case 1 (existing user with matching `google_uid`) was checked **before** Case 3 (current user is guest). When a guest logged in with Google and that Google account was already linked to an existing user, Case 1 matched first and simply logged in the existing user — never reaching the merge logic in Case 3.
+
+## Solution
+
+Added merge logic to Case 1 as well. Now if the current session is a guest when an existing `google_uid` match is found, we merge the guest's data before logging in.
+
+## Changes Made
+
+### Models
+
+- **`app/models/user.rb`**
+  - Added `merge_guest!(guest_user)` method that transfers a guest's data into the existing account:
+    - **Advanced mode users**: Guest's entire project(s) transferred (ownership changed)
+    - **Regular users**: Guest's plants merged into user's single project with reassigned UIDs; zones, locations, sensors, readings, tanks, and sensor types also transferred; empty guest project destroyed
+    - Collaborations transferred (skipping duplicates)
+    - Log entries transferred
+    - Guest user destroyed at the end
+
+### Controllers
+
+- **`app/controllers/google_auth_controller.rb`**
+  - **Case 1** (existing `google_uid` match): Now checks if `current_user` is a guest and calls `merge_guest!` before logging in the existing user
+  - **Case 3** (guest authenticating): Already had merge logic for email matches, unchanged
+
+- **`app/controllers/guest_conversions_controller.rb`**
+  - Updated `create` action: When email matches an existing account, requires password authentication before calling `merge_guest!`
+
+- **`app/controllers/application_controller.rb`**
+  - Moved `auto_select_project` from `GoogleAuthController` to `ApplicationController` so both controllers can use it
+
+### Translations
+
+- **`config/locales/en.yml`** + **`config/locales/es.yml`**
+  - Added `guest.invalid_password` translation for when email/password merge fails authentication
+
+## Merge Behavior
+
+| User Type | Merge Strategy |
+|-----------|----------------|
+| Advanced mode | Guest's project(s) transferred as separate projects (owner_id updated) |
+| Regular | Guest's plants merged into existing user's single project with reassigned UIDs to avoid conflicts |
+
+## Data Transferred
+
+- Plants (with new UIDs in regular mode)
+- Zones
+- Locations
+- Sensors
+- HygroSensorReadings
+- Tanks
+- SensorTypes
+- Collaborations (non-duplicate)
+- LogEntries
+
+## Auth Flow (Updated)
+
+```
+Google Sign-In
+├── Case 1: google_uid matches existing user
+│   ├── If current_user is guest → merge_guest! then login
+│   └── Else → login
+├── Case 3: current_user is guest (no google_uid match)
+│   ├── If email matches existing user → link Google, merge_guest!, login
+│   └── Else → convert guest in-place
+└── Cases 2, 4: unchanged
+
+Email/Password Conversion (guest_conversions#create)
+├── If email matches existing user
+│   ├── If password correct → merge_guest!, login
+│   └── Else → "Incorrect password" error
+└── Else → convert guest in-place
+```

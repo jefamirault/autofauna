@@ -40,6 +40,35 @@ class User < ApplicationRecord
     save!
   end
 
+  def merge_guest!(guest_user)
+    raise "Source must be a guest" unless guest_user.guest?
+
+    transaction do
+      if advanced_mode?
+        guest_user.projects.update_all(owner_id: id)
+      else
+        target_project = projects.first
+        guest_user.projects.each do |guest_project|
+          max_uid = target_project.plants.maximum(:uid) || 0
+          guest_project.plants.order(:uid).each_with_index do |plant, i|
+            plant.update_columns(project_id: target_project.id, uid: max_uid + i + 1)
+          end
+          guest_project.zones.update_all(project_id: target_project.id)
+          guest_project.locations.update_all(project_id: target_project.id)
+          guest_project.sensors.update_all(project_id: target_project.id)
+          HygroSensorReading.where(project_id: guest_project.id).update_all(project_id: target_project.id)
+          Tank.where(project_id: guest_project.id).update_all(project_id: target_project.id)
+          SensorType.where(project_id: guest_project.id).update_all(project_id: target_project.id)
+          guest_project.destroy!
+        end
+      end
+
+      guest_user.collaborations.where.not(project_id: collaborations.select(:project_id)).update_all(user_id: id)
+      LogEntry.where(user_id: guest_user.id).update_all(user_id: id)
+      guest_user.reload.destroy!
+    end
+  end
+
   def to_s
     self.email || "Guest"
   end

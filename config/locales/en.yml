@@ -344,6 +344,7 @@ en:
     create_account: "Create an account"
     save_account: "💾 Create Account"
     conversion_success: "Your account has been created! Your data has been preserved."
+    invalid_password: "Incorrect password for this email address."
     or: "or"
     guest: "Guest"
   google_auth:

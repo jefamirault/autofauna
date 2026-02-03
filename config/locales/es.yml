@@ -344,6 +344,7 @@ es:
     create_account: "Crear una cuenta"
     save_account: "💾 Crear cuenta"
     conversion_success: "¡Tu cuenta ha sido creada! Tus datos se han conservado."
+    invalid_password: "Contraseña incorrecta para esta dirección de correo."
     or: "o"
     guest: "Invitado"
   google_auth:
