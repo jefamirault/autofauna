@@ -107,7 +107,9 @@
 
         <% if user_signed_in? %>
           <%= nav_link 'settings', text: "⚙️ #{t('.account_settings')}" %>
-          <%= button_to "🚪 #{t('.log_out')}", session_path, method: :delete, class: 'logout navItem', onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
+          <% unless current_user.guest? %>
+            <%= button_to "🚪 #{t('.log_out')}", session_path, method: :delete, class: 'logout navItem', onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
+          <% end %>
         <% else %>
           <%= link_to t('log_in'), new_session_path, class: 'navItem' %>
         <% end %>
