@@ -104,6 +104,18 @@ bin/rails test test/models        # Model tests only
 bin/rails test:system             # System tests (browser)
 ```
 
+## Agent Log
+
+An `agent_log.md` file in the project root tracks changes made during the current session. After each significant task, append a summary to this file documenting what was changed and why.
+
+**Plan execution:** When a plan is agreed upon and the user gives permission to clear context and execute, the **first step** must always be writing the plan to `agent_log.md` before any implementation begins.
+
+When the user requests **rotating the logs**:
+1. Move `agent_log.md` → `agent_log/agent_log_<start-date>_to_<end-date>.md` (using the date range of entries in the file)
+2. Create a fresh `agent_log.md` in the project root
+
+Archived logs live in the `agent_log/` directory.
+
 ## Deployment
 
 Capistrano to production server:
