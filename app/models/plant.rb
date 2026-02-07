@@ -8,11 +8,29 @@ class Plant < ApplicationRecord
   belongs_to :last_watering, class_name: 'Watering', optional: true
   has_many :log_entries, as: :loggable, dependent: :destroy
 
+  scope :needing_notification, -> {
+    where(notifications_enabled: true, archived: false)
+      .where.not(date_sort_watering: nil)
+      .where("date_sort_watering <= ?", Date.current)
+      .where("last_notification_sent_at IS NULL OR last_notification_sent_at < date_last_watering")
+  }
+
   before_validation :strip_whitespace
 
   validates_uniqueness_of :uid, scope: :project_id
 
   after_save_commit :sync_watering_dates_if_schedule_changed
+
+  def needs_notification?
+    notifications_enabled? &&
+      date_sort_watering.present? &&
+      date_sort_watering <= Date.current &&
+      (last_notification_sent_at.nil? || last_notification_sent_at < date_last_watering)
+  end
+
+  def mark_notification_sent!
+    update_column(:last_notification_sent_at, Time.current)
+  end
 
   def container
     self.pot

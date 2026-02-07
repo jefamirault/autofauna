@@ -87,3 +87,7 @@ gem 'pg'
 gem 'ransack'
 
 gem 'rails_icons'
+
+gem 'web-push'
+gem 'sidekiq', '~> 7.0'
+gem 'sidekiq-cron', '~> 1.12'

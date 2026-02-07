@@ -3,6 +3,8 @@ class User < ApplicationRecord
 
   has_many :collaborations, dependent: :destroy
   has_many :projects, foreign_key: :owner_id, dependent: :destroy
+  has_many :plants, through: :projects
+  has_many :push_subscriptions, dependent: :destroy
 
   after_create :create_default_project
 
@@ -67,6 +69,11 @@ class User < ApplicationRecord
       LogEntry.where(user_id: guest_user.id).update_all(user_id: id)
       guest_user.reload.destroy!
     end
+  end
+
+  def plants_needing_notification
+    project_ids = projects.pluck(:id) + collaborations.pluck(:project_id)
+    Plant.where(project_id: project_ids).needing_notification
   end
 
   def to_s

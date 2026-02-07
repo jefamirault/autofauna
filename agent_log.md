@@ -2,143 +2,142 @@
 
 Current session log. Previous logs archived in `agent_log/`.
 
-## 2026-02-07 — Plants Index: Display Mode Toggle (Location / Watering)
+---
 
-Added toggle buttons to the plants index page to switch between two display modes:
+## 2026-02-09: Migrate from Solid Queue to Sidekiq + Redis
 
-- **Watering** (default): flat list sorted by urgency (existing behavior)
-- **Location**: plants grouped by location name, with urgency sort within each group; plants without a location appear under "No Location" at the bottom
+**Goal:** Replace Solid Queue with Sidekiq + Redis for background job processing, maintaining existing notification functionality.
 
-### Files modified:
-- `app/controllers/plants_controller.rb` — Added `@display_mode` and `@plants_by_location` grouped hash logic
-- `app/views/plants/index.html.erb` — Added toggle buttons and conditional rendering for grouped/flat layout
-- `app/assets/stylesheets/plants.sass` — Added styles for toggle buttons (pill-style) and location group headers
-- `config/locales/en.yml` — Added `display_by`, `watering`, `location`, `no_location` keys
-- `config/locales/es.yml` — Added Spanish translations for the same keys
+**Plan:**
+1. Update Gemfile (remove solid_queue, add sidekiq + sidekiq-cron)
+2. Update production.rb (change job adapter to sidekiq)
+3. Create Sidekiq configuration files (sidekiq.yml, initializers/sidekiq.rb, schedule.yml)
+4. Remove Solid Queue-specific files (recurring.yml, queue.yml, queue_schema.rb, bin/jobs)
+5. Update puma.rb (remove solid_queue plugin)
 
-## 2026-02-07 — Fix: `unable to convert unpermitted parameters to hash` on Plants Index
+**Status:** Complete
 
-Fixed display mode toggle links raising an error when Ransack search params were present. Changed `params[:q]` to `params[:q]&.to_unsafe_h` in both toggle links so the `ActionController::Parameters` object is converted to a plain hash for URL generation.
+**Changes Made:**
+1. **Gemfile**: Removed `solid_queue`, added `sidekiq ~> 7.0` and `sidekiq-cron ~> 1.12`
+2. **config/environments/production.rb**: Changed `queue_adapter` from `:solid_queue` to `:sidekiq`, removed `solid_queue.connects_to` config
+3. **config/puma.rb**: Removed Solid Queue plugin
+4. **config/sidekiq.yml** (new): Created Sidekiq worker configuration with concurrency settings per environment
+5. **config/initializers/sidekiq.rb** (new): Created Redis configuration and sidekiq-cron schedule loader
+6. **config/schedule.yml** (new): Created cron schedule for PlantNotificationJob (hourly at minute 0)
+7. **Removed files**:
+   - config/recurring.yml
+   - config/queue.yml
+   - db/queue_schema.rb
+   - bin/jobs
+8. **.gitignore**: Added `dump.rdb` for Redis dump files
 
-### Files modified:
-- `app/views/plants/index.html.erb` — Used `to_unsafe_h` on `params[:q]` in toggle link URLs
+**Next Steps for User:**
+1. Run `bundle install` to install Sidekiq gems
+2. Ensure Redis is installed and running (development: `redis-server`, production: systemd service)
+3. Start Sidekiq in development: `bundle exec sidekiq`
+4. Set `REDIS_URL` environment variable in production (e.g., in `.rbenv-vars`)
+5. Set up systemd service for Sidekiq on production server (see plan for service file template)
+6. Test notification job manually: `bin/rails runner "PlantNotificationJob.perform_now"`
+7. Verify cron schedule in Rails console: `Sidekiq::Cron::Job.all`
 
-## 2026-02-07 — Location Filter Buttons on Plants Index
+**Optional:** Add Sidekiq Web UI to routes.rb for monitoring (requires authentication in production)
 
-Added a row of filter buttons below the display-mode toggle, one per location that has plants (plus "No Location"). Multi-select: all active by default, clicking toggles a location off/on. Works with search and display mode.
+---
 
-### Files modified:
-- `app/controllers/plants_controller.rb` — Built `@location_filters` and `@active_location_ids`; filters `@plants` when `params[:locations]` present
-- `app/views/plants/index.html.erb` — Added location filter button row after display toggle
-- `app/assets/stylesheets/plants.sass` — Added `.location-filters` flex layout
-- `config/locales/en.yml` — Added `filter_by_location` key
-- `config/locales/es.yml` — Added Spanish translation for `filter_by_location`
+## 2026-02-09: Add Test Buttons for Email and Push Notifications
 
-## 2026-02-07 — Hide Display Toggle & Location Filters When Only One Location Group
+**Goal:** Allow users to test their notification settings by sending sample email and push notifications on demand from the Account Settings page.
 
-When there's only one location group (or none), the display toggle and location filter buttons are unnecessary. Wrapped both in `@location_filters.size > 1` conditionals so they only appear when there are 2+ location groups.
+**Changes Made:**
+1. **app/controllers/settings_controller.rb**: Added two new actions:
+   - `send_test_email`: Sends test email with up to 3 plants as examples (requires at least 1 plant)
+   - `send_test_push`: Sends test push notification to all registered browser subscriptions (requires at least 1 active subscription)
+   - Both actions handle edge cases (no plants, no subscriptions, delivery failures) with appropriate flash messages
 
-### Files modified:
-- `app/views/plants/index.html.erb` — Wrapped `.display-toggle` in size check; changed `.location-filters` conditional from `.any?` to `.size > 1`
+2. **config/routes.rb**: Added POST routes for test actions:
+   - `POST /settings/send_test_email` → `settings#send_test_email`
+   - `POST /settings/send_test_push` → `settings#send_test_push`
 
-## 2026-02-07 — Make Plant Location Text Clickable for Filtering
+3. **app/views/settings/index.html.erb**: Added "Test Notifications" section with:
+   - "Send Test Email" button (disabled if no plants, with helper text)
+   - "Send Test Push Notification" button (disabled if no push subscriptions, with helper text)
+   - SVG icons (envelope for email, bell for push)
+   - Loading state with `disable_with: "Sending..."` to prevent double-clicks
+   - Tailwind CSS styling for consistent appearance
 
-Made the location text (📍 location name) on each plant card clickable. Clicking a location now filters the plant list to show only plants from that location, using the existing location filter system. This provides a more direct way to filter by location without scrolling to the top filter buttons.
+**Testing:**
+- Email test: Queues test email via Sidekiq using `PlantNotificationMailer.watering_reminder`
+- Push test: Sends synchronously to all active subscriptions with graceful error handling
+- Both respect user's current settings (email address, active subscriptions)
 
-### Files modified:
-- `app/views/plants/_plant_row.html.erb` — Changed location text from `<span>` to `link_to` that filters by that location ID (or "none" for plants without a location); preserves current display mode
+**User Verification Steps:**
+1. Navigate to Account Settings (`/settings`)
+2. Test email: Click "Send Test Email" (requires at least 1 plant in account)
+3. Test push: Enable push notifications, then click "Send Test Push Notification"
+4. Check email inbox and browser notifications for test messages
 
-## 2026-02-07 — Collapsible Location Filters on Plants Index
+---
 
-Implemented collapsible location filter buttons to reduce vertical space usage when users have many locations. Location filters now collapse to show only 1 line by default, with a "show more..." / "show less" toggle button to expand/collapse the full list. State persists across page refreshes using localStorage.
+## 2026-02-09: Fix Push Notification Permission Request
 
-### Implementation:
-- CSS-based collapse with `flex-wrap: nowrap` (collapsed) preventing wrapping to a second line, with `overflow: hidden` to hide buttons that don't fit
-- `flex-wrap: wrap` in expanded state allows buttons to wrap to multiple lines
-- Stimulus controller handles toggle interaction and state persistence via localStorage
-- Toggle button only appears when there are 5+ locations
-- Progressive enhancement: filters work with or without JavaScript
+**Goal:** Fix the bug where clicking "Enable push notifications" does not trigger the browser permission prompt, preventing users from subscribing to push notifications.
 
-### Files created:
-- `app/javascript/controllers/collapsible_filters_controller.js` — New Stimulus controller for expand/collapse functionality with localStorage persistence
+**Problem:** The `subscribe()` method in `push_notifications.js` attempted to create a push subscription without first requesting browser notification permission via `Notification.requestPermission()`. This caused the browser to silently fail or deny the subscription without showing the permission prompt to users.
 
-### Files modified:
-- `app/views/plants/index.html.erb` — Wrapped location filters with Stimulus controller and added toggle button
-- `app/assets/stylesheets/plants.sass` — Added collapsed/expanded states using flex-wrap and toggle button styles
-- `config/locales/en.yml` — Added `show_more` and `show_less` translations
-- `config/locales/es.yml` — Added Spanish translations for toggle button text
+**Solution:** Modified the `subscribe()` method to:
+1. First call `Notification.requestPermission()` to trigger the browser permission prompt
+2. Check if permission was granted before proceeding
+3. Throw a clear error if permission is denied (caught by existing error handling)
 
-## 2026-02-07 — Label and Button Text Updates on Plants Index
+**Changes Made:**
+1. **app/javascript/push_notifications.js** (lines 15-24): Updated `subscribe()` method to:
+   - Request notification permission before attempting subscription
+   - Only proceed with push subscription if permission is granted
+   - Provide clear error message if user denies permission
 
-Updated label text for clarity and added text wrapping prevention to location filter buttons.
+**Important:** After implementing this fix, the Rails server must be restarted for the JavaScript changes to take effect. The importmap needs to reload the modified push_notifications.js file.
 
-### Changes:
-- Changed "Display by:" label to "Sort:"
-- Changed "Filter by location:" label to "Show:"
-- Added `white-space: nowrap` to `.display-toggle-btn` to prevent button text from wrapping to multiple lines
+**Testing Results:**
+- Permission prompt now appears correctly when clicking "Enable push notifications"
+- Subscriptions are successfully created and saved to database
+- Test push notifications are delivered to browser successfully
+- Error handling works correctly for permission denial
 
-### Files modified:
-- `config/locales/en.yml` — Updated `display_by` and `filter_by_location` keys
-- `config/locales/es.yml` — Updated Spanish translations for both labels
-- `app/assets/stylesheets/plants.sass` — Added `white-space: nowrap` to `.display-toggle-btn`
+**Note:** The `web-push` gem was already in the Gemfile but the server restart was required for both the JavaScript changes and to ensure the gem was properly loaded.
 
-## 2026-02-08 — UI/UX Overhaul: Context-Aware Header & Navigation Redesign
+---
 
-Redesigned the header and navigation system with context-aware theming, user dropdown menu, and sidebar locale switcher.
+## 2026-02-09: Production Deployment Checklist for Notifications
 
-### Changes:
-- **Context-aware header**: Header gradient color, icon, and title now change dynamically based on the current controller section (Plants=green, Waterings=blue, Tanks=teal, Locations=amber, Sensors=purple, Users=indigo, Settings=gray)
-- **User dropdown menu**: Moved Users, Project Settings, Account Settings, and Log Out from sidebar bottom nav into a dropdown triggered by clicking the email/user icon in the header
-- **Mobile support**: On mobile, email text is replaced with a user icon button that triggers the same dropdown
-- **Plants search in header**: Moved the search form from the plants index page body into the header bar using `content_for :header_extra`
-- **Sidebar locale switcher**: Replaced the footer locale links with a globe icon button at the bottom of the sidebar that opens a popup with English/Espanol options
-- **Removed old footer**: Removed the `<footer>` with `#localizations` from `<main>`
-- **Removed redundant titles**: Removed `<h1>` from plants index (now shown in header) and tanks index
+**Goal:** Create comprehensive documentation for deploying email and push notification functionality to production.
 
-### Files created:
-- `app/javascript/controllers/dropdown_controller.js` — Stimulus controller for header user dropdown (toggle + click-outside-to-close)
-- `app/javascript/controllers/locale_popup_controller.js` — Stimulus controller for sidebar locale popup (toggle + click-outside-to-close)
+**Changes Made:**
+1. **PRODUCTION_NOTIFICATIONS_CHECKLIST.md** (new): Created detailed step-by-step checklist covering:
+   - Redis installation and configuration
+   - Environment variables setup (REDIS_URL, Mailgun SMTP, RAILS_MASTER_KEY)
+   - VAPID keys verification in Rails credentials
+   - Code deployment via Capistrano
+   - Sidekiq systemd service creation and configuration
+   - Testing procedures (email, push, cron jobs)
+   - Monitoring and troubleshooting commands
+   - Rollback plan
+   - Success criteria
 
-### Files modified:
-- `app/helpers/application_helper.rb` — Added `header_config` method returning icon, title, and gradient class per controller
-- `app/views/layouts/application.html.erb` — Dynamic header with gradient class, icon, title, yield for header_extra, user dropdown; sidebar bottom replaced with locale switcher; footer removed
-- `app/views/plants/index.html.erb` — Moved search form to `content_for :header_extra`; removed `<h1>`
-- `app/views/tanks/index.html.erb` — Removed redundant `<h1>Tanks</h1>`
-- `app/assets/stylesheets/layout.sass` — Added 8 gradient classes, dropdown styles, header search styles, locale popup styles, mobile user icon; removed old hardcoded header gradient, old footer rule, old Spanish sidebar font-size rule
+**Key Requirements for Production:**
+- Redis server installed and running
+- Sidekiq systemd service configured for background job processing
+- Environment variables in `/home/deploy/autofauna/.rbenv-vars`: REDIS_URL, MAILGUN_SMTP_USERNAME, MAILGUN_SMTP_PASSWORD
+- RAILS_MASTER_KEY must match local master.key (for decrypting VAPID keys)
+- HTTPS enabled (required for service workers and push notifications)
+- Service worker deployed to `public/service-worker.js`
 
-## 2026-02-08 — Fix: Plants Header Search — Remove Submit Button & Fix Layout
+**Testing Checklist:**
+1. Redis connection test
+2. Email test notification from settings page
+3. Push notification permission prompt and test notification
+4. Hourly cron job execution (PlantNotificationJob)
+5. Multi-device push notification delivery
+6. Sidekiq queue monitoring
 
-Removed the search submit button that was overlapping the "Plants" title, replaced it with a debounced auto-submit Stimulus controller, and fixed the header flex layout so the title and email don't get compressed.
+**Location:** `/home/jef/autofauna/PRODUCTION_NOTIFICATIONS_CHECKLIST.md`
 
-### Changes:
-- Removed submit button from search form; search now auto-submits 300ms after typing stops
-- Added `header-search` Stimulus controller with debounced `requestSubmit()`
-- Fixed header flex layout: removed `max-width: 400px` from `#headerSearch`, added `flex-shrink: 0` to `#logoContainer` and `#headerRight`
-- Changed search input border-radius from split-button style (`4px 0 0 4px`) to full rounded (`4px`)
-- Removed `input[type="submit"]` CSS rule block entirely
-
-### Files created:
-- `app/javascript/controllers/header_search_controller.js` — Debounced auto-submit Stimulus controller
-
-### Files modified:
-- `app/views/plants/index.html.erb` — Removed submit button, added Stimulus data attributes
-- `app/assets/stylesheets/layout.sass` — Removed max-width & submit styles, added flex-shrink: 0 to logo and header-right
-
-## 2026-02-08 — Plants Index: Search UX Improvements
-
-Improved the search experience on the Plants index with updated result count format, search icon, and collapsible search for narrow screens.
-
-### Changes:
-1. **Updated results count text**: Changed from "56 Active Plants" to "4 plants need watering of 56 plants" format. When searching: "4 plants need watering of 56 results for 'pothos'". Watering count includes plants with :urgent or :today urgency.
-2. **Search icon**: Added 🔎 magnifying glass icon inside the search input area
-3. **Collapsible search on mobile (≤600px)**: Search input hidden by default on narrow screens, shows only magnifying glass button. Clicking expands the input and hides the "Plants" title. Clicking outside or pressing Escape collapses it back. Keeps expanded if search has a value. Desktop: always expanded.
-
-### Files created:
-- `app/javascript/controllers/expandable_search_controller.js` — Stimulus controller for mobile search expand/collapse with click-outside and Escape handling
-
-### Files modified:
-- `app/controllers/plants_controller.rb` — Added `@needs_watering_count` calculation
-- `app/views/plants/index.html.erb` — Updated results count text, added search icon, wrapped search in expandable controller
-- `app/assets/stylesheets/layout.sass` — Added search icon styles, responsive styles for collapsible search
-- `config/locales/en.yml` — Added i18n keys for new results count format
-- `config/locales/es.yml` — Added Spanish translations for results count

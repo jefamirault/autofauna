@@ -49,8 +49,8 @@ Rails.application.configure do
   # Replace the default in-process memory cache store with a durable alternative.
   # config.cache_store = :mem_cache_store
 
-  # Replace the default in-process and non-durable queuing backend for Active Job.
-  # config.active_job.queue_adapter = :resque
+  # Use Sidekiq for background job processing.
+  config.active_job.queue_adapter = :sidekiq
 
   # Raise delivery errors so we know if email sending fails.
   config.action_mailer.raise_delivery_errors = true

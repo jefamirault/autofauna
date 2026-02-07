@@ -41,6 +41,71 @@
   <% end %>
 </div>
 
+<% unless current_user.guest? %>
+  <div class="settings-card">
+    <h2>Notifications</h2>
+    <%= form_with model: current_user, url: settings_path, method: :patch, local: true do |f| %>
+      <div class="field">
+        <%= f.label :notification_enabled, "Enable watering reminders" %>
+        <%= f.check_box :notification_enabled %>
+      </div>
+      <div class="field">
+        <%= f.label :notification_time, "Preferred notification time" %>
+        <%= f.time_field :notification_time, value: current_user.notification_time&.strftime("%H:%M") || "09:00" %>
+      </div>
+      <div class="submit">
+        <%= f.submit "Save notification preferences", class: 'saveButton' %>
+      </div>
+    <% end %>
+
+    <!-- Test Notification Buttons -->
+    <div class="mt-4 pt-4 border-t border-gray-200">
+      <h4 class="text-sm font-medium text-gray-700 mb-3">Test Notifications</h4>
+
+      <div class="space-y-2">
+        <!-- Test Email Button -->
+        <%= button_to send_test_email_path, { method: :post }, { class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500", data: { turbo: false, disable_with: "Sending..." }, disabled: !current_user.plants.any? } do %>
+          <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+          Send Test Email
+        <% end %>
+
+        <% unless current_user.plants.any? %>
+          <p class="text-xs text-gray-500 ml-10">Add a plant first to test email notifications</p>
+        <% end %>
+
+        <!-- Test Push Notification Button -->
+        <%= button_to send_test_push_path, { method: :post }, { class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500", data: { turbo: false, disable_with: "Sending..." }, disabled: !current_user.push_subscriptions.any? } do %>
+          <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          Send Test Push Notification
+        <% end %>
+
+        <% unless current_user.push_subscriptions.any? %>
+          <p class="text-xs text-gray-500 ml-10">Enable push notifications above to test</p>
+        <% end %>
+      </div>
+    </div>
+
+    <% vapid_public_key = Rails.application.credentials.dig(:web_push, :public_key) %>
+    <% if vapid_public_key.present? %>
+      <hr>
+      <h3>Push Notifications</h3>
+      <div data-controller="push-notification" data-push-notification-vapid-key-value="<%= vapid_public_key %>">
+        <p data-push-notification-target="status"></p>
+        <button class="saveButton" data-push-notification-target="subscribeButton" data-action="click->push-notification#subscribe">
+          Enable push notifications
+        </button>
+        <button class="buttonLink" data-push-notification-target="unsubscribeButton" data-action="click->push-notification#unsubscribe" style="display: none;">
+          Disable push notifications
+        </button>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
 <% unless current_user.guest? || current_user.google_uid.present? %>
   <button class="buttonLinkDanger" onclick="document.getElementById('danger-zone').style.display='block'; this.style.display='none';">🗑️ <%= t 'account.delete_account' %></button>
 

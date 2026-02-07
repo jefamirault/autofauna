@@ -44,3 +44,6 @@
 .env
 
 bugs
+
+# Redis dump file
+dump.rdb

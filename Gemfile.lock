@@ -124,7 +124,12 @@ GEM
     drb (2.2.1)
     ed25519 (1.4.0)
     erubi (1.13.0)
+    et-orbi (1.4.0)
+      tzinfo
     ffi (1.17.0-x86_64-linux-gnu)
+    fugit (1.12.1)
+      et-orbi (~> 1.4)
+      raabro (~> 1.4)
     globalid (1.2.1)
       activesupport (>= 6.1)
     i18n (1.14.6)
@@ -140,6 +145,8 @@ GEM
     jbuilder (2.13.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
+    jwt (3.1.2)
+      base64
     logger (1.6.3)
     loofah (2.23.1)
       crass (~> 1.0.2)
@@ -171,6 +178,7 @@ GEM
     nio4r (2.7.4)
     nokogiri (1.17.2-x86_64-linux)
       racc (~> 1.4)
+    openssl (4.0.0)
     ostruct (0.6.1)
     pg (1.5.9)
     psych (5.2.1)
@@ -179,6 +187,7 @@ GEM
     public_suffix (6.0.1)
     puma (6.5.0)
       nio4r (~> 2.0)
+    raabro (1.4.0)
     racc (1.8.1)
     rack (3.1.8)
     rack-session (2.0.0)
@@ -250,6 +259,16 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
       websocket (~> 1.0)
+    sidekiq (7.3.10)
+      base64
+      connection_pool (>= 2.3.0, < 3)
+      logger
+      rack (>= 2.2.4, < 3.3)
+      redis-client (>= 0.23.0, < 1)
+    sidekiq-cron (1.12.0)
+      fugit (~> 1.8)
+      globalid (>= 1.0.1)
+      sidekiq (>= 6)
     sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
@@ -282,6 +301,9 @@ GEM
       activemodel (>= 6.0.0)
       bindex (>= 0.4.0)
       railties (>= 6.0.0)
+    web-push (3.1.0)
+      jwt (~> 3.0)
+      openssl (>= 3.0)
     webdrivers (5.2.0)
       nokogiri (~> 1.6)
       rubyzip (>= 1.3.0)
@@ -320,12 +342,15 @@ DEPENDENCIES
   redis
   sassc-rails
   selenium-webdriver (~> 4.27)
+  sidekiq (~> 7.0)
+  sidekiq-cron (~> 1.12)
   sprockets-rails
   sqlite3
   stimulus-rails
   turbo-rails
   tzinfo-data
   web-console
+  web-push
   webdrivers
 
 RUBY VERSION

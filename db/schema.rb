@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_03_030540) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_07_103656) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -73,6 +73,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_03_030540) do
     t.string "graphic"
     t.string "share_token"
     t.boolean "share_enabled", default: false
+    t.boolean "notifications_enabled", default: false, null: false
+    t.datetime "last_notification_sent_at"
     t.index ["last_watering_id"], name: "index_plants_on_last_watering_id"
     t.index ["location_id"], name: "index_plants_on_location_id"
     t.index ["share_token"], name: "index_plants_on_share_token", unique: true
@@ -86,6 +88,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_03_030540) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "api_key"
+  end
+
+  create_table "push_subscriptions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "endpoint", null: false
+    t.string "p256dh_key", null: false
+    t.string "auth_key", null: false
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
+    t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
   end
 
   create_table "sensor_types", force: :cascade do |t|
@@ -136,6 +150,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_03_030540) do
     t.boolean "guest", default: false, null: false
     t.string "google_uid"
     t.string "avatar_url"
+    t.boolean "notification_enabled", default: false, null: false
+    t.time "notification_time", default: "2000-01-01 09:00:00"
     t.index ["google_uid"], name: "index_users_on_google_uid", unique: true
   end
 
@@ -172,5 +188,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_03_030540) do
 
   add_foreign_key "log_entries", "users", on_delete: :nullify
   add_foreign_key "plants", "locations"
+  add_foreign_key "push_subscriptions", "users"
   add_foreign_key "water_tests", "tanks"
 end

@@ -1,0 +1,5 @@
+plant_notifications:
+  cron: '0 * * * *'  # Every hour at minute 0
+  class: 'PlantNotificationJob'
+  queue: 'default'
+  description: 'Send watering reminder notifications to users'

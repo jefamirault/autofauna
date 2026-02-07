@@ -86,6 +86,13 @@
     </div>
   </div>
 
+  <% unless current_user.guest? %>
+    <div class="archived-checkbox">
+      <%= form.label :notifications_enabled, "🔔 Notify when due?" %>
+      <%= form.check_box :notifications_enabled %>
+    </div>
+  <% end %>
+
   <% unless @plant.new_record? %>
     <div class="archived-checkbox">
       <%= form.label :archived, "🗄️ Archived?" %>

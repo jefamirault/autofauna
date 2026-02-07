@@ -31,6 +31,24 @@
   <% end %>
 </div>
 
+<% unless current_user.guest? %>
+  <div class="share-section">
+    <h3>Notifications</h3>
+    <%= form_with model: @plant, url: plant_path(@plant), method: :patch, local: true do |f| %>
+      <div class="field">
+        <%= f.label :notifications_enabled, "Notify me when this plant needs watering" %>
+        <%= f.check_box :notifications_enabled %>
+      </div>
+      <div class="submit">
+        <%= f.submit "Save", class: 'saveButton' %>
+      </div>
+    <% end %>
+    <% if @plant.last_notification_sent_at.present? %>
+      <p class="info-text">Last notification sent: <%= format_date @plant.last_notification_sent_at %></p>
+    <% end %>
+  </div>
+<% end %>
+
 <div class="plant-actions">
   <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant), class: 'link' %>
   <%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>

@@ -40,7 +40,11 @@ Rails.application.routes.draw do
   root "plants#index"
 
   get 'settings', to: 'settings#index'
+  patch 'settings', to: 'settings#update'
   delete 'settings', to: 'settings#destroy'
+  post 'settings/send_test_email', to: 'settings#send_test_email', as: 'send_test_email'
+  post 'settings/send_test_push', to: 'settings#send_test_push', as: 'send_test_push'
+  resources :push_subscriptions, only: [:create, :destroy]
   get 'en', to: 'settings#english'
   get 'es', to: 'settings#spanish'
 
