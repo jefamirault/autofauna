@@ -18,7 +18,17 @@
       <div class="plant-card-last-watering-volume">💧 <%= last_watering_volume_text(plant) || "–" %></div>
       <div class="plant-card-last-watering-notes">📝 <%= last_watering_notes_text(plant) || "–" %></div>
       <div class="plant-card-last-watering-time">⌛ <span class="long-text"><%= last_watering_time_text(plant).html_safe %></span><span class="short-text"><%= last_watering_time_short_text(plant).html_safe %></span></div>
-      <span class="plant-card-location">📍 <%= plant.location.presence || "–" %></span>
+      <% if plant.location.present? %>
+        <%= link_to plants_path(display: params[:display], locations: [plant.location.id]),
+                    class: "plant-card-location" do %>
+          📍 <%= plant.location.name %>
+        <% end %>
+      <% else %>
+        <%= link_to plants_path(display: params[:display], locations: ["none"]),
+                    class: "plant-card-location" do %>
+          📍 –
+        <% end %>
+      <% end %>
       <span class="plant-card-container">🫙 <%= plant.pot.presence || "–" %></span>
     </div>
   </div>

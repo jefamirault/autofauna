@@ -11,12 +11,49 @@
   <% end %>
 </div>
 
-<div class="display-toggle">
-  <span class="display-toggle-label"><%= t('.display_by') %>:</span>
-  <%= link_to t('.watering'), plants_path(display: "watering", q: params[:q]&.to_unsafe_h),
-      class: "display-toggle-btn #{'active' if @display_mode == 'watering'}" %>
-  <%= link_to t('.location'), plants_path(display: "location", q: params[:q]&.to_unsafe_h),
-      class: "display-toggle-btn #{'active' if @display_mode == 'location'}" %>
+<div id="search-options">
+
+  <% if @location_filters.size > 1 %>
+    <div class="display-toggle">
+      <span class="display-toggle-label"><%= t('.display_by') %>:</span>
+      <%= link_to t('.watering'), plants_path(display: "watering", q: params[:q]&.to_unsafe_h),
+                  class: "display-toggle-btn #{'active' if @display_mode == 'watering'}" %>
+      <%= link_to t('.location'), plants_path(display: "location", q: params[:q]&.to_unsafe_h),
+                  class: "display-toggle-btn #{'active' if @display_mode == 'location'}" %>
+    </div>
+  <% end %>
+
+  <% if @location_filters.size > 1 %>
+    <div data-controller="collapsible-filters"
+         data-collapsible-filters-expanded-value="false">
+      <div class="location-filters"
+           data-collapsible-filters-target="container">
+        <span class="display-toggle-label"><%= t('.filter_by_location') %>:</span>
+        <% @location_filters.each do |name, id| %>
+          <% loc_key = id&.to_s || "none" %>
+          <% is_active = @active_location_ids.include?(loc_key) %>
+          <% if is_active %>
+            <% new_locations = @active_location_ids.reject { |l| l == loc_key }.to_a %>
+          <% else %>
+            <% new_locations = (@active_location_ids.to_a + [loc_key]) %>
+          <% end %>
+          <%= link_to name,
+                      plants_path(display: params[:display], q: params[:q]&.to_unsafe_h, locations: new_locations.presence),
+                      class: "display-toggle-btn #{'active' if is_active}" %>
+        <% end %>
+      </div>
+      <% if @location_filters.size > 4 %>
+        <button type="button"
+                class="location-filters-toggle"
+                data-collapsible-filters-target="toggleButton"
+                data-action="click->collapsible-filters#toggle"
+                data-more-text="<%= t('.show_more') %>"
+                data-less-text="<%= t('.show_less') %>">
+          <%= t('.show_more') %>
+        </button>
+      <% end %>
+    </div>
+  <% end %>
 </div>
 
 <div style="padding: 0 0.75rem;"><%= "#{@plants.size} Active Plants" %>

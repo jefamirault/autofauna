@@ -27,6 +27,27 @@ class PlantsController < ApplicationController
     @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
     @plants = @q.result(distinct: true)
 
+    # Build location filter buttons with counts
+    location_counts = @plants.where.not(location_id: nil).reorder(nil).group(:location_id).count
+    no_location_count = @plants.where(location_id: nil).count
+    locations_with_plants = Location.where(id: location_counts.keys).order(Arel.sql("LOWER(name)"))
+    @location_filters = locations_with_plants.map { |loc| ["#{loc.name} (#{location_counts[loc.id]})", loc.id] }
+    @location_filters << ["#{I18n.t('plants.index.no_location')} (#{no_location_count})", nil] if no_location_count > 0
+
+    all_keys = @location_filters.map { |_, id| id&.to_s || "none" }.to_set
+    if params[:locations].present?
+      @active_location_ids = params[:locations].to_set
+      selected_ids = @active_location_ids.include?("none") ? @active_location_ids - Set["none"] : @active_location_ids
+      has_none = @active_location_ids.include?("none")
+      conditions = []
+      conditions << @plants.where(location_id: selected_ids.to_a) if selected_ids.any?
+      conditions << @plants.where(location_id: nil) if has_none
+      @plants = conditions.reduce { |union, scope| union.or(scope) } if conditions.any?
+      @plants = @plants.none if conditions.empty?
+    else
+      @active_location_ids = all_keys
+    end
+
     @display_mode = params[:display] || "watering"
     if @display_mode == "location"
       grouped = @plants.group_by { |p| p.location&.name }
