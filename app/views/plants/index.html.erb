@@ -10,7 +10,15 @@
     <%= f.submit "&#128269;".html_safe %>
   <% end %>
 </div>
-<br>
+
+<div class="display-toggle">
+  <span class="display-toggle-label"><%= t('.display_by') %>:</span>
+  <%= link_to t('.watering'), plants_path(display: "watering", q: params[:q]&.to_unsafe_h),
+      class: "display-toggle-btn #{'active' if @display_mode == 'watering'}" %>
+  <%= link_to t('.location'), plants_path(display: "location", q: params[:q]&.to_unsafe_h),
+      class: "display-toggle-btn #{'active' if @display_mode == 'location'}" %>
+</div>
+
 <div style="padding: 0 0.75rem;"><%= "#{@plants.size} Active Plants" %>
   <%= params['q']['name_or_location_name_cont'] && params['q']['name_or_location_name_cont'] != '' ? " matching \"#{params['q']['name_or_location_name_cont']}\"" : ''%>
   <% if params['q']['name_or_location_name_cont'] && params['q']['name_or_location_name_cont'] != '' %>
@@ -18,11 +26,22 @@
   <% end %>
 </div>
 
-<div class="plant-cards">
-  <% @plants.each do |plant| %>
-    <%= render 'plant_row', plant: plant %>
+<% if @display_mode == "location" %>
+  <% @plants_by_location.each do |location_name, plants| %>
+    <h3 class="location-group-header"><%= location_name %></h3>
+    <div class="plant-cards">
+      <% plants.each do |plant| %>
+        <%= render 'plant_row', plant: plant %>
+      <% end %>
+    </div>
   <% end %>
-</div>
+<% else %>
+  <div class="plant-cards">
+    <% @plants.each do |plant| %>
+      <%= render 'plant_row', plant: plant %>
+    <% end %>
+  </div>
+<% end %>
 
 <div style=" text-align: center;">
   <div class="plantButton">

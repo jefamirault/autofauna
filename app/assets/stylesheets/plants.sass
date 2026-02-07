@@ -6,6 +6,39 @@ $lightblue: rgba(14, 72, 123, 0.1)
 $yellow: #8C6800
 $lightyellow: rgba(206, 154, 0, 0.2)
 
+// Display Toggle
+.display-toggle
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  padding: 0.5rem 0.75rem
+
+.display-toggle-label
+  color: #666
+  font-size: 0.95em
+
+.display-toggle-btn
+  display: inline-block
+  padding: 0.25rem 0.75rem
+  border-radius: 999px
+  font-size: 0.9em
+  text-decoration: none
+  color: $blue
+  background: $lightblue
+  &:hover
+    background: rgba(14, 72, 123, 0.2)
+    text-decoration: none
+  &.active
+    background: $blue
+    color: white
+
+.location-group-header
+  font-size: 1.1em
+  font-weight: 600
+  color: $blue
+  padding: 0.75rem 0.75rem 0.25rem
+  margin: 0
+
 // Plants > Show
 .wateringNotesColumn
   max-width: 15rem

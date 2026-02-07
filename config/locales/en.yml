@@ -68,6 +68,10 @@ en:
       water: "Water"
       edit: "Edit"
       new_plant: "New Plant"
+      display_by: "Display by"
+      watering: "Watering"
+      location: "Location"
+      no_location: "No Location"
       no_upcoming: "Nothing scheduled in the next 7 days."
       no_recent_watering: "Nothing watered in the last 7 days."
     show:

@@ -68,6 +68,10 @@ es:
       water: "Regar"
       edit: "Editar"
       new_plant: "Nueva planta"
+      display_by: "Mostrar por"
+      watering: "Riego"
+      location: "Ubicación"
+      no_location: "Sin ubicación"
       no_upcoming: "Nada programado para los próximos 7 días."
       no_recent_watering: "Nada regado en los últimos 7 días."
     show:

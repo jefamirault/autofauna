@@ -26,7 +26,15 @@ class PlantsController < ApplicationController
 
     @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
     @plants = @q.result(distinct: true)
-    
+
+    @display_mode = params[:display] || "watering"
+    if @display_mode == "location"
+      grouped = @plants.group_by { |p| p.location&.name }
+      no_location = grouped.delete(nil) || []
+      @plants_by_location = grouped.sort_by { |name, _| name.downcase }.to_h
+      @plants_by_location[I18n.t('plants.index.no_location')] = no_location if no_location.any?
+    end
+
     respond_to do |format|
       format.json { @plants = current_project.plants }
       format.html
