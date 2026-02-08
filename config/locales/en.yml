@@ -77,6 +77,8 @@ en:
       show_less: "show less"
       no_upcoming: "Nothing scheduled in the next 7 days."
       no_recent_watering: "Nothing watered in the last 7 days."
+      results_count: "%{needs_watering} plants need watering of %{total} plants"
+      results_count_with_search: "%{needs_watering} plants need watering of %{total} results for '%{search_term}'"
     show:
       edit_this_plant: "Edit this plant"
       water_this_plant: "Water this Plant"

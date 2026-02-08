@@ -67,6 +67,32 @@ module ApplicationHelper
     end
   end
 
+  def header_config
+    controller = params[:controller]
+    action = params[:action]
+
+    case controller
+    when 'plants', 'log_entries'
+      { icon: 'autofauna_icon.png', title: (action == 'show' && @plant ? @plant.to_s : t('layouts.application.plants')), gradient_class: 'header-plants' }
+    when 'waterings'
+      { icon: 'water_icon.png', title: t('layouts.application.waterings'), gradient_class: 'header-waterings' }
+    when 'tanks', 'water_tests'
+      { icon: 'tank_icon.png', title: (action == 'show' && controller == 'tanks' && @tank ? @tank.to_s : t('layouts.application.tanks')), gradient_class: 'header-tanks' }
+    when 'locations', 'zones'
+      { icon: 'location_icon.png', title: t('layouts.application.locations'), gradient_class: 'header-locations' }
+    when 'sensors', 'sensor_readings', 'sensor_types'
+      { icon: 'sensor_icon.png', title: t('layouts.application.sensors'), gradient_class: 'header-sensors' }
+    when 'users'
+      { icon: 'users_icon.png', title: t('layouts.application.users'), gradient_class: 'header-users' }
+    when 'settings'
+      { icon: 'settings_icon.png', title: t('layouts.application.account_settings'), gradient_class: 'header-settings' }
+    when 'projects'
+      { icon: 'project_icon.png', title: t('layouts.application.project_settings'), gradient_class: 'header-settings' }
+    else
+      { icon: 'autofauna_icon.png', title: 'Autofauna', gradient_class: 'header-default' }
+    end
+  end
+
   def mobile_device?
     user_agent = request.user_agent.to_s.downcase
     user_agent.match?(/mobile|android|iphone|ipad|ipod|blackberry|iemobile|opera mini/)

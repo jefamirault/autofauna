@@ -215,30 +215,13 @@ export default class extends Controller {
             // Minimize sidebar - add class to body for grid layout change
             body.classList.add(...this.minimizedClasses)
             html.classList.add(...this.minimizedClasses)
-            button.innerHTML = this.getExpandIcon()
             button.setAttribute('aria-label', 'Expand sidebar')
         } else {
             // Maximize sidebar - remove class from body
             body.classList.remove(...this.minimizedClasses)
             html.classList.remove(...this.minimizedClasses)
-            button.innerHTML = this.getCollapseIcon()
             button.setAttribute('aria-label', 'Collapse sidebar')
         }
     }
 
-    getCollapseIcon() {
-        return `
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    `
-    }
-
-    getExpandIcon() {
-        return `
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    `
-    }
 }

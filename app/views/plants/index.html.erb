@@ -1,16 +1,16 @@
 <% content_for :title, 'Plants' %>
 
-<div>
-  <h1 style="display:inline-block"><%= t '.plants' %></h1>
-</div>
+<% content_for :header_extra do %>
+  <div id="headerSearch" data-controller="header-search expandable-search" data-expandable-search-has-value="<%= params.dig('q', 'name_or_location_name_cont').present? %>">
+    <%= search_form_for @q, data: { turbo_frame: "plants-results" } do |f| %>
+      <button type="button" class="search-toggle-btn" data-action="click->expandable-search#toggle">🔎</button>
+      <span class="search-icon">🔎</span>
+      <%= f.search_field :name_or_location_name_cont, placeholder: t('plants.index.search_plants'), autofocus: !mobile_device?, data: { action: "input->header-search#search" } %>
+    <% end %>
+  </div>
+<% end %>
 
-<div class="formContainer">
-  <%= search_form_for @q do |f| %>
-    <%= f.search_field :name_or_location_name_cont, placeholder: t('plants.index.search_plants'), autofocus: !mobile_device? %>
-    <%= f.submit "&#128269;".html_safe %>
-  <% end %>
-</div>
-
+<%= turbo_frame_tag "plants-results" do %>
 <div id="search-options">
 
   <% if @location_filters.size > 1 %>
@@ -56,9 +56,14 @@
   <% end %>
 </div>
 
-<div style="padding: 0 0.75rem;"><%= "#{@plants.size} Active Plants" %>
-  <%= params['q']['name_or_location_name_cont'] && params['q']['name_or_location_name_cont'] != '' ? " matching \"#{params['q']['name_or_location_name_cont']}\"" : ''%>
-  <% if params['q']['name_or_location_name_cont'] && params['q']['name_or_location_name_cont'] != '' %>
+<div style="padding: 0 0.75rem;">
+  <% search_term = params.dig('q', 'name_or_location_name_cont') %>
+  <% if search_term.present? %>
+    <%= t('.results_count_with_search', needs_watering: @needs_watering_count, total: @plants.size, search_term: search_term) %>
+  <% else %>
+    <%= t('.results_count', needs_watering: @needs_watering_count, total: @plants.size) %>
+  <% end %>
+  <% if search_term.present? %>
     - <%= link_to t('clear_search'), plants_path %>
   <% end %>
 </div>
@@ -85,3 +90,4 @@
     <%= link_to "🌱 #{t '.new_plant'}", new_plant_path %>
   </div>
 </div>
+<% end %>

@@ -2,9 +2,9 @@
 <div id="<%= dom_id plant %>" class="plant-card <%= plant.watering_urgency %>">
   <div class="plant-card-graphic-col">
     <div class="plant-card-name">
-      <%= link_to plant.label, plant_path(plant.id) %>
+      <%= link_to plant.label, plant_path(plant.id), data: { turbo_frame: "_top" } %>
     </div>
-    <%= link_to plant_path(plant.id), class: "plant-card-graphic" do %>
+    <%= link_to plant_path(plant.id), class: "plant-card-graphic", data: { turbo_frame: "_top" } do %>
       <%= image_tag plant.graphic.present? ? plant.graphic_path : "plant_graphics/placeholder.png", alt: "" %>
     <% end %>
   </div>
@@ -34,7 +34,7 @@
   </div>
   <% unless archive %>
     <% if plant.date_last_watering == Time.zone.now.to_date %>
-      <%= link_to edit_watering_path(plant.waterings.last), class: "plant-card-water-col water-icon-link #{plant.watering_urgency}" do %>
+      <%= link_to edit_watering_path(plant.waterings.last), class: "plant-card-water-col water-icon-link #{plant.watering_urgency}", data: { turbo_frame: "_top" } do %>
         <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
         </svg>
@@ -42,7 +42,7 @@
         <span class="plant-card-water-helper mobile-only"><%= t('plants.water_button.tap') %></span>
       <% end %>
     <% elsif plant.last_watering %>
-      <%= link_to plant_water_path(plant, volume: plant.last_watering.volume, units: plant.last_watering.units, notes: plant.last_watering.notes), class: "plant-card-water-col water-icon-link #{plant.watering_urgency}" do %>
+      <%= link_to plant_water_path(plant, volume: plant.last_watering.volume, units: plant.last_watering.units, notes: plant.last_watering.notes), class: "plant-card-water-col water-icon-link #{plant.watering_urgency}", data: { turbo_frame: "_top" } do %>
         <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
         </svg>
@@ -50,7 +50,7 @@
         <span class="plant-card-water-helper mobile-only"><%= t('plants.water_button.tap') %></span>
       <% end %>
     <% else %>
-      <%= link_to plant_water_path(plant), class: "plant-card-water-col water-icon-link #{plant.watering_urgency}" do %>
+      <%= link_to plant_water_path(plant), class: "plant-card-water-col water-icon-link #{plant.watering_urgency}", data: { turbo_frame: "_top" } do %>
         <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
         </svg>

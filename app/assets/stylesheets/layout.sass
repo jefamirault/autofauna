@@ -61,11 +61,6 @@ html.sidebarMinimized body
       pointer-events: none
       opacity: 0
 
-body.development
-  header
-    background: linear-gradient(135deg, $brightgreen 0%, #637271 67%, $yellow 100%)
-    //background: linear-gradient(135deg, $blue 0%, #637271 67%, $yellow 100%)
-
 header::before
   content: ''
   position: absolute
@@ -75,8 +70,8 @@ header::before
   height: 100%
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)
   animation: shine 6s infinite
-  pointer-events: none /* Makes it non-clickable so links work */
-  z-index: 0 /* Ensures it stays behind content */
+  pointer-events: none
+  z-index: 0
 
 @keyframes shine
   0%
@@ -88,19 +83,17 @@ header::before
 
 header
   grid-area: header
+  position: relative
   display: flex
-  flex-wrap: wrap
+  flex-wrap: nowrap
   justify-content: space-between
   align-items: center
   padding: 0
   margin: 0
-  background: linear-gradient(135deg, $brightgreen 0%, #637271 67%, $greygreen 100%)
-  //background: linear-gradient(135deg, $blue 0%, #637271 67%, $greygreen 100%)
   color: white
-  z-index: 0
-  overflow-x: hidden
-  isolation: isolate /* Creates a new stacking context */
-  contain: layout style /* Contains the effect to this element */
+  z-index: 10
+  overflow: visible
+  isolation: isolate
   a
     color: rgba(255, 255, 255, 0.75)
 
@@ -109,21 +102,52 @@ header
 
   $reduction: 12px
   #logoContainer
-    flex: 1
     display: flex
     align-items: center
-    width: $line-height - $reduction
+    flex-shrink: 0
     height: $line-height - $reduction
+    margin-left: 1.5em
+    cursor: pointer
     img
       width: $line-height - $reduction
       height: $line-height - $reduction
-      margin: 0 0 0 .25rem
+      //margin: 0 0 0 .25rem
     #logoText
       font-size: 2.25rem
       font-weight: 400
       letter-spacing: -0.5px
-      padding: 0 0 0 .5rem
-      cursor: default
+      padding: 0 .5em
+      //cursor: default
+      white-space: nowrap
+
+// Context-aware header gradients
+.header-plants, .header-default
+  background: linear-gradient(135deg, #2E7D32 0%, #637271 67%, #3E4F4E 100%)
+.header-waterings
+  background: linear-gradient(135deg, #1565C0 0%, #4a7a9b 67%, #2c4454 100%)
+.header-tanks
+  background: linear-gradient(135deg, #00897B 0%, #4a8a84 67%, #2c5450 100%)
+.header-locations
+  background: linear-gradient(135deg, #F57F17 0%, #9b8a4a 67%, #544a2c 100%)
+.header-sensors
+  background: linear-gradient(135deg, #7B1FA2 0%, #7a4a9b 67%, #3d2c54 100%)
+.header-users
+  background: linear-gradient(135deg, #283593 0%, #4a5a9b 67%, #2c3454 100%)
+.header-settings
+  background: linear-gradient(135deg, #546E7A 0%, #637271 67%, #3E4F4E 100%)
+
+body.development
+  .header-plants, .header-default
+    background: linear-gradient(135deg, $brightgreen 0%, #637271 67%, $yellow 100%)
+
+// Header right section (email + dropdown)
+#headerRight
+  margin-left: auto
+  position: relative
+  display: flex
+  align-items: center
+  flex-shrink: 0
+  z-index: 1
 
 #headerEmail
   padding: 0 1rem
@@ -132,23 +156,166 @@ header
   white-space: nowrap
   overflow: hidden
   text-overflow: ellipsis
-  max-width: 50%
-  @media (max-width: 600px)
+  cursor: pointer
+  user-select: none
+  .email-text
+    @media (max-width: 600px)
+      display: none
+  .mobile-user-icon
     display: none
+    font-size: 1.4rem
+    @media (max-width: 600px)
+      display: inline
+
+// Header dropdown menu
+.header-dropdown
+  position: absolute
+  top: 100%
+  right: 0
+  background: white
+  border-radius: 6px
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2)
+  z-index: 100
+  min-width: 200px
+  overflow: hidden
+  form
+    width: 100%
+
+.dropdown-item
+  display: block
+  padding: 0.75rem 1.25rem
+  color: #333
+  text-decoration: none
+  font-size: 0.95rem
+  &:hover
+    background: #f0f0f0
+    text-decoration: none
+
+.dropdown-logout
+  display: block
+  width: 100%
+  padding: 0.75rem 1.25rem
+  color: #c62828
+  text-decoration: none
+  font-size: 0.95rem
+  background: none
+  border: none
+  border-top: 1px solid #eee
+  text-align: left
+  cursor: pointer
+  &:hover
+    background: #fbe9e7
+
+// Header search form
+#headerSearch
+  flex: 1
+  display: flex
+  align-items: center
+  margin: 0 1rem
+  z-index: 1
+  form
+    display: flex
+    width: 100%
+    align-items: center
+    gap: 0.5rem
+  .search-icon
+    color: rgba(255, 255, 255, 0.6)
+    font-size: 1.2rem
+    flex-shrink: 0
+  .search-toggle-btn
+    display: none
+    background: none
+    border: none
+    color: rgba(255, 255, 255, 0.6)
+    font-size: 1.4rem
+    cursor: pointer
+    padding: 0
+    flex-shrink: 0
+    &:hover
+      color: rgba(255, 255, 255, 0.9)
+  input[type="search"]
+    flex: 1
+    padding: 0.35rem 0.75rem
+    border: 1px solid rgba(255,255,255,0.3)
+    border-radius: 4px
+    background: rgba(255,255,255,0.15)
+    color: white
+    font-size: 1.1rem
+    outline: none
+    &::placeholder
+      color: rgba(255,255,255,0.6)
+    &:focus
+      background: rgba(255,255,255,0.25)
+      border-color: rgba(255,255,255,0.5)
+
+  // Collapsible search on narrow screens
+  @media (max-width: 600px)
+    margin: 0 0.5rem
+    .search-icon
+      display: none
+    .search-toggle-btn
+      display: block
+    input[type="search"]
+      display: none
+    // When expanded
+    &.search-expanded
+      input[type="search"]
+        display: block
+      .search-toggle-btn
+        display: none
+      .search-icon
+        display: block
+
+// Sidebar locale switcher
+#sidebarLocale
+  position: relative
+  padding: 0.75rem 1rem
+  .locale-toggle-btn
+    background: none
+    border: 1px solid rgba(255,255,255,0.3)
+    border-radius: 4px
+    padding: 0.4rem 0.75rem
+    cursor: pointer
+    color: white
+    font-size: 1.1rem
+    &:hover
+      background: rgba(255,255,255,0.1)
+  .locale-popup
+    position: absolute
+    bottom: 100%
+    left: 1rem
+    background: white
+    border-radius: 6px
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2)
+    z-index: 100
+    overflow: hidden
+    margin-bottom: 0.25rem
+  .locale-option
+    display: block
+    padding: 0.6rem 1.25rem
+    color: #333
+    text-decoration: none
+    font-size: 0.95rem
+    &:hover
+      background: #f0f0f0
+      text-decoration: none
+    &.selected
+      font-weight: 500
+      color: #2E7D32
+
+.hidden
+  display: none !important
 
 button.collapseSidebar
-  width: 5rem
-  height: 4rem
-  padding: 0 1rem
+  height: 100%
+  padding: 0
   background: none
   border: none
   cursor: pointer
   color: #fffe
+  flex-shrink: 0
   &:hover
     color: #fffc
-  svg
-    width: 36px
-    height: 36px
 
 main
   grid-area: main
@@ -226,18 +393,6 @@ aside#sidebar
     color: #fff7
     &:hover
       color: #ffff
-
-html[lang="es"] aside#sidebar nav.logged_in
-  .navItem, button
-    font-size: 0.8em
-
-footer
-  grid-area: footer
-  display: flex
-  justify-content: center
-  line-height: 44px
-  font-size: 110%
-  background: #0007
 
 .fill
   flex: 1

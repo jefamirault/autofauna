@@ -43,23 +43,39 @@
   <body class="<%= Rails.env %> contents" data-controller="sidebar"
         data-sidebar-minimized-class="sidebarMinimized">
 
-    <header>
+    <% config = header_config %>
+    <header class="<%= config[:gradient_class] %>">
       <button data-sidebar-target="toggleButton"
               data-action="click->sidebar#toggle"
               class="collapseSidebar"
               aria-label="Collapse sidebar">
-        <!-- Icon will be populated by Stimulus -->
-  <!--      If same icon for both directions, just put it here-->
+        <div id="logoContainer">
+          <%= image_tag config[:icon] %>
+          <div id="logoText"><%= config[:title] %></div>
+        </div>
       </button>
-      <div id="logoContainer">
-        <%= image_tag 'autofauna_icon.png' %>
-        <div id="logoText">Autofauna</div>
-      </div>
+      <%= yield :header_extra %>
       <% if user_signed_in? %>
-        <div id="headerEmail">
-          <%= current_user.guest? ? t('guest.guest') : current_user.email %>
+        <div id="headerRight" data-controller="dropdown">
+          <div id="headerEmail" data-action="click->dropdown#toggle">
+            <span class="email-text"><%= current_user.guest? ? t('guest.guest') : current_user.email %></span>
+            <span class="mobile-user-icon">&#128100;</span>
+          </div>
+          <div class="header-dropdown hidden" data-dropdown-target="menu">
+            <% if current_user.admin? %>
+              <%= link_to "#{t('.users')}", users_path, class: 'dropdown-item' %>
+            <% end %>
+            <% if current_project && show_project_ui? %>
+              <%= link_to "#{t('.project_settings')}", project_path(current_project), class: 'dropdown-item' %>
+            <% end %>
+            <%= link_to "#{t('.account_settings')}", settings_path, class: 'dropdown-item' %>
+            <% unless current_user.guest? %>
+              <%= button_to t('.log_out'), session_path, method: :delete, class: 'dropdown-logout', onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
+            <% end %>
+          </div>
         </div>
       <% end %>
+
     </header>
 
     <aside id="sidebar">
@@ -96,24 +112,20 @@
         <% end %>
       </nav>
       <div class="fill"></div>
-      <nav class="logged_in" data-action="click->sidebar#closeOnMobile">
-        <% if current_user&.admin? %>
-          <%= nav_link 'users', text: "👥 #{t('.users')}" %>
-        <% end %>
-
-        <% if current_project && show_project_ui? %>
-          <%= nav_link 'projects', action: 'show', text: "🔧 #{t('.project_settings')}", path: project_path(current_project) %>
-        <% end %>
-
-        <% if user_signed_in? %>
-          <%= nav_link 'settings', text: "⚙️ #{t('.account_settings')}" %>
-          <% unless current_user.guest? %>
-            <%= button_to "🚪 #{t('.log_out')}", session_path, method: :delete, class: 'logout navItem', onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
-          <% end %>
-        <% else %>
+      <div id="sidebarLocale" data-controller="locale-popup">
+        <button class="locale-toggle-btn" data-action="click->locale-popup#toggle" aria-label="Change language">
+          <span class="locale-icon">&#127760;</span>
+        </button>
+        <div class="locale-popup hidden" data-locale-popup-target="menu">
+          <%= link_to 'English', "?locale=en", class: "locale-option #{'selected' if current_locale == 'en'}" %>
+          <%= link_to 'Espanol', "?locale=es", class: "locale-option #{'selected' if current_locale == 'es'}" %>
+        </div>
+      </div>
+      <% unless user_signed_in? %>
+        <nav data-action="click->sidebar#closeOnMobile">
           <%= link_to t('log_in'), new_session_path, class: 'navItem' %>
-        <% end %>
-      </nav>
+        </nav>
+      <% end %>
     </aside>
 
     <main class="<%= params[:controller] %> <%= params[:action] %>">
@@ -130,12 +142,6 @@
         <%= yield %>
       </section>
 
-      <footer>
-        <ul id="localizations">
-          <li><%= link_to 'English', "?locale=en", class: (current_locale == 'en' ? 'selected' : '') %></li>
-          <li><%= link_to 'Español', "?locale=es", class: (current_locale == 'es' ? 'selected' : '') %></li>
-        </ul>
-      </footer>
     </main>
 
   </body>

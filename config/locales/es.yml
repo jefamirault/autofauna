@@ -77,6 +77,8 @@ es:
       show_less: "mostrar menos"
       no_upcoming: "Nada programado para los próximos 7 días."
       no_recent_watering: "Nada regado en los últimos 7 días."
+      results_count: "%{needs_watering} plantas necesitan riego de %{total} plantas"
+      results_count_with_search: "%{needs_watering} plantas necesitan riego de %{total} resultados para '%{search_term}'"
     show:
       edit_this_plant: "Editar esta planta"
       water_this_plant: "Regar esta planta"

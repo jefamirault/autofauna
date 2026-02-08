@@ -56,6 +56,9 @@ class PlantsController < ApplicationController
       @plants_by_location[I18n.t('plants.index.no_location')] = no_location if no_location.any?
     end
 
+    # Calculate count of plants that need watering (urgent or today)
+    @needs_watering_count = @plants.count { |p| [:urgent, :today].include?(p.watering_urgency) }
+
     respond_to do |format|
       format.json { @plants = current_project.plants }
       format.html
