@@ -116,7 +116,7 @@ header
       font-size: 2.25rem
       font-weight: 400
       letter-spacing: -0.5px
-      padding: 0 .5em
+      padding: 0 .5em 0 0.3em
       //cursor: default
       white-space: nowrap
 
@@ -218,24 +218,39 @@ body.development
     width: 100%
     align-items: center
     gap: 0.5rem
+  .search-input-wrapper
+    flex: 1
+    position: relative
+    display: flex
+    align-items: center
   .search-icon
-    color: rgba(255, 255, 255, 0.6)
-    font-size: 1.2rem
-    flex-shrink: 0
+    position: absolute
+    left: 0.75rem
+    display: flex
+    align-items: center
+    pointer-events: none
+    z-index: 1
+  .search-icon-img
+    width: 2rem
+    height: 2rem
+    opacity: 0.6
   .search-toggle-btn
     display: none
     background: none
     border: none
-    color: rgba(255, 255, 255, 0.6)
-    font-size: 1.4rem
     cursor: pointer
-    padding: 0
+    padding: 0 0.75rem
     flex-shrink: 0
-    &:hover
-      color: rgba(255, 255, 255, 0.9)
+    height: 4.5rem
+    align-items: center
+    justify-content: center
+    @media (max-width: 600px)
+      height: 4rem
+    &:hover .search-icon-img
+      opacity: 0.9
   input[type="search"]
     flex: 1
-    padding: 0.35rem 0.75rem
+    padding: 0.35rem 0.75rem 0.35rem 2.75rem
     border: 1px solid rgba(255,255,255,0.3)
     border-radius: 4px
     background: rgba(255,255,255,0.15)
@@ -251,20 +266,16 @@ body.development
   // Collapsible search on narrow screens
   @media (max-width: 600px)
     margin: 0 0.5rem
-    .search-icon
+    .search-input-wrapper
       display: none
     .search-toggle-btn
       display: block
-    input[type="search"]
-      display: none
     // When expanded
     &.search-expanded
-      input[type="search"]
-        display: block
+      .search-input-wrapper
+        display: flex
       .search-toggle-btn
         display: none
-      .search-icon
-        display: block
 
 // Sidebar locale switcher
 #sidebarLocale

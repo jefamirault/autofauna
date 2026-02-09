@@ -3,9 +3,15 @@
 <% content_for :header_extra do %>
   <div id="headerSearch" data-controller="header-search expandable-search" data-expandable-search-has-value="<%= params.dig('q', 'name_or_location_name_cont').present? %>">
     <%= search_form_for @q, data: { turbo_frame: "plants-results" } do |f| %>
-      <button type="button" class="search-toggle-btn" data-action="click->expandable-search#toggle">🔎</button>
-      <span class="search-icon">🔎</span>
-      <%= f.search_field :name_or_location_name_cont, placeholder: t('plants.index.search_plants'), autofocus: !mobile_device?, data: { action: "input->header-search#search" } %>
+      <button type="button" class="search-toggle-btn" data-action="click->expandable-search#toggle">
+        <%= image_tag 'search_icon_256.png', alt: 'Search', class: 'search-icon-img' %>
+      </button>
+      <div class="search-input-wrapper">
+        <span class="search-icon">
+          <%= image_tag 'search_icon_256.png', alt: 'Search', class: 'search-icon-img' %>
+        </span>
+        <%= f.search_field :name_or_location_name_cont, placeholder: t('plants.index.search_plants'), autofocus: !mobile_device?, data: { action: "input->header-search#search" } %>
+      </div>
     <% end %>
   </div>
 <% end %>
