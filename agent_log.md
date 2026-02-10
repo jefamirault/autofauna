@@ -180,3 +180,26 @@ Current session log. Previous logs archived in `agent_log/`.
 - `SIDEKIQ_DEPLOYMENT_GUIDE.md`: Comprehensive deployment and troubleshooting guide
 - `DEPLOYMENT_CHECKLIST.md`: Quick reference checklist for deployment steps
 
+---
+
+## 2026-02-09: Fix Mobile Background Image Glitch
+
+**Goal:** Eliminate the mobile-specific background image shrink/expand glitch that occurs every 5-6 seconds.
+
+**Problem:** The header shine animation was causing layout recalculations on mobile browsers, which triggered the body's `background-size: cover` to recalculate, creating a visible shrink/expand effect. Additionally, `background-attachment: fixed` has poor mobile browser support and contributes to visual glitches.
+
+**Solution:**
+1. Completely removed the header shine animation (`header::before` pseudo-element and `@keyframes shine`)
+2. Set `background-attachment: scroll` on mobile devices via media query
+
+**Changes Made:**
+1. **app/assets/stylesheets/layout.sass** (lines 36-42):
+   - Added `@media (max-width: 600px)` block setting `background-attachment: scroll` for mobile
+   - Keeps `background-attachment: fixed` for desktop (600px+)
+
+2. **app/assets/stylesheets/layout.sass** (removed lines 64-82):
+   - Removed `header::before` pseudo-element styles entirely
+   - Removed `@keyframes shine` animation definition
+
+**Status:** Complete - No server restart required (CSS-only changes)
+
