@@ -22,7 +22,7 @@ set :deploy_to, "/home/deploy/#{fetch :application}"
 
 # Default value for :linked_files is []
 # append :linked_files, "config/database.yml", 'config/master.key'
-append 'config/master.key'
+append :linked_files, 'config/master.key', 'config/sidekiq.yml'
 
 # Default value for linked_dirs is []
 # append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "tmp/webpacker", "public/system", "vendor", "storage"
@@ -40,3 +40,12 @@ append :linked_dirs, 'log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bund
 
 # Uncomment the following to require manually verifying the host key before first deploy.
 # set :ssh_options, verify_host_key: :secure
+
+# Sidekiq configuration
+set :init_system, :systemd
+set :sidekiq_config, -> { File.join(shared_path, 'config', 'sidekiq.yml') }
+set :sidekiq_log, -> { File.join(shared_path, 'log', 'sidekiq.log') }
+set :sidekiq_pid, -> { File.join(shared_path, 'tmp', 'pids', 'sidekiq.pid') }
+set :sidekiq_role, :app
+set :sidekiq_processes, 1
+set :sidekiq_service_unit_name, 'sidekiq-autofauna'

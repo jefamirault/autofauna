@@ -141,3 +141,42 @@ Current session log. Previous logs archived in `agent_log/`.
 
 **Location:** `/home/jef/autofauna/PRODUCTION_NOTIFICATIONS_CHECKLIST.md`
 
+---
+
+## 2026-02-09: Fix Sidekiq Worker Not Running in Production
+
+**Goal:** Configure and start Sidekiq worker process on production server to enable email sending and background job processing.
+
+**Problem:** Test emails successfully enqueue to Sidekiq but never send. Root cause: Sidekiq worker process not running on production server - jobs accumulate in Redis queue but aren't executed.
+
+**Implementation Plan:**
+1. Add `capistrano-sidekiq` gem for automated Sidekiq deployment management
+2. Configure Capistrano to manage Sidekiq via systemd service
+3. Verify production environment variables (REDIS_URL, Mailgun credentials)
+4. Deploy to production (will auto-create and start Sidekiq systemd service)
+5. Verify end-to-end: email enqueue → Sidekiq processing → Mailgun delivery
+
+**Changes Made:**
+1. **Gemfile**: Added `capistrano-sidekiq ~> 2.3` to deployment gems
+2. **Capfile**: Added `require "capistrano/sidekiq"` to enable Sidekiq deployment tasks
+3. **config/deploy.rb**:
+   - Added `config/sidekiq.yml` to linked_files
+   - Configured Sidekiq settings (config path, log path, pid path, role, process count)
+
+**Status:** Complete - Ready for deployment
+
+**Next Steps for User:**
+1. Run `bundle install` to install capistrano-sidekiq gem
+2. Follow `DEPLOYMENT_CHECKLIST.md` for step-by-step deployment
+3. See `SIDEKIQ_DEPLOYMENT_GUIDE.md` for detailed troubleshooting
+
+**Key Points:**
+- capistrano-sidekiq will automatically create and manage systemd service
+- Sidekiq will start/restart on each deployment
+- No manual systemd service creation needed
+- First deployment will setup everything automatically
+
+**Files Created:**
+- `SIDEKIQ_DEPLOYMENT_GUIDE.md`: Comprehensive deployment and troubleshooting guide
+- `DEPLOYMENT_CHECKLIST.md`: Quick reference checklist for deployment steps
+
