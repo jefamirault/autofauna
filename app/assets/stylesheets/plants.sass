@@ -6,6 +6,25 @@ $lightblue: rgba(14, 72, 123, 0.1)
 $yellow: #8C6800
 $lightyellow: rgba(206, 154, 0, 0.2)
 
+// Page headers
+h1
+  margin-bottom: 0.25rem
+
+// Count headers container
+.plants-count-headers
+  padding: 0 0.75rem
+
+  @media (min-width: 900px)
+    display: flex
+    align-items: baseline
+
+  @media (max-width: 600px)
+    h1
+      font-size: 1.5em
+    h2
+      font-size: 1.1em
+      padding-left: 0.1em
+
 // Display Toggle
 .display-toggle
   display: flex
@@ -43,6 +62,12 @@ $lightyellow: rgba(206, 154, 0, 0.2)
 
   &.expanded
     flex-wrap: wrap
+
+  button.display-toggle-btn
+    border: none
+    cursor: pointer
+    font-family: inherit
+    font-size: inherit
 
 .location-filters-toggle
   display: inline-block

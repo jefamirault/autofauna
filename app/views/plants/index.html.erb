@@ -1,11 +1,8 @@
 <% content_for :title, 'Plants' %>
 
 <% content_for :header_extra do %>
-  <div id="headerSearch" data-controller="header-search expandable-search" data-expandable-search-has-value="<%= params.dig('q', 'name_or_location_name_cont').present? %>">
+  <div id="headerSearch" data-controller="header-search">
     <%= search_form_for @q, data: { turbo_frame: "plants-results" } do |f| %>
-      <button type="button" class="search-toggle-btn" data-action="click->expandable-search#toggle">
-        <%= image_tag 'search_icon_256.png', alt: 'Search', class: 'search-icon-img' %>
-      </button>
       <div class="search-input-wrapper">
         <span class="search-icon">
           <%= image_tag 'search_icon_256.png', alt: 'Search', class: 'search-icon-img' %>
@@ -17,14 +14,36 @@
 <% end %>
 
 <%= turbo_frame_tag "plants-results" do %>
+<div data-controller="location-filter"
+     data-location-filter-display-mode-value="<%= @display_mode %>"
+     data-location-filter-watering-template-value="<%= t('.watering_count', needs_watering: '__NEEDS_WATERING__') %>"
+     data-location-filter-results-template-value="<%= t('.results_count', total: '__TOTAL__') %>"
+     data-location-filter-results-search-template-value="<%= t('.results_count_with_search', total: '__TOTAL__', search_term: '__SEARCH_TERM__') %>"
+     data-location-filter-search-term-value="<%= params.dig('q', 'name_or_location_name_cont') || '' %>">
+
+<div class="plants-count-headers" data-location-filter-target="resultsCount">
+  <% search_term = params.dig('q', 'name_or_location_name_cont') %>
+  <h1 data-location-filter-target="wateringCount">
+    <%= t('.watering_count', needs_watering: @needs_watering_count) %>
+  </h1>
+  <h2 data-location-filter-target="totalCount">
+    <% if search_term.present? %>
+      <%= t('.results_count_with_search', total: @plants.size, search_term: search_term) %>
+      - <%= link_to t('clear_search'), "#", data: { action: "click->location-filter#clearSearch" } %>
+    <% else %>
+      <%= t('.results_count', total: @plants.size) %>
+    <% end %>
+  </h2>
+</div>
+
 <div id="search-options">
 
   <% if @location_filters.size > 1 %>
     <div class="display-toggle">
       <span class="display-toggle-label"><%= t('.display_by') %>:</span>
-      <%= link_to t('.watering'), plants_path(display: "watering", q: params[:q]&.to_unsafe_h),
+      <%= link_to "💧 #{t('.watering')}", plants_path(display: "watering", q: params[:q]&.to_unsafe_h),
                   class: "display-toggle-btn #{'active' if @display_mode == 'watering'}" %>
-      <%= link_to t('.location'), plants_path(display: "location", q: params[:q]&.to_unsafe_h),
+      <%= link_to "📍 #{t('.location')}", plants_path(display: "location", q: params[:q]&.to_unsafe_h),
                   class: "display-toggle-btn #{'active' if @display_mode == 'location'}" %>
     </div>
   <% end %>
@@ -33,19 +52,19 @@
     <div data-controller="collapsible-filters"
          data-collapsible-filters-expanded-value="false">
       <div class="location-filters"
-           data-collapsible-filters-target="container">
+           data-collapsible-filters-target="container"
+           data-location-filter-target="buttonContainer">
         <span class="display-toggle-label"><%= t('.filter_by_location') %>:</span>
         <% @location_filters.each do |name, id| %>
           <% loc_key = id&.to_s || "none" %>
-          <% is_active = @active_location_ids.include?(loc_key) %>
-          <% if is_active %>
-            <% new_locations = @active_location_ids.reject { |l| l == loc_key }.to_a %>
-          <% else %>
-            <% new_locations = (@active_location_ids.to_a + [loc_key]) %>
-          <% end %>
-          <%= link_to name,
-                      plants_path(display: params[:display], q: params[:q]&.to_unsafe_h, locations: new_locations.presence),
-                      class: "display-toggle-btn #{'active' if is_active}" %>
+          <button type="button"
+                  class="display-toggle-btn"
+                  data-location-filter-target="filterButton"
+                  data-location-id="<%= loc_key %>"
+                  data-location-count="<%= name.match(/\((\d+)\)/)[1] %>"
+                  data-action="click->location-filter#toggleFilter">
+            <%= name %>
+          </button>
         <% end %>
       </div>
       <% if @location_filters.size > 4 %>
@@ -62,25 +81,16 @@
   <% end %>
 </div>
 
-<div style="padding: 0 0.75rem;">
-  <% search_term = params.dig('q', 'name_or_location_name_cont') %>
-  <% if search_term.present? %>
-    <%= t('.results_count_with_search', needs_watering: @needs_watering_count, total: @plants.size, search_term: search_term) %>
-  <% else %>
-    <%= t('.results_count', needs_watering: @needs_watering_count, total: @plants.size) %>
-  <% end %>
-  <% if search_term.present? %>
-    - <%= link_to t('clear_search'), plants_path %>
-  <% end %>
-</div>
-
 <% if @display_mode == "location" %>
   <% @plants_by_location.each do |location_name, plants| %>
-    <h3 class="location-group-header"><%= location_name %></h3>
-    <div class="plant-cards">
-      <% plants.each do |plant| %>
-        <%= render 'plant_row', plant: plant %>
-      <% end %>
+    <% loc_id = plants.first&.location_id&.to_s || "none" %>
+    <div data-location-filter-target="locationGroup" data-location-id="<%= loc_id %>">
+      <h3 class="location-group-header"><%= location_name %></h3>
+      <div class="plant-cards">
+        <% plants.each do |plant| %>
+          <%= render 'plant_row', plant: plant %>
+        <% end %>
+      </div>
     </div>
   <% end %>
 <% else %>
@@ -95,5 +105,6 @@
   <div class="plantButton">
     <%= link_to "🌱 #{t '.new_plant'}", new_plant_path %>
   </div>
+</div>
 </div>
 <% end %>

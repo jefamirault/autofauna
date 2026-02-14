@@ -1,5 +1,5 @@
 <% archive ||= false %>
-<div id="<%= dom_id plant %>" class="plant-card <%= plant.watering_urgency %>">
+<div id="<%= dom_id plant %>" class="plant-card <%= plant.watering_urgency %>" data-location-id="<%= plant.location_id&.to_s || 'none' %>" data-needs-watering="<%= [:urgent, :today].include?(plant.watering_urgency) %>">
   <div class="plant-card-graphic-col">
     <div class="plant-card-name">
       <%= link_to plant.label, plant_path(plant.id), data: { turbo_frame: "_top" } %>
@@ -19,15 +19,17 @@
       <div class="plant-card-last-watering-notes">📝 <%= last_watering_notes_text(plant) || "–" %></div>
       <div class="plant-card-last-watering-time">⌛ <span class="long-text"><%= last_watering_time_text(plant).html_safe %></span><span class="short-text"><%= last_watering_time_short_text(plant).html_safe %></span></div>
       <% if plant.location.present? %>
-        <%= link_to plants_path(display: params[:display], locations: [plant.location.id]),
-                    class: "plant-card-location" do %>
+        <a href="#" class="plant-card-location"
+           data-action="click->location-filter#selectSingleLocation:prevent"
+           data-location-id="<%= plant.location.id %>">
           📍 <%= plant.location.name %>
-        <% end %>
+        </a>
       <% else %>
-        <%= link_to plants_path(display: params[:display], locations: ["none"]),
-                    class: "plant-card-location" do %>
+        <a href="#" class="plant-card-location"
+           data-action="click->location-filter#selectSingleLocation:prevent"
+           data-location-id="none">
           📍 –
-        <% end %>
+        </a>
       <% end %>
       <span class="plant-card-container">🫙 <%= plant.pot.presence || "–" %></span>
     </div>

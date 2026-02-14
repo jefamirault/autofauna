@@ -203,3 +203,98 @@ Current session log. Previous logs archived in `agent_log/`.
 
 **Status:** Complete - No server restart required (CSS-only changes)
 
+---
+
+## 2026-02-14 — Client-Side Location Filtering on Plants Index
+
+Converted location filtering from server-side (Turbo Frame reloads) to instant client-side filtering using a new Stimulus controller.
+
+### Changes:
+- **Label renamed:** "Show:" → "Filter:" (en: "Filter", es: "Filtrar")
+- **Default behavior:** No locations selected by default; all plants shown. Selecting locations filters to only those locations' plants.
+- **Client-side filtering:** New `location_filter_controller.js` Stimulus controller handles toggling, filtering plant card visibility, updating results count, and reordering buttons
+- **Button ordering:** Selected buttons sort first, then by plant count descending
+- **Plant card location links:** Now trigger client-side filter instead of page reload
+
+### Files modified:
+- `config/locales/en.yml` — "Show" → "Filter"
+- `config/locales/es.yml` — "Mostrar" → "Filtrar"
+- `app/controllers/plants_controller.rb` — Removed server-side location filtering (params[:locations] block)
+- `app/views/plants/index.html.erb` — Added location-filter Stimulus controller, converted filter links to buttons, added data attributes
+- `app/views/plants/_plant_row.html.erb` — Added data-location-id and data-needs-watering attributes, changed location links to client-side filter triggers
+- `app/javascript/controllers/location_filter_controller.js` — New Stimulus controller for client-side filtering
+- `app/assets/stylesheets/plants.sass` — Button reset styles for filter buttons
+
+---
+
+## 2026-02-14 — Move Results Count Above Filter Buttons
+
+Moved the "X plants need watering of Y plants" text above the sort and filter buttons and changed it to an `<h1>` tag for better visual hierarchy.
+
+### Changes:
+- Moved results count from below filters to the top of the plants-results frame
+- Changed from `<div>` to `<h1>` tag
+- Updated JavaScript controller to properly update the `<h1>` content while preserving the "Clear Search" link
+
+### Files modified:
+- `app/views/plants/index.html.erb` — Moved results count `<h1>` above search-options div
+- `app/javascript/controllers/location_filter_controller.js` — Updated updateResultsCount() to clone the clear link before updating content
+
+---
+
+## 2026-02-14 — Fix "Clear Search" Button to Clear Input Field
+
+Made the "Clear Search" button properly clear the search input field in the header, not just navigate to a clean URL.
+
+### Problem:
+The "Clear Search" link was a simple anchor tag pointing to `plants_path`, which would reload the page without search parameters. However, the search input field in the header would retain its value due to browser caching or Turbo's form preservation.
+
+### Solution:
+Added a `clearSearch()` method to the `location_filter_controller.js` that:
+1. Finds the search input field in the header using `document.querySelector`
+2. Clears its value
+3. Submits the form to trigger a fresh search (with empty query)
+
+### Changes:
+- **app/javascript/controllers/location_filter_controller.js** — Added `clearSearch(event)` method
+- **app/views/plants/index.html.erb** — Changed "Clear Search" link from `plants_path` to `#` with `data-action="click->location-filter#clearSearch"`
+
+---
+
+## 2026-02-14 — Always Show Search Field on Plants Index at Narrow Breakpoints
+
+Modified the plants index page to always display the search field and hide the logo text at 600px and narrower breakpoints, removing the collapsible toggle behavior entirely.
+
+### Problem:
+Previously, at 600px and narrower, the search field was hidden by default with a toggle button. Users had to click to expand it, and only then would the logo text hide. The JavaScript controller was also interfering with CSS-only solutions.
+
+### Solution:
+1. Removed the `expandable-search` Stimulus controller from the plants index (kept `header-search` for debounced search)
+2. Removed the search toggle button from the HTML
+3. Added CSS rules using `:has()` selector to target elements when on plants index page:
+   - Logo text always hidden (`display: none !important`)
+   - Search input wrapper always displayed (`display: flex !important`)
+   - Search toggle button always hidden (`display: none !important`)
+
+This only affects the plants index page since no other pages have search functionality at this time.
+
+### Changes:
+- **app/views/plants/index.html.erb** — Removed `expandable-search` controller and toggle button
+- **app/assets/stylesheets/layout.sass** — Added `body:has(main.plants.index)` media query block for 600px and narrower
+
+---
+
+## 2026-02-14 — Two-Column Layout for Plant Count Headers
+
+Made the h1 and h2 headers (watering count and results count) display side by side on wider screens with left-aligned, compact spacing.
+
+### Changes:
+- Changed the wrapper div from inline styles to a semantic class `plants-count-headers`
+- Added responsive flexbox layout in CSS that displays headers side by side at 900px+ width
+- Headers stack vertically on narrower screens (< 900px) and display side by side on wider screens (≥ 900px)
+- Used flexbox instead of grid to keep headers left-aligned with compact spacing (2rem gap) for better readability
+
+### Files modified:
+- **app/views/plants/index.html.erb:24** — Changed wrapper div to use class `plants-count-headers`
+- **app/assets/stylesheets/plants.sass:13-19** — Added `.plants-count-headers` styles with 900px breakpoint for flexbox layout
+

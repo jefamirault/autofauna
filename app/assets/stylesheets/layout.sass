@@ -260,6 +260,17 @@ body.development
       .search-toggle-btn
         display: none
 
+// Plants index: search always expanded and logo hidden at narrow breakpoints
+body:has(main.plants.index)
+  @media (max-width: 600px)
+    #logoText
+      display: none !important
+    #headerSearch
+      .search-input-wrapper
+        display: flex !important
+      .search-toggle-btn
+        display: none !important
+
 // Sidebar locale switcher
 #sidebarLocale
   position: relative
