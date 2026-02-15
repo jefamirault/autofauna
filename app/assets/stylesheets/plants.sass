@@ -35,6 +35,7 @@ h1
 .display-toggle-label
   color: #666
   font-size: 0.95em
+  white-space: nowrap
 
 .display-toggle-btn
   display: inline-block
@@ -70,6 +71,40 @@ h1
     font-size: inherit
 
 .location-filters-toggle
+  display: inline-block
+  margin: 0 0 0.5rem 0.75rem
+  padding: 0.25rem 0.75rem
+  border-radius: 999px
+  font-size: 0.85em
+  border: 1px solid rgba(14, 72, 123, 0.3)
+  background: transparent
+  color: $blue
+  cursor: pointer
+  font-family: inherit
+  transition: all 0.2s ease
+
+  &:hover
+    background: $lightblue
+    border-style: solid
+
+.recipe-filters
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  padding: 0 0.75rem 0.5rem
+  flex-wrap: nowrap
+  overflow: hidden
+
+  &.expanded
+    flex-wrap: wrap
+
+  button.display-toggle-btn
+    border: none
+    cursor: pointer
+    font-family: inherit
+    font-size: inherit
+
+.recipe-filters-toggle
   display: inline-block
   margin: 0 0 0.5rem 0.75rem
   padding: 0.25rem 0.75rem

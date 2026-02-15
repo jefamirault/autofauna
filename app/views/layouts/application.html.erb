@@ -87,14 +87,18 @@
       <% end %>
       <nav data-action="click->sidebar#closeOnMobile">
         <%= nav_link 'plants', action: 'index', text: "🌱 #{t('.plants')}" %>
-        <% if params[:controller].in?(%w[plants waterings recipes recipe_batches recipe_sources]) %>
+        <% if params[:controller] == 'plants' %>
           <div class="indent">
             <%= nav_link 'plants', action: 'new', text: "✏️ #{t('.new_plant')}", path: new_plant_path %>
-            <%= nav_link 'waterings', text: "💧 #{t('.waterings')}" %>
+            <%= nav_link 'plants', action: 'archive', text: "🗃️ #{t('.archive')}", path: plants_archive_path %>
+          </div>
+        <% end %>
+        <%= nav_link 'waterings', action: 'index', text: "💧 Water" %>
+        <% if params[:controller].in?(%w[waterings recipes recipe_batches recipe_sources]) %>
+          <div class="indent">
             <%= nav_link 'recipes', text: "🧪 Recipes" %>
             <%= nav_link 'recipe_batches', text: "🪣 Batches" %>
             <%= nav_link 'recipe_sources', text: "📦 Sources" %>
-            <%= nav_link 'plants', action: 'archive', text: "🗃️ #{t('.archive')}", path: plants_archive_path %>
           </div>
         <% end %>
         <%= nav_link 'tanks', text: "🐟 #{t('.tanks')}" %>

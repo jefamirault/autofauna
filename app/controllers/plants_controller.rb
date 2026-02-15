@@ -35,8 +35,12 @@ class PlantsController < ApplicationController
     @location_filters = locations_with_plants.map { |loc| ["#{loc.name} (#{location_counts[loc.id]})", loc.id] }
     @location_filters << ["#{I18n.t('plants.index.no_location')} (#{no_location_count})", nil] if no_location_count > 0
 
-    # Build recipe filter options
-    @recipe_filters = current_project.recipes.order(:name).map { |r| [r.name, r.id] }
+    # Build recipe filter buttons with counts
+    recipe_counts = @plants.where.not(recipe_id: nil).reorder(nil).group(:recipe_id).count
+    no_recipe_count = @plants.where(recipe_id: nil).count
+    recipes_with_plants = Recipe.where(id: recipe_counts.keys).order(:name)
+    @recipe_filters = recipes_with_plants.map { |recipe| ["#{recipe.name} (#{recipe_counts[recipe.id]})", recipe.id] }
+    @recipe_filters << ["#{I18n.t('plants.index.no_recipe')} (#{no_recipe_count})", nil] if no_recipe_count > 0
 
     @display_mode = params[:display] || "watering"
     if @display_mode == "location"

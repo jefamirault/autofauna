@@ -38,15 +38,6 @@
 
 <div id="search-options">
 
-  <% if @recipe_filters.any? %>
-    <div class="recipe-filter">
-      <%= search_form_for @q, data: { turbo_frame: "plants-results" } do |f| %>
-        <span class="display-toggle-label">🧪 Recipe:</span>
-        <%= f.select :recipe_id_eq, options_for_select(@recipe_filters, params.dig('q', 'recipe_id_eq')), { include_blank: "All" }, { data: { action: "change->header-search#search" } } %>
-      <% end %>
-    </div>
-  <% end %>
-
   <% if @location_filters.size > 1 %>
     <div class="display-toggle">
       <span class="display-toggle-label"><%= t('.display_by') %>:</span>
@@ -57,13 +48,45 @@
     </div>
   <% end %>
 
+  <% if @recipe_filters.any? %>
+    <div data-controller="collapsible-filters"
+         data-collapsible-filters-expanded-value="false">
+      <div class="recipe-filters"
+           data-collapsible-filters-target="container"
+           data-location-filter-target="recipeButtonContainer">
+        <span class="display-toggle-label">🧪 <%= t('.filter_by_recipe') %>:</span>
+        <% @recipe_filters.each do |name, id| %>
+          <% recipe_key = id&.to_s || "none" %>
+          <button type="button"
+                  class="display-toggle-btn"
+                  data-location-filter-target="recipeFilterButton"
+                  data-recipe-id="<%= recipe_key %>"
+                  data-recipe-count="<%= name.match(/\((\d+)\)/)[1] %>"
+                  data-action="click->location-filter#toggleRecipeFilter">
+            <%= name %>
+          </button>
+        <% end %>
+      </div>
+      <% if @recipe_filters.size > 4 %>
+        <button type="button"
+                class="recipe-filters-toggle"
+                data-collapsible-filters-target="toggleButton"
+                data-action="click->collapsible-filters#toggle"
+                data-more-text="<%= t('.show_more') %>"
+                data-less-text="<%= t('.show_less') %>">
+          <%= t('.show_more') %>
+        </button>
+      <% end %>
+    </div>
+  <% end %>
+
   <% if @location_filters.size > 1 %>
     <div data-controller="collapsible-filters"
          data-collapsible-filters-expanded-value="false">
       <div class="location-filters"
            data-collapsible-filters-target="container"
            data-location-filter-target="buttonContainer">
-        <span class="display-toggle-label"><%= t('.filter_by_location') %>:</span>
+        <span class="display-toggle-label">📍 <%= t('.filter_by_location') %>:</span>
         <% @location_filters.each do |name, id| %>
           <% loc_key = id&.to_s || "none" %>
           <button type="button"

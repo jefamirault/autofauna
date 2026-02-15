@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["filterButton", "buttonContainer", "locationGroup", "resultsCount", "wateringCount", "totalCount"]
+  static targets = ["filterButton", "recipeFilterButton", "buttonContainer", "recipeButtonContainer", "locationGroup", "resultsCount", "wateringCount", "totalCount"]
   static values = {
     displayMode: String,
     wateringTemplate: String,
@@ -12,6 +12,7 @@ export default class extends Controller {
 
   connect() {
     this.selectedLocations = new Set()
+    this.selectedRecipes = new Set()
   }
 
   toggleFilter(event) {
@@ -68,25 +69,49 @@ export default class extends Controller {
   }
 
   filterPlants() {
-    const showAll = this.selectedLocations.size === 0
+    const showAllLocations = this.selectedLocations.size === 0
+    const showAllRecipes = this.selectedRecipes.size === 0
 
     if (this.displayModeValue === "location") {
       this.locationGroupTargets.forEach(group => {
         const locationId = group.dataset.locationId
-        group.style.display = (showAll || this.selectedLocations.has(locationId)) ? "" : "none"
+        const locationMatch = showAllLocations || this.selectedLocations.has(locationId)
+
+        if (locationMatch && !showAllRecipes) {
+          const cards = group.querySelectorAll(".plant-card[data-recipe-id]")
+          const hasMatchingRecipe = Array.from(cards).some(card =>
+            this.selectedRecipes.has(card.dataset.recipeId)
+          )
+          group.style.display = hasMatchingRecipe ? "" : "none"
+
+          cards.forEach(card => {
+            const recipeId = card.dataset.recipeId
+            card.style.display = this.selectedRecipes.has(recipeId) ? "" : "none"
+          })
+        } else if (locationMatch) {
+          group.style.display = ""
+          const cards = group.querySelectorAll(".plant-card[data-recipe-id]")
+          cards.forEach(card => card.style.display = "")
+        } else {
+          group.style.display = "none"
+        }
       })
     } else {
       const cards = this.element.querySelectorAll(".plant-card[data-location-id]")
       cards.forEach(card => {
         const locationId = card.dataset.locationId
-        card.style.display = (showAll || this.selectedLocations.has(locationId)) ? "" : "none"
+        const recipeId = card.dataset.recipeId
+        const locationMatch = showAllLocations || this.selectedLocations.has(locationId)
+        const recipeMatch = showAllRecipes || this.selectedRecipes.has(recipeId)
+        card.style.display = (locationMatch && recipeMatch) ? "" : "none"
       })
     }
   }
 
   updateResultsCount() {
     if (!this.hasWateringCountTarget || !this.hasTotalCountTarget) return
-    const showAll = this.selectedLocations.size === 0
+    const showAllLocations = this.selectedLocations.size === 0
+    const showAllRecipes = this.selectedRecipes.size === 0
     const cards = this.element.querySelectorAll(".plant-card[data-location-id]")
 
     let total = 0
@@ -94,7 +119,11 @@ export default class extends Controller {
 
     cards.forEach(card => {
       const locationId = card.dataset.locationId
-      const visible = showAll || this.selectedLocations.has(locationId)
+      const recipeId = card.dataset.recipeId
+      const locationMatch = showAllLocations || this.selectedLocations.has(locationId)
+      const recipeMatch = showAllRecipes || this.selectedRecipes.has(recipeId)
+      const visible = locationMatch && recipeMatch
+
       if (visible) {
         total++
         if (card.dataset.needsWatering === "true") {
@@ -143,5 +172,49 @@ export default class extends Controller {
         form.requestSubmit()
       }
     }
+  }
+
+  toggleRecipeFilter(event) {
+    const recipeId = event.currentTarget.dataset.recipeId
+    if (this.selectedRecipes.has(recipeId)) {
+      this.selectedRecipes.delete(recipeId)
+    } else {
+      this.selectedRecipes.add(recipeId)
+    }
+    this.applyRecipeFilter()
+  }
+
+  applyRecipeFilter() {
+    this.updateRecipeButtonStates()
+    this.reorderRecipeButtons()
+    this.filterPlants()
+    this.updateResultsCount()
+  }
+
+  updateRecipeButtonStates() {
+    if (!this.hasRecipeFilterButtonTarget) return
+    this.recipeFilterButtonTargets.forEach(button => {
+      const recipeId = button.dataset.recipeId
+      if (this.selectedRecipes.has(recipeId)) {
+        button.classList.add("active")
+      } else {
+        button.classList.remove("active")
+      }
+    })
+  }
+
+  reorderRecipeButtons() {
+    if (!this.hasRecipeButtonContainerTarget) return
+    const container = this.recipeButtonContainerTarget
+    const buttons = this.recipeFilterButtonTargets.slice()
+
+    buttons.sort((a, b) => {
+      const aActive = this.selectedRecipes.has(a.dataset.recipeId) ? 0 : 1
+      const bActive = this.selectedRecipes.has(b.dataset.recipeId) ? 0 : 1
+      if (aActive !== bActive) return aActive - bActive
+      return parseInt(b.dataset.recipeCount) - parseInt(a.dataset.recipeCount)
+    })
+
+    buttons.forEach(button => container.appendChild(button))
   }
 }

@@ -80,3 +80,65 @@ All three now match the pattern used on the index page and use safe navigation o
 - `app/views/plants/show.html.erb` — added all last watering parameters to both "New watering" links (lines 64, 70)
 
 **Status:** Complete — ready for testing
+
+---
+
+## 2026-02-15 — Convert Recipe Dropdown to Toggleable Filter Buttons
+
+**Goal:** Replace the recipe dropdown filter on plants index with toggleable buttons matching the location filter UI pattern, enabling client-side filtering with AND logic for combined location + recipe filtering.
+
+**Problem:** Recipe dropdown was inconsistent with location filter UI/UX and required server roundtrips for filtering.
+
+**Solution:** Replaced server-side dropdown with client-side toggleable buttons that work exactly like the location filter, with counts, collapse/expand for >4 items, and AND logic when both filters are active.
+
+**Implementation:**
+
+### 1. Plant Card Data Attributes
+- `app/views/plants/_plant_row.html.erb` — added `data-recipe-id` attribute (using "none" for plants without recipes)
+
+### 2. Controller Recipe Filter Building
+- `app/controllers/plants_controller.rb` — replaced simple recipe list with count-based filter buttons (lines 38-43):
+  - Query recipe counts from filtered plants
+  - Include "No Recipe (N)" button when plants without recipes exist
+  - Format matches location filters: "Recipe Name (5)"
+
+### 3. View Replacement
+- `app/views/plants/index.html.erb` — replaced dropdown (lines 41-48) with:
+  - collapsible-filters controller wrapper
+  - Recipe filter button container with location-filter targets
+  - Buttons with recipe-id, recipe-count, and click handler
+  - Show more/less toggle for >4 recipes
+
+### 4. JavaScript Controller Extension
+- `app/javascript/controllers/location_filter_controller.js`:
+  - Added `recipeFilterButton` and `recipeButtonContainer` targets
+  - Initialized `selectedRecipes` Set in connect()
+  - Added `toggleRecipeFilter()` — toggle recipe in selection set
+  - Added `applyRecipeFilter()` — update UI and filter plants
+  - Added `updateRecipeButtonStates()` — manage active classes
+  - Added `reorderRecipeButtons()` — active buttons first, sorted by count
+  - Modified `filterPlants()` — AND logic: show plants matching BOTH location and recipe filters (or all if none selected)
+  - Modified `updateResultsCount()` — count visible plants considering both filters
+
+### 5. CSS Styling
+- `app/assets/stylesheets/plants.sass` — added `.recipe-filters` and `.recipe-filters-toggle` styles (lines 96-119), matching location filter patterns
+
+### 6. Removed Old Styles
+- `app/assets/stylesheets/shared.sass` — removed `.recipe-filter` dropdown styles (lines 963-972)
+
+### 7. Locale Strings
+- `config/locales/en.yml` — added `filter_by_recipe: "Filter by recipe"`, `no_recipe: "No Recipe"`
+- `config/locales/es.yml` — added `filter_by_recipe: "Filtrar por receta"`, `no_recipe: "Sin receta"`
+
+**Behavior:**
+- Recipe buttons appear with counts (e.g., "Bloom Recipe (5)")
+- Clicking toggles filter (no page reload)
+- Active buttons get blue background, move to front, sort by count
+- Collapse/expand works when >4 recipes
+- Combined filtering: location + recipe filters = AND logic (only plants matching both)
+- "No Recipe" button appears when applicable
+- Results count updates correctly with filters active
+- Display mode switching preserves filter state
+- Search + filters work together correctly
+
+**Status:** Complete — ready for testing at `/plants`
