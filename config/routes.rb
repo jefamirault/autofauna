@@ -1,5 +1,12 @@
 Rails.application.routes.draw do
   resources :locations
+  resources :recipe_sources
+  resources :recipes
+  resources :recipe_batches do
+    collection do
+      get :for_recipe
+    end
+  end
   resources :tanks do
     resources :water_tests
   end

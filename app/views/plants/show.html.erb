@@ -49,13 +49,38 @@
   </div>
 <% end %>
 
+<% if @plant.recipe.present? %>
+  <div class="info-card">
+    <div class="info-card-section">
+      <div class="info-row">
+        <span class="label">🧪 Recipe</span>
+        <span class="value"><%= link_to @plant.recipe.name, recipe_path(@plant.recipe) %></span>
+      </div>
+    </div>
+  </div>
+<% end %>
+
 <div class="plant-actions">
-  <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant), class: 'link' %>
+  <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant,
+    volume: @plant.last_watering&.volume,
+    units: @plant.last_watering&.units,
+    notes: @plant.last_watering&.notes,
+    recipe_batch_id: @plant.last_watering&.recipe_batch_id,
+    recipe_id: @plant.last_watering&.recipe_id,
+    tds: @plant.last_watering&.tds),
+    class: 'link' %>
   <%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>
 </div>
 <h3><%= t '.timeline' %></h3>
 <%= render partial: 'timeline', locals: { timeline: @timeline, plant: @plant } %>
 <div class="plant-actions">
-  <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant), class: 'link' %>
+  <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant,
+    volume: @plant.last_watering&.volume,
+    units: @plant.last_watering&.units,
+    notes: @plant.last_watering&.notes,
+    recipe_batch_id: @plant.last_watering&.recipe_batch_id,
+    recipe_id: @plant.last_watering&.recipe_id,
+    tds: @plant.last_watering&.tds),
+    class: 'link' %>
   <%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>
 </div>

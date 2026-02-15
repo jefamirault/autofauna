@@ -1,0 +1,62 @@
+<% content_for :title, "Recipe: #{@recipe}" %>
+
+<h1>
+  <%= link_to "Recipes", recipes_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= @recipe %>
+</h1>
+
+<div class="info-card">
+  <div class="info-card-grid">
+    <div class="info-card-section">
+      <div class="info-row">
+        <span class="label">Name</span>
+        <span class="value"><%= @recipe.name %></span>
+      </div>
+      <% if @recipe.description.present? %>
+        <div class="info-row">
+          <span class="label">Description</span>
+          <span class="value"><%= @recipe.description %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<% if @recipe_ingredients.any? %>
+  <h2>Sources</h2>
+  <table class="timeline">
+    <tbody>
+      <% @recipe_ingredients.each do |ingredient| %>
+        <tr>
+          <td><%= link_to ingredient.recipe_source.name, recipe_source_path(ingredient.recipe_source) %></td>
+          <td><%= ingredient.amount %> <%= ingredient.units %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<div>
+  <%= link_to "✏️ Edit this Recipe", edit_recipe_path(@recipe), class: 'link' %>
+  <%= link_to "↩️ Back to Recipes", recipes_path, class: 'link' %>
+</div>
+
+<% if @active_batches.any? %>
+  <h2>Active Batches</h2>
+  <div class="resource-cards">
+    <% @active_batches.each do |batch| %>
+      <div class="info-card">
+        <div class="info-card-section">
+          <div class="info-row">
+            <span class="value"><%= link_to batch.label, recipe_batch_path(batch) %></span>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<%= link_to "➕ New Batch", new_recipe_batch_path(recipe_id: @recipe.id), class: 'link' %>
+
+<%= button_to "🗑️ Destroy this recipe", @recipe, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('Are you sure you want to permanently delete this Recipe?');" %>

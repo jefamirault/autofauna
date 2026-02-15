@@ -1,0 +1,73 @@
+<% content_for :title, "Batches" %>
+
+<%= link_to "➕ New Batch", new_recipe_batch_path, class: 'link' %>
+
+<% if @active_batches.any? %>
+  <h2>Active</h2>
+  <div class="resource-cards">
+    <% @active_batches.each do |batch| %>
+      <div class="info-card">
+        <div class="info-card-grid">
+          <div class="info-card-section">
+            <div class="info-row">
+              <span class="label">Batch</span>
+              <span class="value"><%= link_to batch.to_s, recipe_batch_path(batch) %></span>
+            </div>
+            <div class="info-row">
+              <span class="label">Recipe</span>
+              <span class="value"><%= link_to batch.recipe.name, recipe_path(batch.recipe) %></span>
+            </div>
+            <div class="info-row">
+              <span class="label">TDS</span>
+              <span class="value"><%= batch.tds %> ppm</span>
+            </div>
+            <% if batch.volume.present? %>
+              <div class="info-row">
+                <span class="label">Volume</span>
+                <span class="value"><%= sprintf('%g', batch.volume) %> <%= batch.volume_units %></span>
+              </div>
+            <% end %>
+            <% if batch.mixed_on.present? %>
+              <div class="info-row">
+                <span class="label">Mixed On</span>
+                <span class="value"><%= format_date batch.mixed_on %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @inactive_batches.any? %>
+  <h2>Inactive</h2>
+  <div class="resource-cards">
+    <% @inactive_batches.each do |batch| %>
+      <div class="info-card">
+        <div class="info-card-grid">
+          <div class="info-card-section">
+            <div class="info-row">
+              <span class="label">Batch</span>
+              <span class="value"><%= link_to batch.to_s, recipe_batch_path(batch) %></span>
+            </div>
+            <div class="info-row">
+              <span class="label">TDS</span>
+              <span class="value"><%= batch.tds %> ppm</span>
+            </div>
+            <% if batch.mixed_on.present? %>
+              <div class="info-row">
+                <span class="label">Mixed On</span>
+                <span class="value"><%= format_date batch.mixed_on %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @active_batches.any? || @inactive_batches.any? %>
+  <%= link_to "➕ New Batch", new_recipe_batch_path, class: 'link' %>
+<% end %>

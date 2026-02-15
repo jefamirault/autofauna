@@ -25,6 +25,9 @@
           <span class='timeline-icon'>💧</span>
           <% if watering.volume.present? %><strong><%= watering.print_volume %></strong><% else %><span class='no-volume'>—</span><% end %>
           <% if watering.notes.present? %><span class='watering-notes'><%= watering.notes %></span><% end %>
+          <% if watering.tds.present? %><span class='watering-tds'>📊 <%= watering.tds %>ppm</span><% end %>
+          <% if watering.recipe.present? %><span class='watering-recipe'>🧪 <%= watering.recipe.name %></span><% end %>
+          <% if watering.recipe_batch.present? %><span class='watering-batch'>🪣 <%= watering.recipe_batch.to_s %></span><% end %>
           <span class='watering-time'>🕐 <%= time_ago watering.date %></span>
           <% if watering.interval %><span class='interval'>(<%= watering.interval_text %>)</span><% end %>
           <% if watering.updated_at - watering.created_at > 1.minute %><span class='metadata updated-at'>Updated <%= time_ago_in_words watering.updated_at %> ago</span><% end %>

@@ -1,0 +1,40 @@
+<% content_for :title, "Recipes" %>
+
+<%= link_to "➕ New Recipe", new_recipe_path, class: 'link' %>
+
+<div class="resource-cards">
+  <% @recipes.each do |recipe| %>
+    <div class="info-card">
+      <div class="info-card-grid">
+        <div class="info-card-section">
+          <div class="info-row">
+            <span class="label">Name</span>
+            <span class="value"><%= link_to recipe.name, recipe_path(recipe) %></span>
+          </div>
+          <% if recipe.recipe_sources.any? %>
+            <div class="info-row">
+              <span class="label">Sources</span>
+              <span class="value"><%= recipe.recipe_sources.map(&:name).join(", ") %></span>
+            </div>
+          <% end %>
+          <% if recipe.recipe_batches.active.any? %>
+            <div class="info-row">
+              <span class="label">Active Batches</span>
+              <span class="value"><%= recipe.recipe_batches.active.count %></span>
+            </div>
+          <% end %>
+          <% if recipe.description.present? %>
+            <div class="info-row">
+              <span class="label">Description</span>
+              <span class="value"><%= recipe.description %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if @recipes.any? %>
+  <%= link_to "➕ New Recipe", new_recipe_path, class: 'link' %>
+<% end %>

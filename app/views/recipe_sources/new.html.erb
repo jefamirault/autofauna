@@ -1,0 +1,15 @@
+<% content_for :title, "New Source" %>
+
+<div class="settings-card">
+  <h1>
+    <%= link_to "Sources", recipe_sources_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    New Source
+  </h1>
+
+  <%= render "form", recipe_source: @recipe_source %>
+
+  <p>
+    <%= link_to "❌ Cancel", recipe_sources_path, class: 'link' %>
+  </p>
+</div>

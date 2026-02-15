@@ -18,7 +18,8 @@ class WateringsController < ApplicationController
 
   # GET /waterings/new
   def new
-    @watering = Watering.new plant_id: params[:plant_id], date: Time.zone.now.to_date, volume: params[:volume], units: params[:units], notes: params[:notes]
+    @watering = Watering.new plant_id: params[:plant_id], date: Time.zone.now.to_date, volume: params[:volume], units: params[:units], notes: params[:notes],
+      recipe_batch_id: params[:recipe_batch_id], recipe_id: params[:recipe_id], tds: params[:tds]
     respond_to do |format|
       format.turbo_stream
       format.html
@@ -93,6 +94,6 @@ class WateringsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def watering_params
-      params.require(:watering).permit(:plant_id, :date, :notes, :volume, :units)
+      params.require(:watering).permit(:plant_id, :date, :notes, :volume, :units, :tds, :recipe_batch_id, :recipe_id)
     end
 end

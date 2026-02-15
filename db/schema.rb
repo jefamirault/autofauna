@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_07_103656) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_15_100003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -75,8 +75,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_07_103656) do
     t.boolean "share_enabled", default: false
     t.boolean "notifications_enabled", default: false, null: false
     t.datetime "last_notification_sent_at"
+    t.bigint "recipe_id"
     t.index ["last_watering_id"], name: "index_plants_on_last_watering_id"
     t.index ["location_id"], name: "index_plants_on_location_id"
+    t.index ["recipe_id"], name: "index_plants_on_recipe_id"
     t.index ["share_token"], name: "index_plants_on_share_token", unique: true
   end
 
@@ -100,6 +102,56 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_07_103656) do
     t.datetime "updated_at", null: false
     t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
     t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
+  end
+
+  create_table "recipe_batches", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.bigint "recipe_id", null: false
+    t.integer "tds"
+    t.float "volume"
+    t.integer "volume_units"
+    t.date "mixed_on"
+    t.text "notes"
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_recipe_batches_on_project_id"
+    t.index ["recipe_id"], name: "index_recipe_batches_on_recipe_id"
+  end
+
+  create_table "recipe_ingredients", force: :cascade do |t|
+    t.bigint "recipe_id", null: false
+    t.bigint "recipe_source_id", null: false
+    t.decimal "amount", precision: 10, scale: 4
+    t.string "units"
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["recipe_id", "recipe_source_id"], name: "index_recipe_ingredients_on_recipe_id_and_recipe_source_id", unique: true
+    t.index ["recipe_id"], name: "index_recipe_ingredients_on_recipe_id"
+    t.index ["recipe_source_id"], name: "index_recipe_ingredients_on_recipe_source_id"
+  end
+
+  create_table "recipe_sources", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.string "name", null: false
+    t.bigint "tank_id"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "name"], name: "index_recipe_sources_on_project_id_and_name", unique: true
+    t.index ["project_id"], name: "index_recipe_sources_on_project_id"
+    t.index ["tank_id"], name: "index_recipe_sources_on_tank_id"
+  end
+
+  create_table "recipes", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "name"], name: "index_recipes_on_project_id_and_name", unique: true
+    t.index ["project_id"], name: "index_recipes_on_project_id"
   end
 
   create_table "sensor_types", force: :cascade do |t|
@@ -176,6 +228,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_07_103656) do
     t.integer "interval"
     t.float "volume"
     t.integer "units"
+    t.integer "tds"
+    t.bigint "recipe_batch_id"
+    t.bigint "recipe_id"
+    t.index ["recipe_batch_id"], name: "index_waterings_on_recipe_batch_id"
+    t.index ["recipe_id"], name: "index_waterings_on_recipe_id"
   end
 
   create_table "zones", force: :cascade do |t|
@@ -188,6 +245,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_07_103656) do
 
   add_foreign_key "log_entries", "users", on_delete: :nullify
   add_foreign_key "plants", "locations"
+  add_foreign_key "plants", "recipes"
   add_foreign_key "push_subscriptions", "users"
+  add_foreign_key "recipe_batches", "projects"
+  add_foreign_key "recipe_batches", "recipes"
+  add_foreign_key "recipe_ingredients", "recipe_sources"
+  add_foreign_key "recipe_ingredients", "recipes"
+  add_foreign_key "recipe_sources", "projects"
+  add_foreign_key "recipe_sources", "tanks"
+  add_foreign_key "recipes", "projects"
   add_foreign_key "water_tests", "tanks"
+  add_foreign_key "waterings", "recipe_batches"
+  add_foreign_key "waterings", "recipes"
 end

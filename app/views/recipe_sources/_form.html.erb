@@ -1,0 +1,33 @@
+<%= form_with(model: recipe_source) do |form| %>
+  <% if recipe_source.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(recipe_source.errors.count, "error") %> prohibited this source from being saved:</h2>
+      <ul>
+        <% recipe_source.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form.hidden_field :project_id, value: recipe_source&.project_id || current_project.id %>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name, autofocus: true, placeholder: "e.g. FloraGro" %>
+  </div>
+
+  <div>
+    <%= form.label :tank_id, "Tank (optional)", style: "display: block" %>
+    <%= form.select :tank_id, options_from_collection_for_select(current_project.tanks, :id, :name, recipe_source&.tank_id), prompt: '-- None --' %>
+  </div>
+
+  <div>
+    <%= form.label :description, style: "display: block" %>
+    <%= form.textarea :description %>
+  </div>
+
+  <div>
+    <%= form.submit "💾 #{recipe_source.new_record? ? 'Create' : 'Update'} Source", class: 'saveButton' %>
+  </div>
+<% end %>

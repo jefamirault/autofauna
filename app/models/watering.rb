@@ -1,6 +1,10 @@
 class Watering < ApplicationRecord
   belongs_to :plant
+  belongs_to :recipe_batch, optional: true
+  belongs_to :recipe, optional: true
   validates :date, presence: true
+
+  before_validation :set_recipe_from_batch
 
   after_save_commit :update_watering_intervals
   after_destroy :update_watering_intervals
@@ -72,6 +76,12 @@ class Watering < ApplicationRecord
   end
 
   private
+
+  def set_recipe_from_batch
+    if recipe_batch.present? && recipe.blank?
+      self.recipe = recipe_batch.recipe
+    end
+  end
 
   def update_watering_intervals
     # Skip if plant is being destroyed

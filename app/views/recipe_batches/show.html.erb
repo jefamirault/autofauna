@@ -1,0 +1,51 @@
+<% content_for :title, "Batch: #{@recipe_batch}" %>
+
+<h1>
+  <%= link_to "Batches", recipe_batches_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= @recipe_batch %>
+</h1>
+
+<div class="info-card">
+  <div class="info-card-grid">
+    <div class="info-card-section">
+      <div class="info-row">
+        <span class="label">Recipe</span>
+        <span class="value"><%= link_to @recipe_batch.recipe.name, recipe_path(@recipe_batch.recipe) %></span>
+      </div>
+      <div class="info-row">
+        <span class="label">TDS</span>
+        <span class="value"><%= @recipe_batch.tds %> ppm</span>
+      </div>
+      <% if @recipe_batch.volume.present? %>
+        <div class="info-row">
+          <span class="label">Volume</span>
+          <span class="value"><%= sprintf('%g', @recipe_batch.volume) %> <%= @recipe_batch.volume_units %></span>
+        </div>
+      <% end %>
+      <% if @recipe_batch.mixed_on.present? %>
+        <div class="info-row">
+          <span class="label">Mixed On</span>
+          <span class="value"><%= format_date @recipe_batch.mixed_on %></span>
+        </div>
+      <% end %>
+      <div class="info-row">
+        <span class="label">Status</span>
+        <span class="value"><%= @recipe_batch.active? ? "Active" : "Inactive" %></span>
+      </div>
+      <% if @recipe_batch.notes.present? %>
+        <div class="info-row">
+          <span class="label">Notes</span>
+          <span class="value"><%= @recipe_batch.notes %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div>
+  <%= link_to "✏️ Edit this Batch", edit_recipe_batch_path(@recipe_batch), class: 'link' %>
+  <%= link_to "↩️ Back to Batches", recipe_batches_path, class: 'link' %>
+</div>
+
+<%= button_to "🗑️ Destroy this batch", @recipe_batch, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('Are you sure you want to permanently delete this Batch?');" %>

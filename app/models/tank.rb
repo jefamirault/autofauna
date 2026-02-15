@@ -4,6 +4,7 @@ class Tank < ApplicationRecord
   has_many :log_entries, as: :loggable, dependent: :destroy
   belongs_to :project
   has_many :water_tests, dependent: :destroy
+  has_many :recipe_sources
 
   def latest_water_test
     water_tests.recent.first

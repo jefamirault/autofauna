@@ -7,7 +7,8 @@ class PlantsController < ApplicationController
 
   def water
     @plant = Plant.find params[:plant_id]
-    redirect_to new_watering_path(plant_id: @plant.id, volume: params[:volume], units: params[:units], notes: params[:notes])
+    redirect_to new_watering_path(plant_id: @plant.id, volume: params[:volume], units: params[:units], notes: params[:notes],
+      recipe_batch_id: params[:recipe_batch_id], recipe_id: params[:recipe_id], tds: params[:tds])
   end
 
   # GET /plants or /plants.json
@@ -33,6 +34,9 @@ class PlantsController < ApplicationController
     locations_with_plants = Location.where(id: location_counts.keys).order(Arel.sql("LOWER(name)"))
     @location_filters = locations_with_plants.map { |loc| ["#{loc.name} (#{location_counts[loc.id]})", loc.id] }
     @location_filters << ["#{I18n.t('plants.index.no_location')} (#{no_location_count})", nil] if no_location_count > 0
+
+    # Build recipe filter options
+    @recipe_filters = current_project.recipes.order(:name).map { |r| [r.name, r.id] }
 
     @display_mode = params[:display] || "watering"
     if @display_mode == "location"
@@ -188,6 +192,6 @@ class PlantsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:name, :uid, :project_id, :zone_id, :location_id, :pot, :archived, :min_watering_freq, :max_watering_freq, :manual_watering_frequency, :graphic, :notifications_enabled)
+      params.require(:plant).permit(:name, :uid, :project_id, :zone_id, :location_id, :pot, :archived, :min_watering_freq, :max_watering_freq, :manual_watering_frequency, :graphic, :notifications_enabled, :recipe_id)
     end
 end

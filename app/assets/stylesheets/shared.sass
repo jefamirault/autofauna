@@ -90,7 +90,7 @@ h2
   margin: .5em 0 .5em .65em
 
 main
-  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings, &.plants, &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests
+  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings, &.plants, &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests, &.recipes, &.recipe_sources, &.recipe_batches
     label
       display: block
       font-size: 85%
@@ -136,7 +136,7 @@ main
           @media (max-width: 600px)
             width: calc(100% - 2rem)
             margin: 0 1rem
-  &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests
+  &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests, &.recipes, &.recipe_sources, &.recipe_batches
     &.new, &.edit, &.create, &.update
       section#primary
         background: transparent
@@ -933,4 +933,46 @@ main.plants
       display: inline
       @media (hover: hover)
         display: none
+
+// Nested form rows (recipes ingredients)
+.nested-row
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  margin-bottom: 0.5rem
+  padding: 0.5rem
+  background: $lightgreen
+  border-radius: 4px
+
+  .nested-row-fields
+    display: flex
+    gap: 0.5rem
+    flex: 1
+    flex-wrap: wrap
+    select, input
+      flex: 1
+      min-width: 80px
+    .nested-amount
+      max-width: 100px
+    .nested-units
+      max-width: 120px
+
+  .nested-row-actions
+    flex-shrink: 0
+
+// Recipe filter on plants index
+.recipe-filter
+  display: inline-flex
+  align-items: center
+  gap: 0.5rem
+  margin-bottom: 0.5rem
+  select
+    width: auto
+    min-width: 120px
+
+// Timeline recipe/TDS/batch tags
+.watering-tds, .watering-recipe, .watering-batch
+  margin-left: 0.5em
+  font-size: 0.9em
+  color: #666
 

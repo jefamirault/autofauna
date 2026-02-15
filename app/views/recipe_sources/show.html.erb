@@ -1,0 +1,46 @@
+<% content_for :title, "Source: #{@recipe_source}" %>
+
+<h1>
+  <%= link_to "Sources", recipe_sources_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= @recipe_source %>
+</h1>
+
+<div class="info-card">
+  <div class="info-card-grid">
+    <div class="info-card-section">
+      <div class="info-row">
+        <span class="label">Name</span>
+        <span class="value"><%= @recipe_source.name %></span>
+      </div>
+      <% if @recipe_source.tank.present? %>
+        <div class="info-row">
+          <span class="label">Tank</span>
+          <span class="value"><%= link_to @recipe_source.tank.name, tank_path(@recipe_source.tank) %></span>
+        </div>
+      <% end %>
+      <% if @recipe_source.description.present? %>
+        <div class="info-row">
+          <span class="label">Description</span>
+          <span class="value"><%= @recipe_source.description %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div>
+  <%= link_to "✏️ Edit this Source", edit_recipe_source_path(@recipe_source), class: 'link' %>
+  <%= link_to "↩️ Back to Sources", recipe_sources_path, class: 'link' %>
+</div>
+
+<% if @recipe_source.recipes.any? %>
+  <h2>Used in Recipes</h2>
+  <ul>
+    <% @recipe_source.recipes.each do |recipe| %>
+      <li><%= link_to recipe.name, recipe_path(recipe) %></li>
+    <% end %>
+  </ul>
+<% end %>
+
+<%= button_to "🗑️ Destroy this source", @recipe_source, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('Are you sure you want to permanently delete this Source?');" %>

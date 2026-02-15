@@ -3,6 +3,7 @@ class Plant < ApplicationRecord
 
   belongs_to :project
   belongs_to :location, optional: true
+  belongs_to :recipe, optional: true
   has_one :zone, through: :location
   has_many :waterings, -> { order 'waterings.date' }, dependent: :destroy
   belongs_to :last_watering, class_name: 'Watering', optional: true
@@ -234,12 +235,12 @@ class Plant < ApplicationRecord
   end
 
   def self.ransackable_attributes(auth_object = nil)
-    %w[uid name pot date_last_watering location_id
+    %w[uid name pot date_last_watering location_id recipe_id
         date_sort_watering min_watering_freq max_watering_freq date_min_watering date_max_watering
         archived created_at updated_at project_id date_last_watering graphic]
   end
   def self.ransackable_associations(auth_object = nil)
-    %w[location]
+    %w[location recipe]
   end
 
   def location_with_zone

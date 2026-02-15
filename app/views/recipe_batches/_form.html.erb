@@ -1,0 +1,53 @@
+<%= form_with(model: recipe_batch) do |form| %>
+  <% if recipe_batch.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(recipe_batch.errors.count, "error") %> prohibited this batch from being saved:</h2>
+      <ul>
+        <% recipe_batch.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form.hidden_field :project_id, value: recipe_batch&.project_id || current_project.id %>
+
+  <div>
+    <%= form.label :recipe_id, "Recipe", style: "display: block" %>
+    <%= form.collection_select :recipe_id, current_project.recipes.order(:name), :id, :name, prompt: '-- Select Recipe --' %>
+  </div>
+
+  <div>
+    <%= form.label :tds, "TDS (ppm)", style: "display: block" %>
+    <%= form.number_field :tds, placeholder: "e.g. 400" %>
+  </div>
+
+  <div>
+    <%= form.label :volume, style: "display: block" %>
+    <%= form.number_field :volume, step: 'any', placeholder: "e.g. 5.0" %>
+  </div>
+
+  <div>
+    <%= form.label :volume_units, "Units", style: "display: block" %>
+    <%= form.select :volume_units, options_for_select(RecipeBatch.volume_units.map { |k, v| [k, k] }, recipe_batch.volume_units) %>
+  </div>
+
+  <div>
+    <%= form.label :mixed_on, "Date Mixed", style: "display: block" %>
+    <%= form.date_field :mixed_on, value: recipe_batch.mixed_on || Date.current %>
+  </div>
+
+  <div>
+    <%= form.label :notes, style: "display: block" %>
+    <%= form.textarea :notes %>
+  </div>
+
+  <div>
+    <%= form.label :active, style: "display: inline" %>
+    <%= form.check_box :active %>
+  </div>
+
+  <div>
+    <%= form.submit "💾 #{recipe_batch.new_record? ? 'Create' : 'Update'} Batch", class: 'saveButton' %>
+  </div>
+<% end %>

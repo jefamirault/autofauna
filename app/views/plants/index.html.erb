@@ -38,6 +38,15 @@
 
 <div id="search-options">
 
+  <% if @recipe_filters.any? %>
+    <div class="recipe-filter">
+      <%= search_form_for @q, data: { turbo_frame: "plants-results" } do |f| %>
+        <span class="display-toggle-label">🧪 Recipe:</span>
+        <%= f.select :recipe_id_eq, options_for_select(@recipe_filters, params.dig('q', 'recipe_id_eq')), { include_blank: "All" }, { data: { action: "change->header-search#search" } } %>
+      <% end %>
+    </div>
+  <% end %>
+
   <% if @location_filters.size > 1 %>
     <div class="display-toggle">
       <span class="display-toggle-label"><%= t('.display_by') %>:</span>

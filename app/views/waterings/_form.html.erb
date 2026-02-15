@@ -1,5 +1,5 @@
 <div class="formContainer">
-  <%= form_with(model: watering) do |form| %>
+  <%= form_with(model: watering, data: { controller: "watering-recipe", watering_recipe_url_value: for_recipe_recipe_batches_path }) do |form| %>
     <% if watering.errors.any? %>
       <div style="color: red">
         <h2><%= pluralize(watering.errors.count, "error") %> prohibited this watering from being saved:</h2>
@@ -32,6 +32,30 @@
       <%= form.label :units, t('attributes.units'), style: "display: block" %>
       <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units || watering.plant.suggested_watering_unit) %>
     </div>
+
+    <% if current_project.recipes.any? %>
+      <div>
+        <%= form.label :recipe_id, "Recipe", style: "display: block" %>
+        <%= form.collection_select :recipe_id, current_project.recipes.order(:name), :id, :name, { prompt: '-- None --', selected: watering.recipe_id }, { data: { watering_recipe_target: "recipeSelect", action: "change->watering-recipe#recipeChanged" } } %>
+      </div>
+
+      <div>
+        <%= form.label :recipe_batch_id, "Batch", style: "display: block" %>
+        <select name="watering[recipe_batch_id]" id="watering_recipe_batch_id" data-watering-recipe-target="batchSelect" data-action="change->watering-recipe#batchChanged">
+          <option value="">-- None --</option>
+          <% if watering.recipe_id.present? %>
+            <% current_project.recipe_batches.active.where(recipe_id: watering.recipe_id).each do |batch| %>
+              <option value="<%= batch.id %>" data-tds="<%= batch.tds %>" <%= 'selected' if watering.recipe_batch_id == batch.id %>><%= batch.label %></option>
+            <% end %>
+          <% end %>
+        </select>
+      </div>
+
+      <div>
+        <%= form.label :tds, "TDS (ppm)", style: "display: block" %>
+        <%= form.number_field :tds, placeholder: "e.g. 400", data: { watering_recipe_target: "tdsField" } %>
+      </div>
+    <% end %>
 
     <div>
       <%= form.label :notes, style: "display: block" %>

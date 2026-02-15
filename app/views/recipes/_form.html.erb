@@ -1,0 +1,76 @@
+<%= form_with(model: recipe, data: { controller: "nested-form" }) do |form| %>
+  <% if recipe.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(recipe.errors.count, "error") %> prohibited this recipe from being saved:</h2>
+      <ul>
+        <% recipe.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form.hidden_field :project_id, value: recipe&.project_id || current_project.id %>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name, autofocus: true, placeholder: "e.g. Early Growth" %>
+  </div>
+
+  <div>
+    <%= form.label :description, style: "display: block" %>
+    <%= form.textarea :description %>
+  </div>
+
+  <h3>Sources</h3>
+  <div data-nested-form-target="container">
+    <% recipe.recipe_ingredients.each do |ingredient| %>
+      <%= form.fields_for :recipe_ingredients, ingredient do |ing_form| %>
+        <div class="nested-row" data-nested-form-target="row">
+          <div class="nested-row-fields">
+            <%= ing_form.hidden_field :id %>
+            <%= ing_form.select :recipe_source_id,
+              options_from_collection_for_select(current_project.recipe_sources, :id, :name, ingredient.recipe_source_id),
+              prompt: '-- Select Source --' %>
+            <%= ing_form.number_field :amount, step: 'any', placeholder: "Amount", class: 'nested-amount' %>
+            <%= ing_form.text_field :units, placeholder: "Units (e.g. mL/tsp)", class: 'nested-units' %>
+            <%= ing_form.hidden_field :position %>
+          </div>
+          <div class="nested-row-actions">
+            <%= ing_form.hidden_field :_destroy, value: false, class: 'destroy-field' %>
+            <button type="button" class="buttonLinkDanger" data-action="click->nested-form#remove">✕</button>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <template data-nested-form-target="template">
+    <div class="nested-row" data-nested-form-target="row">
+      <div class="nested-row-fields">
+        <select name="recipe[recipe_ingredients_attributes][NEW_RECORD][recipe_source_id]">
+          <option value="">-- Select Source --</option>
+          <% current_project.recipe_sources.each do |source| %>
+            <option value="<%= source.id %>"><%= source.name %></option>
+          <% end %>
+        </select>
+        <input type="number" name="recipe[recipe_ingredients_attributes][NEW_RECORD][amount]" step="any" placeholder="Amount" class="nested-amount">
+        <input type="text" name="recipe[recipe_ingredients_attributes][NEW_RECORD][units]" placeholder="Units (e.g. mL/tsp)" class="nested-units">
+        <input type="hidden" name="recipe[recipe_ingredients_attributes][NEW_RECORD][position]" value="">
+      </div>
+      <div class="nested-row-actions">
+        <input type="hidden" name="recipe[recipe_ingredients_attributes][NEW_RECORD][_destroy]" value="false" class="destroy-field">
+        <button type="button" class="buttonLinkDanger" data-action="click->nested-form#remove">✕</button>
+      </div>
+    </div>
+  </template>
+
+  <div>
+    <button type="button" class="link" data-action="click->nested-form#add">➕ Add Source</button>
+  </div>
+
+  <br>
+  <div>
+    <%= form.submit "💾 #{recipe.new_record? ? 'Create' : 'Update'} Recipe", class: 'saveButton' %>
+  </div>
+<% end %>

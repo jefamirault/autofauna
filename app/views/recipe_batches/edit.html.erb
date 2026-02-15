@@ -1,0 +1,20 @@
+<% content_for :title, "Edit Batch: #{@recipe_batch}" %>
+
+<div class="settings-card">
+  <h1>
+    <%= link_to "Batches", recipe_batches_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    <%= link_to @recipe_batch, recipe_batch_path(@recipe_batch), class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    Edit
+  </h1>
+
+  <%= render "form", recipe_batch: @recipe_batch %>
+
+  <p>
+    <%= link_to "❌ Discard changes", @recipe_batch, class: 'link' %>
+  </p>
+  <p>
+    <%= button_to "🗑️ Destroy this batch", @recipe_batch, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('Are you sure you want to permanently delete this Batch?');" %>
+  </p>
+</div>

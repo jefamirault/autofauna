@@ -1,0 +1,15 @@
+<% content_for :title, "New Recipe" %>
+
+<div class="settings-card">
+  <h1>
+    <%= link_to "Recipes", recipes_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    New Recipe
+  </h1>
+
+  <%= render "form", recipe: @recipe %>
+
+  <p>
+    <%= link_to "❌ Cancel", recipes_path, class: 'link' %>
+  </p>
+</div>

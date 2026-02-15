@@ -13,6 +13,9 @@ class Project < ApplicationRecord
   has_many :hygro_sensor_readings, dependent: :destroy
   has_many :sensor_types, dependent: :destroy
   has_many :tanks, dependent: :destroy
+  has_many :recipe_sources, dependent: :destroy
+  has_many :recipes, dependent: :destroy
+  has_many :recipe_batches, dependent: :destroy
 
   def users
     [owner] + collaborators

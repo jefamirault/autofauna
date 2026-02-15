@@ -1,0 +1,34 @@
+<% content_for :title, "Sources" %>
+
+<%= link_to "➕ New Source", new_recipe_source_path, class: 'link' %>
+
+<div class="resource-cards">
+  <% @recipe_sources.each do |source| %>
+    <div class="info-card">
+      <div class="info-card-grid">
+        <div class="info-card-section">
+          <div class="info-row">
+            <span class="label">Name</span>
+            <span class="value"><%= link_to source.name, recipe_source_path(source) %></span>
+          </div>
+          <% if source.tank.present? %>
+            <div class="info-row">
+              <span class="label">Tank</span>
+              <span class="value"><%= link_to source.tank.name, tank_path(source.tank) %></span>
+            </div>
+          <% end %>
+          <% if source.description.present? %>
+            <div class="info-row">
+              <span class="label">Description</span>
+              <span class="value"><%= source.description %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if @recipe_sources.any? %>
+  <%= link_to "➕ New Source", new_recipe_source_path, class: 'link' %>
+<% end %>

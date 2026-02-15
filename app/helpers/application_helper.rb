@@ -74,7 +74,7 @@ module ApplicationHelper
     case controller
     when 'plants', 'log_entries'
       { icon: 'autofauna_icon.png', title: (action == 'show' && @plant ? @plant.to_s : t('layouts.application.plants')), gradient_class: 'header-plants' }
-    when 'waterings'
+    when 'waterings', 'recipes', 'recipe_batches', 'recipe_sources'
       { icon: 'water_icon.png', title: t('layouts.application.waterings'), gradient_class: 'header-waterings' }
     when 'tanks', 'water_tests'
       { icon: 'tank_icon.png', title: (action == 'show' && controller == 'tanks' && @tank ? @tank.to_s : t('layouts.application.tanks')), gradient_class: 'header-tanks' }
