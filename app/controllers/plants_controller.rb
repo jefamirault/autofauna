@@ -28,27 +28,68 @@ class PlantsController < ApplicationController
     @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
     @plants = @q.result(distinct: true)
 
-    # Build location filter buttons with counts
+    # Build location filter buttons with colors, sorted by count (descending)
     location_counts = @plants.where.not(location_id: nil).reorder(nil).group(:location_id).count
     no_location_count = @plants.where(location_id: nil).count
     locations_with_plants = Location.where(id: location_counts.keys).order(Arel.sql("LOWER(name)"))
-    @location_filters = locations_with_plants.map { |loc| ["#{loc.name} (#{location_counts[loc.id]})", loc.id] }
-    @location_filters << ["#{I18n.t('plants.index.no_location')} (#{no_location_count})", nil] if no_location_count > 0
 
-    # Build recipe filter buttons with counts
+    @location_filters = locations_with_plants.map { |loc|
+      {
+        name: "#{loc.name} (#{location_counts[loc.id]})",
+        id: loc.id,
+        count: location_counts[loc.id],
+        color: loc.hex_color
+      }
+    }.sort_by { |f| -f[:count] }
+
+    @location_filters << {
+      name: "#{I18n.t('plants.index.no_location')} (#{no_location_count})",
+      id: nil,
+      count: no_location_count,
+      color: '#999999'
+    } if no_location_count > 0
+
+    # Build recipe filter buttons with colors, sorted by count (descending)
     recipe_counts = @plants.where.not(recipe_id: nil).reorder(nil).group(:recipe_id).count
     no_recipe_count = @plants.where(recipe_id: nil).count
     recipes_with_plants = Recipe.where(id: recipe_counts.keys).order(:name)
-    @recipe_filters = recipes_with_plants.map { |recipe| ["#{recipe.name} (#{recipe_counts[recipe.id]})", recipe.id] }
-    @recipe_filters << ["#{I18n.t('plants.index.no_recipe')} (#{no_recipe_count})", nil] if no_recipe_count > 0
+
+    @recipe_filters = recipes_with_plants.map { |recipe|
+      {
+        name: "#{recipe.name} (#{recipe_counts[recipe.id]})",
+        id: recipe.id,
+        count: recipe_counts[recipe.id],
+        color: recipe.hex_color
+      }
+    }.sort_by { |f| -f[:count] }
+
+    @recipe_filters << {
+      name: "#{I18n.t('plants.index.no_recipe')} (#{no_recipe_count})",
+      id: nil,
+      count: no_recipe_count,
+      color: '#999999'
+    } if no_recipe_count > 0
+
+    # Build watering status groups for filtering
+    @watering_status_groups = [
+      { status: 'urgent', name: I18n.t('plants.index.overdue'), count: @plants.count { |p| p.watering_urgency == :urgent } },
+      { status: 'today', name: I18n.t('plants.index.needs_water_today'), count: @plants.count { |p| p.watering_urgency == :today } },
+      { status: 'scheduled', name: I18n.t('plants.index.scheduled'), count: @plants.count { |p| [:normal, :none].include?(p.watering_urgency) } }
+    ]
 
     @display_mode = params[:display] || "watering"
-    if @display_mode == "location"
-      grouped = @plants.group_by { |p| p.location&.name }
-      no_location = grouped.delete(nil) || []
-      @plants_by_location = grouped.sort_by { |name, _| name.downcase }.to_h
-      @plants_by_location[I18n.t('plants.index.no_location')] = no_location if no_location.any?
-    end
+
+    # Always build location groups (needed for client-side display mode switching)
+    grouped = @plants.group_by { |p| [p.location&.name, p.location&.hex_color || '#999999'] }
+    no_location = grouped.delete([nil, '#999999']) || []
+    @plants_by_location = grouped.sort_by { |(name, _color), _plants| (name || '').downcase }.to_h
+    @plants_by_location[[I18n.t('plants.index.no_location'), '#999999']] = no_location if no_location.any?
+
+    # Always build recipe groups (needed for client-side display mode switching)
+    grouped = @plants.group_by { |p| [p.recipe&.name, p.recipe&.hex_color || '#999999'] }
+    no_recipe = grouped.delete([nil, '#999999']) || []
+    @plants_by_recipe = grouped.sort_by { |(name, _color), _plants| (name || '').downcase }.to_h
+    @plants_by_recipe[[I18n.t('plants.index.no_recipe'), '#999999']] = no_recipe if no_recipe.any?
 
     # Calculate count of plants that need watering (urgent or today)
     @needs_watering_count = @plants.count { |p| [:urgent, :today].include?(p.watering_urgency) }

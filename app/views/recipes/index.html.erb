@@ -6,7 +6,7 @@
   <% @recipes.each do |recipe| %>
     <div class="info-card">
       <div class="info-card-grid">
-        <div class="info-card-section">
+        <div class="info-card-section" style="background: color-mix(in srgb, <%= recipe.hex_color %> 12%, transparent); border-left: 3px solid color-mix(in srgb, <%= recipe.hex_color %> 80%, black);">
           <div class="info-row">
             <span class="label">Name</span>
             <span class="value"><%= link_to recipe.name, recipe_path(recipe) %></span>

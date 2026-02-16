@@ -6,6 +6,10 @@ class LocationsController < ApplicationController
   # GET /locations or /locations.json
   def index
     @locations = current_project.locations
+      .left_joins(:plants)
+      .where('plants.id IS NULL OR plants.archived = ?', false)
+      .group('locations.id')
+      .order('COUNT(plants.id) DESC, LOWER(locations.name) ASC')
   end
 
   # GET /locations/1 or /locations/1.json
@@ -67,6 +71,6 @@ class LocationsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def location_params
-      params.expect(location: [ :zone_id, :name, :description, :project_id])
+      params.expect(location: [ :zone_id, :name, :description, :project_id, :color])
     end
 end

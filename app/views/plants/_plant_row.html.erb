@@ -1,5 +1,5 @@
 <% archive ||= false %>
-<div id="<%= dom_id plant %>" class="plant-card <%= plant.watering_urgency %>" data-location-id="<%= plant.location_id&.to_s || 'none' %>" data-recipe-id="<%= plant.recipe_id&.to_s || 'none' %>" data-needs-watering="<%= [:urgent, :today].include?(plant.watering_urgency) %>">
+<div id="<%= dom_id plant %>" class="plant-card <%= plant.watering_urgency %>" data-location-id="<%= plant.location_id&.to_s || 'none' %>" data-recipe-id="<%= plant.recipe_id&.to_s || 'none' %>" data-needs-watering="<%= [:urgent, :today].include?(plant.watering_urgency) %>" data-watering-status="<%= plant.watering_urgency == :urgent ? 'urgent' : (plant.watering_urgency == :today ? 'today' : 'scheduled') %>">
   <div class="plant-card-graphic-col">
     <div class="plant-card-name">
       <%= link_to plant.label, plant_path(plant.id), data: { turbo_frame: "_top" } %>

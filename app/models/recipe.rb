@@ -7,12 +7,30 @@ class Recipe < ApplicationRecord
   has_many :plants
   has_many :waterings
 
-  accepts_nested_attributes_for :recipe_ingredients, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :recipe_ingredients, allow_destroy: true, reject_if: :reject_ingredient
 
   validates :name, presence: true, uniqueness: { scope: :project_id }
+  validates :color, format: { with: /\A#[0-9A-F]{6}\z/i }, allow_blank: true
+  validate :unique_recipe_sources
+
+  def reject_ingredient(attributes)
+    # Reject if all blank OR if no recipe_source_id is present
+    attributes[:recipe_source_id].blank?
+  end
+
+  def unique_recipe_sources
+    source_ids = recipe_ingredients.reject(&:marked_for_destruction?).map(&:recipe_source_id).compact
+    if source_ids.uniq.length != source_ids.length
+      errors.add(:base, "Cannot add the same source multiple times")
+    end
+  end
+
+  def hex_color
+    color.presence || '#7B1FA2'
+  end
 
   def self.ransackable_attributes(auth_object = nil)
-    %w[id name]
+    %w[id name color]
   end
 
   def to_s

@@ -142,3 +142,166 @@ All three now match the pattern used on the index page and use safe navigation o
 - Search + filters work together correctly
 
 **Status:** Complete — ready for testing at `/plants`
+
+---
+
+## 2026-02-15 — Plants Page Enhancement: Colors, Watering Status Filters, UX Improvements
+
+**Goal:** Add user-assignable colors to Locations/Recipes, watering status filters (Overdue/Needs Water/Scheduled), collapsible groups, search clear button, client-side display mode switching, improved filter sorting, and enhanced result messaging.
+
+**Features:**
+1. **Color coding**: Users can assign colors to Locations and Recipes; colors appear on filter buttons and group headers
+2. **Watering status filters**: New filter buttons for Overdue/Needs Water/Scheduled watering states
+3. **Improved filter UX**: Pre-sort by count (descending), maintain client-side display mode switching
+4. **Search clear button**: Quick X button to clear search without manual deletion
+5. **Collapsible groups**: Location groups with colored headers and localStorage persistence
+6. **Enhanced messaging**: Dynamic result text that reflects active filters/search
+7. **Client-side mode toggle**: Switch between watering/location display without page reload
+
+**Implementation Details:**
+
+### Database Migrations (2 files)
+- `db/migrate/20260215200000_add_color_to_locations.rb` — adds color column to locations (default: #0E487B)
+- `db/migrate/20260215200001_add_color_to_recipes.rb` — adds color column to recipes (default: #7B1FA2)
+
+### Models Updated (2 files)
+- `app/models/location.rb` — added color validation (hex format), hex_color method, color to ransackable_attributes
+- `app/models/recipe.rb` — added color validation (hex format), hex_color method, color to ransackable_attributes
+
+### Controllers Updated (3 files)
+- `app/controllers/plants_controller.rb` — filter data now uses hash format with {name, id, count, color}, pre-sorted by count descending, watering_status_groups built for filtering, location grouping includes colors
+- `app/controllers/locations_controller.rb` — added :color to strong params
+- `app/controllers/recipes_controller.rb` — added :color to strong params
+
+### Views Updated (4 files)
+- `app/views/plants/index.html.erb` — search clear button in header, display mode as Stimulus buttons, watering status filter section, filter buttons use color data attributes and CSS variables, location groups now collapsible with colored headers, new Stimulus values for filtered result templates
+- `app/views/plants/_plant_row.html.erb` — added data-watering-status attribute for filtering
+- `app/views/locations/_form.html.erb` — added color picker field with helper text
+- `app/views/recipes/_form.html.erb` — added color picker field with helper text
+
+### JavaScript Controllers (2 files)
+- `app/javascript/controllers/collapsible_group_controller.js` — NEW controller for collapsible location groups with localStorage persistence
+- `app/javascript/controllers/location_filter_controller.js` — MAJOR UPDATE:
+  - New targets: searchInput, clearSearchBtn, wateringStatusButton, wateringStatusContainer, wateringGroup, groupCount
+  - New values: resultsFilteredTemplate, resultsFilteredSearchTemplate
+  - New methods: switchDisplayMode (client-side mode toggle), toggleWateringStatusFilter, clearSearch, updateSearchClearButton, updateDisplayMode, updateGroupCounts
+  - Updated methods: filterPlants (now includes watering status filtering), updateResultsCount (dynamic messaging based on active filters/search)
+
+### Stylesheets Updated (1 file)
+- `app/assets/stylesheets/plants.sass`:
+  - Color-aware filter buttons using CSS variables (--filter-color)
+  - Search clear button styling (positioned absolute in search wrapper)
+  - Collapsible group headers (clickable, with hover states, flex layout for icon/title/count)
+  - Watering status filter buttons with status-specific colors (urgent=orange, today=green, scheduled=blue)
+  - Group count styling
+
+### Locales Updated (2 files)
+- `config/locales/en.yml` — added filter_by_status, overdue, needs_water_today, scheduled, results_filtered, results_filtered_search
+- `config/locales/es.yml` — added Spanish translations for new strings
+
+**Additional Refinements:**
+- Updated filter button styling so colored buttons show a light version (15% opacity) of their assigned color when inactive, with the full color as text. Hover increases to 25% opacity. Active state shows solid color with white text.
+- Location resource cards on index page now show 12% tint of assigned color with darker left border (3px solid, 80% color + 20% black)
+- Recipe info cards on index page now show 12% tint of assigned color with darker left border (3px solid, 80% color + 20% black)
+- Locations index page now sorts by active plant count (descending), then alphabetically by name
+- Watering status filter buttons now show light backgrounds (15% tint) when inactive, matching the location/recipe filter button pattern
+
+**Bug Fix:**
+- Fixed Recipe update error when duplicate sources were submitted - added custom `reject_ingredient` method to reject ingredients without a source_id, and `unique_recipe_sources` validation to provide user-friendly error message instead of database constraint violation
+
+**Major UI Update: Toggleable Filters & Recipe Display Mode**
+
+### Filter UX Overhaul
+- All filters now hidden by default with "Add filter:" buttons for Status | Recipe | Location
+- Clicking an "Add filter" button reveals that filter section
+- Each filter section has a "✕" remove button to hide and clear active filters
+- Filter sections: Status, Recipe, and Location can be independently shown/hidden
+
+### Recipe Display Mode
+- Added "Recipe" as third display mode option (alongside Watering and Location)
+- Controller builds `@plants_by_recipe` grouping similar to location grouping
+- Recipe groups show colored headers with collapsible content
+- Recipe groups use localStorage for collapse state persistence
+
+### View Changes
+- `app/views/plants/index.html.erb`:
+  - Display mode toggle now includes Recipe button (conditional on recipes existing)
+  - Add filter buttons section with Status/Recipe/Location buttons
+  - All filter sections wrapped with show/hide capability
+  - Recipe groups rendered with colored headers similar to location groups
+  - "Show more/less" toggle buttons moved inside filter containers to appear inline
+
+### Controller Changes
+- `app/controllers/plants_controller.rb`:
+  - Added recipe grouping logic (elsif @display_mode == "recipe")
+  - Groups plants by recipe name and color
+
+### JavaScript Changes
+- `app/javascript/controllers/location_filter_controller.js`:
+  - Added targets: recipeGroup, addStatusFilterBtn, addRecipeFilterBtn, addLocationFilterBtn, locationFilterContainer, recipeFilterContainer, addFiltersContainer
+  - Added show/hide methods: showStatusFilter, hideStatusFilter, showRecipeFilter, hideRecipeFilter, showLocationFilter, hideLocationFilter
+  - Added updateAddFiltersVisibility() and areAllFiltersVisible() - "Add filter:" section auto-hides when all filters are visible
+  - Updated filterPlants() to handle recipe display mode
+  - Updated updateDisplayMode() to show/hide recipe groups
+  - Hide methods clear active filters and update UI
+
+### Styling
+- `app/assets/stylesheets/plants.sass`:
+  - New .add-filters container styling
+  - New .add-filter-btn with dashed border and hover effects
+  - New .remove-filter-btn (✕ button) styling
+  - "Show more/less" toggle buttons now inline (margin removed)
+
+### Locales
+- Added translations: add_filter, status, recipe (en.yml, es.yml)
+
+**Bug Fix:**
+- Fixed filter button reordering to preserve "show less" toggle and "✕" remove buttons at the end of the list (they were being moved to the front during reordering)
+
+**Status:** Complete — awaiting `bin/rails db:migrate`
+
+---
+
+## 2026-02-16 — Fix Location Display Mode Button + Client-Side Mode Switching
+
+**Goal:** Fix the Location sort/display button on Plants Index that was not showing any results when clicked, while preserving active filter state when switching display modes.
+
+**Problem:** Clicking the Location display mode button tried to switch modes client-side using JavaScript, but the location groups HTML was only rendered server-side when `@display_mode == "location"`. When the page loads in "watering" mode (default), those DOM elements don't exist, so the JavaScript had nothing to show.
+
+**Root Cause:** Rails was conditionally rendering HTML structures based on the `params[:display]` parameter, so only one display mode's DOM existed at a time.
+
+**Solution:** Changed to always render all three display modes (watering, location, recipe) in the HTML, with client-side JavaScript toggling visibility and updating the URL without page reload. This preserves filter state while maintaining proper URL reflection of current mode.
+
+**Files Modified:**
+
+1. `app/controllers/plants_controller.rb`:
+   - Removed conditional rendering logic
+   - Always build both `@plants_by_location` and `@plants_by_recipe` groupings regardless of display mode
+   - This ensures all necessary data is available for client-side mode switching
+
+2. `app/views/plants/index.html.erb`:
+   - Wrapped location groups in `locationGroupsContainer` div
+   - Wrapped recipe groups in `recipeGroupsContainer` div
+   - Wrapped watering view in `wateringGroupsContainer` div
+   - Each container has initial `display` style based on `@display_mode` (for server-side page load)
+   - All three modes are always rendered
+
+3. `app/javascript/controllers/location_filter_controller.js`:
+   - Added new targets: `locationGroupsContainer`, `recipeGroupsContainer`, `wateringGroupsContainer`
+   - Updated `switchDisplayMode()`:
+     - Sets `displayModeValue` to new mode
+     - Updates URL using `history.pushState()` without triggering navigation
+     - Updates button active states
+     - Calls `updateDisplayMode()` to toggle container visibility
+   - Restored `updateDisplayMode()` function:
+     - Shows/hides container targets based on current display mode
+     - Re-applies filters and updates counts after mode switch
+
+**Behavior:**
+- Clicking Watering/Location/Recipe display buttons switches modes instantly without page reload
+- URL updates to `?display=watering`, `?display=location`, or `?display=recipe` without navigation
+- All active filters (location, recipe, watering status) are preserved when switching modes
+- Filter state (selectedLocations, selectedRecipes, selectedWateringStatuses Sets) remains intact
+- Page refreshes and direct URL access still work correctly (server renders appropriate initial state)
+
+**Status:** Complete — ready for testing
