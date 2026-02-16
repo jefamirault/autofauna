@@ -4,7 +4,7 @@
 
 <div class="resource-cards">
   <% @recipes.each do |recipe| %>
-    <div class="info-card">
+    <div class="info-card" style="background: color-mix(in srgb, <%= recipe.hex_color %> 12%, transparent); border-left: 3px solid color-mix(in srgb, <%= recipe.hex_color %> 80%, black);">
       <div class="info-card-grid">
         <div class="info-card-section">
           <div class="info-row">

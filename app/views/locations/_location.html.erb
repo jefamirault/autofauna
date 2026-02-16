@@ -1,4 +1,4 @@
-<%= link_to location, class: 'resource-card' do %>
+<%= link_to location, class: 'resource-card', style: "background: color-mix(in srgb, #{location.hex_color} 12%, transparent); border-left: 3px solid color-mix(in srgb, #{location.hex_color} 80%, black);" do %>
   <div class="resource-card-name"><%= location.name %></div>
   <div class="resource-card-meta">
     <% if location.zone %>Zone: <%= location.zone %> · <% end %>

@@ -22,6 +22,12 @@
     <%= form.textarea :description %>
   </div>
 
+  <div>
+    <%= form.label :color, "Color", style: "display: block" %>
+    <%= form.color_field :color, value: recipe.hex_color %>
+    <small>Used for filter buttons</small>
+  </div>
+
   <h3>Sources</h3>
   <div data-nested-form-target="container">
     <% recipe.recipe_ingredients.each do |ingredient| %>

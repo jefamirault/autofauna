@@ -30,36 +30,58 @@ h1
   display: flex
   align-items: center
   gap: 0.5rem
-  padding: 0.5rem 0.75rem
+  min-height: 2rem
 
 .display-toggle-label
   color: #666
-  font-size: 0.95em
+  font-size: 0.9em
   white-space: nowrap
+  line-height: 1.8
+
+.filter-label-text
+  @media (max-width: 899px)
+    display: none
 
 .display-toggle-btn
   display: inline-block
   padding: 0.25rem 0.75rem
   border-radius: 999px
   font-size: 0.9em
+  line-height: 1.4
   text-decoration: none
   color: $blue
   background: $lightblue
   white-space: nowrap
+  border: none
+  cursor: pointer
+  font-family: inherit
   &:hover
     background: rgba(14, 72, 123, 0.2)
     text-decoration: none
   &.active
     background: $blue
     color: white
+  // Color-aware filter buttons
+  &[data-location-color], &[data-recipe-color]
+    background: color-mix(in srgb, var(--filter-color) 15%, transparent)
+    color: var(--filter-color)
+    &:hover
+      background: color-mix(in srgb, var(--filter-color) 25%, transparent)
+    &.active
+      background: var(--filter-color)
+      color: white
+      &:hover
+        background: var(--filter-color)
+        opacity: 0.9
 
 .location-filters
   display: flex
   align-items: center
   gap: 0.5rem
-  padding: 0 0.75rem 0.5rem
   flex-wrap: nowrap
-  overflow: hidden
+  overflow-x: scroll
+  scrollbar-width: none
+  min-height: 2rem
 
   &.expanded
     flex-wrap: wrap
@@ -68,11 +90,9 @@ h1
     border: none
     cursor: pointer
     font-family: inherit
-    font-size: inherit
 
 .location-filters-toggle
   display: inline-block
-  margin: 0 0 0.5rem 0.75rem
   padding: 0.25rem 0.75rem
   border-radius: 999px
   font-size: 0.85em
@@ -82,6 +102,7 @@ h1
   cursor: pointer
   font-family: inherit
   transition: all 0.2s ease
+  white-space: nowrap
 
   &:hover
     background: $lightblue
@@ -91,9 +112,10 @@ h1
   display: flex
   align-items: center
   gap: 0.5rem
-  padding: 0 0.75rem 0.5rem
   flex-wrap: nowrap
-  overflow: hidden
+  overflow-x: scroll
+  scrollbar-width: none
+  min-height: 2rem
 
   &.expanded
     flex-wrap: wrap
@@ -102,11 +124,9 @@ h1
     border: none
     cursor: pointer
     font-family: inherit
-    font-size: inherit
 
 .recipe-filters-toggle
   display: inline-block
-  margin: 0 0 0.5rem 0.75rem
   padding: 0.25rem 0.75rem
   border-radius: 999px
   font-size: 0.85em
@@ -116,6 +136,7 @@ h1
   cursor: pointer
   font-family: inherit
   transition: all 0.2s ease
+  white-space: nowrap
 
   &:hover
     background: $lightblue
@@ -127,6 +148,69 @@ h1
   color: $blue
   padding: 0.75rem 0.75rem 0.25rem
   margin: 0
+
+  &.clickable
+    cursor: pointer
+    user-select: none
+    transition: background-color 0.2s ease
+    display: flex
+    align-items: center
+    gap: 0.5rem
+    padding: 0.75rem
+    margin: 0.5rem 0 0.25rem
+    border-radius: 4px
+    &:hover
+      opacity: 0.9
+
+.group-count
+  margin-left: auto
+  font-size: 0.9em
+  opacity: 0.8
+
+// Watering status filters
+.watering-status-filters
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  flex-wrap: wrap
+  scrollbar-width: none
+  min-height: 2rem
+
+.watering-status-btn
+  // Inactive states with light backgrounds
+  &[data-status="urgent"]
+    background: color-mix(in srgb, #f59e0b 15%, transparent)
+    color: #f59e0b
+    &:hover
+      background: color-mix(in srgb, #f59e0b 25%, transparent)
+  &[data-status="today"]
+    background: color-mix(in srgb, #10b981 15%, transparent)
+    color: #10b981
+    &:hover
+      background: color-mix(in srgb, #10b981 25%, transparent)
+  &[data-status="scheduled"]
+    background: color-mix(in srgb, #3b82f6 15%, transparent)
+    color: #3b82f6
+    &:hover
+      background: color-mix(in srgb, #3b82f6 25%, transparent)
+
+  // Active states with solid backgrounds
+  &.active
+    &[data-status="urgent"]
+      background: #f59e0b
+      color: white
+      &:hover
+        opacity: 0.9
+    &[data-status="today"]
+      background: #10b981
+      color: white
+      &:hover
+        opacity: 0.9
+    &[data-status="scheduled"]
+      background: #3b82f6
+      color: white
+      &:hover
+        opacity: 0.9
 
 // Plants > Show
 .wateringNotesColumn
@@ -451,3 +535,129 @@ h1
     margin-left: 16px
     margin-right: 16px
 
+// Search clear button
+.search-input-wrapper
+  position: relative
+
+.search-clear-btn
+  position: absolute
+  right: 0.5rem
+  top: 50%
+  transform: translateY(-50%)
+  background: none
+  border: none
+  color: rgba(255, 255, 255, 0.7)
+  font-size: 1.2rem
+  cursor: pointer
+  padding: 0.25rem 0.5rem
+  z-index: 10
+  &:hover
+    color: white
+
+// Filter controls wrapper - display toggle and add filters on same line
+#search-options
+  display: flex
+  flex-wrap: wrap
+  gap: 0.5rem
+  align-items: center
+  margin: 0 0 .5em .5em
+
+  @media (max-width: 950px)
+    flex-direction: column
+    align-items: flex-start
+
+// Add filter buttons - inline with display toggle
+.add-filters
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  min-height: 2rem
+
+.add-filter-btn
+  display: inline-block
+  padding: 0.25rem 0.75rem
+  border-radius: 999px
+  font-size: 0.9em
+  text-decoration: none
+  color: $blue
+  background: transparent
+  border: 1px dashed rgba(14, 72, 123, 0.4)
+  white-space: nowrap
+  cursor: pointer
+  font-family: inherit
+  transition: all 0.2s ease
+  &:hover
+    background: $lightblue
+    border-style: solid
+
+// Remove filter button (X button)
+.remove-filter-btn
+  display: inline-block
+  padding: 0.25rem 0.5rem
+  border-radius: 999px
+  font-size: 0.9em
+  background: transparent
+  border: none
+  color: rgba(14, 72, 123, 0.6)
+  cursor: pointer
+  font-family: inherit
+  margin-left: 0.25rem
+  &:hover
+    background: rgba(14, 72, 123, 0.1)
+    color: $blue
+
+// Watering status filters
+.watering-status-filters
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  flex-wrap: nowrap
+  width: 100%
+  overflow-x: scroll
+
+
+.watering-status-btn
+  // Inactive states with light backgrounds
+  &[data-status="urgent"]
+    background: color-mix(in srgb, #f59e0b 15%, transparent)
+    color: #f59e0b
+    &:hover
+      background: color-mix(in srgb, #f59e0b 25%, transparent)
+  &[data-status="today"]
+    background: color-mix(in srgb, #10b981 15%, transparent)
+    color: #10b981
+    &:hover
+      background: color-mix(in srgb, #10b981 25%, transparent)
+  &[data-status="scheduled"]
+    background: color-mix(in srgb, #3b82f6 15%, transparent)
+    color: #3b82f6
+    &:hover
+      background: color-mix(in srgb, #3b82f6 25%, transparent)
+
+  // Active states with solid backgrounds
+  &.active
+    &[data-status="urgent"]
+      background: #f59e0b
+      color: white
+      &:hover
+        opacity: 0.9
+    &[data-status="today"]
+      background: #10b981
+      color: white
+      &:hover
+        opacity: 0.9
+    &[data-status="scheduled"]
+      background: #3b82f6
+      color: white
+      &:hover
+        opacity: 0.9
+
+// Recipe and location filter sections - full width
+.recipe-filter-section, .location-filter-section
+  width: 100%
+  min-height: 2rem
+
+.group-count
+  margin-left: auto
+  font-size: 0.9em
+  opacity: 0.8

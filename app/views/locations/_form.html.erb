@@ -30,6 +30,12 @@
   </div>
 
   <div>
+    <%= form.label :color, "Color", style: "display: block" %>
+    <%= form.color_field :color, value: location.hex_color %>
+    <small>Used for filter buttons and group headers</small>
+  </div>
+
+  <div>
     <%= form.submit "💾 #{location.new_record? ? 'Create' : 'Update'} Location", class: 'saveButton' %>
   </div>
 <% end %>
