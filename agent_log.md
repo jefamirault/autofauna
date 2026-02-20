@@ -479,3 +479,20 @@ All three now match the pattern used on the index page and use safe navigation o
 - Categorical measurement type unaffected
 
 **Status:** Complete — ready for testing
+
+---
+
+## 2026-02-20 — Fix "Content Missing" Error on New Plant Button
+
+**Goal:** Fix the "New Plant" button at the bottom of the Plants Index page that was showing a blank "Content Missing" message instead of the expected new plant form.
+
+**Problem:** When users clicked the "New Plant" button at the bottom of the Plants Index page (line 273), they saw "Content Missing" instead of the new plant form.
+
+**Root Cause:** The "New Plant" link was rendered inside a `<turbo-frame id="plants-results">` frame but didn't specify `data: { turbo_frame: "_top" }`. When clicked, Turbo attempted to find a matching `<turbo-frame id="plants-results">` in the response from the `new` action, but the `new.html.erb` view doesn't provide one, resulting in "Content Missing".
+
+**Solution:** Added `data: { turbo_frame: "_top" }` to the New Plant link to tell Turbo to break out of the frame context and navigate the full page. This matches the pattern used by other navigation links in the plants index (like in `_plant_row.html.erb`).
+
+**Files Modified:**
+- `app/views/plants/index.html.erb` (line 273) — added `data: { turbo_frame: "_top" }` to the New Plant link
+
+**Status:** Complete — ready for testing
