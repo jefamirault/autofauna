@@ -305,3 +305,20 @@ All three now match the pattern used on the index page and use safe navigation o
 - Page refreshes and direct URL access still work correctly (server renders appropriate initial state)
 
 **Status:** Complete — ready for testing
+
+---
+
+## 2026-02-20 — Fix "None" Recipe Selection for Plant Edit Form
+
+**Goal:** Allow existing plants to have their recipe changed back to "None" in the Edit form, matching the behavior of the New Plant form.
+
+**Problem:** The New Plant form allowed selecting "None" for Recipe, but the Edit Plant form didn't provide this option for plants that already had a recipe assigned. This was because the form used `prompt: '-- None --'` which only displays when the field value is `nil`.
+
+**Root Cause:** Rails' `collection_select` with `prompt:` option only shows the prompt text when the current value is nil. For persisted records with an existing recipe_id, the prompt didn't appear, making it impossible to clear the recipe back to nil.
+
+**Solution:** Changed from `prompt: '-- None --'` to `include_blank: '-- None --'` on line 53 of `_form.html.erb`. The `include_blank` option keeps the "None" choice available regardless of whether a value is currently selected.
+
+**Files Modified:**
+- `app/views/plants/_form.html.erb` — changed recipe collection_select from `prompt:` to `include_blank:` (line 53)
+
+**Status:** Complete — ready for testing

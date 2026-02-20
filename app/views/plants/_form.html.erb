@@ -50,7 +50,7 @@
   <% unless recipes.empty? %>
     <div class="field">
       <%= form.label :recipe_id, "🧪 Recipe" %>
-      <%= form.collection_select :recipe_id, recipes.order(:name), :id, :name, prompt: '-- None --' %>
+      <%= form.collection_select :recipe_id, recipes.order(:name), :id, :name, include_blank: '-- None --' %>
     </div>
   <% end %>
 
