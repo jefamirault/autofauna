@@ -30,6 +30,7 @@ Rails.application.routes.draw do
   resources :plants do
     get 'water'
     resources :log_entries
+    resources :soil_moisture_readings
     collection do
       get :suggest_graphic
     end

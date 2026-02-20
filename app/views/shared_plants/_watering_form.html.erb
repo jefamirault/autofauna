@@ -13,8 +13,10 @@
     <% end %>
 
     <div>
-      <%= form.label :date, style: "display: block" %>
-      <%= form.date_field :date, value: watering.date || Time.zone.now.to_date %>
+      <%= form.label :watered_at, "Date & Time", style: "display: block" %>
+      <%= form.datetime_local_field :watered_at,
+          value: watering.watered_at&.strftime("%Y-%m-%dT%H:%M") ||
+                 Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
     </div>
 
     <div>

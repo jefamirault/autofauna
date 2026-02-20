@@ -12,7 +12,7 @@
   <tbody>
   <% waterings.reverse.each do |watering| %>
     <tr>
-      <td><%= link_to format_date(watering.date), watering %></td>
+      <td><%= link_to format_date(watering.watered_at), watering %></td>
       <td><%= watering.print_volume %></td>
       <td><%= watering.interval_text %></td>
       <td class="wateringNotesColumn"><%= watering.notes %></td>

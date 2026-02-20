@@ -31,12 +31,12 @@ class SharedPlantsController < ApplicationController
   def build_timeline
     @log_entries = @plant.log_entries.reverse
     log_items = @log_entries.map { |entry| { type: :log_entry, date: entry.timestamp, object: entry } }
-    watering_items = @plant.waterings.map { |watering| { type: :watering, date: watering.date.to_datetime, object: watering } }
+    watering_items = @plant.waterings.map { |watering| { type: :watering, date: watering.watered_at, object: watering } }
     @timeline = (log_items + watering_items).sort_by { |item| item[:date] }.reverse
     @shared_view = true
   end
 
   def shared_watering_params
-    params.require(:watering).permit(:date, :volume, :units, :notes)
+    params.require(:watering).permit(:watered_at, :volume, :units, :notes)
   end
 end

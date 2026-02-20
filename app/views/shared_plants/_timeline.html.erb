@@ -19,7 +19,7 @@
           <span class='timeline-icon'>💧</span>
           <% if watering.volume.present? %><strong><%= watering.print_volume %></strong><% else %><span class='no-volume'>—</span><% end %>
           <% if watering.notes.present? %><span class='watering-notes'><%= watering.notes %></span><% end %>
-          <span class='watering-time'>🕐 <%= time_ago watering.date %></span>
+          <span class='watering-time'>🕐 <%= time_ago watering.watered_at %></span>
           <% if watering.interval %><span class='interval'>(<%= watering.interval_text %>)</span><% end %>
           <% if watering.updated_at - watering.created_at > 1.minute %><span class='metadata updated-at'>Updated <%= time_ago_in_words watering.updated_at %> ago</span><% end %>
         </td>

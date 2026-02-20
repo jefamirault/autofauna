@@ -21,6 +21,17 @@
       <%= form.label :api_key, t('attributes.api_key'), style: "display: block" %>
       <%= form.text_field :api_key %>
     </div>
+
+    <div>
+      <%= form.label :moisture_measurement_type, t('attributes.moisture_measurement_type'), style: "display: block" %>
+      <%= form.select :moisture_measurement_type,
+          options_for_select(
+            [['Numeric', 'numeric'],
+             ['Categorical (Dry/Wet/etc)', 'categorical']],
+            project.moisture_measurement_type || 'numeric'
+          ) %>
+      <small style="display: block; margin-top: 0.25rem; color: #666;">This setting applies to all plants in this project</small>
+    </div>
   <% end %>
   <br>
   <div>

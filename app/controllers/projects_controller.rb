@@ -91,7 +91,7 @@ class ProjectsController < ApplicationController
   end
 
   def project_params
-    params.require(:project).permit(:name, :api_key)
+    params.require(:project).permit(:name, :api_key, :moisture_measurement_type)
   end
 
   def collaborator_params

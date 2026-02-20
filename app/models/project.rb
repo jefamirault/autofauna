@@ -6,6 +6,7 @@ class Project < ApplicationRecord
 
   has_many :plants, dependent: :destroy
   has_many :waterings, through: :plants
+  has_many :soil_moisture_readings, through: :plants
 
   has_many :zones, dependent: :destroy
   has_many :locations, dependent: :destroy
@@ -16,6 +17,8 @@ class Project < ApplicationRecord
   has_many :recipe_sources, dependent: :destroy
   has_many :recipes, dependent: :destroy
   has_many :recipe_batches, dependent: :destroy
+
+  enum :moisture_measurement_type, { numeric: 0, categorical: 1 }
 
   def users
     [owner] + collaborators
@@ -54,5 +57,9 @@ class Project < ApplicationRecord
     starting_id = 1
     max = self.plants.pluck(:uid).reject(&:nil?).max
     max ? max + 1 : starting_id
+  end
+
+  def moisture_categories
+    SoilMoistureReading.value_categoricals.keys
   end
 end

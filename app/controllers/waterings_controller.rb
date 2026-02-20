@@ -9,7 +9,7 @@ class WateringsController < ApplicationController
       auto_select_project(current_user)
       return redirect_to new_session_path unless current_project
     end
-    @waterings = current_project&.waterings&.sort_by{|w| [w.date, w.updated_at]}&.reverse&.first 500
+    @waterings = current_project&.waterings&.sort_by{|w| [w.watered_at, w.updated_at]}&.reverse&.first 500
   end
 
   # GET /waterings/1 or /waterings/1.json
@@ -18,8 +18,18 @@ class WateringsController < ApplicationController
 
   # GET /waterings/new
   def new
-    @watering = Watering.new plant_id: params[:plant_id], date: Time.zone.now.to_date, volume: params[:volume], units: params[:units], notes: params[:notes],
+    @watering = Watering.new plant_id: params[:plant_id], watered_at: Time.zone.now, volume: params[:volume], units: params[:units], notes: params[:notes],
       recipe_batch_id: params[:recipe_batch_id], recipe_id: params[:recipe_id], tds: params[:tds]
+
+    # Check for recent standalone moisture reading (within last hour) to pre-fill
+    if @watering.plant
+      @recent_moisture_reading = @watering.plant.soil_moisture_readings
+        .where(timing: :standalone)
+        .where('measured_at >= ?', 1.hour.ago)
+        .order(measured_at: :desc)
+        .first
+    end
+
     respond_to do |format|
       format.turbo_stream
       format.html
@@ -94,6 +104,6 @@ class WateringsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def watering_params
-      params.require(:watering).permit(:plant_id, :date, :notes, :volume, :units, :tds, :recipe_batch_id, :recipe_id)
+      params.require(:watering).permit(:plant_id, :watered_at, :notes, :volume, :units, :tds, :recipe_batch_id, :recipe_id, :pre_moisture, :post_moisture, :pre_moisture_reading_id)
     end
 end

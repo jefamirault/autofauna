@@ -69,6 +69,7 @@
     recipe_id: @plant.last_watering&.recipe_id,
     tds: @plant.last_watering&.tds),
     class: 'link' %>
+  <%= link_to "🌱 Log Soil Moisture", new_plant_soil_moisture_reading_path(@plant), class: 'link' %>
   <%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>
 </div>
 <h3><%= t '.timeline' %></h3>

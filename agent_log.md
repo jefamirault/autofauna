@@ -322,3 +322,160 @@ All three now match the pattern used on the index page and use safe navigation o
 - `app/views/plants/_form.html.erb` — changed recipe collection_select from `prompt:` to `include_blank:` (line 53)
 
 **Status:** Complete — ready for testing
+
+---
+
+## 2026-02-20 — Soil Moisture Tracking Implementation
+
+**Goal:** Add comprehensive soil moisture tracking with standalone logging, watering-integrated pre/post readings, project-wide measurement preferences (numeric vs categorical), and precise datetime-based watering records.
+
+**Features:**
+1. **Standalone moisture logging**: Record soil moisture readings at any time for any plant
+2. **Watering-integrated readings**: Optional pre/post watering moisture measurements
+3. **Project measurement preference**: Choose between numeric (0-100%) or categorical (Saturated/Wet/Moist/Dry/Bone Dry)
+4. **Precise watering timestamps**: Upgrade from DATE to DATETIME for better tracking
+5. **Timeline integration**: Display moisture readings alongside waterings in plant timeline
+
+**Implementation Phases:**
+- Phase 1: Database & Models (Non-Breaking)
+- Phase 2: Standalone Moisture Logging
+- Phase 3: Watering Date → DateTime Migration
+- Phase 4: Watering-Moisture Integration
+- Phase 5: Polish & Testing
+
+**Status:** Implementation complete — awaiting `bin/rails db:migrate`
+
+### Database Migrations (3 files)
+- `db/migrate/20260220100000_add_moisture_measurement_type_to_projects.rb` — adds moisture_measurement_type enum (numeric/categorical) to projects table
+- `db/migrate/20260220100001_create_soil_moisture_readings.rb` — creates soil_moisture_readings table with plant/watering associations, numeric/categorical values, timing enum, and notes
+- `db/migrate/20260220100002_change_waterings_date_to_datetime.rb` — changes waterings.date column to datetime and renames to watered_at for precise timestamp tracking
+
+### Models (1 new, 3 modified)
+- **NEW** `app/models/soil_moisture_reading.rb` — SoilMoistureReading model with timing/value_categorical enums, validations for measurement type matching project preference, display_value helper method
+- **MODIFIED** `app/models/project.rb` — added has_many :soil_moisture_readings, moisture_measurement_type enum, moisture_categories helper
+- **MODIFIED** `app/models/plant.rb` — added has_many :soil_moisture_readings, latest_moisture_reading/latest_moisture_value helpers, updated waterings association and update_watering_dates to use watered_at
+- **MODIFIED** `app/models/watering.rb` — added has_many :soil_moisture_readings (nullify on delete), renamed all date references to watered_at, added virtual attributes (pre_moisture, post_moisture) with after_save callback to create moisture readings
+
+### Controllers (1 new, 3 modified)
+- **NEW** `app/controllers/soil_moisture_readings_controller.rb` — standard CRUD for standalone moisture logging, forces timing: :standalone, conditional strong params based on project measurement type
+- **MODIFIED** `app/controllers/waterings_controller.rb` — updated index sort to use watered_at, changed new action pre-fill from date to watered_at (Time.zone.now), added :watered_at, :pre_moisture, :post_moisture to strong params
+- **MODIFIED** `app/controllers/projects_controller.rb` — added :moisture_measurement_type to strong params
+- **MODIFIED** `app/controllers/plants_controller.rb` — updated timeline building to use watered_at, added standalone moisture readings to timeline
+
+### Views (3 new, 12 modified)
+- **NEW** `app/views/soil_moisture_readings/_form.html.erb` — form partial with conditional input (numeric number field or categorical select) based on project preference
+- **NEW** `app/views/soil_moisture_readings/new.html.erb` — new moisture reading form
+- **NEW** `app/views/soil_moisture_readings/edit.html.erb` — edit moisture reading with delete button
+- **MODIFIED** `app/views/waterings/_form.html.erb` — added watering-moisture Stimulus controller, changed date field to datetime_local_field for watered_at, added toggleable pre/post moisture fields with progressive disclosure UI
+- **MODIFIED** `app/views/plants/show.html.erb` — added "Log Soil Moisture" link to plant actions
+- **MODIFIED** `app/views/plants/_plant.html.erb` — added latest moisture reading display to plant info card
+- **MODIFIED** `app/views/plants/_timeline.html.erb` — updated watering.date to watering.watered_at, added inline display of pre/post moisture readings on watering entries, added moisture_reading timeline item type for standalone readings
+- **MODIFIED** `app/views/projects/_form.html.erb` — added moisture_measurement_type dropdown (Numeric vs Categorical)
+- **MODIFIED** `app/views/waterings/show.html.erb` — updated watering.date to watering.watered_at with time display
+- **MODIFIED** `app/views/waterings/_watering.html.erb` — updated watering.date to watering.watered_at
+- **MODIFIED** `app/views/waterings/index.html.erb` — updated watering.date to watering.watered_at
+- **MODIFIED** `app/views/waterings/edit.html.erb` — updated watering.date to watering.watered_at with time display
+- **MODIFIED** `app/views/plants/_waterings.html.erb` — updated watering.date to watering.watered_at
+- **MODIFIED** `app/views/shared_plants/_timeline.html.erb` — updated watering.date to watering.watered_at
+- **MODIFIED** `app/views/shared_plants/_watering_form.html.erb` — changed date field to datetime_local_field for watered_at
+
+### JavaScript (1 new)
+- **NEW** `app/javascript/controllers/watering_moisture_controller.js` — Stimulus controller for progressive disclosure of pre/post moisture fields in watering form (togglePre, togglePost, hidePre, hidePost actions)
+
+### Routes
+- `config/routes.rb` — added nested resources :soil_moisture_readings under plants
+
+### Locales (2 files)
+- `config/locales/en.yml` — added soil_moisture_readings translations (new, edit, create_success, update_success, delete_success), added attribute translations (watered_at, moisture_measurement_type, value_numeric, value_categorical, pre_moisture, post_moisture, measured_at)
+- `config/locales/es.yml` — added Spanish translations for all new strings
+
+### Additional Controller Updates
+- **MODIFIED** `app/controllers/shared_plants_controller.rb` — updated build_timeline to use watered_at, updated shared_watering_params to permit watered_at instead of date
+
+### Key Features Implemented
+1. **Project-level moisture measurement preference** — set in project settings, applies to all plants
+2. **Standalone moisture logging** — record moisture readings independently of waterings
+3. **Watering-integrated moisture** — optional pre/post moisture readings on watering form with toggle buttons
+4. **Precise watering timestamps** — waterings now store date AND time
+5. **Timeline integration** — standalone moisture readings appear in plant timeline, watering-linked readings display inline with watering entries
+6. **Latest moisture display** — plant info card shows most recent moisture reading
+7. **Progressive disclosure UX** — moisture fields hidden by default, revealed with "➕ Add" buttons
+
+### Data Migration Notes
+- Waterings table: `date` column (DATE) → `watered_at` column (DATETIME)
+- Existing watering records will have times set to 00:00:00 after migration
+- All code references to `watering.date` have been updated to `watering.watered_at`
+
+**Next Steps:**
+1. Run `bin/rails db:migrate` to apply database changes
+2. Test standalone moisture logging
+3. Test watering with pre/post moisture readings
+4. Test project moisture measurement type switching
+5. Verify timeline displays correctly
+
+---
+
+### Enhancement: Auto-fill Pre-Watering Moisture from Recent Readings
+
+**Goal:** Automatically pre-fill the pre-watering moisture field when a user has logged a standalone moisture reading within the last hour, and link to that existing reading instead of creating a duplicate.
+
+**Implementation:**
+
+1. **Controller Change** (`app/controllers/waterings_controller.rb`):
+   - Added logic in `new` action to find most recent standalone moisture reading within 1 hour
+   - Stores in `@recent_moisture_reading` instance variable
+
+2. **View Change** (`app/views/waterings/_form.html.erb`):
+   - Pre-moisture field auto-shown (not hidden) if `@recent_moisture_reading` exists
+   - "Add Pre-Watering Moisture" button hidden when field is auto-shown
+   - Field pre-filled with value from recent reading (numeric or categorical)
+   - Added hidden field `pre_moisture_reading_id` to store reading ID
+   - Added visual indicator: "✨ Auto-filled from reading X minutes ago"
+
+3. **Model Change** (`app/models/watering.rb`):
+   - Added `pre_moisture_reading_id` to virtual attributes
+   - Added `link_existing_moisture_reading` method to update existing readings
+   - Modified `create_moisture_readings` to check for `@pre_moisture_reading_id`
+   - If ID exists: updates existing standalone reading (changes timing to `:pre_watering`, links to watering, updates timestamp)
+   - If ID doesn't exist: creates new reading as before
+
+4. **Strong Params** (`app/controllers/waterings_controller.rb`):
+   - Added `:pre_moisture_reading_id` to permitted parameters
+
+**Behavior:**
+- User logs standalone moisture reading at 2:00 PM
+- User navigates to water the plant at 2:30 PM
+- Pre-watering moisture field appears automatically with the 2:00 PM reading value
+- User can edit the value, remove it, or accept it as-is
+- On submit: the existing 2:00 PM reading is updated (not duplicated) to link to the watering
+- No duplicate moisture record created
+
+**Status:** Complete
+
+---
+
+## 2026-02-20 — Remove Percentage Units Label from Soil Moisture Levels
+
+**Goal:** Remove hardcoded percentage units from soil moisture measurements to support arbitrary numeric scales (not all instruments measure 0-100%).
+
+**Problem:** The current implementation assumes percentage-based measurements and adds "%" units to numeric values. Users have different soil moisture instruments with varying scales (0-1023 for analog sensors, custom calibrated ranges, etc.), so forcing percentage interpretation is incorrect.
+
+**Changes:**
+
+1. **Model** (`app/models/soil_moisture_reading.rb`):
+   - Removed "%" suffix from `display_value` method (line 37)
+   - Removed 0-100 range constraint from validation (lines 17-19), kept numericality check
+
+2. **Forms** (3 locations):
+   - `app/views/soil_moisture_readings/_form.html.erb` — changed helper text from "Percentage (0-100%)" to "Numeric value", removed min/max constraints
+   - `app/views/waterings/_form.html.erb` (2 instances) — changed helper text from "Percentage (0-100%)" to "Numeric value" (lines 97, 117), removed min/max constraints from both pre/post moisture fields
+
+3. **Project Configuration** (`app/views/projects/_form.html.erb`):
+   - Changed dropdown text from "Numeric (0-100%)" to "Numeric" (line 29)
+
+**Impact:**
+- Backward compatible - existing numeric values display correctly without "%" suffix
+- Users can now use any numeric scale their instruments provide
+- Categorical measurement type unaffected
+
+**Status:** Complete — ready for testing

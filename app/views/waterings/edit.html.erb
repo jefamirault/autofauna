@@ -7,7 +7,7 @@
   <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
   <%= link_to t('.waterings'), waterings_path, class: 'breadcrumb' %>
   <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= link_to @watering.date.strftime('%a %-m/%-d/%y'), watering_path(@watering), class: 'breadcrumb' %>
+  <%= link_to @watering.watered_at.strftime('%a %-m/%-d/%y %l:%M%P'), watering_path(@watering), class: 'breadcrumb' %>
   <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
   Edit
 </h1>

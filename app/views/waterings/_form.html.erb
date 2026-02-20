@@ -1,5 +1,5 @@
 <div class="formContainer">
-  <%= form_with(model: watering, data: { controller: "watering-recipe", watering_recipe_url_value: for_recipe_recipe_batches_path }) do |form| %>
+  <%= form_with(model: watering, data: { controller: "watering-recipe watering-moisture", watering_recipe_url_value: for_recipe_recipe_batches_path }) do |form| %>
     <% if watering.errors.any? %>
       <div style="color: red">
         <h2><%= pluralize(watering.errors.count, "error") %> prohibited this watering from being saved:</h2>
@@ -19,8 +19,10 @@
     </div>
 
     <div>
-      <%= form.label :date, style: "display: block" %>
-      <%= form.date_field :date, value: watering.date || Time.zone.now.to_date %>
+      <%= form.label :watered_at, "Date & Time", style: "display: block" %>
+      <%= form.datetime_local_field :watered_at,
+          value: watering.watered_at&.strftime("%Y-%m-%dT%H:%M") ||
+                 Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
     </div>
 
     <div>
@@ -61,6 +63,71 @@
       <%= form.label :notes, style: "display: block" %>
       <%= form.text_area :notes, autofocus: watering.notes.nil? || watering.notes == '', placeholder: "e.g. Tap water" %>
     </div>
+
+    <div class="moisture-section">
+      <div class="moisture-header">
+        <button type="button"
+                data-action="click->watering-moisture#togglePre"
+                data-watering-moisture-target="preButton"
+                class="buttonLink"
+                style="<%= 'display: none;' if @recent_moisture_reading %>">
+          ➕ Add Pre-Watering Moisture
+        </button>
+        <button type="button"
+                data-action="click->watering-moisture#togglePost"
+                data-watering-moisture-target="postButton"
+                class="buttonLink">
+          ➕ Add Post-Watering Moisture
+        </button>
+      </div>
+
+      <!-- Pre-moisture field (auto-shown if recent reading exists) -->
+      <div data-watering-moisture-target="preField" style="<%= @recent_moisture_reading ? 'display: block;' : 'display: none;' %>">
+        <%= form.label :pre_moisture, "Pre-Watering Moisture", style: "display: block" %>
+        <% if @recent_moisture_reading %>
+          <small style="display: block; margin-bottom: 0.5rem; color: #666;">
+            ✨ Auto-filled from reading <%= time_ago_in_words(@recent_moisture_reading.measured_at) %> ago
+          </small>
+          <%= form.hidden_field :pre_moisture_reading_id, value: @recent_moisture_reading.id %>
+        <% end %>
+        <% if current_project.moisture_measurement_type == 'numeric' %>
+          <%= form.number_field :pre_moisture,
+              value: @recent_moisture_reading&.value_numeric,
+              step: '0.1', placeholder: "e.g. 45.5" %>
+          <small>Numeric value</small>
+        <% else %>
+          <%= form.select :pre_moisture,
+              options_for_select(
+                SoilMoistureReading.value_categoricals.keys.map { |k| [k.titleize, k] },
+                @recent_moisture_reading&.value_categorical
+              ),
+              { prompt: '-- Select --' } %>
+        <% end %>
+        <button type="button"
+                data-action="click->watering-moisture#hidePre"
+                class="buttonLinkSmall">✕ Remove</button>
+      </div>
+
+      <!-- Post-moisture field (hidden by default) -->
+      <div data-watering-moisture-target="postField" style="display: none;">
+        <%= form.label :post_moisture, "Post-Watering Moisture", style: "display: block" %>
+        <% if current_project.moisture_measurement_type == 'numeric' %>
+          <%= form.number_field :post_moisture,
+              step: '0.1', placeholder: "e.g. 85.0" %>
+          <small>Numeric value</small>
+        <% else %>
+          <%= form.select :post_moisture,
+              options_for_select(
+                SoilMoistureReading.value_categoricals.keys.map { |k| [k.titleize, k] }
+              ),
+              { prompt: '-- Select --' } %>
+        <% end %>
+        <button type="button"
+                data-action="click->watering-moisture#hidePost"
+                class="buttonLinkSmall">✕ Remove</button>
+      </div>
+    </div>
+
     <br>
     <div>
       <% submit_text = t(watering.new_record? ? 'waterings.create_watering' : 'waterings.update_watering') %>

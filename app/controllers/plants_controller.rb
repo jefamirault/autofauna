@@ -129,11 +129,12 @@ class PlantsController < ApplicationController
   def show
     @log_entries = @plant.log_entries.reverse
 
-    # Combine log entries and waterings into a single timeline
+    # Combine log entries, waterings, and standalone moisture readings into a single timeline
     log_items = @log_entries.map { |entry| { type: :log_entry, date: entry.timestamp, object: entry } }
-    watering_items = @plant.waterings.map { |watering| { type: :watering, date: watering.date.to_datetime, object: watering } }
+    watering_items = @plant.waterings.map { |watering| { type: :watering, date: watering.watered_at, object: watering } }
+    moisture_items = @plant.soil_moisture_readings.where(timing: :standalone).map { |reading| { type: :moisture_reading, date: reading.measured_at, object: reading } }
 
-    @timeline = (log_items + watering_items).sort_by { |item| item[:date] }.reverse
+    @timeline = (log_items + watering_items + moisture_items).sort_by { |item| item[:date] }.reverse
   end
 
   # GET /plants/new

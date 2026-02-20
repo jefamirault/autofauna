@@ -1,0 +1,16 @@
+<div class="settings-card">
+  <h1>🌱 <%= t('soil_moisture_readings.edit') %></h1>
+  <p class="subtitle">Plant: <%= @plant.label %></p>
+
+  <%= render 'form', soil_moisture_reading: @soil_moisture_reading %>
+
+  <hr>
+
+  <div class="danger-zone">
+    <%= button_to t('delete'),
+        plant_soil_moisture_reading_path(@plant, @soil_moisture_reading),
+        method: :delete,
+        data: { confirm: t('are_you_sure') },
+        class: 'button danger' %>
+  </div>
+</div>

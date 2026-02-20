@@ -1,0 +1,6 @@
+<div class="settings-card">
+  <h1>🌱 <%= t('soil_moisture_readings.new') %></h1>
+  <p class="subtitle">Plant: <%= @plant.label %></p>
+
+  <%= render 'form', soil_moisture_reading: @soil_moisture_reading %>
+</div>

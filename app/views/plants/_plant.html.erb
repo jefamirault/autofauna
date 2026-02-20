@@ -48,6 +48,15 @@
           <span class="value"><%= plant.watering_frequency_text %></span>
         </div>
       <% end %>
+      <% if @plant.latest_moisture_reading %>
+        <div class="info-row">
+          <span class="label">🌱 Latest Soil Moisture:</span>
+          <span class="value">
+            <%= @plant.latest_moisture_value %>
+            <small>(<%= time_ago_in_words(@plant.latest_moisture_reading.measured_at) %> ago)</small>
+          </span>
+        </div>
+      <% end %>
       <% if @plant.container.present? %>
         <div class="info-row">
           <span class="label">🫙 <%= t 'attributes.container' %>:</span>

@@ -1,6 +1,6 @@
 <div id="<%= dom_id watering %>">
-  <h1><%= t('waterings.watered_on') %> <%= format_date @watering.date, long: true %></h1>
-  <h4><%= time_ago @watering.date %></h4>
+  <h1><%= t('waterings.watered_on') %> <%= format_date @watering.watered_at, long: true %></h1>
+  <h4><%= time_ago @watering.watered_at %></h4>
   <strong><%= t 'attributes.plant' %>:</strong>
   <div class="plantButton">
     <%= link_to watering.plant %>

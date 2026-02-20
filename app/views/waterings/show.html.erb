@@ -1,5 +1,5 @@
 <% content_for :title do %>
-  Watered #<%= @watering.plant.uid %> <%= @watering.plant.name %> <%= @watering.date.strftime '%a %-m/%-d/%y' %>
+  Watered #<%= @watering.plant.uid %> <%= @watering.plant.name %> <%= @watering.watered_at.strftime '%a %-m/%-d/%y %l:%M%P' %>
 <% end %>
 
 <h1 style="display:inline-block">
@@ -9,7 +9,7 @@
   <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
   <%= link_to t('.waterings'), waterings_path, class: 'breadcrumb' %>
   <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= @watering.date.strftime '%a %-m/%-d/%y' %>
+  <%= @watering.watered_at.strftime '%a %-m/%-d/%y %l:%M%P' %>
 </h1>
 
 <%= render @watering %>

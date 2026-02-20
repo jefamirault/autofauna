@@ -183,6 +183,12 @@ es:
       watering_updated: "El riego se actualizó exitosamente."
       confirm_delete: "¿Está seguro de que desea eliminar esta riego?"
       delete_success: "El riego fue eliminada exitosamente."
+  soil_moisture_readings:
+    new: "Nueva lectura de humedad del suelo"
+    edit: "Editar lectura de humedad del suelo"
+    create_success: "Lectura de humedad registrada exitosamente"
+    update_success: "Lectura de humedad actualizada"
+    delete_success: "Lectura de humedad eliminada"
   sensors:
     messages:
       confirm_delete: "¿Está seguro de que desea eliminar esta sensor?"
@@ -313,8 +319,15 @@ es:
     archived: "¿Archivado?"
     plant: "Planta"
     date:  "Fecha"
+    watered_at: "Fecha y hora"
     interval: "Intervalo"
     notes: "Notas"
+    moisture_measurement_type: "Tipo de medición de humedad"
+    value_numeric: "Nivel de humedad"
+    value_categorical: "Nivel de humedad"
+    pre_moisture: "Humedad antes del riego"
+    post_moisture: "Humedad después del riego"
+    measured_at: "Medido en"
     logged: "Registrado"
     updated: "Actualizado"
     projects: "Proyectos"

@@ -5,9 +5,10 @@ class Plant < ApplicationRecord
   belongs_to :location, optional: true
   belongs_to :recipe, optional: true
   has_one :zone, through: :location
-  has_many :waterings, -> { order 'waterings.date' }, dependent: :destroy
+  has_many :waterings, -> { order 'waterings.watered_at' }, dependent: :destroy
   belongs_to :last_watering, class_name: 'Watering', optional: true
   has_many :log_entries, as: :loggable, dependent: :destroy
+  has_many :soil_moisture_readings, dependent: :destroy
 
   scope :needing_notification, -> {
     where(notifications_enabled: true, archived: false)
@@ -193,8 +194,8 @@ class Plant < ApplicationRecord
     if waterings.nil? || waterings.empty?
       nil
     else
-      last_fertilization = waterings.order(:date).reverse.find {|w| w.notes =~ /fertilizer/}
-      last_fertilization ? last_fertilization.date : nil
+      last_fertilization = waterings.order(:watered_at).reverse.find {|w| w.notes =~ /fertilizer/}
+      last_fertilization ? last_fertilization.watered_at&.to_date : nil
     end
   end
 
@@ -257,6 +258,14 @@ class Plant < ApplicationRecord
     self.last_watering&.watering_text
   end
 
+  def latest_moisture_reading
+    soil_moisture_readings.recent.first
+  end
+
+  def latest_moisture_value
+    latest_moisture_reading&.display_value
+  end
+
   # private
 
   def sync_watering_dates_if_schedule_changed
@@ -266,7 +275,7 @@ class Plant < ApplicationRecord
   end
 
   def update_watering_dates
-    dates = waterings.map &:date
+    dates = waterings.map { |w| w.watered_at&.to_date }.compact
     self.date_last_watering = dates.last
     if self.date_last_watering
       self.date_min_watering = min_watering_freq ? date_last_watering + min_watering_freq : nil

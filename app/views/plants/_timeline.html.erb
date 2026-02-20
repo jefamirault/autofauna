@@ -28,9 +28,25 @@
           <% if watering.tds.present? %><span class='watering-tds'>📊 <%= watering.tds %>ppm</span><% end %>
           <% if watering.recipe.present? %><span class='watering-recipe'>🧪 <%= watering.recipe.name %></span><% end %>
           <% if watering.recipe_batch.present? %><span class='watering-batch'>🪣 <%= watering.recipe_batch.to_s %></span><% end %>
-          <span class='watering-time'>🕐 <%= time_ago watering.date %></span>
+          <% if watering.soil_moisture_readings.any? %>
+            <% watering.soil_moisture_readings.order(:timing).each do |reading| %>
+              <span class='watering-moisture'>🌱 <%= reading.timing.titleize %>: <%= reading.display_value %></span>
+            <% end %>
+          <% end %>
+          <span class='watering-time'>🕐 <%= time_ago watering.watered_at %></span>
           <% if watering.interval %><span class='interval'>(<%= watering.interval_text %>)</span><% end %>
           <% if watering.updated_at - watering.created_at > 1.minute %><span class='metadata updated-at'>Updated <%= time_ago_in_words watering.updated_at %> ago</span><% end %>
+        </td>
+      </tr>
+    <% elsif item[:type] == :moisture_reading %>
+      <% reading = item[:object] %>
+      <tr class="moisture-reading-row green">
+        <td class='whenColumn'>
+          <span class='timeline-icon'>🌱</span>
+          <strong>Soil Moisture:</strong> <%= reading.display_value %>
+          <% if reading.notes.present? %><span class='moisture-notes'><%= reading.notes %></span><% end %>
+          <span class='moisture-time'>🕐 <%= time_ago reading.measured_at %></span>
+          <% if reading.updated_at - reading.created_at > 1.minute %><span class='metadata updated-at'>Updated <%= time_ago_in_words reading.updated_at %> ago</span><% end %>
         </td>
       </tr>
     <% end %>

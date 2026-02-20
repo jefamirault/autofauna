@@ -183,6 +183,12 @@ en:
       watering_updated: "Watering was successfully updated."
       confirm_delete: "Are you sure you want to delete this watering?"
       delete_success: "Watering deleted successfully."
+  soil_moisture_readings:
+    new: "New Soil Moisture Reading"
+    edit: "Edit Soil Moisture Reading"
+    create_success: "Moisture reading logged successfully"
+    update_success: "Moisture reading updated"
+    delete_success: "Moisture reading deleted"
   sensors:
     messages:
       confirm_delete: "Are you sure you want to delete this Sensor?"
@@ -313,8 +319,15 @@ en:
     archived: "Archived?"
     plant: "Plant"
     date:  "Date"
+    watered_at: "Date & Time"
     interval: "Interval"
     notes: "Notes"
+    moisture_measurement_type: "Moisture Measurement Type"
+    value_numeric: "Moisture Level"
+    value_categorical: "Moisture Level"
+    pre_moisture: "Pre-Watering Moisture"
+    post_moisture: "Post-Watering Moisture"
+    measured_at: "Measured At"
     logged: "Logged"
     updated: "Updated"
     projects: "Projects"

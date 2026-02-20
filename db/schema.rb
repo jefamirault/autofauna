@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_15_200001) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_20_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -91,6 +91,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_15_200001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "api_key"
+    t.integer "moisture_measurement_type", default: 0, null: false
+    t.index ["moisture_measurement_type"], name: "index_projects_on_moisture_measurement_type"
   end
 
   create_table "push_subscriptions", force: :cascade do |t|
@@ -182,6 +184,23 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_15_200001) do
     t.integer "sensor_type_id"
   end
 
+  create_table "soil_moisture_readings", force: :cascade do |t|
+    t.bigint "plant_id", null: false
+    t.bigint "watering_id"
+    t.datetime "measured_at", null: false
+    t.decimal "value_numeric", precision: 5, scale: 2
+    t.integer "value_categorical"
+    t.integer "timing", default: 0, null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["measured_at"], name: "index_soil_moisture_readings_on_measured_at"
+    t.index ["plant_id", "measured_at"], name: "index_soil_moisture_readings_on_plant_id_and_measured_at"
+    t.index ["plant_id"], name: "index_soil_moisture_readings_on_plant_id"
+    t.index ["timing"], name: "index_soil_moisture_readings_on_timing"
+    t.index ["watering_id"], name: "index_soil_moisture_readings_on_watering_id"
+  end
+
   create_table "tanks", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -223,7 +242,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_15_200001) do
 
   create_table "waterings", force: :cascade do |t|
     t.integer "plant_id"
-    t.date "date"
+    t.datetime "watered_at"
     t.string "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -256,6 +275,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_15_200001) do
   add_foreign_key "recipe_sources", "projects"
   add_foreign_key "recipe_sources", "tanks"
   add_foreign_key "recipes", "projects"
+  add_foreign_key "soil_moisture_readings", "plants"
+  add_foreign_key "soil_moisture_readings", "waterings"
   add_foreign_key "water_tests", "tanks"
   add_foreign_key "waterings", "recipe_batches"
   add_foreign_key "waterings", "recipes"
