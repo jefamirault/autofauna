@@ -26,7 +26,7 @@ body
     &.sidebarMinimized
       grid-template-rows: var(--header-height) 0 1fr auto
       aside#sidebar
-        opacity: 0
+        visibility: hidden
         pointer-events: none
 
   font-size: 125%
@@ -44,7 +44,7 @@ body
   @media (max-width: 600px)
     background-attachment: scroll
 
-  @media (min-width: 600px)
+  @media (min-width: 601px)
     &.sidebarMinimized
       grid-template-columns: 4rem 1fr
   &.development
@@ -59,10 +59,10 @@ html.sidebarMinimized body
   @media (max-width: 600px)
     grid-template-rows: var(--header-height) 0 1fr auto
     aside#sidebar
-      opacity: 0
+      visibility: hidden
       pointer-events: none
 
-  @media (min-width: 600px)
+  @media (min-width: 601px)
     grid-template-columns: 4rem 1fr
 
 $reduction: 12px
@@ -72,7 +72,7 @@ header
   position: relative
   display: flex
   flex-wrap: nowrap
-  justify-content: space-between
+  justify-content: center
   align-items: center
   padding: 0
   margin: 0
@@ -127,6 +127,10 @@ body:has(header.header-graphic) #logoContainer
     transition: height 0.12s, padding 0.12s
     #logoText
       display: none
+  // Landscape mobile: don't scale up logo
+  @media (max-width: 900px) and (min-width: 601px) and (max-height: 500px)
+    height: var(--header-height)
+    padding: 0.25rem
 
 // When minimized: logo shrinks to fit narrow icon rail
 body.sidebarMinimized:has(header.header-graphic) #logoContainer,
@@ -181,6 +185,9 @@ body.development:has(header.header-plants), body.development:has(header.header-d
 // Context-aware header gradients — always on the header, logo area covered by solid button/logoContainer
 .header-plants, .header-waterings, .header-tanks, .header-locations, .header-sensors, .header-users, .header-settings, .header-default
   background: var(--section-gradient)
+  // Mobile: blend solid button color into gradient so there's no visible seam
+  @media (max-width: 600px)
+    background: linear-gradient(to right, var(--section-color-start) var(--header-height), transparent calc(var(--header-height) + 3rem)), var(--section-gradient)
 
 // Header title (shown in #headerRight for graphic headers)
 #headerTitle
@@ -191,6 +198,11 @@ body.development:has(header.header-plants), body.development:has(header.header-d
   font-weight: 400
   letter-spacing: -0.5px
   white-space: nowrap
+  @media (max-width: 600px)
+    display: block
+    flex: 1
+    text-align: center
+    margin: 0
 
 // Header right section (email + dropdown)
 #headerRight
@@ -200,6 +212,8 @@ body.development:has(header.header-plants), body.development:has(header.header-d
   align-items: center
   flex-shrink: 0
   z-index: 1
+  @media (max-width: 600px)
+    margin-left: 0
 
 #headerEmail
   padding: 0.75rem 1rem
@@ -330,10 +344,12 @@ body.development:has(header.header-plants), body.development:has(header.header-d
       .search-toggle-btn
         display: none
 
-// Plants index: search always expanded and logo hidden at narrow breakpoints
+// Plants index: search always expanded and title/logo hidden at narrow breakpoints
 body:has(main.plants.index)
   @media (max-width: 600px)
     #logoText
+      display: none !important
+    #headerTitle
       display: none !important
     #headerSearch
       .search-input-wrapper
@@ -344,10 +360,9 @@ body:has(main.plants.index)
 // Sidebar locale switcher
 #sidebarLocale
   position: relative
-  border-top: 1px solid #fff7
   .locale-toggle-btn
     width: 100%
-    background: transparent
+    background: none
     border: none
     cursor: pointer
     color: white
@@ -378,9 +393,21 @@ button.collapseSidebar
   color: #fffe
   flex-shrink: 0
   height: var(--logo-size, var(--header-height))
-  @media (max-width: 600px)
+  @media (max-width: 900px) and (min-width: 601px) and (max-height: 500px)
     height: var(--header-height)
+  @media (max-width: 600px)
+    position: fixed
+    top: 0
+    left: 0
+    width: var(--header-height)
+    height: var(--header-height)
+    z-index: 20
     background: var(--section-color-start)
+    display: flex
+    align-items: center
+    justify-content: center
+    #logoText
+      display: none
   &:hover
     color: #fffc
 
@@ -389,11 +416,8 @@ body.sidebarMinimized button.collapseSidebar,
 html.sidebarMinimized button.collapseSidebar
   height: var(--header-height)
   @media (max-width: 600px)
-    position: fixed
-    top: 0
-    left: 0
-    width: var(--header-height)
-    z-index: 20
+    visibility: visible
+    pointer-events: auto
 
 main
   grid-area: main
@@ -421,6 +445,11 @@ section#primary
     .fill
       flex: 0
 
+// Landscape mobile: collapse fill spacer so locale scrolls with nav
+@media (max-width: 900px) and (min-width: 601px) and (max-height: 500px)
+  aside#sidebar .fill
+    flex: 0
+
 aside#sidebar
   grid-area: sidebar
   background: #0009
@@ -431,13 +460,16 @@ aside#sidebar
     grid-row: 1 / -1
 
   nav
+    display: flex
     flex-direction: column
+    flex-wrap: nowrap
+    flex: 1
     border-top: 1px solid #fff7
+    overflow-y: auto
+    min-height: 0
 
 
   a.navItem, nav button, .locale-toggle-btn
-    flex: 1
-    background: #2227
     display: block
     color: white
     padding: 1rem 1rem 1rem 2.5rem
@@ -445,7 +477,7 @@ aside#sidebar
     border-bottom: 1px solid #fff7
 
     &:hover, &.selected
-      background: #777
+      background: #7779
       text-decoration: none
     &.selected
       cursor: default

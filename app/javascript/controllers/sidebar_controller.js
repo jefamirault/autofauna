@@ -11,7 +11,7 @@ export default class extends Controller {
     connect() {
         // Set initial state based on stored preference or default
         const stored = localStorage.getItem('sidebar-minimized')
-        const isMobile = window.innerWidth < 600
+        const isMobile = window.innerWidth <= 600
         this.minimizedValue = isMobile || (stored ? JSON.parse(stored) : false)
         this.updateSidebar()
 
@@ -33,7 +33,7 @@ export default class extends Controller {
         this.handleSidebarTouchStart = this.handleSidebarTouchStart.bind(this)
         this.handleSidebarTouchEnd = this.handleSidebarTouchEnd.bind(this)
         const sidebar = document.getElementById('sidebar')
-        if (sidebar && window.innerWidth < 600) {
+        if (sidebar && window.innerWidth <= 600) {
             sidebar.addEventListener('touchstart', this.handleSidebarTouchStart, { passive: true })
             sidebar.addEventListener('touchend', this.handleSidebarTouchEnd, { passive: true })
         }
@@ -71,14 +71,14 @@ export default class extends Controller {
 
     handleScroll(e) {
         const scrollTop = e.target.scrollTop
-        if (window.innerWidth < 600 && !this.minimizedValue && scrollTop > this.lastScrollTop) {
+        if (window.innerWidth <= 600 && !this.minimizedValue && scrollTop > this.lastScrollTop) {
             this.closeOnMobile()
         }
         this.lastScrollTop = scrollTop
     }
 
     handleResize() {
-        if (window.innerWidth < 600 && !this.minimizedValue) {
+        if (window.innerWidth <= 600 && !this.minimizedValue) {
             this.minimizedValue = true
             this.updateSidebar()
         }
@@ -115,7 +115,7 @@ export default class extends Controller {
         this.touchStartY = e.touches[0].clientY
         this.isTracking = false
 
-        const isNarrowScreen = window.innerWidth < 600
+        const isNarrowScreen = window.innerWidth <= 600
 
         if (!isNarrowScreen) {
             // Different detection areas based on sidebar state
@@ -159,7 +159,7 @@ export default class extends Controller {
     }
 
     handleSwipe() {
-        const isNarrowScreen = window.innerWidth < 600
+        const isNarrowScreen = window.innerWidth <= 600
 
         // Only handle swipes on wide screens
         if (!isNarrowScreen) {
@@ -198,7 +198,7 @@ export default class extends Controller {
     }
 
     closeOnMobile() {
-        const isMobile = window.innerWidth < 600
+        const isMobile = window.innerWidth <= 600
         if (isMobile && !this.minimizedValue) {
             this.minimizedValue = true
             this.updateSidebar()
@@ -207,18 +207,14 @@ export default class extends Controller {
     }
 
     handleNavClick() {
-        const isMobile = window.innerWidth < 600
+        const isMobile = window.innerWidth <= 600
         if (isMobile && !this.minimizedValue) {
-            // Mobile expanded: minimize on nav click (existing closeOnMobile behavior)
+            // Mobile expanded: minimize on nav click
             this.minimizedValue = true
             this.updateSidebar()
             localStorage.setItem('sidebar-minimized', JSON.stringify(this.minimizedValue))
-        } else if (!isMobile && this.minimizedValue) {
-            // Desktop minimized (icon rail): expand on nav click
-            this.minimizedValue = false
-            this.updateSidebar()
-            localStorage.setItem('sidebar-minimized', JSON.stringify(this.minimizedValue))
         }
+        // Desktop minimized: just navigate, don't expand sidebar
     }
 
     updateSidebar() {

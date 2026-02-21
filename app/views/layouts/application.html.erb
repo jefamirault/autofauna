@@ -112,26 +112,24 @@
             </div>
           <% end %>
         <% end %>
-      </nav>
-      <div class="fill"></div>
-      <div id="sidebarLocale" data-controller="locale-popup">
-        <div class="locale-options hidden" data-locale-popup-target="menu">
-          <% if current_locale != 'en' %>
-            <%= link_to raw('🌐 <span class="nav-label">English</span>'), "?locale=en", class: "navItem locale-option" %>
-          <% end %>
-          <% if current_locale != 'es' %>
-            <%= link_to raw('🌐 <span class="nav-label">Español</span>'), "?locale=es", class: "navItem locale-option" %>
-          <% end %>
+        <div class="fill"></div>
+        <div id="sidebarLocale" data-controller="locale-popup" data-locale-popup-flag-value="<%= current_locale == 'es' ? '🇲🇽' : '🇺🇸' %>">
+          <div class="locale-options hidden" data-locale-popup-target="menu">
+            <% if current_locale != 'en' %>
+              <%= link_to raw('🇺🇸 <span class="nav-label">English</span>'), "?locale=en", class: "navItem locale-option" %>
+            <% end %>
+            <% if current_locale != 'es' %>
+              <%= link_to raw('🇲🇽 <span class="nav-label">Español</span>'), "?locale=es", class: "navItem locale-option" %>
+            <% end %>
+          </div>
+          <button class="locale-toggle-btn navItem" data-action="click->locale-popup#toggle" aria-label="Change language">
+            <span data-locale-popup-target="icon">🌐</span> <span class="nav-label"><%= current_locale == 'es' ? 'Español' : 'English' %></span>
+          </button>
         </div>
-        <button class="locale-toggle-btn navItem" data-action="click->locale-popup#toggle" aria-label="Change language">
-          &#127760; <span class="nav-label"><%= current_locale == 'es' ? 'Español' : 'English' %></span>
-        </button>
-      </div>
-      <% unless user_signed_in? %>
-        <nav data-action="click->sidebar#handleNavClick">
+        <% unless user_signed_in? %>
           <%= link_to t('log_in'), new_session_path, class: 'navItem' %>
-        </nav>
-      <% end %>
+        <% end %>
+      </nav>
     </aside>
 
     <main class="<%= params[:controller] %> <%= params[:action] %>">
