@@ -4,3 +4,59 @@ Current session log. Previous logs archived in `agent_log/`.
 
 ---
 
+## 2026-02-20: Plants Search Page UI/UX Update
+
+**Plan:**
+1. SASS — Restructure `#search-options` into Sort/Filter rows; unify duplicated filter styles; add pagination styles
+2. HTML — Restructure `index.html.erb` with Sort/Filter rows; move toggle/close buttons outside scroll containers; add pagination controls
+3. JS — Update `location_filter_controller.js` (reorder fixes for new DOM + client-side pagination)
+4. Locales — Add Sort/Filter/pagination translation keys to en.yml and es.yml
+
+**Changes made:**
+
+1. **SASS** (`app/assets/stylesheets/plants.sass`):
+   - `#search-options` changed to `flex-direction: column` (always stacked)
+   - New `.sort-row` with `min-height: 2.5rem`
+   - New `.filter-row` with `.row-label` and `.filter-row-content` column layout
+   - Responsive: `.filter-row` stacks at <500px
+   - Unified `.location-filters`/`.recipe-filters` into `.filter-buttons-scroll`
+   - Unified `.location-filters-toggle`/`.recipe-filters-toggle` into `.filter-toggle-btn`
+   - New `.collapsible-filter` flex row, `.filter-section-label`
+   - Removed old `.display-toggle`, `.display-toggle-label`, `.filter-label-text`
+   - New `.pagination-controls`, `.pagination-per-page`, `.pagination-nav`, `.pagination-info` styles
+   - Removed duplicate watering status styles
+
+2. **HTML** (`app/views/plants/index.html.erb`):
+   - Sort row with `.sort-row` and `.row-label` "Sort:"
+   - Filter row with `.filter-row`, `.row-label` "Filter:", and `.filter-row-content`
+   - Each filter section uses `.collapsible-filter` with toggle/close buttons outside the scroll container
+   - `collapsible-filters` controller moved to the outer container div
+   - Added pagination controls below watering group
+
+3. **JS** (`app/javascript/controllers/location_filter_controller.js`):
+   - New targets: `paginationControls`, `paginationNav`, `paginationInfo`
+   - New values: `perPage`, `currentPage`, `showingTemplate`
+   - `reorderButtons()`/`reorderRecipeButtons()`: No longer manage label/toggle/remove buttons (now outside container)
+   - `filterPlants()`: In watering mode, uses `data-filter-hidden` attribute, then calls `paginateVisibleCards()`
+   - `updateResultsCount()`: In watering mode, checks `data-filter-hidden` instead of style.display
+   - New methods: `paginateVisibleCards()`, `renderPaginationControls()`, `createPageButton()`, `goToPage()`, `changePerPage()`
+   - `switchDisplayMode()`: Updated selector from `.display-toggle` to `.sort-row`; hides pagination in non-watering modes; resets page
+   - All filter apply/hide methods reset `currentPageValue = 1`
+
+4. **Locales**: Added `sort`, `filter`, `status_label`, `recipe_label`, `location_label`, `show_per_page`, `all`, `showing_info` to both en.yml and es.yml
+
+---
+
+## 2026-02-20: Plants Search — Filter Layout Refinements
+
+Three visual fixes for the Sort/Filter row structure:
+
+1. **Equal-width filter labels** (`plants.sass`): Added `min-width: 5.5rem` to `.filter-section-label` so Status/Recipe/Location labels align.
+
+2. **Add-filter buttons alignment** (`index.html.erb`): Moved `.add-filters` div from inside `.filter-row > .filter-row-content` to be a direct child of `#search-options`, between sort-row and filter-row. Now aligns with sort buttons.
+
+3. **Toggle/close buttons in scroll container** (`index.html.erb` + `plants.sass`):
+   - Moved `.filter-toggle-btn` and `.remove-filter-btn` inside `.filter-buttons-scroll`, wrapped in a `.filter-actions` span
+   - New `.filter-actions` style: `position: sticky; right: 0` with white background — pins to right edge when scrolling, flows naturally when expanded
+   - Removed `flex-shrink: 0` from standalone `.filter-toggle-btn` and `.remove-filter-btn` (now handled by `.filter-actions`)
+

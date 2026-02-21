@@ -26,22 +26,6 @@ h1
       padding-left: 0.1em
 
 // Display Toggle
-.display-toggle
-  display: flex
-  align-items: center
-  gap: 0.5rem
-  min-height: 2rem
-
-.display-toggle-label
-  color: #666
-  font-size: 0.9em
-  white-space: nowrap
-  line-height: 1.8
-
-.filter-label-text
-  @media (max-width: 899px)
-    display: none
-
 .display-toggle-btn
   display: inline-block
   padding: 0.25rem 0.75rem
@@ -74,107 +58,193 @@ h1
         background: var(--filter-color)
         opacity: 0.9
 
-.location-filters
+// Filter controls wrapper - stacked rows
+#search-options
+  display: flex
+  flex-direction: column
+  gap: 0.5rem
+  margin: 0 0 .5em .5em
+
+// Sort row
+.sort-row
   display: flex
   align-items: center
   gap: 0.5rem
-  flex-wrap: nowrap
-  overflow-x: scroll
+  min-height: 2.5rem
+  overflow-x: auto
   scrollbar-width: none
-  min-height: 2rem
 
-  &.expanded
-    flex-wrap: wrap
+  &::-webkit-scrollbar
+    display: none
 
-  button.display-toggle-btn
-    border: none
-    cursor: pointer
-    font-family: inherit
+  .display-toggle-btn
+    padding: .75em  1.5em .75em 1em
 
-.location-filters-toggle
-  display: inline-block
-  padding: 0.25rem 0.75rem
-  border-radius: 999px
-  font-size: 0.85em
-  border: 1px solid rgba(14, 72, 123, 0.3)
-  background: transparent
-  color: $blue
-  cursor: pointer
-  font-family: inherit
-  transition: all 0.2s ease
-  white-space: nowrap
-
-  &:hover
-    background: $lightblue
-    border-style: solid
-
-.recipe-filters
+// Filter row with label + content
+.filter-row
   display: flex
-  align-items: center
   gap: 0.5rem
-  flex-wrap: nowrap
-  overflow-x: scroll
-  scrollbar-width: none
-  min-height: 2rem
 
-  &.expanded
-    flex-wrap: wrap
+  @media (max-width: 500px)
+    flex-direction: column
 
-  button.display-toggle-btn
-    border: none
-    cursor: pointer
-    font-family: inherit
-
-.recipe-filters-toggle
-  display: inline-block
-  padding: 0.25rem 0.75rem
-  border-radius: 999px
-  font-size: 0.85em
-  border: 1px solid rgba(14, 72, 123, 0.3)
-  background: transparent
-  color: $blue
-  cursor: pointer
-  font-family: inherit
-  transition: all 0.2s ease
-  white-space: nowrap
-
-  &:hover
-    background: $lightblue
-    border-style: solid
-
-.location-group-header
-  font-size: 1.1em
-  font-weight: 600
-  color: $blue
-  padding: 0.75rem 0.75rem 0.25rem
-  margin: 0
-
-  &.clickable
-    cursor: pointer
-    user-select: none
-    transition: background-color 0.2s ease
-    display: flex
-    align-items: center
-    gap: 0.5rem
-    padding: 0.75rem
-    margin: 0.5rem 0 0.25rem
-    border-radius: 4px
-    &:hover
-      opacity: 0.9
-
-.group-count
-  margin-left: auto
+.row-label
+  color: #666
   font-size: 0.9em
-  opacity: 0.8
+  white-space: nowrap
+  line-height: 1.8
+  display: flex
+  align-items: center
+  align-self: stretch
+  padding-top: 0.25rem
+
+.filter-row-content
+  display: flex
+  flex-direction: column
+  gap: 0.5rem
+  flex: 1
+  min-width: 0
+
+// Add filter buttons row
+.add-filters
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  min-height: 2rem
+  overflow-x: auto
+  scrollbar-width: none
+
+  &::-webkit-scrollbar
+    display: none
+
+.add-filter-btn
+  display: inline-block
+  padding: 0.25rem 0.75rem
+  border-radius: 999px
+  font-size: 0.9em
+  text-decoration: none
+  color: $blue
+  background: transparent
+  border: 1px dashed rgba(14, 72, 123, 0.4)
+  white-space: nowrap
+  cursor: pointer
+  font-family: inherit
+  transition: all 0.2s ease
+  &:hover
+    background: $lightblue
+    border-style: solid
+
+// Collapsible filter row (status, recipe, location)
+.collapsible-filter
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  min-height: 2rem
+
+  .display-toggle-btn
+    border: 1px solid transparent
+
+.filter-section-label
+  color: #666
+  font-size: 0.9em
+  white-space: nowrap
+  line-height: 1.8
+  flex-shrink: 0
+
+  @media (max-width: 500px)
+    .filter-label-text
+      display: none
+
+// Shared scrollable filter button container
+.filter-buttons-scroll
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  flex: 1
+  min-width: 0
+  flex-wrap: nowrap
+  overflow-x: auto
+  scrollbar-width: none
+
+  &::-webkit-scrollbar
+    display: none
+
+  &.expanded
+    flex-wrap: wrap
+    overflow-x: visible
+
+  button.display-toggle-btn
+    border: none
+    cursor: pointer
+    font-family: inherit
+
+// Filter actions container (sticky at right edge of scroll)
+.filter-actions
+  position: sticky
+  right: 0
+  display: flex
+  align-items: center
+  align-self: stretch
+  gap: 0.25rem
+  flex-shrink: 0
+  background: #eee
+  padding-left: 0.25rem
+
+  .is-overflowing > &::before
+    content: ""
+    position: absolute
+    right: 100%
+    top: 0
+    bottom: 0
+    width: 3em
+    background: linear-gradient(to right, transparent, #eee)
+    pointer-events: none
+
+// Shared filter toggle button (show more/less)
+.filter-toggle-btn
+  display: inline-block
+  padding: 0.25rem 0.75rem
+  border-radius: 999px
+  font-size: 0.85em
+  border: 1px solid rgba(14, 72, 123, 0.3)
+  background: transparent
+  color: $blue
+  cursor: pointer
+  font-family: inherit
+  transition: all 0.2s ease
+  white-space: nowrap
+
+  &:hover
+    background: $lightblue
+    border-style: solid
+
+// Remove filter button (X button)
+.remove-filter-btn
+  display: inline-block
+  padding: 0.25rem 0.5rem
+  border-radius: 999px
+  font-size: 0.9em
+  background: transparent
+  border: none
+  color: rgba(14, 72, 123, 0.6)
+  cursor: pointer
+  font-family: inherit
+  margin-left: 0.25rem
+  &:hover
+    background: rgba(14, 72, 123, 0.1)
+    color: $blue
 
 // Watering status filters
 .watering-status-filters
   display: flex
   align-items: center
   gap: 0.5rem
-  flex-wrap: wrap
+  flex-wrap: nowrap
+  overflow-x: auto
   scrollbar-width: none
-  min-height: 2rem
+
+  &::-webkit-scrollbar
+    display: none
 
 .watering-status-btn
   // Inactive states with light backgrounds
@@ -211,6 +281,31 @@ h1
       color: white
       &:hover
         opacity: 0.9
+
+.location-group-header
+  font-size: 1.1em
+  font-weight: 600
+  color: $blue
+  padding: 0.75rem 0.75rem 0.25rem
+  margin: 0
+
+  &.clickable
+    cursor: pointer
+    user-select: none
+    transition: background-color 0.2s ease
+    display: flex
+    align-items: center
+    gap: 0.5rem
+    padding: 0.75rem
+    margin: 0.5rem 0 0.25rem
+    border-radius: 4px
+    &:hover
+      opacity: 0.9
+
+.group-count
+  margin-left: auto
+  font-size: 0.9em
+  opacity: 0.8
 
 // Plants > Show
 .wateringNotesColumn
@@ -554,110 +649,66 @@ h1
   &:hover
     color: white
 
-// Filter controls wrapper - display toggle and add filters on same line
-#search-options
+// Pagination
+.pagination-controls
   display: flex
+  align-items: center
+  justify-content: center
+  gap: 1rem
+  padding: 1rem 0.5rem
   flex-wrap: wrap
-  gap: 0.5rem
-  align-items: center
-  margin: 0 0 .5em .5em
 
-  @media (max-width: 950px)
-    flex-direction: column
-    align-items: flex-start
-
-// Add filter buttons - inline with display toggle
-.add-filters
+.pagination-per-page
   display: flex
   align-items: center
   gap: 0.5rem
-  min-height: 2rem
-
-.add-filter-btn
-  display: inline-block
-  padding: 0.25rem 0.75rem
-  border-radius: 999px
   font-size: 0.9em
-  text-decoration: none
-  color: $blue
-  background: transparent
-  border: 1px dashed rgba(14, 72, 123, 0.4)
-  white-space: nowrap
-  cursor: pointer
-  font-family: inherit
-  transition: all 0.2s ease
-  &:hover
-    background: $lightblue
-    border-style: solid
+  color: #666
 
-// Remove filter button (X button)
-.remove-filter-btn
-  display: inline-block
-  padding: 0.25rem 0.5rem
-  border-radius: 999px
-  font-size: 0.9em
-  background: transparent
-  border: none
-  color: rgba(14, 72, 123, 0.6)
-  cursor: pointer
-  font-family: inherit
-  margin-left: 0.25rem
-  &:hover
-    background: rgba(14, 72, 123, 0.1)
+  select
+    padding: 0.25rem 0.5rem
+    border-radius: 999px
+    border: 1px solid rgba(14, 72, 123, 0.3)
+    background: white
     color: $blue
+    font-family: inherit
+    font-size: 0.9em
+    cursor: pointer
 
-// Watering status filters
-.watering-status-filters
+.pagination-nav
   display: flex
   align-items: center
-  gap: 0.5rem
-  flex-wrap: nowrap
-  width: 100%
-  overflow-x: scroll
+  gap: 0.25rem
 
+  button
+    display: inline-block
+    padding: 0.25rem 0.6rem
+    border-radius: 999px
+    font-size: 0.85em
+    border: 1px solid rgba(14, 72, 123, 0.3)
+    background: transparent
+    color: $blue
+    cursor: pointer
+    font-family: inherit
+    transition: all 0.2s ease
+    white-space: nowrap
+    min-width: 2rem
+    text-align: center
 
-.watering-status-btn
-  // Inactive states with light backgrounds
-  &[data-status="urgent"]
-    background: color-mix(in srgb, #f59e0b 15%, transparent)
-    color: #f59e0b
-    &:hover
-      background: color-mix(in srgb, #f59e0b 25%, transparent)
-  &[data-status="today"]
-    background: color-mix(in srgb, #10b981 15%, transparent)
-    color: #10b981
-    &:hover
-      background: color-mix(in srgb, #10b981 25%, transparent)
-  &[data-status="scheduled"]
-    background: color-mix(in srgb, #3b82f6 15%, transparent)
-    color: #3b82f6
-    &:hover
-      background: color-mix(in srgb, #3b82f6 25%, transparent)
+    &:hover:not(:disabled)
+      background: $lightblue
+      border-style: solid
 
-  // Active states with solid backgrounds
-  &.active
-    &[data-status="urgent"]
-      background: #f59e0b
+    &:disabled
+      opacity: 0.4
+      cursor: default
+
+    &.active
+      background: $blue
       color: white
-      &:hover
-        opacity: 0.9
-    &[data-status="today"]
-      background: #10b981
-      color: white
-      &:hover
-        opacity: 0.9
-    &[data-status="scheduled"]
-      background: #3b82f6
-      color: white
-      &:hover
-        opacity: 0.9
+      border-color: $blue
 
-// Recipe and location filter sections - full width
-.recipe-filter-section, .location-filter-section
-  width: 100%
-  min-height: 2rem
-
-.group-count
-  margin-left: auto
-  font-size: 0.9em
-  opacity: 0.8
+.pagination-info
+  font-size: 0.85em
+  color: #666
+  white-space: nowrap

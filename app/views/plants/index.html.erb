@@ -34,7 +34,10 @@
      data-location-filter-results-search-template-value="<%= t('.results_count_with_search', total: '__TOTAL__', search_term: '__SEARCH_TERM__') %>"
      data-location-filter-results-filtered-template-value="<%= t('.results_filtered', total: '__TOTAL__') %>"
      data-location-filter-results-filtered-search-template-value="<%= t('.results_filtered_search', total: '__TOTAL__', search_term: '__SEARCH_TERM__') %>"
-     data-location-filter-search-term-value="<%= params.dig('q', 'name_or_location_name_cont') || '' %>">
+     data-location-filter-search-term-value="<%= params.dig('q', 'name_or_location_name_cont') || '' %>"
+     data-location-filter-per-page-value="20"
+     data-location-filter-current-page-value="1"
+     data-location-filter-showing-template-value="<%= t('.showing_info', from: '__FROM__', to: '__TO__', total: '__TOTAL__') %>">
 
 <div class="plants-count-headers" data-location-filter-target="resultsCount">
   <% search_term = params.dig('q', 'name_or_location_name_cont') %>
@@ -54,8 +57,8 @@
 <div id="search-options">
 
   <% if @location_filters.size > 1 || @recipe_filters.any? %>
-    <div class="display-toggle">
-      <span class="display-toggle-label"><%= t('.display_by') %>:</span>
+    <div class="sort-row">
+      <span class="row-label"><%= t('.sort') %>:</span>
       <button type="button"
               class="display-toggle-btn <%= 'active' if @display_mode == 'watering' %>"
               data-action="click->location-filter#switchDisplayMode"
@@ -82,21 +85,13 @@
   <% end %>
 
   <div class="add-filters" data-location-filter-target="addFiltersContainer">
-    <span class="display-toggle-label"><%= t('.add_filter') %>:</span>
+    <span class="row-label"><%= t('.add_filters') %>:</span>
     <% if @watering_status_groups.any? %>
       <button type="button"
               class="add-filter-btn"
               data-location-filter-target="addStatusFilterBtn"
               data-action="click->location-filter#showStatusFilter">
         🕐 <%= t('.status') %>
-      </button>
-    <% end %>
-    <% if @recipe_filters.any? %>
-      <button type="button"
-              class="add-filter-btn"
-              data-location-filter-target="addRecipeFilterBtn"
-              data-action="click->location-filter#showRecipeFilter">
-        🧪 <%= t('.recipe') %>
       </button>
     <% end %>
     <% if @location_filters.size > 1 %>
@@ -107,108 +102,138 @@
         📍 <%= t('.location') %>
       </button>
     <% end %>
+    <% if @recipe_filters.any? %>
+      <button type="button"
+              class="add-filter-btn"
+              data-location-filter-target="addRecipeFilterBtn"
+              data-action="click->location-filter#showRecipeFilter">
+        🧪 <%= t('.recipe') %>
+      </button>
+    <% end %>
   </div>
 
-  <% if @watering_status_groups.any? %>
-    <div class="watering-status-filters" data-location-filter-target="wateringStatusContainer" style="display: none;">
-      <span class="display-toggle-label">🕐 <span class="filter-label-text"><%= t('.filter_by_status') %>:</span></span>
-      <% @watering_status_groups.each do |group| %>
-        <button type="button"
-                class="display-toggle-btn watering-status-btn"
-                data-location-filter-target="wateringStatusButton"
-                data-status="<%= group[:status] %>"
-                data-status-count="<%= group[:count] %>"
-                data-action="click->location-filter#toggleWateringStatusFilter">
-          <%= "#{group[:name]} (#{group[:count]})" %>
-        </button>
+  <div class="filter-row" data-location-filter-target="filterRow" style="display: none;">
+    <span class="row-label"><%= t('.filter') %>:</span>
+    <div class="filter-row-content">
+
+      <% if @watering_status_groups.any? %>
+        <div class="collapsible-filter" data-location-filter-target="wateringStatusContainer" style="display: none;">
+          <div class="filter-buttons-scroll watering-status-filters">
+            <span class="filter-section-label">🕐 <span class="filter-label-text"><%= t('.status_label') %>:</span></span>
+            <% @watering_status_groups.each do |group| %>
+              <button type="button"
+                      class="display-toggle-btn watering-status-btn"
+                      data-location-filter-target="wateringStatusButton"
+                      data-status="<%= group[:status] %>"
+                      data-status-count="<%= group[:count] %>"
+                      data-action="click->location-filter#toggleWateringStatusFilter">
+                <%= "#{group[:name]} (#{group[:count]})" %>
+              </button>
+            <% end %>
+            <span class="filter-actions">
+              <button type="button"
+                      class="remove-filter-btn"
+                      data-action="click->location-filter#hideStatusFilter">
+                ✕
+              </button>
+            </span>
+          </div>
+        </div>
       <% end %>
-      <button type="button"
-              class="remove-filter-btn"
-              data-action="click->location-filter#hideStatusFilter">
-        ✕
-      </button>
-    </div>
-  <% end %>
 
-  <% if @recipe_filters.any? %>
-    <div class="recipe-filter-section" data-location-filter-target="recipeFilterContainer" style="display: none;">
-      <div data-controller="collapsible-filters"
-           data-collapsible-filters-expanded-value="false">
-        <div class="recipe-filters"
-             data-collapsible-filters-target="container"
-             data-location-filter-target="recipeButtonContainer">
-          <span class="display-toggle-label">🧪 <span class="filter-label-text"><%= t('.filter_by_recipe') %>:</span></span>
-          <% @recipe_filters.each do |filter| %>
-            <button type="button"
-                    class="display-toggle-btn"
-                    style="--filter-color: <%= filter[:color] %>;"
-                    data-location-filter-target="recipeFilterButton"
-                    data-recipe-id="<%= filter[:id]&.to_s || 'none' %>"
-                    data-recipe-count="<%= filter[:count] %>"
-                    data-recipe-color="<%= filter[:color] %>"
-                    data-action="click->location-filter#toggleRecipeFilter">
-              <%= filter[:name] %>
-            </button>
-          <% end %>
-          <% if @recipe_filters.size > 4 %>
-            <button type="button"
-                    class="recipe-filters-toggle"
-                    data-collapsible-filters-target="toggleButton"
-                    data-action="click->collapsible-filters#toggle"
-                    data-more-text="<%= t('.show_more') %>"
-                    data-less-text="<%= t('.show_less') %>">
-              <%= t('.show_more') %>
-            </button>
-          <% end %>
-          <button type="button"
-                  class="remove-filter-btn"
-                  data-action="click->location-filter#hideRecipeFilter">
-            ✕
-          </button>
+      <% if @location_filters.size > 1 %>
+        <div data-location-filter-target="locationFilterContainer" style="display: none;"
+             data-controller="collapsible-filters"
+             data-collapsible-filters-expanded-value="false">
+          <div class="collapsible-filter">
+            <div class="filter-buttons-scroll"
+                 data-collapsible-filters-target="container"
+                 data-location-filter-target="buttonContainer">
+              <span class="filter-section-label">📍 <span class="filter-label-text"><%= t('.location_label') %>:</span></span>
+              <% @location_filters.each do |filter| %>
+                <button type="button"
+                        class="display-toggle-btn"
+                        style="--filter-color: <%= filter[:color] %>;"
+                        data-location-filter-target="filterButton"
+                        data-location-id="<%= filter[:id]&.to_s || 'none' %>"
+                        data-location-count="<%= filter[:count] %>"
+                        data-location-color="<%= filter[:color] %>"
+                        data-action="click->location-filter#toggleFilter">
+                  <%= filter[:name] %>
+                </button>
+              <% end %>
+              <span class="filter-actions">
+                <% if @location_filters.size > 4 %>
+                  <button type="button"
+                          class="filter-toggle-btn"
+                          data-collapsible-filters-target="toggleButton"
+                          data-action="click->collapsible-filters#toggle"
+                          data-more-text="<%= t('.show_more') %>"
+                          data-less-text="<%= t('.show_less') %>"
+                          data-more-text-short="<%= t('.more') %>"
+                          data-less-text-short="<%= t('.less') %>">
+                    <%= t('.show_more') %>
+                  </button>
+                <% end %>
+                <button type="button"
+                        class="remove-filter-btn"
+                        data-action="click->location-filter#hideLocationFilter">
+                  ✕
+                </button>
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  <% end %>
+      <% end %>
 
-  <% if @location_filters.size > 1 %>
-    <div class="location-filter-section" data-location-filter-target="locationFilterContainer" style="display: none;">
-      <div data-controller="collapsible-filters"
-           data-collapsible-filters-expanded-value="false">
-        <div class="location-filters"
-             data-collapsible-filters-target="container"
-             data-location-filter-target="buttonContainer">
-          <span class="display-toggle-label">📍 <span class="filter-label-text"><%= t('.filter_by_location') %>:</span></span>
-          <% @location_filters.each do |filter| %>
-            <button type="button"
-                    class="display-toggle-btn"
-                    style="--filter-color: <%= filter[:color] %>;"
-                    data-location-filter-target="filterButton"
-                    data-location-id="<%= filter[:id]&.to_s || 'none' %>"
-                    data-location-count="<%= filter[:count] %>"
-                    data-location-color="<%= filter[:color] %>"
-                    data-action="click->location-filter#toggleFilter">
-              <%= filter[:name] %>
-            </button>
-          <% end %>
-          <% if @location_filters.size > 4 %>
-            <button type="button"
-                    class="location-filters-toggle"
-                    data-collapsible-filters-target="toggleButton"
-                    data-action="click->collapsible-filters#toggle"
-                    data-more-text="<%= t('.show_more') %>"
-                    data-less-text="<%= t('.show_less') %>">
-              <%= t('.show_more') %>
-            </button>
-          <% end %>
-          <button type="button"
-                  class="remove-filter-btn"
-                  data-action="click->location-filter#hideLocationFilter">
-            ✕
-          </button>
+      <% if @recipe_filters.any? %>
+        <div data-location-filter-target="recipeFilterContainer" style="display: none;"
+             data-controller="collapsible-filters"
+             data-collapsible-filters-expanded-value="false">
+          <div class="collapsible-filter">
+            <div class="filter-buttons-scroll"
+                 data-collapsible-filters-target="container"
+                 data-location-filter-target="recipeButtonContainer">
+              <span class="filter-section-label">🧪 <span class="filter-label-text"><%= t('.recipe_label') %>:</span></span>
+              <% @recipe_filters.each do |filter| %>
+                <button type="button"
+                        class="display-toggle-btn"
+                        style="--filter-color: <%= filter[:color] %>;"
+                        data-location-filter-target="recipeFilterButton"
+                        data-recipe-id="<%= filter[:id]&.to_s || 'none' %>"
+                        data-recipe-count="<%= filter[:count] %>"
+                        data-recipe-color="<%= filter[:color] %>"
+                        data-action="click->location-filter#toggleRecipeFilter">
+                  <%= filter[:name] %>
+                </button>
+              <% end %>
+              <span class="filter-actions">
+                <% if @recipe_filters.size > 4 %>
+                  <button type="button"
+                          class="filter-toggle-btn"
+                          data-collapsible-filters-target="toggleButton"
+                          data-action="click->collapsible-filters#toggle"
+                          data-more-text="<%= t('.show_more') %>"
+                          data-less-text="<%= t('.show_less') %>"
+                          data-more-text-short="<%= t('.more') %>"
+                          data-less-text-short="<%= t('.less') %>">
+                    <%= t('.show_more') %>
+                  </button>
+                <% end %>
+                <button type="button"
+                        class="remove-filter-btn"
+                        data-action="click->location-filter#hideRecipeFilter">
+                  ✕
+                </button>
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
+      <% end %>
+
     </div>
-  <% end %>
+  </div>
+
 </div>
 
 <!-- Location Groups (always rendered, visibility controlled by JavaScript) -->
@@ -266,6 +291,20 @@
       <%= render 'plant_row', plant: plant %>
     <% end %>
   </div>
+</div>
+
+<div class="pagination-controls" data-location-filter-target="paginationControls" style="display: <%= @display_mode == 'watering' ? '' : 'none' %>;">
+  <div class="pagination-per-page">
+    <label><%= t('.show_per_page') %>:</label>
+    <select data-action="change->location-filter#changePerPage">
+      <option value="10">10</option>
+      <option value="20" selected>20</option>
+      <option value="50">50</option>
+      <option value="0"><%= t('.all') %></option>
+    </select>
+  </div>
+  <div class="pagination-nav" data-location-filter-target="paginationNav"></div>
+  <div class="pagination-info" data-location-filter-target="paginationInfo"></div>
 </div>
 
 <div style=" text-align: center;">
