@@ -206,6 +206,21 @@ export default class extends Controller {
         }
     }
 
+    handleNavClick() {
+        const isMobile = window.innerWidth < 600
+        if (isMobile && !this.minimizedValue) {
+            // Mobile expanded: minimize on nav click (existing closeOnMobile behavior)
+            this.minimizedValue = true
+            this.updateSidebar()
+            localStorage.setItem('sidebar-minimized', JSON.stringify(this.minimizedValue))
+        } else if (!isMobile && this.minimizedValue) {
+            // Desktop minimized (icon rail): expand on nav click
+            this.minimizedValue = false
+            this.updateSidebar()
+            localStorage.setItem('sidebar-minimized', JSON.stringify(this.minimizedValue))
+        }
+    }
+
     updateSidebar() {
         const button = this.toggleButtonTarget
         const body = document.body

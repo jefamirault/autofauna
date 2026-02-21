@@ -48,7 +48,7 @@ module ApplicationHelper
 
   def nav_item(name, selected = false)
     default_class = 'navItem'
-    "<a class='#{default_class}#{selected ? ' selected' : ''}'>#{name}</a>".html_safe
+    "<a class='#{default_class}#{selected ? ' selected' : ''}'>#{nav_label(name)}</a>".html_safe
   end
 
   def nav_link(controller, options = {})
@@ -56,14 +56,25 @@ module ApplicationHelper
     text = options[:text] || t(".#{controller}")
     action = options[:action] || 'index'
     path = options[:path] || send("#{controller}_path")
+    label = nav_label(text)
     if params[:controller] == controller
         if params[:action] == action
           nav_item(text, true)
         else
-          link_to(text, path, class: default_class)
+          link_to(label, path, class: default_class)
         end
     else
-      link_to(text, path, class: default_class)
+      link_to(label, path, class: default_class)
+    end
+  end
+
+  # Split "🌱 Plants" into emoji + <span class="nav-label">Plants</span>
+  def nav_label(text)
+    parts = text.split(' ', 2)
+    if parts.length == 2
+      "#{parts[0]} <span class=\"nav-label\">#{ERB::Util.html_escape(parts[1])}</span>".html_safe
+    else
+      text
     end
   end
 
@@ -73,26 +84,40 @@ module ApplicationHelper
 
     case controller
     when 'plants', 'log_entries'
-      has_graphic = action.in?(%w[show edit]) && @plant&.graphic_path
-      icon = has_graphic ? @plant.graphic_path : 'autofauna_icon.png'
-      gradient = has_graphic ? 'header-plants header-plant-graphic' : 'header-plants'
-      { icon: icon, title: (action.in?(%w[show edit]) && @plant ? @plant.to_s : t('layouts.application.plants')), gradient_class: gradient }
-    when 'waterings', 'recipes', 'recipe_batches', 'recipe_sources'
-      { icon: 'water_icon.png', title: t('layouts.application.waterings'), gradient_class: 'header-waterings' }
+      icon = action.in?(%w[show edit]) && @plant&.graphic_path ? @plant.graphic_path : 'autofauna_icon.png'
+      title = action.in?(%w[show edit]) && @plant ? @plant.to_s : t('layouts.application.plants')
+      { icon: icon, title: title, gradient_class: 'header-plants header-graphic' }
+    when 'waterings'
+      icon = action.in?(%w[show edit]) && @watering&.plant&.graphic_path ? @watering.plant.graphic_path : 'water_icon.png'
+      { icon: icon, title: t('layouts.application.waterings'), gradient_class: 'header-waterings header-graphic' }
+    when 'recipes'
+      title = action.in?(%w[show edit]) && @recipe ? @recipe.to_s : t('layouts.application.waterings')
+      { icon: 'water_icon.png', title: title, gradient_class: 'header-waterings header-graphic' }
+    when 'recipe_batches'
+      title = action.in?(%w[show edit]) && @recipe_batch ? @recipe_batch.to_s : t('layouts.application.waterings')
+      { icon: 'water_icon.png', title: title, gradient_class: 'header-waterings header-graphic' }
+    when 'recipe_sources'
+      title = action.in?(%w[show edit]) && @recipe_source ? @recipe_source.to_s : t('layouts.application.waterings')
+      { icon: 'water_icon.png', title: title, gradient_class: 'header-waterings header-graphic' }
     when 'tanks', 'water_tests'
-      { icon: 'tank_icon.png', title: (action == 'show' && controller == 'tanks' && @tank ? @tank.to_s : t('layouts.application.tanks')), gradient_class: 'header-tanks' }
-    when 'locations', 'zones'
-      { icon: 'location_icon.png', title: t('layouts.application.locations'), gradient_class: 'header-locations' }
+      { icon: 'tank_icon.png', title: (action == 'show' && controller == 'tanks' && @tank ? @tank.to_s : t('layouts.application.tanks')), gradient_class: 'header-tanks header-graphic' }
+    when 'locations'
+      title = action.in?(%w[show edit]) && @location ? @location.to_s : t('layouts.application.locations')
+      { icon: 'location_icon.png', title: title, gradient_class: 'header-locations header-graphic' }
+    when 'zones'
+      title = action.in?(%w[show edit]) && @zone ? @zone.to_s : t('layouts.application.locations')
+      { icon: 'location_icon.png', title: title, gradient_class: 'header-locations header-graphic' }
     when 'sensors', 'sensor_readings', 'sensor_types'
-      { icon: 'sensor_icon.png', title: t('layouts.application.sensors'), gradient_class: 'header-sensors' }
+      title = action.in?(%w[show edit]) && controller == 'sensors' && @sensor ? @sensor.to_s : t('layouts.application.sensors')
+      { icon: 'sensor_icon.png', title: title, gradient_class: 'header-sensors header-graphic' }
     when 'users'
-      { icon: 'users_icon.png', title: t('layouts.application.users'), gradient_class: 'header-users' }
+      { icon: 'users_icon.png', title: t('layouts.application.users'), gradient_class: 'header-users header-graphic' }
     when 'settings'
-      { icon: 'settings_icon.png', title: t('layouts.application.account_settings'), gradient_class: 'header-settings' }
+      { icon: 'settings_icon.png', title: t('layouts.application.account_settings'), gradient_class: 'header-settings header-graphic' }
     when 'projects'
-      { icon: 'project_icon.png', title: t('layouts.application.project_settings'), gradient_class: 'header-settings' }
+      { icon: 'project_icon.png', title: t('layouts.application.project_settings'), gradient_class: 'header-settings header-graphic' }
     else
-      { icon: 'autofauna_icon.png', title: 'Autofauna', gradient_class: 'header-default' }
+      { icon: 'autofauna_icon.png', title: 'Autofauna', gradient_class: 'header-default header-graphic' }
     end
   end
 

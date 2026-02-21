@@ -45,18 +45,10 @@
 
     <% config = header_config %>
     <header class="<%= config[:gradient_class] %>">
-      <button data-sidebar-target="toggleButton"
-              data-action="click->sidebar#toggle"
-              class="collapseSidebar"
-              aria-label="Collapse sidebar">
-        <div id="logoContainer">
-          <%= image_tag config[:icon] %>
-          <div id="logoText"><%= config[:title] %></div>
-        </div>
-      </button>
       <%= yield :header_extra %>
       <% if user_signed_in? %>
         <div id="headerRight" data-controller="dropdown">
+          <div id="headerTitle"><%= config[:title] %></div>
           <div id="headerEmail" data-action="click->dropdown#toggle">
             <span class="email-text"><%= current_user.guest? ? t('guest.guest') : current_user.email %></span>
             <span class="mobile-user-icon">&#128100;</span>
@@ -79,13 +71,16 @@
     </header>
 
     <aside id="sidebar">
-      <% if current_project && show_project_ui? %>
-        <div id="currentProject">
-          <%= current_project || t('.current_project') %>
-          <%= link_to icon('cog-6-tooth', variant: 'solid'), project_path(current_project), class: 'iconLink' %>
+      <button data-sidebar-target="toggleButton"
+              data-action="click->sidebar#toggle"
+              class="collapseSidebar"
+              aria-label="Collapse sidebar">
+        <div id="logoContainer">
+          <%= image_tag config[:icon] %>
+          <div id="logoText"><%= config[:title] %></div>
         </div>
-      <% end %>
-      <nav data-action="click->sidebar#closeOnMobile">
+      </button>
+      <nav data-action="click->sidebar#handleNavClick">
         <%= nav_link 'plants', action: 'index', text: "🌱 #{t('.plants')}" %>
         <% if params[:controller] == 'plants' %>
           <div class="indent">
@@ -120,16 +115,16 @@
       </nav>
       <div class="fill"></div>
       <div id="sidebarLocale" data-controller="locale-popup">
-        <button class="locale-toggle-btn" data-action="click->locale-popup#toggle" aria-label="Change language">
-          <span class="locale-icon">&#127760;</span>
+        <button class="locale-toggle-btn navItem" data-action="click->locale-popup#toggle" aria-label="Change language">
+          &#127760; <span class="nav-label"><%= current_locale == 'es' ? 'Español' : 'English' %></span>
         </button>
-        <div class="locale-popup hidden" data-locale-popup-target="menu">
-          <%= link_to 'English', "?locale=en", class: "locale-option #{'selected' if current_locale == 'en'}" %>
-          <%= link_to 'Espanol', "?locale=es", class: "locale-option #{'selected' if current_locale == 'es'}" %>
+        <div class="locale-options hidden" data-locale-popup-target="menu">
+          <%= link_to raw('🌐 <span class="nav-label">English</span>'), "?locale=en", class: "navItem locale-option #{'selected' if current_locale == 'en'}" %>
+          <%= link_to raw('🌐 <span class="nav-label">Español</span>'), "?locale=es", class: "navItem locale-option #{'selected' if current_locale == 'es'}" %>
         </div>
       </div>
       <% unless user_signed_in? %>
-        <nav data-action="click->sidebar#closeOnMobile">
+        <nav data-action="click->sidebar#handleNavClick">
           <%= link_to t('log_in'), new_session_path, class: 'navItem' %>
         </nav>
       <% end %>

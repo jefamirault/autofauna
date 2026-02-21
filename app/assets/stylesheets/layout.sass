@@ -11,17 +11,20 @@ html
   height: 100%
 
 body
+  --header-height: 4.5rem
   height: 100%
   display: grid
   grid-template-columns: 18rem 1fr
-  grid-template-rows: 4.5rem 1fr
-  grid-template-areas: "header header" "sidebar main"
+  grid-template-rows: var(--header-height) 1fr
+  grid-template-areas: "sidebar header" "sidebar main"
+  transition: grid-template-columns 0.12s
   @media (max-width: 600px) // narrow screen
+    --header-height: 4rem
     grid-template-columns: 1fr
-    grid-template-rows: 4rem auto 1fr auto
+    grid-template-rows: var(--header-height) auto 1fr auto
     grid-template-areas: "header" "sidebar" "main" "footer"
     &.sidebarMinimized
-      grid-template-rows: 4rem 0 1fr auto
+      grid-template-rows: var(--header-height) 0 1fr auto
       aside#sidebar
         opacity: 0
         pointer-events: none
@@ -43,26 +46,26 @@ body
 
   @media (min-width: 600px)
     &.sidebarMinimized
-      grid-template-columns: 0 1fr
-      aside#sidebar
-        pointer-events: none
-        opacity: 0
+      grid-template-columns: 4rem 1fr
   &.development
     background-image: url("background2.jpg")
+
+// Suppress all transitions during initial FOUC prevention
+html.no-transition *
+  transition: none !important
 
 // Support for early sidebarMinimized class on html element (prevents FOUC)
 html.sidebarMinimized body
   @media (max-width: 600px)
-    grid-template-rows: 4rem 0 1fr auto
+    grid-template-rows: var(--header-height) 0 1fr auto
     aside#sidebar
       opacity: 0
       pointer-events: none
 
   @media (min-width: 600px)
-    grid-template-columns: 0 1fr
-    aside#sidebar
-      pointer-events: none
-      opacity: 0
+    grid-template-columns: 4rem 1fr
+
+$reduction: 12px
 
 header
   grid-area: header
@@ -83,61 +86,111 @@ header
   form
     padding: 0
 
-  $reduction: 12px
-  #logoContainer
-    display: flex
-    align-items: center
-    flex-shrink: 0
+// Header — grid column separation handles spacing, no padding-left needed on desktop
+// Mobile: reserve space for the fixed toggle button
+@media (max-width: 600px)
+  header
+    padding-left: var(--header-height)
+
+#logoContainer
+  display: flex
+  align-items: center
+  height: $line-height - $reduction
+  cursor: pointer
+  img
+    width: $line-height - $reduction
     height: $line-height - $reduction
-    margin-left: 1.5em
-    cursor: pointer
-    img
-      width: $line-height - $reduction
-      height: $line-height - $reduction
-      //margin: 0 0 0 .25rem
+  #logoText
+    font-size: 2.25rem
+    font-weight: 400
+    letter-spacing: -0.5px
+    padding: 0 .5em 0 0.3em
+    white-space: nowrap
+
+// Section graphic: button sits at grid intersection, tall logo overflows into sidebar area
+// --logo-size controls total height; sidebar padding derived automatically
+body:has(header.header-graphic)
+  --logo-size: 16rem
+
+
+body:has(header.header-graphic) #logoContainer
+  img
+    width: auto
+    height: 100%
+    object-fit: contain
+  @media (min-width: 601px)
+    box-sizing: border-box
+    height: var(--logo-size)
+    padding: 1rem 0
+    width: 100%
+    justify-content: center
+    transition: height 0.12s, padding 0.12s
     #logoText
-      font-size: 2.25rem
-      font-weight: 400
-      letter-spacing: -0.5px
-      padding: 0 .5em 0 0.3em
-      //cursor: default
-      white-space: nowrap
+      display: none
 
-// Plant graphic in header — taller header row
-body:has(header.header-plant-graphic)
-  grid-template-rows: 7.5rem 1fr
-  @media (max-width: 600px)
-    grid-template-rows: 7.5rem auto 1fr auto
-    &.sidebarMinimized
-      grid-template-rows: 7.5rem 0 1fr auto
-
-.header-plant-graphic
-  #logoContainer
-    height: 6rem
+// When minimized: logo shrinks to fit narrow icon rail
+body.sidebarMinimized:has(header.header-graphic) #logoContainer,
+html.sidebarMinimized body:has(header.header-graphic) #logoContainer
+  @media (min-width: 601px)
+    height: var(--header-height)
+    padding: 0.25rem
+    width: 100%
     img
-      width: auto
+      width: 100%
       height: 100%
       object-fit: contain
 
-// Context-aware header gradients
-.header-plants, .header-default
-  background: linear-gradient(135deg, #2E7D32 0%, #637271 67%, #3E4F4E 100%)
-.header-waterings
-  background: linear-gradient(135deg, #1565C0 0%, #4a7a9b 67%, #2c4454 100%)
-.header-tanks
-  background: linear-gradient(135deg, #00897B 0%, #4a8a84 67%, #2c5450 100%)
-.header-locations
-  background: linear-gradient(135deg, #F57F17 0%, #9b8a4a 67%, #544a2c 100%)
-.header-sensors
-  background: linear-gradient(135deg, #7B1FA2 0%, #7a4a9b 67%, #3d2c54 100%)
-.header-users
-  background: linear-gradient(135deg, #283593 0%, #4a5a9b 67%, #2c3454 100%)
-.header-settings
-  background: linear-gradient(135deg, #546E7A 0%, #637271 67%, #3E4F4E 100%)
+// Graphic header: button inside sidebar provides the tall logo area naturally
+// No extra padding-top needed since the button is part of sidebar flow
 
-body.development
-  .header-plants, .header-default
-    background: linear-gradient(135deg, $brightgreen 0%, #637271 67%, $yellow 100%)
+.header-graphic
+  @media (min-width: 601px)
+    #headerRight
+      flex: 1
+      height: 100%
+    #headerTitle
+      display: block
+
+// Section gradient + solid end color — single source of truth per nav section
+body:has(header.header-plants), body:has(header.header-default)
+  --section-gradient: linear-gradient(135deg, #2E7D32 0%, #637271 67%, #3E4F4E 100%)
+  --section-color-start: #2E7D32
+body:has(header.header-waterings)
+  --section-gradient: linear-gradient(135deg, #1565C0 0%, #4a7a9b 67%, #2c4454 100%)
+  --section-color-start: #1565C0
+body:has(header.header-tanks)
+  --section-gradient: linear-gradient(135deg, #00897B 0%, #4a8a84 67%, #2c5450 100%)
+  --section-color-start: #00897B
+body:has(header.header-locations)
+  --section-gradient: linear-gradient(135deg, #F57F17 0%, #9b8a4a 67%, #544a2c 100%)
+  --section-color-start: #F57F17
+body:has(header.header-sensors)
+  --section-gradient: linear-gradient(135deg, #7B1FA2 0%, #7a4a9b 67%, #3d2c54 100%)
+  --section-color-start: #7B1FA2
+body:has(header.header-users)
+  --section-gradient: linear-gradient(135deg, #283593 0%, #4a5a9b 67%, #2c3454 100%)
+  --section-color-start: #283593
+body:has(header.header-settings)
+  --section-gradient: linear-gradient(135deg, #546E7A 0%, #637271 67%, #3E4F4E 100%)
+  --section-color-start: #546E7A
+
+body.development:has(header.header-plants), body.development:has(header.header-default)
+  --section-gradient: linear-gradient(135deg, #{$brightgreen} 0%, #637271 67%, #{$yellow} 100%)
+  --section-color-start: #{$brightgreen}
+
+// Context-aware header gradients — always on the header, logo area covered by solid button/logoContainer
+.header-plants, .header-waterings, .header-tanks, .header-locations, .header-sensors, .header-users, .header-settings, .header-default
+  background: var(--section-gradient)
+
+// Header title (shown in #headerRight for graphic headers)
+#headerTitle
+  display: none
+  margin-left: 3vw
+  margin-right: auto
+  font-size: 2.25rem
+  font-weight: 400
+  letter-spacing: -0.5px
+  white-space: nowrap
 
 // Header right section (email + dropdown)
 #headerRight
@@ -149,14 +202,17 @@ body.development
   z-index: 1
 
 #headerEmail
-  padding: 0 1rem
+  padding: 0.75rem 1rem
   font-size: 1.1rem
-  color: rgba(255, 255, 255, 0.75)
+  color: rgba(255, 255, 255, 0.85)
   white-space: nowrap
   overflow: hidden
   text-overflow: ellipsis
   cursor: pointer
   user-select: none
+  border-radius: 4px
+  &:hover
+    background: rgba(255,255,255,0.1)
   .email-text
     @media (max-width: 600px)
       display: none
@@ -182,21 +238,21 @@ body.development
 
 .dropdown-item
   display: block
-  padding: 0.75rem 1.25rem
+  padding: 1rem 1.25rem
   color: #333
   text-decoration: none
-  font-size: 0.95rem
+  font-size: 1rem
   &:hover
-    background: #f0f0f0
+    background: rgba(0,0,0,0.06)
     text-decoration: none
 
 .dropdown-logout
   display: block
   width: 100%
-  padding: 0.75rem 1.25rem
+  padding: 1rem 1.25rem
   color: #c62828
   text-decoration: none
-  font-size: 0.95rem
+  font-size: 1rem
   background: none
   border: none
   border-top: 1px solid #eee
@@ -240,11 +296,9 @@ body.development
     cursor: pointer
     padding: 0 0.75rem
     flex-shrink: 0
-    height: 4.5rem
+    height: var(--header-height)
     align-items: center
     justify-content: center
-    @media (max-width: 600px)
-      height: 4rem
     &:hover .search-icon-img
       opacity: 0.9
   input[type="search"]
@@ -290,53 +344,56 @@ body:has(main.plants.index)
 // Sidebar locale switcher
 #sidebarLocale
   position: relative
-  padding: 0.75rem 1rem
+  border-top: 1px solid #fff7
   .locale-toggle-btn
-    background: none
-    border: 1px solid rgba(255,255,255,0.3)
-    border-radius: 4px
-    padding: 0.4rem 0.75rem
+    width: 100%
+    background: transparent
+    border: none
     cursor: pointer
     color: white
-    font-size: 1.1rem
+    text-align: left
+    font-size: 1rem
     &:hover
-      background: rgba(255,255,255,0.1)
-  .locale-popup
-    position: absolute
-    bottom: 100%
-    left: 1rem
-    background: white
-    border-radius: 6px
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2)
-    z-index: 100
-    overflow: hidden
-    margin-bottom: 0.25rem
-  .locale-option
-    display: block
-    padding: 0.6rem 1.25rem
-    color: #333
-    text-decoration: none
-    font-size: 0.95rem
-    &:hover
-      background: #f0f0f0
-      text-decoration: none
-    &.selected
-      font-weight: 500
-      color: #2E7D32
+      background: #777
+  .locale-options
+    border-top: 1px solid #fff7
+    .locale-option
+      border-bottom: 1px solid #fff7
+      &.selected
+        background: #777
+        cursor: default
 
 .hidden
   display: none !important
 
 button.collapseSidebar
-  height: 100%
+  z-index: 11
+  overflow: visible
+  width: 100%
+  transition: height 0.12s
   padding: 0
-  background: none
+  background: #0009
   border: none
   cursor: pointer
   color: #fffe
   flex-shrink: 0
+  height: var(--logo-size, var(--header-height))
+  @media (max-width: 600px)
+    height: var(--header-height)
+    background: var(--section-color-start)
   &:hover
     color: #fffc
+
+// Minimized: button shrinks to header height on all breakpoints
+body.sidebarMinimized button.collapseSidebar,
+html.sidebarMinimized button.collapseSidebar
+  height: var(--header-height)
+  @media (max-width: 600px)
+    position: fixed
+    top: 0
+    left: 0
+    width: var(--header-height)
+    z-index: 20
 
 main
   grid-area: main
@@ -370,25 +427,15 @@ aside#sidebar
   display: flex
   flex-direction: column
   justify-content: space-between
-
-  #currentProject
-    font-size: 1.5rem
-    margin: 0
-    padding: 1.5rem 1.5rem 1.5rem .5rem
-    color: #fff7
-    text-align: center
-    white-space: nowrap
-    cursor: default
-
-    svg
-      height: 1.5rem
+  @media (min-width: 601px)
+    grid-row: 1 / -1
 
   nav
     flex-direction: column
     border-top: 1px solid #fff7
 
 
-  a.navItem, button
+  a.navItem, nav button, .locale-toggle-btn
     flex: 1
     background: #2227
     display: block
@@ -417,3 +464,23 @@ aside#sidebar
 
 .fill
   flex: 1
+
+// Desktop minimized: icon-rail state — show emoji only, hide text labels
+@media (min-width: 601px)
+  body.sidebarMinimized aside#sidebar,
+  html.sidebarMinimized body aside#sidebar
+    .nav-label
+      display: none
+    a.navItem, nav button, .locale-toggle-btn
+      padding: 1rem 0
+      text-align: center
+      font-size: 1.2rem
+    .indent a
+      padding-left: 0
+      text-align: center
+    #logoText
+      display: none
+    #logoContainer img
+      width: 100%
+      height: 100%
+      object-fit: contain

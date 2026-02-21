@@ -26,7 +26,7 @@ class PlantsController < ApplicationController
     @q = current_project.plants.ransack(params['q'])
 
     @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
-    @plants = @q.result(distinct: true)
+    @plants = @q.result(distinct: true).includes(:location, :recipe, :last_watering)
 
     # Build location filter buttons with colors, sorted by count (descending)
     location_counts = @plants.where.not(location_id: nil).reorder(nil).group(:location_id).count
@@ -70,12 +70,17 @@ class PlantsController < ApplicationController
       color: '#999999'
     } if no_recipe_count > 0
 
-    # Build watering status groups for filtering
+    # Build watering status groups for filtering (single pass)
+    urgency_counts = { urgent: 0, today: 0, normal: 0, none: 0 }
+    @plants.each { |p| urgency_counts[p.watering_urgency] += 1 }
+
     @watering_status_groups = [
-      { status: 'urgent', name: I18n.t('plants.index.overdue'), count: @plants.count { |p| p.watering_urgency == :urgent } },
-      { status: 'today', name: I18n.t('plants.index.needs_water_today'), count: @plants.count { |p| p.watering_urgency == :today } },
-      { status: 'scheduled', name: I18n.t('plants.index.scheduled'), count: @plants.count { |p| [:normal, :none].include?(p.watering_urgency) } }
+      { status: 'urgent', name: I18n.t('plants.index.overdue'), count: urgency_counts[:urgent] },
+      { status: 'today', name: I18n.t('plants.index.needs_water_today'), count: urgency_counts[:today] },
+      { status: 'scheduled', name: I18n.t('plants.index.scheduled'), count: urgency_counts[:normal] + urgency_counts[:none] }
     ]
+
+    @needs_watering_count = urgency_counts[:urgent] + urgency_counts[:today]
 
     @display_mode = params[:display] || "watering"
 
@@ -90,9 +95,6 @@ class PlantsController < ApplicationController
     no_recipe = grouped.delete([nil, '#999999']) || []
     @plants_by_recipe = grouped.sort_by { |(name, _color), _plants| (name || '').downcase }.to_h
     @plants_by_recipe[[I18n.t('plants.index.no_recipe'), '#999999']] = no_recipe if no_recipe.any?
-
-    # Calculate count of plants that need watering (urgent or today)
-    @needs_watering_count = @plants.count { |p| [:urgent, :today].include?(p.watering_urgency) }
 
     respond_to do |format|
       format.json { @plants = current_project.plants }
