@@ -1,7 +1,7 @@
 class RecipeBatch < ApplicationRecord
   belongs_to :project
   belongs_to :recipe
-  has_many :waterings
+  has_many :waterings, dependent: :nullify
 
   validates :tds, presence: true, numericality: { greater_than: 0, only_integer: true }
 

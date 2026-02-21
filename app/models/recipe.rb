@@ -4,8 +4,8 @@ class Recipe < ApplicationRecord
   has_many :recipe_ingredients, -> { order(:position) }, dependent: :destroy
   has_many :recipe_sources, through: :recipe_ingredients
   has_many :recipe_batches, dependent: :destroy
-  has_many :plants
-  has_many :waterings
+  has_many :plants, dependent: :nullify
+  has_many :waterings, dependent: :nullify
 
   accepts_nested_attributes_for :recipe_ingredients, allow_destroy: true, reject_if: :reject_ingredient
 
