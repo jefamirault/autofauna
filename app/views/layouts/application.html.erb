@@ -115,13 +115,17 @@
       </nav>
       <div class="fill"></div>
       <div id="sidebarLocale" data-controller="locale-popup">
+        <div class="locale-options hidden" data-locale-popup-target="menu">
+          <% if current_locale != 'en' %>
+            <%= link_to raw('🌐 <span class="nav-label">English</span>'), "?locale=en", class: "navItem locale-option" %>
+          <% end %>
+          <% if current_locale != 'es' %>
+            <%= link_to raw('🌐 <span class="nav-label">Español</span>'), "?locale=es", class: "navItem locale-option" %>
+          <% end %>
+        </div>
         <button class="locale-toggle-btn navItem" data-action="click->locale-popup#toggle" aria-label="Change language">
           &#127760; <span class="nav-label"><%= current_locale == 'es' ? 'Español' : 'English' %></span>
         </button>
-        <div class="locale-options hidden" data-locale-popup-target="menu">
-          <%= link_to raw('🌐 <span class="nav-label">English</span>'), "?locale=en", class: "navItem locale-option #{'selected' if current_locale == 'en'}" %>
-          <%= link_to raw('🌐 <span class="nav-label">Español</span>'), "?locale=es", class: "navItem locale-option #{'selected' if current_locale == 'es'}" %>
-        </div>
       </div>
       <% unless user_signed_in? %>
         <nav data-action="click->sidebar#handleNavClick">
