@@ -1,7 +1,7 @@
 class PlantsController < ApplicationController
   before_action :authenticate
   before_action :set_project
-  before_action :set_plant, only: %i[ show edit update destroy create_share revoke_share regenerate_share ]
+  before_action :set_plant, only: %i[ show edit update destroy create_share revoke_share regenerate_share create_view_share revoke_view_share regenerate_view_share ]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
 
@@ -219,6 +219,21 @@ class PlantsController < ApplicationController
   def regenerate_share
     @plant.regenerate_share_token!
     redirect_to plant_path(@plant), notice: t('plants.messages.share_regenerated')
+  end
+
+  def create_view_share
+    @plant.generate_view_share_token!
+    redirect_to plant_path(@plant), notice: t('plants.messages.view_share_created', default: 'Viewing link created')
+  end
+
+  def revoke_view_share
+    @plant.revoke_view_share_token!
+    redirect_to plant_path(@plant), notice: t('plants.messages.view_share_revoked', default: 'Viewing link revoked')
+  end
+
+  def regenerate_view_share
+    @plant.regenerate_view_share_token!
+    redirect_to plant_path(@plant), notice: t('plants.messages.view_share_regenerated', default: 'Viewing link regenerated')
   end
 
   private

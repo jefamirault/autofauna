@@ -3,12 +3,15 @@ class SharedPlantsController < ApplicationController
 
   def show
     last = @plant.last_watering
-    @watering = Watering.new(date: Time.zone.now.to_date, volume: last&.volume, units: last&.units, notes: last&.notes)
+    @watering = Watering.new(watered_at: Time.zone.now, volume: last&.volume, units: last&.units, notes: last&.notes)
     build_timeline
     render layout: 'shared'
   end
 
   def create_watering
+    if @view_only
+      redirect_to shared_plant_path(token: params[:token]), alert: "View-only access" and return
+    end
     @watering = @plant.waterings.new(shared_watering_params)
 
     if @watering.save
@@ -23,9 +26,19 @@ class SharedPlantsController < ApplicationController
 
   def set_plant
     @plant = Plant.find_by(share_token: params[:token])
-    if @plant.nil? || !@plant.share_enabled?
-      render 'not_found', layout: 'shared', status: :not_found and return
+    if @plant&.share_enabled?
+      @view_only = false
+      return
     end
+
+    @plant = Plant.find_by(view_share_token: params[:token])
+    if @plant&.view_share_enabled?
+      @view_only = true
+      return
+    end
+
+    @plant = nil
+    render 'not_found', layout: 'shared', status: :not_found and return
   end
 
   def build_timeline

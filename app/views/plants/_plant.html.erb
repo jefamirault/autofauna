@@ -20,14 +20,25 @@
         <div class="watering-suggestion">
           🕐 <%= @plant.time_until_watering_text.html_safe %>
         </div>
+        <% if @plant.min_watering_freq.nil? %>
+          <div class="watering-frequency-prompt">
+            <%= link_to "⏳ Set watering frequency", edit_plant_path(@plant) %>
+          </div>
+        <% end %>
         <div class="watering-history">
           ⌛ <%= t('attributes.last_watered') %> <%= time_ago(@plant.date_last_watering) || t('time.never') %>
         </div>
         <div class="watering-details">
-          <strong class="watering-volume">💧 <%= @plant.last_watering&.print_volume || '—' %> water</strong>
+          <strong class="watering-volume">💧 <%= @plant.last_watering&.print_volume || '—' %></strong>
           <br>
           <% if @plant.last_watering&.notes.present? %>
             <span class="watering-notes-text">📝 <%= @plant.last_watering.notes %></span>
+          <% end %>
+          <% if @plant.last_watering&.recipe.present? %>
+            <span class="watering-recipe-text">🧪 <%= @plant.last_watering.recipe.name %></span>
+          <% end %>
+          <% if @plant.last_watering&.recipe_batch.present? %>
+            <span class="watering-batch-text">🪣 Batch: <%= @plant.last_watering.recipe_batch.to_s %></span>
           <% end %>
         </div>
       </div>
@@ -61,6 +72,12 @@
         <div class="info-row">
           <span class="label">🫙 <%= t 'attributes.container' %>:</span>
           <span class="value"><%= plant.pot %></span>
+        </div>
+      <% end %>
+      <% if plant.recipe.present? %>
+        <div class="info-row">
+          <span class="label">🧪 Recipe:</span>
+          <span class="value"><%= link_to plant.recipe.name, recipe_path(plant.recipe) %></span>
         </div>
       <% end %>
       <% if @plant.archived %>

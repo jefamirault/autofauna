@@ -103,6 +103,22 @@ header
       //cursor: default
       white-space: nowrap
 
+// Plant graphic in header — taller header row
+body:has(header.header-plant-graphic)
+  grid-template-rows: 7.5rem 1fr
+  @media (max-width: 600px)
+    grid-template-rows: 7.5rem auto 1fr auto
+    &.sidebarMinimized
+      grid-template-rows: 7.5rem 0 1fr auto
+
+.header-plant-graphic
+  #logoContainer
+    height: 6rem
+    img
+      width: auto
+      height: 100%
+      object-fit: contain
+
 // Context-aware header gradients
 .header-plants, .header-default
   background: linear-gradient(135deg, #2E7D32 0%, #637271 67%, #3E4F4E 100%)

@@ -2,15 +2,6 @@
   #<%= @plant.uid %> <%= @plant.name %>
 <% end %>
 
-<h1 class="plant-header">
-  <% if @plant.graphic.present? %>
-    <%= link_to plants_path, class: 'plant-header-graphic-link' do %>
-      <%= image_tag @plant.graphic_path, class: "plant-header-graphic", alt: "#{@plant.name}" %>
-    <% end %>
-  <% end %>
-  <%= @plant %>
-</h1>
-
 <%= render @plant %>
 <p class="plant-actions">
   <%= link_to "✏️ #{t('.edit_this_plant')}", edit_plant_path(@plant), class: 'link' %>
@@ -19,7 +10,9 @@
 </p>
 
 <div class="share-section">
-  <h3><%= t('plants.show.share_link') %></h3>
+  <h3>Sharing</h3>
+
+  <h4>💧 Watering Link</h4>
   <% if @plant.shared? %>
     <div class="share-link-container">
       <input type="text" class="share-link-input" value="<%= shared_plant_url(@plant.share_token) %>" readonly onclick="this.select()">
@@ -29,34 +22,29 @@
   <% else %>
     <%= button_to "🔗 #{t('plants.show.create_share_link')}", create_share_plant_path(@plant), method: :post, class: 'buttonLink' %>
   <% end %>
+
+  <h4>👁️ Viewing Link</h4>
+  <% if @plant.view_shared? %>
+    <div class="share-link-container">
+      <input type="text" class="share-link-input" value="<%= shared_plant_url(@plant.view_share_token) %>" readonly onclick="this.select()">
+      <%= button_to "⛔ Revoke", revoke_view_share_plant_path(@plant), method: :delete, class: 'buttonLinkDanger danger', data: { confirm: "Revoke this viewing link?" } %>
+      <%= button_to "🔄 Regenerate", regenerate_view_share_plant_path(@plant), method: :post, class: 'buttonLinkDanger danger', data: { confirm: "Regenerate this viewing link? The old link will stop working." } %>
+    </div>
+  <% else %>
+    <%= button_to "🔗 Create Viewing Link", create_view_share_plant_path(@plant), method: :post, class: 'buttonLink' %>
+  <% end %>
 </div>
 
 <% unless current_user.guest? %>
   <div class="share-section">
-    <h3>Notifications</h3>
-    <%= form_with model: @plant, url: plant_path(@plant), method: :patch, local: true do |f| %>
-      <div class="field">
-        <%= f.label :notifications_enabled, "Notify me when this plant needs watering" %>
-        <%= f.check_box :notifications_enabled %>
-      </div>
-      <div class="submit">
-        <%= f.submit "Save", class: 'saveButton' %>
-      </div>
+    <%= button_to plant_path(@plant), method: :patch,
+        params: { plant: { notifications_enabled: !@plant.notifications_enabled } },
+        class: "notification-toggle #{@plant.notifications_enabled? ? 'enabled' : 'disabled'}" do %>
+      🔔 <%= @plant.notifications_enabled? ? "Notifications Enabled" : "Notifications Disabled" %>
     <% end %>
     <% if @plant.last_notification_sent_at.present? %>
       <p class="info-text">Last notification sent: <%= format_date @plant.last_notification_sent_at %></p>
     <% end %>
-  </div>
-<% end %>
-
-<% if @plant.recipe.present? %>
-  <div class="info-card">
-    <div class="info-card-section">
-      <div class="info-row">
-        <span class="label">🧪 Recipe</span>
-        <span class="value"><%= link_to @plant.recipe.name, recipe_path(@plant.recipe) %></span>
-      </div>
-    </div>
   </div>
 <% end %>
 

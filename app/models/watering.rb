@@ -77,7 +77,7 @@ class Watering < ApplicationRecord
   end
 
   def volume_and_notes
-    "<strong>#{print_volume}</strong> #{self.notes.nil? || self.notes == '' ? 'water' : self.notes}".html_safe
+    "<strong>#{print_volume}</strong> #{self.notes.nil? || self.notes == '' ? '' : self.notes}".html_safe
   end
 
   # Virtual attributes for form integration

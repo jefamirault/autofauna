@@ -1,7 +1,7 @@
 <div class="settings-card auth-card">
   <h2><%= t 'account.update_password' %></h2>
 
-  <%= form_with model: current_user, url: password_path do |form| %>
+  <%= form_with model: current_user, url: password_path, data: { turbo: false } do |form| %>
     <% if form.object.errors.any? %>
       <div class="auth-errors">
         <% form.object.errors.full_messages.each do |message| %>

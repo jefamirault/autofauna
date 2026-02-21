@@ -1,4 +1,4 @@
-<%= form_with(model: recipe_batch) do |form| %>
+<%= form_with(model: recipe_batch, data: { turbo: false }) do |form| %>
   <% if recipe_batch.errors.any? %>
     <div style="color: red">
       <h2><%= pluralize(recipe_batch.errors.count, "error") %> prohibited this batch from being saved:</h2>

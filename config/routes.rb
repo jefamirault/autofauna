@@ -38,6 +38,9 @@ Rails.application.routes.draw do
       post 'share', to: 'plants#create_share', as: 'create_share'
       delete 'share', to: 'plants#revoke_share', as: 'revoke_share'
       post 'regenerate_share', to: 'plants#regenerate_share', as: 'regenerate_share'
+      post 'view_share', to: 'plants#create_view_share', as: 'create_view_share'
+      delete 'view_share', to: 'plants#revoke_view_share', as: 'revoke_view_share'
+      post 'regenerate_view_share', to: 'plants#regenerate_view_share', as: 'regenerate_view_share'
     end
   end
 

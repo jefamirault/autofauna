@@ -765,6 +765,16 @@ table.timeline
       color: #888
       font-size: 0.85em
 
+    .watering-recipe-text, .watering-batch-text
+      display: block
+      color: #888
+      font-size: 0.85em
+
+  .watering-frequency-prompt
+    font-size: 0.85em
+    a
+      color: #888
+
 main.plants
   h3
     margin-left: 16px
@@ -800,6 +810,39 @@ main.plants
 
 .share-section .danger
   color: white
+
+.share-section h4
+  color: #666
+  margin: 1rem 0 0.5rem 0
+
+// Notification toggle button
+.notification-toggle
+  display: inline-block
+  padding: 0.5rem 1rem
+  border: none
+  border-radius: 6px
+  font-family: Roboto, verdana, sans-serif
+  font-size: 0.95em
+  cursor: pointer
+  button
+    background: none
+    border: none
+    color: inherit
+    font: inherit
+    cursor: pointer
+    padding: 0
+
+  &.enabled
+    background: #2E7D32
+    color: white
+    &:hover
+      background: #1B5E20
+
+  &.disabled
+    background: #999
+    color: white
+    &:hover
+      background: #777
 
 // Shared view layout
 .shared-header

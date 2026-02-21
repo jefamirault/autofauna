@@ -18,6 +18,7 @@ class Plant < ApplicationRecord
   }
 
   before_validation :strip_whitespace
+  before_validation :set_default_max_watering_freq, on: :create
 
   validates_uniqueness_of :uid, scope: :project_id
 
@@ -149,7 +150,11 @@ class Plant < ApplicationRecord
         I18n.t("plants.watering_status.within", count: max_watering_days, days: max_watering_days)
       end
     else
-      I18n.t("plants.watering_status.unscheduled")
+      if date_last_watering.nil?
+        I18n.t("plants.watering_status.never_watered", default: "Water this plant to begin tracking")
+      else
+        I18n.t("plants.watering_status.unscheduled")
+      end
     end
   end
 
@@ -197,6 +202,32 @@ class Plant < ApplicationRecord
       last_fertilization = waterings.order(:watered_at).reverse.find {|w| w.notes =~ /fertilizer/}
       last_fertilization ? last_fertilization.watered_at&.to_date : nil
     end
+  end
+
+  def set_default_max_watering_freq
+    if min_watering_freq.present? && max_watering_freq.blank?
+      self.max_watering_freq = min_watering_freq
+    end
+  end
+
+  def generate_view_share_token!
+    if view_share_token.nil?
+      update!(view_share_token: SecureRandom.urlsafe_base64(16), view_share_enabled: true)
+    else
+      update!(view_share_enabled: true)
+    end
+  end
+
+  def revoke_view_share_token!
+    update!(view_share_enabled: false)
+  end
+
+  def regenerate_view_share_token!
+    update!(view_share_token: SecureRandom.urlsafe_base64(16), view_share_enabled: true)
+  end
+
+  def view_shared?
+    view_share_token.present? && view_share_enabled?
   end
 
   def strip_whitespace

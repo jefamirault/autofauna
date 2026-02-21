@@ -1,4 +1,4 @@
-<%= form_with(model: sensor) do |form| %>
+<%= form_with(model: sensor, data: { turbo: false }) do |form| %>
   <% if sensor.errors.any? %>
     <div style="color: red">
       <h2><%= pluralize(sensor.errors.count, "error") %> prohibited this sensor from being saved:</h2>

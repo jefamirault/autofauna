@@ -1,5 +1,5 @@
 <div class="formContainer">
-  <%= form_with(model: watering, data: { controller: "watering-recipe watering-moisture", watering_recipe_url_value: for_recipe_recipe_batches_path }) do |form| %>
+  <%= form_with(model: watering, data: { controller: "watering-recipe watering-moisture", watering_recipe_url_value: for_recipe_recipe_batches_path, turbo: false }) do |form| %>
     <% if watering.errors.any? %>
       <div style="color: red">
         <h2><%= pluralize(watering.errors.count, "error") %> prohibited this watering from being saved:</h2>

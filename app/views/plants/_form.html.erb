@@ -2,7 +2,8 @@
 <%= form_with(model: plant, data: {
   controller: "plant-graphic",
   plant_graphic_suggest_url_value: suggest_graphic_plants_path,
-  plant_graphic_paths_value: graphic_paths.to_json
+  plant_graphic_paths_value: graphic_paths.to_json,
+  turbo: false
 }) do |form| %>
   <% if plant.errors.any? %>
     <div class="auth-errors">
