@@ -7,8 +7,12 @@ class ProjectsController < ApplicationController
   before_action :require_advanced_mode, only: [:show, :edit, :new]
 
   def index
-    auto_select_project(current_user) if current_user
-    redirect_to plants_path
+    if current_user&.advanced_mode? || current_user&.admin?
+      @projects = current_user.admin? ? Project.all : current_user.projects
+    else
+      auto_select_project(current_user) if current_user
+      redirect_to plants_path
+    end
   end
 
   def show
@@ -85,7 +89,7 @@ class ProjectsController < ApplicationController
 
   def set_project
     @project = Project.find params[:id]
-    if @project.users.include? current_user
+    if current_user&.admin? || @project.users.include?(current_user)
       set_current_project @project
     end
   end
