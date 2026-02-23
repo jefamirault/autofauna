@@ -10,30 +10,12 @@ class Plant < ApplicationRecord
   has_many :log_entries, as: :loggable, dependent: :destroy
   has_many :soil_moisture_readings, dependent: :destroy
 
-  scope :needing_notification, -> {
-    where(notifications_enabled: true, archived: false)
-      .where.not(date_sort_watering: nil)
-      .where("date_sort_watering <= ?", Date.current)
-      .where("last_notification_sent_at IS NULL OR last_notification_sent_at < date_last_watering")
-  }
-
   before_validation :strip_whitespace
   before_validation :set_default_max_watering_freq, on: :create
 
   validates_uniqueness_of :uid, scope: :project_id
 
   after_save_commit :sync_watering_dates_if_schedule_changed
-
-  def needs_notification?
-    notifications_enabled? &&
-      date_sort_watering.present? &&
-      date_sort_watering <= Date.current &&
-      (last_notification_sent_at.nil? || last_notification_sent_at < date_last_watering)
-  end
-
-  def mark_notification_sent!
-    update_column(:last_notification_sent_at, Time.current)
-  end
 
   def container
     self.pot

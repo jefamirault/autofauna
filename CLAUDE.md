@@ -47,7 +47,7 @@ User (has_secure_password, guest?, advanced_mode?, google_uid, login_enabled)
                                 ├── Recipe (name, color)
                                 │    ├── RecipeIngredient (amount, units, position)
                                 │    └── RecipeBatch (tds, volume, volume_units, mixed_on, active)
-                                └── PushSubscription
+                                └── PushSubscription (enabled, user_agent)
 ```
 
 **Key relationships:**
@@ -109,7 +109,15 @@ User (has_secure_password, guest?, advanced_mode?, google_uid, login_enabled)
 - **Push:** Web Push notifications via `web-push` gem + Service Worker (`public/service-worker.js`)
 - **VAPID keys:** Stored in Rails credentials
 - **Test buttons:** Settings page has "Send Test Email" and "Send Test Push Notification" buttons
-- **Push subscription:** PushSubscription model, browser permission requested on enable
+- **Push subscription:** PushSubscription model (has `enabled` boolean), browser permission requested on enable
+- **Per-device control:** Each push subscription can be individually disabled/enabled via inline toggle (no page reload). "Forget" deletes the record entirely.
+- **Global ↔ device sync:** The push card header toggle and individual device states are bidirectionally synced:
+  - Enabling the global toggle auto-enables the current device if all are disabled
+  - Disabling the global toggle disables all devices
+  - Disabling the last device auto-unchecks the global toggle (without collapsing the card)
+  - Enabling any device auto-checks the global toggle
+- **Notification sending** uses `PushSubscription.enabled` scope — disabled devices don't receive notifications
+- **Test button states:** "Send Test Push" disabled (gray) when no enabled devices; "Send Test Email" disabled when email toggle is off
 
 ## Plants Index UI
 
@@ -136,6 +144,8 @@ The plants index is the main page with significant client-side interactivity:
 | `watering_recipe_controller` | Dynamic batch dropdown on recipe change, auto-fill TDS |
 | `watering_moisture_controller` | Progressive disclosure of pre/post moisture fields |
 | `nested_form_controller` | Add/remove rows for nested attributes (recipes) |
+| `push_notification_controller` | Push device list: inline enable/disable toggle, "This Device" detection, test button state, global toggle sync |
+| `notification_settings_controller` | Notification card: collapse/expand, frequency settings, dirty tracking, global enable/disable toggle, test button state |
 
 ## Layout Architecture
 
@@ -222,9 +232,14 @@ Config in `config/deploy.rb` and `config/deploy/production.rb`
 - VAPID keys for push notifications stored in Rails credentials
 
 **Sidekiq in production:**
-- Managed via capistrano-sidekiq (auto-creates systemd service)
+- Managed via systemd service (`/etc/systemd/system/sidekiq.service`)
 - Config: `config/deploy.rb` has sidekiq settings (config path, log path, pid path)
-- Logs: `/home/jef/autofauna/log/sidekiq.log`
+- Logs: `/home/deploy/autofauna/log/sidekiq.log`, errors: `/home/deploy/autofauna/log/sidekiq_error.log`
+- Working directory: `/home/deploy/autofauna/current` (Capistrano symlink — NOT `/home/deploy/autofauna`)
+- ExecStart uses `/home/deploy/.rbenv/bin/rbenv exec bundle exec sidekiq` (rbenv not in systemd PATH by default)
+- **Stale processes:** After deploy, an old Sidekiq process may still be running with outdated code. Check `ps aux | grep sidekiq` — if a process predates the deploy, kill it and restart via `sudo systemctl restart sidekiq`
+- **Debugging:** `sudo systemctl status sidekiq` for status, `sudo journalctl -u sidekiq -n 30 --no-pager` for logs
+- **Running rails commands on server:** Must use `/home/deploy/autofauna/current` (not `/home/deploy/autofauna`), e.g. `cd /home/deploy/autofauna/current && RAILS_ENV=production bin/rails db:migrate`
 
 ## Common Patterns & Gotchas
 
@@ -238,3 +253,9 @@ Config in `config/deploy.rb` and `config/deploy/production.rb`
 - **Guest cleanup:** `rake guests:cleanup` destroys guest accounts older than 30 days
 - **Account deletion:** Async via `DeleteUserDataJob` — sets `login_enabled: false` immediately, destroys data in background
 - **Merge guest data:** When guest authenticates with existing account, `merge_guest!` transfers all data (plants, zones, sensors, etc.)
+- **Push subscription dual state:** Browser push subscriptions and server `PushSubscription` records are independent. The server record has an `enabled` flag to soft-disable without deleting. "Forget" deletes the record entirely. If browser is subscribed but no server record exists, the JS auto-re-registers. If a disabled record exists for the endpoint, it does NOT re-register (the endpoint still matches).
+- **Push device "Forget" button:** Only visible when the device is disabled; never shown for the current device (CSS `!important` rule on `.current-device .push-device-forget-wrap`)
+- **Cross-controller communication (push):** `notification-settings` dispatches `notification-enabled`/`notification-disabled` custom events on the `push-notification` controller element. The push controller listens in `connect()`. A `_suppressHeaderSync` flag prevents feedback loops when the global toggle triggers bulk device changes.
+- **Notification card collapse:** The `notification-settings` controller collapses card bodies to `height: 0; overflow: hidden`. Stimulus controllers inside still connect and can inject DOM, but content is invisible until the toggle switch expands the body. Don't remove visible fallback UI (like subscribe buttons) without ensuring the JS replacement works in both collapsed and expanded states
+- **button_to data attributes:** Rails `button_to` puts `data:` attributes on the `<form>` wrapper, not the `<button>`. To target the actual button from Stimulus, wrap in a div with the target and use `querySelector("button[type='submit']")` inside.
+- **button_to generates `<form>` tags:** Rails `button_to` renders a `<form>` element in the DOM. When using `querySelector("form")` inside a Stimulus controller, `button_to` forms may be found instead of the intended form. The push notification card has `button_to "Forget"` forms before the frequency settings form, so `querySelector("form")` returns the wrong one. Prefer querying for the specific input directly on `this.element` (e.g., `this.element.querySelector('input[type="time"]')`) or use Stimulus targets instead of generic form queries.

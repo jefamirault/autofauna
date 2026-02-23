@@ -30,6 +30,151 @@
   </div>
 </div>
 
+
+<% unless current_user.guest? %>
+  <%# === Email Notifications Card === %>
+  <div class="settings-card notification-card" data-controller="notification-settings" data-notification-settings-channel-value="email" data-notification-settings-enabled-value="<%= current_user.email_notifications_enabled? %>" data-notification-settings-toggle-url-value="<%= toggle_notification_path %>">
+    <div class="notification-card-header" data-action="click->notification-settings#toggleExpand">
+      <h2>📧 Email Notifications</h2>
+      <div class="toggle-wrap" data-action="click->notification-settings#preventPropagation click->notification-settings#toggleFromWrap">
+        <span class="toggle-label" data-notification-settings-target="toggleLabel"><%= current_user.email_notifications_enabled? ? "ON" : "OFF" %></span>
+        <label class="switch">
+          <input type="checkbox" data-notification-settings-target="toggle" data-action="change->notification-settings#toggleEnabled" <%= "checked" if current_user.email_notifications_enabled? %>>
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="notification-card-body" data-notification-settings-target="body">
+      <%= form_with model: current_user, url: settings_path, method: :patch, local: true, data: { action: "submit->notification-settings#handleSubmit" } do |f| %>
+        <%= f.hidden_field :email_notifications_enabled, value: current_user.email_notifications_enabled?, data: { notification_settings_target: "hiddenEnabled" } %>
+
+        <% email_is_hourly = current_user.email_notification_frequency_type == "hourly" %>
+        <% email_freq_val = current_user.email_notification_frequency_value || 1 %>
+        <div class="field">
+          <label>Frequency</label>
+          <div class="frequency-toggle" data-notification-settings-target="frequencyToggle">
+            <button type="button" class="frequency-btn <%= 'active' unless email_is_hourly %>" data-action="click->notification-settings#setDaily" data-notification-settings-target="dailyBtn">Daily</button>
+            <button type="button" class="frequency-btn <%= 'active' if email_is_hourly %>" data-action="click->notification-settings#setHourly" data-notification-settings-target="hourlyBtn">Hourly</button>
+          </div>
+          <%= f.hidden_field :email_notification_frequency_type, value: email_is_hourly ? "hourly" : "days", data: { notification_settings_target: "frequencyType" } %>
+        </div>
+
+        <div class="field">
+          <div class="frequency-detail-row" data-notification-settings-target="frequencyDetail">
+            <span data-notification-settings-target="dailyValueWrap" style="<%= 'display: none;' if email_is_hourly %>">
+              <%= f.select :email_notification_frequency_value, (1..7).map { |n| ["Every #{n == 1 ? 'day' : "#{n} days"}", n] }, {}, class: "frequency-day-select", disabled: email_is_hourly, data: { notification_settings_target: "dailyValue", action: "change->notification-settings#inputChanged" } %>
+            </span>
+            <span data-notification-settings-target="hourlyValueWrap" style="<%= 'display: none;' unless email_is_hourly %>">
+              <%= f.select :email_notification_frequency_value, (1..12).map { |n| ["Every #{n == 1 ? 'hour' : "#{n} hours"}", n] }, {}, class: "frequency-day-select", disabled: !email_is_hourly, data: { notification_settings_target: "hourlyValue", action: "change->notification-settings#inputChanged" } %>
+            </span>
+            <span data-notification-settings-target="dailyAtLabel" style="<%= 'display: none;' if email_is_hourly %>">at</span>
+            <span data-notification-settings-target="hourlyStartLabel" style="<%= 'display: none;' unless email_is_hourly %>">starting at</span>
+            <%= f.time_field :email_notification_time, value: current_user.email_notification_time&.strftime("%H:%M") || "09:00", class: "frequency-time-input", data: { action: "input->notification-settings#inputChanged change->notification-settings#inputChanged" } %>
+          </div>
+        </div>
+
+        <div class="submit save-submit-wrap" data-notification-settings-target="submitWrap">
+          <%= f.submit "Save", class: 'saveButton', data: { notification_settings_target: "submitButton" } %>
+        </div>
+      <% end %>
+
+      <div style="margin-top: 1rem;" data-notification-settings-target="testButton">
+        <%= button_to send_test_email_path, method: :post, class: "buttonLink", style: "width: 100%; text-align: center;", data: { turbo: false, disable_with: "Sending..." }, disabled: !current_user.email_notifications_enabled? || !current_user.plants.any? do %>
+          📧 Send Test Email
+        <% end %>
+        <% unless current_user.plants.any? %>
+          <p style="font-size: 0.85em; color: #888; margin: 0.25rem 0 0 0;">Add a plant first to test email notifications</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <%# === Push Notifications Card === %>
+  <div class="settings-card notification-card" data-controller="notification-settings" data-notification-settings-channel-value="push" data-notification-settings-enabled-value="<%= current_user.push_notifications_enabled? %>" data-notification-settings-toggle-url-value="<%= toggle_notification_path %>">
+    <div class="notification-card-header" data-action="click->notification-settings#toggleExpand">
+      <h2>🔔 Push Notifications</h2>
+      <div class="toggle-wrap" data-action="click->notification-settings#preventPropagation click->notification-settings#toggleFromWrap">
+        <span class="toggle-label" data-notification-settings-target="toggleLabel"><%= current_user.push_notifications_enabled? ? "ON" : "OFF" %></span>
+        <label class="switch">
+          <input type="checkbox" data-notification-settings-target="toggle" data-action="change->notification-settings#toggleEnabled" <%= "checked" if current_user.push_notifications_enabled? %>>
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="notification-card-body" data-notification-settings-target="body">
+      <% vapid_public_key = Rails.application.credentials.dig(:web_push, :public_key) %>
+      <% if vapid_public_key.present? %>
+        <div data-controller="push-notification" data-push-notification-vapid-key-value="<%= vapid_public_key %>">
+          <div style="margin-bottom: 1rem;">
+            <div class="push-device-list" data-push-notification-target="deviceList">
+              <% current_user.push_subscriptions.order(created_at: :desc).each do |sub| %>
+                <div class="push-device <%= 'push-device-disabled' unless sub.enabled? %>" data-endpoint="<%= sub.endpoint %>" data-subscription-id="<%= sub.id %>" data-enabled="<%= sub.enabled? %>">
+                  <div class="push-device-info">
+                    <span class="push-device-name"><%= sub.device_name %></span>
+                    <span class="push-device-date"><%= sub.enabled? ? "Subscribed #{time_ago_in_words(sub.created_at)} ago" : "Disabled" %></span>
+                  </div>
+                  <div class="push-device-actions">
+                    <span class="push-device-forget-wrap" <%= 'style="display: none;"' if sub.enabled? %>>
+                      <%= button_to "Forget", push_subscription_path(sub), method: :delete, class: "push-device-forget", data: { turbo: false, confirm: "Forget this device? It will re-register next time it connects." } %>
+                    </span>
+                    <button type="button" class="<%= sub.enabled? ? 'push-device-remove' : 'push-device-enable' %>" data-action="click->push-notification#toggleDevice"><%= sub.enabled? ? "Disable" : "Enable" %></button>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <%= form_with model: current_user, url: settings_path, method: :patch, local: true, data: { action: "submit->notification-settings#handleSubmit" } do |f| %>
+            <%= f.hidden_field :push_notifications_enabled, value: current_user.push_notifications_enabled?, data: { notification_settings_target: "hiddenEnabled" } %>
+
+            <% push_is_hourly = current_user.push_notification_frequency_type == "hourly" %>
+            <% push_freq_val = current_user.push_notification_frequency_value || 1 %>
+            <div class="field">
+              <label>Frequency</label>
+              <div class="frequency-toggle" data-notification-settings-target="frequencyToggle">
+                <button type="button" class="frequency-btn <%= 'active' unless push_is_hourly %>" data-action="click->notification-settings#setDaily" data-notification-settings-target="dailyBtn">Daily</button>
+                <button type="button" class="frequency-btn <%= 'active' if push_is_hourly %>" data-action="click->notification-settings#setHourly" data-notification-settings-target="hourlyBtn">Hourly</button>
+              </div>
+              <%= f.hidden_field :push_notification_frequency_type, value: push_is_hourly ? "hourly" : "days", data: { notification_settings_target: "frequencyType" } %>
+            </div>
+
+            <div class="field">
+              <div class="frequency-detail-row" data-notification-settings-target="frequencyDetail">
+                <span data-notification-settings-target="dailyValueWrap" style="<%= 'display: none;' if push_is_hourly %>">
+                  <%= f.select :push_notification_frequency_value, (1..7).map { |n| ["Every #{n == 1 ? 'day' : "#{n} days"}", n] }, {}, class: "frequency-day-select", disabled: push_is_hourly, data: { notification_settings_target: "dailyValue", action: "change->notification-settings#inputChanged" } %>
+                </span>
+                <span data-notification-settings-target="hourlyValueWrap" style="<%= 'display: none;' unless push_is_hourly %>">
+                  <%= f.select :push_notification_frequency_value, (1..12).map { |n| ["Every #{n == 1 ? 'hour' : "#{n} hours"}", n] }, {}, class: "frequency-day-select", disabled: !push_is_hourly, data: { notification_settings_target: "hourlyValue", action: "change->notification-settings#inputChanged" } %>
+                </span>
+                <span data-notification-settings-target="dailyAtLabel" style="<%= 'display: none;' if push_is_hourly %>">at</span>
+                <span data-notification-settings-target="hourlyStartLabel" style="<%= 'display: none;' unless push_is_hourly %>">starting at</span>
+                <%= f.time_field :push_notification_time, value: current_user.push_notification_time&.strftime("%H:%M") || "09:00", class: "frequency-time-input", data: { action: "input->notification-settings#inputChanged change->notification-settings#inputChanged" } %>
+              </div>
+            </div>
+
+            <div class="submit save-submit-wrap" data-notification-settings-target="submitWrap">
+              <%= f.submit "Save", class: 'saveButton', data: { notification_settings_target: "submitButton" } %>
+            </div>
+          <% end %>
+
+          <div style="margin-top: 1rem;" data-push-notification-target="testPushWrap">
+            <%= button_to send_test_push_path, method: :post, class: "buttonLink", style: "width: 100%; text-align: center;", data: { turbo: false, disable_with: "Sending..." }, disabled: !current_user.push_subscriptions.enabled.any? do %>
+              🔔 Send Test Push Notification
+            <% end %>
+            <p data-push-notification-target="testPushHint" style="font-size: 0.85em; color: #888; margin: 0.25rem 0 0 0; <%= 'display: none;' if current_user.push_subscriptions.enabled.any? %>">Enable push in this browser first to test</p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <% if current_user.email_notifications_enabled? || current_user.push_notifications_enabled? %>
+    <%= button_to "Disable All Notifications", disable_all_notifications_path, method: :patch, class: "buttonLinkDanger", style: "width: 100%; text-align: center; box-sizing: border-box; margin-bottom: 1.5rem;", data: { turbo: false, confirm: "Disable both email and push notifications?" } %>
+  <% end %>
+<% end %>
+
 <div class="settings-card">
   <h2>🛡️ <%= t 'account.security' %></h2>
   <% unless current_user.guest? || current_user.google_uid.present? %>
@@ -40,64 +185,6 @@
     <%= button_to "🚪 #{t('layouts.application.log_out')}", session_path, class: 'buttonLink', method: :delete, onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
   <% end %>
 </div>
-
-<% unless current_user.guest? %>
-  <div class="settings-card">
-    <h2>Notifications</h2>
-    <%= form_with model: current_user, url: settings_path, method: :patch, local: true do |f| %>
-      <div class="field">
-        <%= f.label :notification_enabled, "Enable watering reminders" %>
-        <%= f.check_box :notification_enabled %>
-      </div>
-      <div class="field">
-        <%= f.label :notification_time, "Preferred notification time" %>
-        <%= f.time_field :notification_time, value: current_user.notification_time&.strftime("%H:%M") || "09:00" %>
-      </div>
-      <div class="submit">
-        <%= f.submit "Save notification preferences", class: 'saveButton' %>
-      </div>
-    <% end %>
-
-    <br>
-    <!-- Test Notification Buttons -->
-    <h2>Test Notifications</h2>
-
-    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-      <!-- Test Email Button -->
-      <%= button_to send_test_email_path, method: :post, class: "buttonLink", style: "width: 100%; text-align: center;", data: { turbo: false, disable_with: "Sending..." }, disabled: !current_user.plants.any? do %>
-        📧 Send Test Email
-      <% end %>
-
-      <% unless current_user.plants.any? %>
-        <p style="font-size: 0.85em; color: #888; margin: -0.25rem 0 0.5rem 1rem;">Add a plant first to test email notifications</p>
-      <% end %>
-
-      <!-- Test Push Notification Button -->
-      <%= button_to send_test_push_path, method: :post, class: "buttonLink", style: "width: 100%; text-align: center;", data: { turbo: false, disable_with: "Sending..." }, disabled: !current_user.push_subscriptions.any? do %>
-        🔔 Send Test Push Notification
-      <% end %>
-
-      <% unless current_user.push_subscriptions.any? %>
-        <p style="font-size: 0.85em; color: #888; margin: -0.25rem 0 0 1rem;">Enable push notifications above to test</p>
-      <% end %>
-    </div>
-
-    <% vapid_public_key = Rails.application.credentials.dig(:web_push, :public_key) %>
-    <% if vapid_public_key.present? %>
-      <br>
-      <h2>Push Notifications</h2>
-      <div data-controller="push-notification" data-push-notification-vapid-key-value="<%= vapid_public_key %>">
-        <p data-push-notification-target="status"></p>
-        <button class="saveButton" data-push-notification-target="subscribeButton" data-action="click->push-notification#subscribe">
-          Enable push notifications
-        </button>
-        <button class="buttonLink" data-push-notification-target="unsubscribeButton" data-action="click->push-notification#unsubscribe" style="display: none;">
-          Disable push notifications
-        </button>
-      </div>
-    <% end %>
-  </div>
-<% end %>
 
 <% unless current_user.guest? || current_user.google_uid.present? %>
   <button class="buttonLinkDanger" onclick="document.getElementById('danger-zone').style.display='block'; this.style.display='none';">🗑️ <%= t 'account.delete_account' %></button>

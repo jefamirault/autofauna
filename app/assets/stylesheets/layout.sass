@@ -177,13 +177,16 @@ body:has(header.header-users)
 body:has(header.header-settings)
   --section-gradient: linear-gradient(135deg, #546E7A 0%, #637271 67%, #3E4F4E 100%)
   --section-color-start: #546E7A
+body:has(header.header-admin)
+  --section-gradient: linear-gradient(135deg, #E65100 0%, #BF360C 67%, #4E342E 100%)
+  --section-color-start: #E65100
 
 body.development:has(header.header-plants), body.development:has(header.header-default)
   --section-gradient: linear-gradient(135deg, #{$brightgreen} 0%, #637271 67%, #{$yellow} 100%)
   --section-color-start: #{$brightgreen}
 
 // Context-aware header gradients — always on the header, logo area covered by solid button/logoContainer
-.header-plants, .header-waterings, .header-tanks, .header-locations, .header-sensors, .header-users, .header-settings, .header-default
+.header-plants, .header-waterings, .header-tanks, .header-locations, .header-sensors, .header-users, .header-settings, .header-admin, .header-default
   background: var(--section-gradient)
   // Mobile: blend solid button color into gradient so there's no visible seam
   @media (max-width: 600px)

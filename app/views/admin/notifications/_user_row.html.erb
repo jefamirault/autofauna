@@ -1,0 +1,15 @@
+<tr>
+  <td><%= user.email %></td>
+  <td>
+    <%= button_to user.email_notifications_enabled? ? "✅ Email" : "🚫 Email",
+        admin_notifications_update_user_path(id: user.id, user: { email_notifications_enabled: !user.email_notifications_enabled }),
+        method: :patch,
+        class: user.email_notifications_enabled? ? 'buttonLink' : 'buttonLinkDanger' %>
+  </td>
+  <td>
+    <%= button_to user.push_notifications_enabled? ? "✅ Push" : "🚫 Push",
+        admin_notifications_update_user_path(id: user.id, user: { push_notifications_enabled: !user.push_notifications_enabled }),
+        method: :patch,
+        class: user.push_notifications_enabled? ? 'buttonLink' : 'buttonLinkDanger' %>
+  </td>
+</tr>

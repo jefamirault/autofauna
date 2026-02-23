@@ -4,21 +4,28 @@ Current session log. Previous logs archived in `agent_log/`.
 
 ---
 
-## 2026-02-22 — Update CLAUDE.md with Context from Agent Logs
+## 2026-02-23: Push subscription Disable/Enable + Forget
 
-Read all 9 archived agent logs and extracted useful context into CLAUDE.md. Added the following sections:
+**Problem:** The "Remove" button on push notification devices was deleting the server record, but the browser still had an active subscription. On page reload, the JS auto-re-registered it — making it impossible to disable a specific device's notifications.
 
-- **Stack:** Added Sidekiq + Redis, capistrano-sidekiq
-- **Domain Model:** Expanded with all new models (Recipe, RecipeSource, RecipeIngredient, RecipeBatch, SoilMoistureReading, PushSubscription), updated User/Project/Plant/Watering/Location attributes
-- **Key Files:** Added plant_graphics concern, application_helper, Stimulus controllers directory
-- **Conventions:** Added guest accounts, Google auth, advanced_mode documentation
-- **Design System:** New section documenting CSS component classes (resource-card, info-card, settings-card)
-- **Background Jobs:** New section covering Sidekiq/Redis configuration, queues, cron jobs
-- **Notifications:** New section covering email (Mailgun) and push (web-push gem) notifications
-- **Plants Index UI:** New section documenting display modes, filters, pagination, search
-- **Stimulus Controllers:** New section listing all 11 controllers with their purposes
-- **Layout Architecture:** New section covering grid layout, context-aware header, sidebar states, FOUC prevention, mobile behavior
-- **Key Routes:** Expanded with recipe, moisture, sharing, guest, and Google auth routes
-- **Deployment:** Added env vars (REDIS_URL, Mailgun), Sidekiq production config
-- **Common Patterns & Gotchas:** New section with 10 documented pitfalls (Turbo frames, Google Sign-In, Ransack params, N+1 queries, etc.)
+**Changes:**
+- Added `enabled` boolean column to `push_subscriptions` (migration `20260223100002`)
+- Added `PushSubscription.enabled` scope
+- Replaced "Remove" button with **Disable/Enable toggle** (`toggle` action on `PushSubscriptionsController`)
+- Added **"Forget"** button that performs the old delete behavior (with warning that device will re-register)
+- Updated JS controller to check `data-enabled` attribute — disabled records still match by endpoint so no auto-re-register
+- Updated notification sending (job + test push) to only target `.enabled` subscriptions
+- Added route: `PATCH /push_subscriptions/:id/toggle`
+- Added CSS for disabled state (`.push-device-disabled`) and actions layout (`.push-device-actions`, `.push-device-forget`)
 
+## 2026-02-23: Push device toggle UX improvements
+
+**Changes:**
+- **Inline toggle (no reload):** Disable/Enable buttons now use fetch + optimistic UI update instead of form submit + page reload
+- **Test Push button state:** Dynamically disables (gray) when no enabled devices exist; re-enables when a device is enabled. Hint text toggles visibility.
+- **Header toggle sync:** When all push devices are disabled, the push card's header switch-slider auto-unchecks (persisted to server) — card body stays expanded. Re-enabling a device auto-checks it back.
+- **Test Email button state:** Disabled unless the email notifications toggle switch is on (via `notification-settings` controller `testButton` target)
+- **Forget button visibility:** Only shown when a device is disabled; never shown for the current device (CSS `!important` rule on `.current-device .push-device-forget-wrap`)
+- **Disabled button styling:** Added `.buttonLink button:disabled` CSS (gray background, not-allowed cursor)
+- Extended `push-notification` controller scope to wrap frequency form + test button (needed for Stimulus targets)
+- Removed stray `console.log` statements from `notification_settings_controller.js`

@@ -112,6 +112,8 @@ module ApplicationHelper
       { icon: 'sensor_icon.png', title: title, gradient_class: 'header-sensors header-graphic' }
     when 'users'
       { icon: 'users_icon.png', title: t('layouts.application.users'), gradient_class: 'header-users header-graphic' }
+    when 'admin/notifications'
+      { icon: 'settings_icon.png', title: 'Notifications', gradient_class: 'header-admin header-graphic' }
     when 'settings'
       { icon: 'settings_icon.png', title: t('layouts.application.account_settings'), gradient_class: 'header-settings header-graphic' }
     when 'projects'

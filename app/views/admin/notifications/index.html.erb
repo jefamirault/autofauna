@@ -1,0 +1,76 @@
+<% content_for :title, 'Notification Management' %>
+
+<h1>🔔 Notification Management</h1>
+
+<div class="settings-card">
+  <h2>⚙️ System Settings</h2>
+  <%= form_with model: @config, url: admin_notifications_update_config_path, method: :patch, local: true do |f| %>
+    <div class="field">
+      <%= f.label :cron_expression, "Notification Frequency" %>
+      <%= f.select :cron_expression, [
+        ["Every minute", "* * * * *"],
+        ["Every 5 minutes", "*/5 * * * *"],
+        ["Every 15 minutes", "*/15 * * * *"],
+        ["Every 30 minutes", "*/30 * * * *"],
+        ["Every hour", "0 * * * *"],
+        ["Every 6 hours", "0 */6 * * *"],
+        ["Every 12 hours", "0 */12 * * *"],
+        ["Daily (midnight)", "0 0 * * *"]
+      ], {}, class: "selectField" %>
+    </div>
+    <div class="field">
+      <%= f.label :notifications_paused, "Pause all notifications" %>
+      <%= f.check_box :notifications_paused %>
+    </div>
+    <div class="submit">
+      <%= f.submit "Save System Settings", class: 'saveButton' %>
+    </div>
+  <% end %>
+</div>
+
+<div class="settings-card">
+  <h2>📝 Message Templates</h2>
+  <%= form_with model: @config, url: admin_notifications_update_config_path, method: :patch, local: true do |f| %>
+    <div class="field">
+      <%= f.label :email_subject_template, "Email Subject" %>
+      <%= f.text_field :email_subject_template, class: "textField" %>
+      <p class="hint">Variables: <code>{{count}}</code></p>
+    </div>
+    <div class="field">
+      <%= f.label :email_body_template, "Email Body (HTML)" %>
+      <%= f.text_area :email_body_template, rows: 10, class: "textField" %>
+      <p class="hint">Variables: <code>{{user_email}}</code>, <code>{{plant_list}}</code>, <code>{{app_url}}</code>, <code>{{count}}</code></p>
+    </div>
+    <div class="field">
+      <%= f.label :push_title_template, "Push Notification Title" %>
+      <%= f.text_field :push_title_template, class: "textField" %>
+      <p class="hint">Variables: <code>{{plant_name}}</code>, <code>{{plant_label}}</code></p>
+    </div>
+    <div class="field">
+      <%= f.label :push_body_template, "Push Notification Body" %>
+      <%= f.text_field :push_body_template, class: "textField" %>
+      <p class="hint">Variables: <code>{{plant_name}}</code>, <code>{{plant_label}}</code></p>
+    </div>
+    <div class="submit">
+      <%= f.submit "Save Templates", class: 'saveButton' %>
+    </div>
+  <% end %>
+</div>
+
+<div class="settings-card">
+  <h2>👥 User Notification Controls</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Email</th>
+        <th>Push</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @users.each do |user| %>
+        <%= render "user_row", user: user %>
+      <% end %>
+    </tbody>
+  </table>
+</div>

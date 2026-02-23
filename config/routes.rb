@@ -1,4 +1,22 @@
+require 'sidekiq/web'
+require 'sidekiq/cron/web'
+
+class AdminConstraint
+  def matches?(request)
+    user_id = request.cookie_jar.encrypted[:user_id]
+    user_id.present? && User.find_by(id: user_id)&.admin?
+  end
+end
+
 Rails.application.routes.draw do
+  mount Sidekiq::Web => '/sidekiq', constraints: AdminConstraint.new
+
+  namespace :admin do
+    get 'notifications', to: 'notifications#index', as: :notifications
+    patch 'notifications/update_config', to: 'notifications#update_config', as: :notifications_update_config
+    patch 'notifications/update_user/:id', to: 'notifications#update_user', as: :notifications_update_user
+  end
+
   resources :locations
   resources :recipe_sources
   resources :recipes
@@ -55,7 +73,13 @@ Rails.application.routes.draw do
   delete 'settings', to: 'settings#destroy'
   post 'settings/send_test_email', to: 'settings#send_test_email', as: 'send_test_email'
   post 'settings/send_test_push', to: 'settings#send_test_push', as: 'send_test_push'
-  resources :push_subscriptions, only: [:create, :destroy]
+  patch 'settings/toggle_notification', to: 'settings#toggle_notification', as: 'toggle_notification'
+  patch 'settings/disable_all_notifications', to: 'settings#disable_all_notifications', as: 'disable_all_notifications'
+  resources :push_subscriptions, only: [:create, :destroy] do
+    member do
+      patch :toggle
+    end
+  end
   get 'en', to: 'settings#english'
   get 'es', to: 'settings#spanish'
 

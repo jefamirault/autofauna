@@ -37,6 +37,20 @@ class SettingsController < ApplicationController
     redirect_to root_path
   end
 
+  def toggle_notification
+    channel = params[:channel]
+    return head(:bad_request) unless %w[email push].include?(channel)
+
+    field = "#{channel}_notifications_enabled"
+    current_user.update_column(field.to_sym, !current_user.send("#{field}?"))
+    head :ok
+  end
+
+  def disable_all_notifications
+    current_user.update_columns(email_notifications_enabled: false, push_notifications_enabled: false)
+    redirect_to settings_path, notice: "All notifications disabled."
+  end
+
   def send_test_email
     if current_user.plants.any?
       # Send test email with up to 3 plants as examples
@@ -49,9 +63,9 @@ class SettingsController < ApplicationController
   end
 
   def send_test_push
-    if current_user.push_subscriptions.any?
+    if current_user.push_subscriptions.enabled.any?
       sent_count = 0
-      current_user.push_subscriptions.each do |subscription|
+      current_user.push_subscriptions.enabled.each do |subscription|
         begin
           subscription.send_notification(
             title: "Test Notification from Autofauna",
@@ -77,6 +91,11 @@ class SettingsController < ApplicationController
   private
 
   def notification_params
-    params.require(:user).permit(:notification_enabled, :notification_time)
+    params.require(:user).permit(
+      :email_notifications_enabled, :push_notifications_enabled,
+      :email_notification_time, :push_notification_time,
+      :email_notification_frequency_type, :email_notification_frequency_value,
+      :push_notification_frequency_type, :push_notification_frequency_value
+    )
   end
 end

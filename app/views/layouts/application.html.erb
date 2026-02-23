@@ -56,6 +56,7 @@
           <div class="header-dropdown hidden" data-dropdown-target="menu">
             <% if current_user.admin? %>
               <%= link_to "#{t('.users')}", users_path, class: 'dropdown-item' %>
+              <%= link_to "🔔 Notifications", admin_notifications_path, class: 'dropdown-item' %>
             <% end %>
             <% if current_project && show_project_ui? %>
               <%= link_to "#{t('.project_settings')}", project_path(current_project), class: 'dropdown-item' %>

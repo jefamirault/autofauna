@@ -71,9 +71,52 @@ class User < ApplicationRecord
     end
   end
 
-  def plants_needing_notification
+  def plants_needing_water
     project_ids = projects.pluck(:id) + collaborations.pluck(:project_id)
-    Plant.where(project_id: project_ids).needing_notification
+    Plant.where(project_id: project_ids, archived: false)
+      .where.not(date_sort_watering: nil)
+      .where("date_sort_watering <= ?", Date.current)
+  end
+
+  def should_send_notification?(channel)
+    enabled = send("#{channel}_notifications_enabled?")
+    return false unless enabled
+
+    freq_type = send("#{channel}_notification_frequency_type") || "daily"
+    freq_value = send("#{channel}_notification_frequency_value") || 1
+    notif_time = send("#{channel}_notification_time")
+    last_sent = send("last_#{channel}_notification_sent_at")
+    now = Time.current
+
+    notif_hour = notif_time&.hour || 9
+    notif_min = notif_time&.min || 0
+
+    case freq_type
+    when "daily"
+      return false if last_sent&.to_date == now.to_date
+      now.hour == notif_hour && now.min == notif_min
+    when "days"
+      return false unless now.hour == notif_hour && now.min == notif_min
+      last_sent.nil? || last_sent < (now - freq_value.days).end_of_day
+    when "hourly"
+      start_minutes = notif_hour * 60 + notif_min
+      current_minutes = now.hour * 60 + now.min
+      interval_minutes = freq_value * 60
+      return false if current_minutes < start_minutes
+      offset = (current_minutes - start_minutes) % interval_minutes
+      return false unless offset == 0
+      last_sent.nil? || last_sent < now.beginning_of_minute
+    else
+      false
+    end
+  end
+
+  def mark_email_notification_sent!
+    update_column(:last_email_notification_sent_at, Time.current)
+  end
+
+  def mark_push_notification_sent!
+    update_column(:last_push_notification_sent_at, Time.current)
   end
 
   def to_s

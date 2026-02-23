@@ -5,6 +5,33 @@ class PushSubscription < ApplicationRecord
   validates :p256dh_key, presence: true
   validates :auth_key, presence: true
 
+  scope :enabled, -> { where(enabled: true) }
+
+  def device_name
+    return "Unknown device" if user_agent.blank?
+
+    browser = case user_agent
+              when /Edg/i then "Edge"
+              when /OPR|Opera/i then "Opera"
+              when /Chrome/i then "Chrome"
+              when /Safari/i then "Safari"
+              when /Firefox/i then "Firefox"
+              else "Browser"
+              end
+
+    os = case user_agent
+         when /iPhone|iPad/i then "iOS"
+         when /Android/i then "Android"
+         when /Windows/i then "Windows"
+         when /Macintosh|Mac OS/i then "macOS"
+         when /Linux/i then "Linux"
+         when /CrOS/i then "ChromeOS"
+         else nil
+         end
+
+    os ? "#{browser} on #{os}" : browser
+  end
+
   def send_notification(title:, body:, url: nil)
     payload = { title: title, body: body, url: url }.compact.to_json
 

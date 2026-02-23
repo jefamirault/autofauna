@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_21_100001) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_23_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -54,6 +54,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_21_100001) do
     t.index ["user_id"], name: "index_log_entries_on_user_id"
   end
 
+  create_table "notification_configs", force: :cascade do |t|
+    t.string "cron_expression", default: "0 * * * *", null: false
+    t.boolean "notifications_paused", default: false, null: false
+    t.string "email_subject_template", default: "{{count}} plant(s) need watering", null: false
+    t.text "email_body_template", null: false
+    t.string "push_title_template", default: "Water {{plant_name}}", null: false
+    t.string "push_body_template", default: "{{plant_label}} is due for watering", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "plants", force: :cascade do |t|
     t.string "name"
     t.integer "uid"
@@ -74,8 +85,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_21_100001) do
     t.string "graphic"
     t.string "share_token"
     t.boolean "share_enabled", default: false
-    t.boolean "notifications_enabled", default: false, null: false
-    t.datetime "last_notification_sent_at"
     t.bigint "recipe_id"
     t.string "view_share_token"
     t.boolean "view_share_enabled", default: false
@@ -106,6 +115,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_21_100001) do
     t.string "user_agent"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "enabled", default: true, null: false
     t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
     t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
   end
@@ -226,8 +236,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_21_100001) do
     t.boolean "guest", default: false, null: false
     t.string "google_uid"
     t.string "avatar_url"
-    t.boolean "notification_enabled", default: false, null: false
-    t.time "notification_time", default: "2000-01-01 09:00:00"
+    t.boolean "email_notifications_enabled", default: true, null: false
+    t.boolean "push_notifications_enabled", default: true, null: false
+    t.time "email_notification_time", default: "2000-01-01 09:00:00"
+    t.time "push_notification_time", default: "2000-01-01 09:00:00"
+    t.string "email_notification_frequency_type", default: "daily"
+    t.integer "email_notification_frequency_value", default: 1
+    t.string "push_notification_frequency_type", default: "daily"
+    t.integer "push_notification_frequency_value", default: 1
+    t.datetime "last_email_notification_sent_at"
+    t.datetime "last_push_notification_sent_at"
     t.index ["google_uid"], name: "index_users_on_google_uid", unique: true
   end
 

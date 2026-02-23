@@ -1,5 +1,5 @@
 plant_notifications:
-  cron: '0 * * * *'  # Every hour at minute 0
+  cron: '* * * * *'  # Every minute — job checks per-user frequency preferences
   class: 'PlantNotificationJob'
-  queue: 'default'
+  active_job: true
   description: 'Send watering reminder notifications to users'

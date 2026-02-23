@@ -35,18 +35,6 @@
   <% end %>
 </div>
 
-<% unless current_user.guest? %>
-  <div class="share-section">
-    <%= button_to plant_path(@plant), method: :patch,
-        params: { plant: { notifications_enabled: !@plant.notifications_enabled } },
-        class: "notification-toggle #{@plant.notifications_enabled? ? 'enabled' : 'disabled'}" do %>
-      🔔 <%= @plant.notifications_enabled? ? "Notifications Enabled" : "Notifications Disabled" %>
-    <% end %>
-    <% if @plant.last_notification_sent_at.present? %>
-      <p class="info-text">Last notification sent: <%= format_date @plant.last_notification_sent_at %></p>
-    <% end %>
-  </div>
-<% end %>
 
 <div class="plant-actions">
   <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant,
