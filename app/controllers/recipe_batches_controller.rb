@@ -1,4 +1,6 @@
 class RecipeBatchesController < ApplicationController
+  before_action :authenticate
+  before_action :ensure_project
   before_action :set_recipe_batch, only: %i[show edit update destroy]
   before_action :authorize_viewer, only: [:index, :show, :for_recipe]
   before_action :authorize_editor, except: [:index, :show, :for_recipe]
@@ -62,7 +64,7 @@ class RecipeBatchesController < ApplicationController
   private
 
   def set_recipe_batch
-    @recipe_batch = RecipeBatch.find(params.expect(:id))
+    @recipe_batch = current_project.recipe_batches.find(params.expect(:id))
   end
 
   def recipe_batch_params

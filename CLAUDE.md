@@ -84,6 +84,23 @@ User (has_secure_password, guest?, advanced_mode?, google_uid, login_enabled)
 - SASS for styles (sassc-rails)
 - System tests with Capybara + Selenium
 
+## Authorization & Resource Scoping
+
+All resources are scoped to `current_project` to prevent cross-project access (IDOR). Follow these rules when adding or modifying controllers:
+
+- **Every resource controller** must have `before_action :authenticate` and `before_action :ensure_project` (from ApplicationController) before any other filters
+- **`set_*` methods must scope through `current_project`:** Use `current_project.<association>.find(params[:id])` — never `Model.find(params[:id])`. This returns 404 if the resource doesn't belong to the user's project.
+- **Nested resources** scope through the parent: e.g. `@tank.water_tests.find(params[:id])`, where `@tank` was already scoped via `current_project.tanks.find(...)`
+- **`authorize_viewer` / `authorize_editor`** come after `authenticate` and `ensure_project` in the filter chain
+- **`rescue_from ActiveRecord::RecordNotFound`** in ApplicationController provides a user-friendly redirect when scoped `.find` raises
+- **Public/shared controllers** (e.g. `SharedPlantsController`) are exempt — they use `find_by` with share tokens and handle not-found themselves
+
+**Checklist for new controllers:**
+1. `before_action :authenticate`
+2. `before_action :ensure_project`
+3. `before_action :set_<resource>` — scoped through `current_project`
+4. `before_action :authorize_viewer` / `:authorize_editor` with appropriate `only:`/`except:`
+
 ## Design System (CSS Classes)
 
 | Component | Usage | CSS Class |

@@ -1,9 +1,19 @@
 class ApplicationController < ActionController::Base
   around_action :switch_locale
 
-
+  rescue_from ActiveRecord::RecordNotFound do |exception|
+    redirect_to plants_path, alert: t('errors.not_found', default: 'Record not found.')
+  end
 
   private
+
+  def ensure_project
+    if current_project.nil?
+      auto_select_project(current_user)
+      redirect_to new_session_path unless current_project
+    end
+  end
+
   def switch_locale(&action)
     locale = params[:locale] || cookies[:locale] || I18n.default_locale
     if params[:locale]

@@ -1,6 +1,10 @@
 class WaterTestsController < ApplicationController
+  before_action :authenticate
+  before_action :ensure_project
   before_action :set_tank
   before_action :set_water_test, only: [:show, :edit, :update, :destroy]
+  before_action :authorize_viewer, only: [:index, :show]
+  before_action :authorize_editor, except: [:index, :show]
 
   def index
     @water_tests = @tank.water_tests.recent.includes(:tank)
@@ -42,7 +46,7 @@ class WaterTestsController < ApplicationController
   private
 
   def set_tank
-    @tank = Tank.find(params[:tank_id])
+    @tank = current_project.tanks.find(params[:tank_id])
   end
 
   def set_water_test

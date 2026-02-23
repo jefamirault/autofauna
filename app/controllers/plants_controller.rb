@@ -6,7 +6,7 @@ class PlantsController < ApplicationController
   before_action :authorize_editor, except: [:index, :show]
 
   def water
-    @plant = Plant.find params[:plant_id]
+    @plant = current_project.plants.find(params[:plant_id])
     redirect_to new_watering_path(plant_id: @plant.id, volume: params[:volume], units: params[:units], notes: params[:notes],
       recipe_batch_id: params[:recipe_batch_id], recipe_id: params[:recipe_id], tds: params[:tds])
   end
@@ -241,7 +241,7 @@ class PlantsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_plant
-      @plant = Plant.find(params[:id])
+      @plant = current_project.plants.find(params[:id])
     end
 
     def set_project

@@ -1,4 +1,6 @@
 class RecipesController < ApplicationController
+  before_action :authenticate
+  before_action :ensure_project
   before_action :set_recipe, only: %i[show edit update destroy]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
@@ -59,7 +61,7 @@ class RecipesController < ApplicationController
   private
 
   def set_recipe
-    @recipe = Recipe.find(params.expect(:id))
+    @recipe = current_project.recipes.find(params.expect(:id))
   end
 
   def recipe_params

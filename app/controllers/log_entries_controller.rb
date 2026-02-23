@@ -1,23 +1,25 @@
 class LogEntriesController < ApplicationController
+  before_action :authenticate
+  before_action :ensure_project
+  before_action :set_plant, only: %i[ index new edit ]
   before_action :set_log_entry, only: %i[ show edit update destroy ]
+  before_action :authorize_viewer, only: [:index, :show]
+  before_action :authorize_editor, except: [:index, :show]
 
   def index
-    @loggable = Plant.find params[:plant_id]
+    @loggable = @plant
     @log_entries = @loggable.log_entries.reverse
   end
 
   def show
-    @log_entry = LogEntry.find(params[:id])
     @loggable = @log_entry.loggable
   end
 
   def new
-    @plant = Plant.find(params[:plant_id])
     @log_entry = LogEntry.new loggable_type: 'plant', loggable: @plant, user: current_user
   end
 
   def edit
-    @plant = Plant.find(params[:plant_id])
   end
 
   def create
@@ -56,8 +58,15 @@ class LogEntriesController < ApplicationController
   end
 
   private
+
+  def set_plant
+    @plant = current_project.plants.find(params[:plant_id])
+  end
+
   def set_log_entry
-    @log_entry = LogEntry.find(params.expect(:id))
+    plant = @plant || current_project.plants.find(params[:plant_id])
+    @log_entry = plant.log_entries.find(params.expect(:id))
+    @plant ||= plant
   end
 
   def log_entry_params

@@ -1,4 +1,6 @@
 class SensorTypesController < ApplicationController
+  before_action :authenticate
+  before_action :ensure_project
   before_action :set_sensor_type, only: %i[ show edit update destroy ]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
@@ -62,7 +64,7 @@ class SensorTypesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_sensor_type
-      @sensor_type = SensorType.find(params.expect(:id))
+      @sensor_type = current_project.sensor_types.find(params.expect(:id))
     end
 
     # Only allow a list of trusted parameters through.

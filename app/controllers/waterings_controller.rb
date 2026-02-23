@@ -1,15 +1,13 @@
 class WateringsController < ApplicationController
+  before_action :authenticate
+  before_action :ensure_project
   before_action :set_watering, only: %i[ show edit update destroy ]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
 
   # GET /waterings or /waterings.json
   def index
-    if current_project.nil?
-      auto_select_project(current_user)
-      return redirect_to new_session_path unless current_project
-    end
-    @waterings = current_project&.waterings&.sort_by{|w| [w.watered_at, w.updated_at]}&.reverse&.first 500
+    @waterings = current_project.waterings.sort_by{|w| [w.watered_at, w.updated_at]}.reverse.first 500
   end
 
   # GET /waterings/1 or /waterings/1.json
@@ -99,7 +97,7 @@ class WateringsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_watering
-      @watering = Watering.find(params[:id])
+      @watering = current_project.waterings.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.

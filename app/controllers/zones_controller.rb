@@ -1,4 +1,6 @@
 class ZonesController < ApplicationController
+  before_action :authenticate
+  before_action :ensure_project
   before_action :set_zone, only: %i[ show edit update destroy ]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
@@ -62,7 +64,7 @@ class ZonesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_zone
-      @zone = Zone.find(params.expect(:id))
+      @zone = current_project.zones.find(params.expect(:id))
     end
 
     # Only allow a list of trusted parameters through.
