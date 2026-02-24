@@ -210,32 +210,50 @@ class PlantsController < ApplicationController
 
   def create_share
     @plant.generate_share_token!
-    redirect_to plant_path(@plant), notice: t('plants.messages.share_created')
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plant_path(@plant), notice: t('plants.messages.share_created') }
+    end
   end
 
   def revoke_share
     @plant.revoke_share_token!
-    redirect_to plant_path(@plant), notice: t('plants.messages.share_revoked')
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plant_path(@plant), notice: t('plants.messages.share_revoked') }
+    end
   end
 
   def regenerate_share
     @plant.regenerate_share_token!
-    redirect_to plant_path(@plant), notice: t('plants.messages.share_regenerated')
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plant_path(@plant), notice: t('plants.messages.share_regenerated') }
+    end
   end
 
   def create_view_share
     @plant.generate_view_share_token!
-    redirect_to plant_path(@plant), notice: t('plants.messages.view_share_created', default: 'Viewing link created')
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plant_path(@plant), notice: t('plants.messages.view_share_created', default: 'Viewing link created') }
+    end
   end
 
   def revoke_view_share
     @plant.revoke_view_share_token!
-    redirect_to plant_path(@plant), notice: t('plants.messages.view_share_revoked', default: 'Viewing link revoked')
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plant_path(@plant), notice: t('plants.messages.view_share_revoked', default: 'Viewing link revoked') }
+    end
   end
 
   def regenerate_view_share
     @plant.regenerate_view_share_token!
-    redirect_to plant_path(@plant), notice: t('plants.messages.view_share_regenerated', default: 'Viewing link regenerated')
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plant_path(@plant), notice: t('plants.messages.view_share_regenerated', default: 'Viewing link regenerated') }
+    end
   end
 
   private

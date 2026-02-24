@@ -3,52 +3,22 @@
 <% end %>
 
 <%= render @plant %>
-<p class="plant-actions">
-  <%= link_to "✏️ #{t('.edit_this_plant')}", edit_plant_path(@plant), class: 'link' %>
-  <%= link_to "📈 #{t('.export_plant')}", plant_path(@plant, format: :json), class: 'link' %>
-  <%= link_to "🗃️ #{t('plants.all_plants')}", plants_path, class: 'link' %>
-</p>
 
-<div class="share-section">
-  <h3>Sharing</h3>
-
-  <h4>💧 Watering Link</h4>
-  <% if @plant.shared? %>
-    <div class="share-link-container">
-      <input type="text" class="share-link-input" value="<%= shared_plant_url(@plant.share_token) %>" readonly onclick="this.select()">
-      <%= button_to "⛔ #{t('plants.show.revoke_share')}", revoke_share_plant_path(@plant), method: :delete, class: 'buttonLinkDanger danger', data: { confirm: t('plants.show.revoke_confirm') } %>
-      <%= button_to "🔄 #{t('plants.show.regenerate_share')}", regenerate_share_plant_path(@plant), method: :post, class: 'buttonLinkDanger danger', data: { confirm: t('plants.show.regenerate_confirm') } %>
-    </div>
-  <% else %>
-    <%= button_to "🔗 #{t('plants.show.create_share_link')}", create_share_plant_path(@plant), method: :post, class: 'buttonLink' %>
-  <% end %>
-
-  <h4>👁️ Viewing Link</h4>
-  <% if @plant.view_shared? %>
-    <div class="share-link-container">
-      <input type="text" class="share-link-input" value="<%= shared_plant_url(@plant.view_share_token) %>" readonly onclick="this.select()">
-      <%= button_to "⛔ Revoke", revoke_view_share_plant_path(@plant), method: :delete, class: 'buttonLinkDanger danger', data: { confirm: "Revoke this viewing link?" } %>
-      <%= button_to "🔄 Regenerate", regenerate_view_share_plant_path(@plant), method: :post, class: 'buttonLinkDanger danger', data: { confirm: "Regenerate this viewing link? The old link will stop working." } %>
-    </div>
-  <% else %>
-    <%= button_to "🔗 Create Viewing Link", create_view_share_plant_path(@plant), method: :post, class: 'buttonLink' %>
-  <% end %>
+<div class="timeline-header">
+  <h3><%= t '.timeline' %></h3>
+  <div class="plant-actions">
+    <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant,
+      volume: @plant.last_watering&.volume,
+      units: @plant.last_watering&.units,
+      notes: @plant.last_watering&.notes,
+      recipe_batch_id: @plant.last_watering&.recipe_batch_id,
+      recipe_id: @plant.last_watering&.recipe_id,
+      tds: @plant.last_watering&.tds),
+      class: 'link' %>
+    <%= link_to "🌱 Log Soil Moisture", new_plant_soil_moisture_reading_path(@plant), class: 'link' %>
+    <%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>
+  </div>
 </div>
-
-
-<div class="plant-actions">
-  <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant,
-    volume: @plant.last_watering&.volume,
-    units: @plant.last_watering&.units,
-    notes: @plant.last_watering&.notes,
-    recipe_batch_id: @plant.last_watering&.recipe_batch_id,
-    recipe_id: @plant.last_watering&.recipe_id,
-    tds: @plant.last_watering&.tds),
-    class: 'link' %>
-  <%= link_to "🌱 Log Soil Moisture", new_plant_soil_moisture_reading_path(@plant), class: 'link' %>
-  <%= link_to "📝 #{t('new_log_entry')}", new_plant_log_entry_path(@plant), class: 'link' %>
-</div>
-<h3><%= t '.timeline' %></h3>
 <%= render partial: 'timeline', locals: { timeline: @timeline, plant: @plant } %>
 <div class="plant-actions">
   <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant,

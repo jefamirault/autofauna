@@ -44,7 +44,7 @@
       </div>
     </div>
 
-    <div class="info-card-section location-section">
+    <div class="info-card-section details-section" data-controller="sharing-toggle" data-sharing-toggle-plant-id-value="<%= @plant.id %>">
       <div class="info-row">
         <span class="label">📍 <%= t('attributes.location') %>:</span>
         <span class="value"><%= plant.location %></span>
@@ -86,6 +86,33 @@
           <span class="value"><%= t @plant.archived %></span>
         </div>
       <% end %>
+
+      <div class="plant-detail-actions">
+        <%= link_to "✏️ #{t('plants.show.edit_this_plant')}", edit_plant_path(@plant), class: 'link' %>
+        <%= link_to "📈 #{t('plants.show.export_plant')}", plant_path(@plant, format: :json), class: 'link' %>
+        <% sharing_active = @plant.shared? || @plant.view_shared? %>
+        <a href="#" class="link sharing-toggle<%= ' sharing-active' if sharing_active %>" data-action="click->sharing-toggle#toggle" data-sharing-toggle-target="button" style="opacity: <%= sharing_active ? '1' : '0.7' %>"><%= sharing_active ? "🔓 Sharing Enabled" : "🔒 Sharing Disabled" %></a>
+      </div>
+
+      <div class="share-cards" data-sharing-toggle-target="cards" <%= 'style="display: none;"'.html_safe unless sharing_active %>>
+        <div class="settings-card notification-card share-card" data-controller="share-toggle" data-share-toggle-key-value="watering-<%= @plant.id %>">
+          <div class="notification-card-header" data-action="click->share-toggle#toggle">
+            <h2>💧 Watering Link</h2>
+          </div>
+          <div class="notification-card-body" data-share-toggle-target="body">
+            <%= render "plants/share_watering_body", plant: @plant %>
+          </div>
+        </div>
+
+        <div class="settings-card notification-card share-card" data-controller="share-toggle" data-share-toggle-key-value="viewing-<%= @plant.id %>">
+          <div class="notification-card-header" data-action="click->share-toggle#toggle">
+            <h2>👁️ Viewing Link</h2>
+          </div>
+          <div class="notification-card-body" data-share-toggle-target="body">
+            <%= render "plants/share_viewing_body", plant: @plant %>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

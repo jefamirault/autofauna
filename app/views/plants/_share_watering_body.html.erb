@@ -1,0 +1,11 @@
+<div id="share-watering-body-<%= plant.id %>">
+  <% if plant.shared? %>
+    <div class="share-link-container">
+      <input type="text" class="share-link-input" value="<%= shared_plant_url(plant.share_token) %>" readonly onclick="this.select()">
+      <%= button_to t('plants.show.revoke_share'), revoke_share_plant_path(plant), method: :delete, class: 'buttonLinkDanger danger', data: { confirm: t('plants.show.revoke_confirm') } %>
+      <%= button_to t('plants.show.regenerate_share'), regenerate_share_plant_path(plant), method: :post, class: 'buttonLinkDanger danger', data: { confirm: t('plants.show.regenerate_confirm') } %>
+    </div>
+  <% else %>
+    <%= button_to "🔗 #{t('plants.show.create_share_link')}", create_share_plant_path(plant), method: :post, class: 'buttonLink' %>
+  <% end %>
+</div>

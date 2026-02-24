@@ -1,0 +1,3 @@
+<%= turbo_stream.replace "share-watering-body-#{@plant.id}" do %>
+  <%= render "plants/share_watering_body", plant: @plant %>
+<% end %>

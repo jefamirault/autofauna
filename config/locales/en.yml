@@ -113,9 +113,9 @@ en:
       plants: "Plants"
       share_link: "Share Link"
       create_share_link: "Get Share Link"
-      revoke_share: "Revoke Share Link"
+      revoke_share: "Revoke"
       revoke_confirm: "Are you sure? Anyone with the current link will no longer be able to view this plant."
-      regenerate_share: "Regenerate Link"
+      regenerate_share: "Regenerate"
       regenerate_confirm: "Are you sure? This will create a new link and the old one will stop working."
     plant:
       water_this_plant: "Water this Plant"
