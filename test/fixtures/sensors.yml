@@ -1,15 +1,23 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  zone_id: 1
-  location: MyString
-  project_id: 1
-  description: MyText
+  name: Living Room Sensor
+  zone: one
+  location: Living Room
+  project: one
+  sensor_type: one
+  description: Main sensor
 
 two:
-  name: MyString
-  zone_id: 1
-  location: MyString
-  project_id: 1
-  description: MyText
+  name: Bedroom Sensor
+  zone: one
+  location: Bedroom
+  project: one
+  sensor_type: two
+  description: Secondary sensor
+
+sensor_p2:
+  name: Project Two Sensor
+  project: two
+  sensor_type: sensor_type_p2
+  description: Sensor for project two

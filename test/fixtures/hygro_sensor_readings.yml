@@ -2,12 +2,14 @@
 
 one:
   datetime: 2025-01-26 16:30:20
-  zone_id: 1
-  tds: 1
-  sensor_id: 1
+  temperature: 72
+  humidity: 45
+  project: one
+  sensor: one
 
 two:
   datetime: 2025-01-26 16:30:20
-  zone_id: 1
-  tds: 1
-  sensor_id: 1
+  temperature: 68
+  humidity: 50
+  project: one
+  sensor: one

@@ -1,23 +1,37 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  min_temp: 1
-  max_temp: 1
-  min_humidity: 1
-  max_humidity: 1
-  accuracy_temp: 1.5
-  resolution_temp: 1.5
-  accuracy_humidity: 1.5
-  resolution_humidity: 1.5
+  name: DHT22
+  min_temp: -40
+  max_temp: 80
+  min_humidity: 0
+  max_humidity: 100
+  accuracy_temp: 0.5
+  resolution_temp: 0.1
+  accuracy_humidity: 2.0
+  resolution_humidity: 0.1
+  project: one
 
 two:
-  name: MyString
-  min_temp: 1
-  max_temp: 1
-  min_humidity: 1
-  max_humidity: 1
-  accuracy_temp: 1.5
-  resolution_temp: 1.5
-  accuracy_humidity: 1.5
-  resolution_humidity: 1.5
+  name: BME280
+  min_temp: -40
+  max_temp: 85
+  min_humidity: 0
+  max_humidity: 100
+  accuracy_temp: 1.0
+  resolution_temp: 0.01
+  accuracy_humidity: 3.0
+  resolution_humidity: 0.01
+  project: one
+
+sensor_type_p2:
+  name: SHT31
+  min_temp: -40
+  max_temp: 125
+  min_humidity: 0
+  max_humidity: 100
+  accuracy_temp: 0.3
+  resolution_temp: 0.01
+  accuracy_humidity: 2.0
+  resolution_humidity: 0.01
+  project: two

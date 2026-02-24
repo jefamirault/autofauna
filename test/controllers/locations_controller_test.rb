@@ -2,7 +2,9 @@ require "test_helper"
 
 class LocationsControllerTest < ActionDispatch::IntegrationTest
   setup do
+    @user = users(:one)
     @location = locations(:one)
+    sign_in @user
   end
 
   test "should get index" do
@@ -17,7 +19,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create location" do
     assert_difference("Location.count") do
-      post locations_url, params: { location: { description: @location.description, name: @location.name, project_id: @location.project_id, zone_id: @location.zone_id } }
+      post locations_url, params: { location: { description: "New location", name: "Kitchen", project_id: @location.project_id } }
     end
 
     assert_redirected_to location_url(Location.last)
@@ -34,11 +36,13 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update location" do
-    patch location_url(@location), params: { location: { description: @location.description, name: @location.name, project_id: @location.project_id, zone_id: @location.zone_id } }
+    patch location_url(@location), params: { location: { description: @location.description, name: @location.name, project_id: @location.project_id } }
     assert_redirected_to location_url(@location)
   end
 
   test "should destroy location" do
+    # Move plants to a different location first to avoid FK constraint
+    @location.plants.update_all(location_id: nil)
     assert_difference("Location.count", -1) do
       delete location_url(@location)
     end

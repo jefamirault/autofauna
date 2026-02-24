@@ -221,6 +221,83 @@ bin/rails test test/models        # Model tests only
 bin/rails test:system             # System tests (browser)
 ```
 
+**PostgreSQL superuser requirement:** Rails 8 added `check_all_foreign_keys_valid!` which requires the DB user to have superuser privileges to access `pg_constraint`. The test DB user (`autofauna_development`) must be a superuser or tests will error with `PG::InsufficientPrivilege`. One-time setup:
+```bash
+sudo -u postgres psql -c "ALTER USER autofauna_development WITH SUPERUSER;"
+```
+
+**Fixture FK ordering:** The DB user also cannot disable referential integrity (requires superuser for trigger manipulation), so fixtures load in alphabetical table order. FK references in fixtures must point to tables that come earlier alphabetically, or the referenced column must be nullable (so it can be omitted).
+
+### Test Authentication
+
+Auth uses encrypted cookies (`cookies.encrypted[:user_id]` and `cookies.encrypted[:project_id]`). Integration tests authenticate via a `sign_in(user)` helper defined in `test/test_helper.rb` that POSTs to `session_url` with credentials. All controller tests must call `sign_in` in `setup` before making requests.
+
+```ruby
+# test/test_helper.rb provides:
+def sign_in(user)
+  post session_url, params: { user: { email: user.email, password: "password" } }
+end
+```
+
+- Fixture users use `password_digest: <%= BCrypt::Password.create('password') %>` so the hardcoded `"password"` works
+- `sign_in` also triggers `auto_select_project`, so `current_project` is set automatically from the user's first project
+- Session route is singular: `resource :session` → helpers are `new_session_url`, `session_url` (not `sessions_*`)
+
+### Fixture Conventions
+
+- **Use fixture references, not hardcoded IDs:** Write `project: one` not `project_id: 1`. Rails resolves fixture labels to deterministic IDs via hashing.
+- **Fixture users** must have real BCrypt password digests and unique emails
+- **Fixture plants** must have unique `uid` values (per project, validated by `validates_uniqueness_of :uid, scope: :project_id`)
+- **Required associations:** Sensors require `zone` and `sensor_type`, Tanks require `location`, Plants require `project`
+- **Fixtures skip callbacks:** `after_save_commit` callbacks (like `update_watering_dates`, `update_last_watering`) do NOT fire when fixtures are loaded. Computed fields like `date_last_watering`, `date_min_watering`, `last_watering_id` will be nil unless explicitly set in the fixture or computed manually in the test.
+
+### Writing Controller Tests
+
+All authenticated controller tests follow this pattern:
+
+```ruby
+setup do
+  @user = users(:one)
+  @resource = resources(:one)
+  sign_in @user
+end
+```
+
+**Common pitfalls:**
+- **Waterings new/edit forms** require `plant_id` param: `get new_watering_url(plant_id: @watering.plant_id)`
+- **Destroy tests** may fail if the fixture record has dependent associations with FK constraints. Either use a fixture without dependents (e.g., `zones(:two)`) or nil out the FK first (e.g., `@location.plants.update_all(location_id: nil)`)
+- **Create/update tests** must include all required association params (e.g., `location_id` for tanks, `sensor_type_id` for sensors)
+- **Redirect assertions** must match actual controller behavior — waterings redirect to `plant_url(@watering.plant)`, not `watering_url`
+- **Transmit endpoint** is unauthenticated (uses API key param) — set `api_key` on the project in test setup
+
+### Multi-Tenancy Test Fixtures
+
+Two fixture "worlds" exist for cross-project isolation testing:
+
+| Fixture | Project One (users :one) | Project Two (users :two) |
+|---------|--------------------------|--------------------------|
+| Zone | `zones(:one)`, `zones(:two)` | `zones(:zone_p2)` |
+| Location | `locations(:one)`, `locations(:two)` | `locations(:location_p2)` |
+| Plant | `plants(:one)`, `plants(:two)` | `plants(:plant_p2)` |
+| Watering | `waterings(:one)`, `waterings(:two)` | `waterings(:watering_p2)` |
+| Tank | `tanks(:one)`, `tanks(:two)` | `tanks(:tank_p2)` |
+| Sensor | `sensors(:one)`, `sensors(:two)` | `sensors(:sensor_p2)` |
+| SensorType | `sensor_types(:one)`, `sensor_types(:two)` | `sensor_types(:sensor_type_p2)` |
+
+Authorization tests verify that `users(:two)` signed in cannot access project-one resources (redirected via `rescue_from RecordNotFound`).
+
+### Test Coverage Summary
+
+| File | Tests | What it covers |
+|------|-------|----------------|
+| `test/controllers/*_controller_test.rb` | 54 | CRUD for all resource controllers (authenticated) |
+| `test/controllers/authorization_test.rb` | 28 | Cross-project isolation (show/edit/update/destroy × 7 resources) |
+| `test/controllers/shared_plants_controller_test.rb` | 7 | Share token access, revocation, invalid tokens |
+| `test/controllers/transmit_controller_test.rb` | 6 | Sensor API ingestion, bad keys, missing params |
+| `test/models/plant_test.rb` | 28 | Watering schedule dates, urgency, frequency calc, text formatting |
+| `test/models/user_notification_test.rb` | 20 | Notification frequency logic (daily/hourly/N-days) |
+| `test/models/guest_account_test.rb` | 22 | Guest creation, conversion, merge, plants_needing_water |
+
 ## Agent Log
 
 An `agent_log.md` file in the project root tracks changes made during the current session. After each significant task, append a summary to this file documenting what was changed and why.

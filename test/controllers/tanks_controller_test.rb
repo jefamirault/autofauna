@@ -2,7 +2,9 @@ require "test_helper"
 
 class TanksControllerTest < ActionDispatch::IntegrationTest
   setup do
+    @user = users(:one)
     @tank = tanks(:one)
+    sign_in @user
   end
 
   test "should get index" do
@@ -17,7 +19,7 @@ class TanksControllerTest < ActionDispatch::IntegrationTest
 
   test "should create tank" do
     assert_difference("Tank.count") do
-      post tanks_url, params: { tank: { description: @tank.description, location: @tank.location, name: @tank.name, zone_id: @tank.zone_id } }
+      post tanks_url, params: { tank: { description: "New tank", name: "New Tank", project_id: @tank.project_id, location_id: locations(:one).id } }
     end
 
     assert_redirected_to tank_url(Tank.last)
@@ -34,7 +36,7 @@ class TanksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update tank" do
-    patch tank_url(@tank), params: { tank: { description: @tank.description, location: @tank.location, name: @tank.name, zone_id: @tank.zone_id } }
+    patch tank_url(@tank), params: { tank: { description: @tank.description, name: @tank.name, location_id: locations(:one).id } }
     assert_redirected_to tank_url(@tank)
   end
 

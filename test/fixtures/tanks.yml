@@ -1,13 +1,19 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  description: MyText
-  zone_id: 1
-  location: MyString
+  name: Main Tank
+  description: Primary water tank
+  project: one
+  location: one
 
 two:
-  name: MyString
-  description: MyText
-  zone_id: 1
-  location: MyString
+  name: Reserve Tank
+  description: Backup water tank
+  project: one
+  location: two
+
+tank_p2:
+  name: Project Two Tank
+  description: Tank for project two
+  project: two
+  location: location_p2

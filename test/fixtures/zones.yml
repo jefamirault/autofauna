@@ -1,11 +1,16 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  project_id: 1
-  description: MyText
+  name: Indoor
+  project: one
+  description: Indoor zone
 
 two:
-  name: MyString
-  project_id: 1
-  description: MyText
+  name: Outdoor
+  project: one
+  description: Outdoor zone
+
+zone_p2:
+  name: Project Two Zone
+  project: two
+  description: Zone for project two

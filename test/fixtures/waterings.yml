@@ -1,11 +1,16 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  plant_id: 1
-  date: 2023-06-15
+  plant: one
+  watered_at: 2023-06-15 12:00:00
   notes: MyString
 
 two:
-  plant_id: 1
-  date: 2023-06-15
+  plant: one
+  watered_at: 2023-06-15 12:00:00
   notes: MyString
+
+watering_p2:
+  plant: plant_p2
+  watered_at: 2023-06-15 12:00:00
+  notes: Project two watering

@@ -1,13 +1,22 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
+  name: Monstera
   uid: 1
-  location: MyString
-  pot: MyString
+  pot: ceramic
+  location: one
+  project: one
 
 two:
-  name: MyString
+  name: Pothos
+  uid: 2
+  pot: plastic
+  location: one
+  project: one
+
+plant_p2:
+  name: Fern
   uid: 1
-  location: MyString
-  pot: MyString
+  pot: ceramic
+  location: location_p2
+  project: two

@@ -2,7 +2,9 @@ require "test_helper"
 
 class ZonesControllerTest < ActionDispatch::IntegrationTest
   setup do
+    @user = users(:one)
     @zone = zones(:one)
+    sign_in @user
   end
 
   test "should get index" do
@@ -17,7 +19,7 @@ class ZonesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create zone" do
     assert_difference("Zone.count") do
-      post zones_url, params: { zone: { description: @zone.description, name: @zone.name, project_id: @zone.project_id } }
+      post zones_url, params: { zone: { description: "New zone", name: "Patio", project_id: @zone.project_id } }
     end
 
     assert_redirected_to zone_url(Zone.last)
@@ -39,8 +41,10 @@ class ZonesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should destroy zone" do
+    # Use zone :two which has no locations referencing it
+    zone = zones(:two)
     assert_difference("Zone.count", -1) do
-      delete zone_url(@zone)
+      delete zone_url(zone)
     end
 
     assert_redirected_to zones_url

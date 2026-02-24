@@ -113,6 +113,7 @@ class ApplicationController < ActionController::Base
 
   def auto_select_project(user)
     return if current_project.present?
+    return if user.nil?
 
     project = user.projects.first || Collaboration.find_by(user: user)&.project
     set_current_project(project) if project

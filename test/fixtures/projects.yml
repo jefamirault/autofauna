@@ -1,13 +1,11 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  owner_id: 1
-  name: MyString
-  description: MyText
-  active: false
+  owner: one
+  name: Test Project
+  active: true
 
 two:
-  owner_id: 1
-  name: MyString
-  description: MyText
-  active: false
+  owner: two
+  name: Second Project
+  active: true

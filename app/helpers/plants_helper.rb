@@ -34,6 +34,7 @@ module PlantsHelper
     if watering.nil?
       'Never'
     else
+      return 'Never' if plant.date_last_watering.nil?
       days_ago = (Time.zone.now.to_date - plant.date_last_watering.to_date).to_i
       if days_ago == 0
         '<strong>Today</strong>'

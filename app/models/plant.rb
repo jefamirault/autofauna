@@ -54,7 +54,7 @@ class Plant < ApplicationRecord
   end
 
   def first_watering
-    waterings.any? ? waterings.first.date.to_date : nil
+    waterings.any? ? waterings.first.watered_at&.to_date : nil
   end
 
   def last_watering
@@ -62,7 +62,7 @@ class Plant < ApplicationRecord
   end
 
   def suggested_watering_unit
-    waterings.any? ? waterings.sort_by {|w| [w.date, w.updated_at]}.last.units : 'cups'
+    waterings.any? ? waterings.sort_by {|w| [w.watered_at, w.updated_at]}.last.units : 'cups'
   end
 
   def calculate_watering_frequency
@@ -71,8 +71,8 @@ class Plant < ApplicationRecord
     end
     min = 999999 # this will only work until 2739, RemindMe! in 725 years
     max = 0
-    last = waterings.first.date
-    watering_dates = waterings.map {|w| w.date }
+    last = waterings.first.watered_at.to_date
+    watering_dates = waterings.map {|w| w.watered_at.to_date }
     # get all waterings except the first one
     watering_dates[1..-1].each do |date|
       interval = date - last
