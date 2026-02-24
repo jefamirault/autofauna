@@ -12,6 +12,7 @@ html
 
 body
   --header-height: 4.5rem
+  --card-max-width: 650px
   height: 100%
   display: grid
   grid-template-columns: 18rem 1fr
@@ -70,9 +71,8 @@ $reduction: 12px
 header
   grid-area: header
   position: relative
-  display: flex
-  flex-wrap: nowrap
-  justify-content: center
+  display: grid
+  grid-template-columns: 1fr
   align-items: center
   padding: 0
   margin: 0
@@ -80,6 +80,9 @@ header
   z-index: 10
   overflow: visible
   isolation: isolate
+  > *
+    grid-row: 1
+    grid-column: 1
   a
     color: rgba(255, 255, 255, 0.75)
 
@@ -92,68 +95,74 @@ header
   header
     padding-left: var(--header-height)
 
-#logoContainer
-  display: flex
-  align-items: center
-  height: $line-height - $reduction
+// #logoContainer styles are now scoped under .sidebarNav
+
+// Hamburger toggle button — icon is absolutely pinned so it never moves during sidebar animation
+button.hamburgerToggle
+  z-index: 11
+  width: 100%
+  height: var(--header-height)
+  padding: 0
+  background: #0007
+  border: none
+  border-bottom: 1px solid #fff3
   cursor: pointer
-  img
-    width: $line-height - $reduction
-    height: $line-height - $reduction
-  #logoText
-    font-size: 2.25rem
-    font-weight: 400
-    letter-spacing: -0.5px
-    padding: 0 .5em 0 0.3em
-    white-space: nowrap
-
-// Section graphic: button sits at grid intersection, tall logo overflows into sidebar area
-// --logo-size controls total height; sidebar padding derived automatically
-body:has(header.header-graphic)
-  --logo-size: 16rem
-
-
-body:has(header.header-graphic) #logoContainer
-  img
-    width: auto
+  color: #fffe
+  flex-shrink: 0
+  position: relative
+  .hamburger-icon
+    position: absolute
+    left: 0
+    top: 0
+    width: 4rem
     height: 100%
-    object-fit: contain
-  @media (min-width: 601px)
-    box-sizing: border-box
-    height: var(--logo-size)
-    padding: 1rem 0
-    width: 100%
+    display: flex
+    align-items: center
     justify-content: center
-    transition: height 0.12s, padding 0.12s
-    #logoText
-      display: none
-  // Landscape mobile: don't scale up logo
-  @media (max-width: 900px) and (min-width: 601px) and (max-height: 500px)
-    height: var(--header-height)
-    padding: 0.25rem
-
-// When minimized: logo shrinks to fit narrow icon rail
-body.sidebarMinimized:has(header.header-graphic) #logoContainer,
-html.sidebarMinimized body:has(header.header-graphic) #logoContainer
-  @media (min-width: 601px)
-    height: var(--header-height)
-    padding: 0.25rem
+    font-size: 1.8rem
+    line-height: 1
+  .hamburger-title
+    display: block
     width: 100%
-    img
-      width: 100%
-      height: 100%
-      object-fit: contain
+    box-sizing: border-box
+    font-size: 1.75rem
+    font-weight: 400
+    text-align: center
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+    padding: 0 4rem
+    line-height: var(--header-height)
+    opacity: 1
+    transition: opacity 0.08s 0.04s
+  &:hover
+    background: #7779
+  @media (max-width: 600px)
+    position: fixed
+    top: 0
+    left: 0
+    width: var(--header-height)
+    height: var(--header-height)
+    z-index: 20
+    background: var(--section-color-start)
+    .hamburger-title
+      opacity: 0
+      transition: none
 
-// Graphic header: button inside sidebar provides the tall logo area naturally
-// No extra padding-top needed since the button is part of sidebar flow
+// Minimized: fade out title, icon stays in place
+@media (min-width: 601px)
+  body.sidebarMinimized button.hamburgerToggle,
+  html.sidebarMinimized body button.hamburgerToggle
+    .hamburger-title
+      opacity: 0
+      transition: opacity 0.04s
 
-.header-graphic
-  @media (min-width: 601px)
-    #headerRight
-      flex: 1
-      height: 100%
-    #headerTitle
-      display: block
+// Minimized mobile: hamburger stays visible
+body.sidebarMinimized button.hamburgerToggle,
+html.sidebarMinimized button.hamburgerToggle
+  @media (max-width: 600px)
+    visibility: visible
+    pointer-events: auto
 
 // Section gradient + solid end color — single source of truth per nav section
 body:has(header.header-plants), body:has(header.header-default)
@@ -192,31 +201,30 @@ body.development:has(header.header-plants), body.development:has(header.header-d
   @media (max-width: 600px)
     background: linear-gradient(to right, var(--section-color-start) var(--header-height), transparent calc(var(--header-height) + 3rem)), var(--section-gradient)
 
-// Header title (shown in #headerRight for graphic headers)
+// Header title — centered in the full header grid cell, independent of headerRight
 #headerTitle
-  display: none
-  margin-left: 3vw
-  margin-right: auto
+  text-align: center
   font-size: 2.25rem
   font-weight: 400
   letter-spacing: -0.5px
   white-space: nowrap
-  @media (max-width: 600px)
-    display: block
-    flex: 1
-    text-align: center
-    margin: 0
+  overflow: hidden
+  text-overflow: ellipsis
+  pointer-events: none
+
+// Show pages with plant-graphic-banner: align title over the banner
+body:has(.plant-graphic-banner) #headerTitle
+  width: var(--card-max-width)
+  justify-self: start
+  margin-left: 3vw
 
 // Header right section (email + dropdown)
 #headerRight
-  margin-left: auto
+  justify-self: end
   position: relative
   display: flex
   align-items: center
-  flex-shrink: 0
   z-index: 1
-  @media (max-width: 600px)
-    margin-left: 0
 
 #headerEmail
   padding: 0.75rem 1rem
@@ -280,7 +288,6 @@ body.development:has(header.header-plants), body.development:has(header.header-d
 
 // Header search form
 #headerSearch
-  flex: 1
   display: flex
   align-items: center
   margin: 0 1rem
@@ -320,7 +327,7 @@ body.development:has(header.header-plants), body.development:has(header.header-d
       opacity: 0.9
   input[type="search"]
     flex: 1
-    padding: 0.35rem 0.75rem 0.35rem 2.75rem
+    padding: 0.35rem 2.5rem 0.35rem 2.75rem
     border: 1px solid rgba(255,255,255,0.3)
     border-radius: 4px
     background: rgba(255,255,255,0.15)
@@ -347,14 +354,21 @@ body.development:has(header.header-plants), body.development:has(header.header-d
       .search-toggle-btn
         display: none
 
-// Plants index: search always expanded and title/logo hidden at narrow breakpoints
+// Plants index: two-column header with search + email side by side
 body:has(main.plants.index)
+  header
+    grid-template-columns: minmax(0, 1fr) auto
+    > *
+      grid-row: auto
+      grid-column: auto
+  #headerTitle
+    display: none !important
+  #headerSearch
+    max-width: var(--card-max-width)
+    margin-left: 1rem
   @media (max-width: 600px)
-    #logoText
-      display: none !important
-    #headerTitle
-      display: none !important
     #headerSearch
+      max-width: none
       .search-input-wrapper
         display: flex !important
       .search-toggle-btn
@@ -384,43 +398,55 @@ body:has(main.plants.index)
 .hidden
   display: none !important
 
-button.collapseSidebar
-  z-index: 11
-  overflow: visible
+a.sidebarNav
+  display: block
   width: 100%
-  transition: height 0.12s
   padding: 0
-  background: #0009
   border: none
-  cursor: pointer
   color: #fffe
   flex-shrink: 0
-  height: var(--logo-size, var(--header-height))
-  @media (max-width: 900px) and (min-width: 601px) and (max-height: 500px)
-    height: var(--header-height)
-  @media (max-width: 600px)
-    position: fixed
-    top: 0
-    left: 0
-    width: var(--header-height)
-    height: var(--header-height)
-    z-index: 20
-    background: var(--section-color-start)
+  text-decoration: none
+  overflow: hidden
+  cursor: pointer
+  #logoContainer
+    box-sizing: border-box
+    height: var(--logo-size, var(--header-height))
+    padding: 1rem 0
+    width: 100%
     display: flex
-    align-items: center
     justify-content: center
-    #logoText
-      display: none
+    align-items: center
+    transition: height 0.12s, padding 0.12s
+    img
+      width: auto
+      height: 100%
+      object-fit: contain
   &:hover
+    background: #7779
     color: #fffc
-
-// Minimized: button shrinks to header height on all breakpoints
-body.sidebarMinimized button.collapseSidebar,
-html.sidebarMinimized button.collapseSidebar
-  height: var(--header-height)
+    text-decoration: none
   @media (max-width: 600px)
-    visibility: visible
-    pointer-events: auto
+    display: none
+  // Landscape mobile: don't scale up logo
+  @media (max-width: 900px) and (min-width: 601px) and (max-height: 500px)
+    #logoContainer
+      height: var(--header-height)
+      padding: 0.25rem
+
+// --logo-size controls tall logo area when sidebar is expanded
+body
+  --logo-size: 16rem
+
+// Minimized: logo shrinks to header height
+@media (min-width: 601px)
+  body.sidebarMinimized .sidebarNav #logoContainer,
+  html.sidebarMinimized body .sidebarNav #logoContainer
+    height: var(--header-height)
+    padding: 0.25rem
+    img
+      width: 100%
+      height: 100%
+      object-fit: contain
 
 main
   grid-area: main
@@ -439,6 +465,24 @@ section#primary
   padding: 0.5em 3vw 2em
   background: #eee
   flex: 1
+
+.plant-graphic-banner
+  display: flex
+  justify-content: center
+  max-width: var(--card-max-width)
+  margin: 1.5rem 0 0
+  padding: 1.5rem 0
+  background: rgba(0, 77, 64, 0.06)
+  border-radius: 8px
+  .plant-graphic-image
+    max-height: 12rem
+    object-fit: contain
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15))
+  @media (max-width: 600px)
+    padding: 1rem 0
+    margin: 1rem 0 0
+    .plant-graphic-image
+      max-height: 8rem
 
 @media (max-width: 600px)
   #mainContainer
@@ -486,6 +530,14 @@ aside#sidebar
       cursor: default
     svg
       height: 20px
+    .nav-icon
+      height: 1.2em
+      width: 1.2em
+      object-fit: contain
+      vertical-align: middle
+      margin-right: 0.1em
+  .fill + a.navItem
+    border-top: 1px solid #fff7
   .indent a
     padding-left: 4rem
   form
@@ -513,9 +565,3 @@ aside#sidebar
     .indent a
       padding-left: 0
       text-align: center
-    #logoText
-      display: none
-    #logoContainer img
-      width: 100%
-      height: 100%
-      object-fit: contain

@@ -46,9 +46,9 @@
     <% config = header_config %>
     <header class="<%= config[:gradient_class] %>">
       <%= yield :header_extra %>
+      <div id="headerTitle"><%= config[:title] %></div>
       <% if user_signed_in? %>
         <div id="headerRight" data-controller="dropdown">
-          <div id="headerTitle"><%= config[:title] %></div>
           <div id="headerEmail" data-action="click->dropdown#toggle">
             <span class="email-text"><%= current_user.guest? ? t('guest.guest') : current_user.email %></span>
             <span class="mobile-user-icon">&#128100;</span>
@@ -68,52 +68,64 @@
           </div>
         </div>
       <% end %>
-
     </header>
 
     <aside id="sidebar">
-      <button data-sidebar-target="toggleButton"
+      <button class="hamburgerToggle"
+              data-sidebar-target="hamburgerButton"
               data-action="click->sidebar#toggle"
-              class="collapseSidebar"
-              aria-label="Collapse sidebar">
+              aria-label="Toggle sidebar">
+        <span class="hamburger-icon">&#9776;</span>
+        <span class="hamburger-title"><%= config[:section_title] %></span>
+      </button>
+      <%= link_to config[:nav_path], class: 'sidebarNav' do %>
         <div id="logoContainer">
           <%= image_tag config[:icon] %>
-          <div id="logoText"><%= config[:title] %></div>
         </div>
-      </button>
+      <% end %>
       <nav data-action="click->sidebar#handleNavClick">
-        <%= nav_link 'plants', action: 'index', text: "🌱 #{t('.plants')}" %>
+        <%# Current section's sub-nav at top %>
         <% if params[:controller] == 'plants' %>
           <div class="indent">
             <%= nav_link 'plants', action: 'new', text: "✏️ #{t('.new_plant')}", path: new_plant_path %>
             <%= nav_link 'plants', action: 'archive', text: "🗃️ #{t('.archive')}", path: plants_archive_path %>
           </div>
-        <% end %>
-        <%= nav_link 'waterings', action: 'index', text: "💧 Water" %>
-        <% if params[:controller].in?(%w[waterings recipes recipe_batches recipe_sources]) %>
+        <% elsif params[:controller].in?(%w[waterings recipes recipe_batches recipe_sources]) %>
           <div class="indent">
             <%= nav_link 'recipes', text: "🧪 Recipes" %>
             <%= nav_link 'recipe_batches', text: "🪣 Batches" %>
             <%= nav_link 'recipe_sources', text: "📦 Sources" %>
           </div>
-        <% end %>
-        <%= nav_link 'tanks', text: "🐟 #{t('.tanks')}" %>
-        <%= nav_link 'locations', text: "📍 #{t('.locations')}" %>
-        <% if params[:controller] == 'locations' || params[:controller] == 'zones' %>
+        <% elsif params[:controller] == 'locations' || params[:controller] == 'zones' %>
           <div class="indent">
             <%= nav_link 'zones', text: "🌎 #{t('.zones')}" %>
           </div>
+        <% elsif current_user&.advanced_mode? && params[:controller].in?(%w[sensors sensor_readings sensor_types]) %>
+          <div class="indent">
+            <%= nav_link 'sensor_readings', action: 'readings', text: "📊 #{t('.sensor_readings')}", path: sensor_readings_path %>
+            <%= nav_link 'sensor_types', text: "🏷️ #{t('.sensor_types')}" %>
+          </div>
         <% end %>
-        <% if current_user&.advanced_mode? %>
+
+        <%# Remaining nav items, vertically centered %>
+        <div class="fill"></div>
+        <% unless params[:controller].in?(%w[plants log_entries]) %>
+          <%= link_to plants_path, class: 'navItem' do %><%= image_tag 'autofauna_icon.png', class: 'nav-icon' %> <span class="nav-label"><%= t('.plants') %></span><% end %>
+        <% end %>
+        <% unless params[:controller].in?(%w[waterings recipes recipe_batches recipe_sources]) %>
+          <%= nav_link 'waterings', action: 'index', text: "💧 Water" %>
+        <% end %>
+        <% unless params[:controller] == 'tanks' %>
+          <%= nav_link 'tanks', text: "🐟 #{t('.tanks')}" %>
+        <% end %>
+        <% unless params[:controller].in?(%w[locations zones]) %>
+          <%= nav_link 'locations', text: "📍 #{t('.locations')}" %>
+        <% end %>
+        <% if current_user&.advanced_mode? && !params[:controller].in?(%w[sensors sensor_readings sensor_types]) %>
           <%= nav_link 'sensors', text: "📡 #{t('.sensors')}" %>
-          <% if params[:controller] == 'sensors' || params[:controller] == 'sensor_readings' || params[:controller] == 'sensor_types' %>
-            <div class="indent">
-              <%= nav_link 'sensor_readings', action: 'readings', text: "📊 #{t('.sensor_readings')}", path: sensor_readings_path %>
-              <%= nav_link 'sensor_types', text: "🏷️ #{t('.sensor_types')}" %>
-            </div>
-          <% end %>
         <% end %>
         <div class="fill"></div>
+
         <div id="sidebarLocale" data-controller="locale-popup" data-locale-popup-flag-value="<%= current_locale == 'es' ? '🇲🇽' : '🇺🇸' %>">
           <div class="locale-options hidden" data-locale-popup-target="menu">
             <% if current_locale != 'en' %>
@@ -144,6 +156,11 @@
       <% end %>
 
       <section id="primary">
+        <% if config[:plant_graphic] %>
+          <div class="plant-graphic-banner">
+            <%= image_tag config[:plant_graphic], class: 'plant-graphic-image' %>
+          </div>
+        <% end %>
         <%= yield %>
       </section>
 

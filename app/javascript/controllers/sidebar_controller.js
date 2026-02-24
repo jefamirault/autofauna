@@ -2,7 +2,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-    static targets = ["toggleButton"]
+    static targets = ["hamburgerButton"]
     static classes = ["minimized"]
     static values = {
         minimized: Boolean
@@ -218,7 +218,7 @@ export default class extends Controller {
     }
 
     updateSidebar() {
-        const button = this.toggleButtonTarget
+        const button = this.hamburgerButtonTarget
         const body = document.body
         const html = document.documentElement
 

@@ -84,42 +84,55 @@ module ApplicationHelper
 
     case controller
     when 'plants', 'log_entries'
-      icon = action.in?(%w[show edit]) && @plant&.graphic_path ? @plant.graphic_path : 'autofauna_icon.png'
-      title = action.in?(%w[show edit]) && @plant ? @plant.to_s : t('layouts.application.plants')
-      { icon: icon, title: title, gradient_class: 'header-plants header-graphic' }
+      section_title = t('layouts.application.plants')
+      title = action.in?(%w[show edit]) && @plant ? @plant.to_s : section_title
+      plant_graphic = action == 'show' ? @plant&.graphic_path : nil
+      { icon: 'autofauna_icon.png', title: title, section_title: section_title, gradient_class: 'header-plants', nav_path: plants_path, plant_graphic: plant_graphic }
     when 'waterings'
-      icon = action.in?(%w[show edit]) && @watering&.plant&.graphic_path ? @watering.plant.graphic_path : 'water_icon.png'
-      { icon: icon, title: t('layouts.application.waterings'), gradient_class: 'header-waterings header-graphic' }
+      section_title = t('layouts.application.waterings')
+      plant_graphic = (@watering&.plant || @plant)&.graphic_path
+      { icon: 'water_icon.png', title: section_title, section_title: section_title, gradient_class: 'header-waterings', nav_path: waterings_path, plant_graphic: plant_graphic }
     when 'recipes'
-      title = action.in?(%w[show edit]) && @recipe ? @recipe.to_s : t('layouts.application.waterings')
-      { icon: 'water_icon.png', title: title, gradient_class: 'header-waterings header-graphic' }
+      section_title = t('layouts.application.waterings')
+      title = action.in?(%w[show edit]) && @recipe ? @recipe.to_s : section_title
+      { icon: 'water_icon.png', title: title, section_title: section_title, gradient_class: 'header-waterings', nav_path: recipes_path, plant_graphic: nil }
     when 'recipe_batches'
-      title = action.in?(%w[show edit]) && @recipe_batch ? @recipe_batch.to_s : t('layouts.application.waterings')
-      { icon: 'water_icon.png', title: title, gradient_class: 'header-waterings header-graphic' }
+      section_title = t('layouts.application.waterings')
+      title = action.in?(%w[show edit]) && @recipe_batch ? @recipe_batch.to_s : section_title
+      { icon: 'water_icon.png', title: title, section_title: section_title, gradient_class: 'header-waterings', nav_path: recipe_batches_path, plant_graphic: nil }
     when 'recipe_sources'
-      title = action.in?(%w[show edit]) && @recipe_source ? @recipe_source.to_s : t('layouts.application.waterings')
-      { icon: 'water_icon.png', title: title, gradient_class: 'header-waterings header-graphic' }
+      section_title = t('layouts.application.waterings')
+      title = action.in?(%w[show edit]) && @recipe_source ? @recipe_source.to_s : section_title
+      { icon: 'water_icon.png', title: title, section_title: section_title, gradient_class: 'header-waterings', nav_path: recipe_sources_path, plant_graphic: nil }
     when 'tanks', 'water_tests'
-      { icon: 'tank_icon.png', title: (action == 'show' && controller == 'tanks' && @tank ? @tank.to_s : t('layouts.application.tanks')), gradient_class: 'header-tanks header-graphic' }
+      section_title = t('layouts.application.tanks')
+      title = action == 'show' && controller == 'tanks' && @tank ? @tank.to_s : section_title
+      { icon: 'tank_icon.png', title: title, section_title: section_title, gradient_class: 'header-tanks', nav_path: tanks_path, plant_graphic: nil }
     when 'locations'
-      title = action.in?(%w[show edit]) && @location ? @location.to_s : t('layouts.application.locations')
-      { icon: 'location_icon.png', title: title, gradient_class: 'header-locations header-graphic' }
+      section_title = t('layouts.application.locations')
+      title = action.in?(%w[show edit]) && @location ? @location.to_s : section_title
+      { icon: 'location_icon.png', title: title, section_title: section_title, gradient_class: 'header-locations', nav_path: locations_path, plant_graphic: nil }
     when 'zones'
-      title = action.in?(%w[show edit]) && @zone ? @zone.to_s : t('layouts.application.locations')
-      { icon: 'location_icon.png', title: title, gradient_class: 'header-locations header-graphic' }
+      section_title = t('layouts.application.locations')
+      title = action.in?(%w[show edit]) && @zone ? @zone.to_s : section_title
+      { icon: 'location_icon.png', title: title, section_title: section_title, gradient_class: 'header-locations', nav_path: zones_path, plant_graphic: nil }
     when 'sensors', 'sensor_readings', 'sensor_types'
-      title = action.in?(%w[show edit]) && controller == 'sensors' && @sensor ? @sensor.to_s : t('layouts.application.sensors')
-      { icon: 'sensor_icon.png', title: title, gradient_class: 'header-sensors header-graphic' }
+      section_title = t('layouts.application.sensors')
+      title = action.in?(%w[show edit]) && controller == 'sensors' && @sensor ? @sensor.to_s : section_title
+      { icon: 'sensor_icon.png', title: title, section_title: section_title, gradient_class: 'header-sensors', nav_path: sensors_path, plant_graphic: nil }
     when 'users'
-      { icon: 'users_icon.png', title: t('layouts.application.users'), gradient_class: 'header-users header-graphic' }
+      section_title = t('layouts.application.users')
+      { icon: 'users_icon.png', title: section_title, section_title: section_title, gradient_class: 'header-users', nav_path: users_path, plant_graphic: nil }
     when 'admin/notifications'
-      { icon: 'settings_icon.png', title: 'Notifications', gradient_class: 'header-admin header-graphic' }
+      { icon: 'settings_icon.png', title: 'Notifications', section_title: 'Notifications', gradient_class: 'header-admin', nav_path: admin_notifications_path, plant_graphic: nil }
     when 'settings'
-      { icon: 'settings_icon.png', title: t('layouts.application.account_settings'), gradient_class: 'header-settings header-graphic' }
+      section_title = t('layouts.application.account_settings')
+      { icon: 'settings_icon.png', title: section_title, section_title: section_title, gradient_class: 'header-settings', nav_path: settings_path, plant_graphic: nil }
     when 'projects'
-      { icon: 'project_icon.png', title: t('layouts.application.project_settings'), gradient_class: 'header-settings header-graphic' }
+      section_title = t('layouts.application.project_settings')
+      { icon: 'project_icon.png', title: section_title, section_title: section_title, gradient_class: 'header-settings', nav_path: projects_path, plant_graphic: nil }
     else
-      { icon: 'autofauna_icon.png', title: 'Autofauna', gradient_class: 'header-default header-graphic' }
+      { icon: 'autofauna_icon.png', title: 'Autofauna', section_title: 'Autofauna', gradient_class: 'header-default', nav_path: plants_path, plant_graphic: nil }
     end
   end
 

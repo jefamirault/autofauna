@@ -2,13 +2,11 @@
   Edit #<%= @plant.uid %> <%= @plant.name %>
 <% end %>
 <div class="settings-card">
-  <h1>
-    <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
-    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-    <%= link_to @plant, plant_path(@plant), class: 'breadcrumb' %>
-    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-    Edit
-  </h1>
+  <% if @plant&.graphic_path %>
+    <div class="plant-graphic-banner">
+      <%= image_tag @plant.graphic_path, class: 'plant-graphic-image' %>
+    </div>
+  <% end %>
 
   <%= render "form", plant: @plant %>
 

@@ -153,7 +153,7 @@ The plants index is the main page with significant client-side interactivity:
 | `location_filter_controller` | Plants index: filtering (location/recipe/watering status), pagination, display mode, result counts |
 | `collapsible_filters_controller` | Expand/collapse filter button rows (localStorage persistence) |
 | `collapsible_group_controller` | Collapsible location/recipe groups (localStorage persistence) |
-| `sidebar_controller` | Sidebar minimize/expand, mobile auto-close, icon-rail mode |
+| `sidebar_controller` | Sidebar minimize/expand via hamburgerButton target, mobile auto-close, icon-rail mode, touch/swipe handling |
 | `dropdown_controller` | Header user dropdown menu |
 | `locale_popup_controller` | Sidebar locale switcher popup |
 | `header_search_controller` | Debounced auto-submit for search |
@@ -167,11 +167,19 @@ The plants index is the main page with significant client-side interactivity:
 ## Layout Architecture
 
 - **Grid layout:** `"sidebar header" / "sidebar main"` — sidebar spans both rows
-- **Context-aware header:** Gradient color, icon, and title change per controller section (Plants=green, Waterings=blue, Tanks=teal, etc.) via `header_config` helper
-- **Sidebar:** Minimized state = icon rail (4rem wide, emoji-only nav labels); expanded = full 18rem with text labels
-- **FOUC prevention:** Inline `<script>` in `<head>` applies sidebar state before render
-- **Mobile (≤600px):** Sidebar hidden when minimized, collapse button fixed-position; background-attachment: scroll
-- **Plant graphic in header:** On plant/watering show pages, plant's graphic replaces section icon in header
+- **Context-aware header:** `display: grid` with single column; all children share same grid cell. Gradient color and title change per controller section (Plants=green, Waterings=blue, Tanks=teal, etc.) via `header_config` helper. `#headerTitle` is a direct child of `<header>`, truly centered independent of `#headerRight` (email/dropdown)
+- **`header_config` keys:** `icon` (section icon), `title` (page-specific), `section_title` (generic section name for hamburger), `gradient_class`, `nav_path` (always a valid section index URL), `plant_graphic` (show pages only)
+- **Sidebar structure:** Three sections top-to-bottom:
+  1. `button.hamburgerToggle` — ☰ icon (absolutely positioned in 4rem box, never moves during animation) + section title (fades with opacity transitions)
+  2. `a.sidebarNav` > `#logoContainer` — tall section icon (16rem expanded via `--logo-size`, header-height minimized), always links to section index
+  3. `<nav>` — current section's sub-nav (`.indent`) at top, remaining sections vertically centered between `.fill` divs, locale switcher at bottom. Current section omitted from nav (redundant with sidebarNav)
+- **Sidebar states:** Minimized = icon rail (4rem wide, emoji-only nav labels, hamburger title hidden); expanded = full 18rem with text labels
+- **FOUC prevention:** Inline `<script>` in `<head>` applies sidebar state before render; hamburger icon uses absolute positioning so it never shifts during sidebar width transitions; title uses opacity transitions to avoid flash
+- **Mobile (≤600px):** Sidebar hidden when minimized; hamburger button fixed top-left; sidebarNav hidden (hamburger is the only fixed button)
+- **Plant graphic banner:** On plant/watering show pages, `.plant-graphic-banner` renders in `section#primary` before yield; on plant edit, rendered inside `.settings-card` instead. Uses `max-width: var(--card-max-width)` (shared CSS variable with `.info-card-grid`)
+- **`--card-max-width: 650px`** CSS variable on body — shared by `.plant-graphic-banner`, `.info-card-grid:has(.details-section)`, and plants index search bar
+- **Plants index header:** Two-column grid (`1fr auto`); `#headerTitle` hidden; search bar left-aligned with `max-width: var(--card-max-width)`
+- **Nav icons:** Plants uses `autofauna_icon.png` with `.nav-icon` class (other sections still use emoji, to be migrated)
 
 ## API / Sensor Integration
 
