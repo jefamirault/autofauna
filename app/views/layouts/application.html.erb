@@ -113,7 +113,11 @@
           <%= link_to plants_path, class: 'navItem' do %><%= image_tag 'autofauna_icon.png', class: 'nav-icon' %> <span class="nav-label"><%= t('.plants') %></span><% end %>
         <% end %>
         <% unless params[:controller].in?(%w[waterings recipes recipe_batches recipe_sources]) %>
-          <%= nav_link 'waterings', action: 'index', text: "💧 Water" %>
+          <% if params[:controller] == 'waterings' && params[:action] == 'index' %>
+            <a class='navItem selected'><%= image_tag 'water_icon.png', class: 'nav-icon' %> <span class="nav-label">Water</span></a>
+          <% else %>
+            <%= link_to waterings_path, class: 'navItem' do %><%= image_tag 'water_icon.png', class: 'nav-icon' %> <span class="nav-label">Water</span><% end %>
+          <% end %>
         <% end %>
         <% unless params[:controller] == 'tanks' %>
           <%= nav_link 'tanks', text: "🐟 #{t('.tanks')}" %>
