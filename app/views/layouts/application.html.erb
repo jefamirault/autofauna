@@ -55,13 +55,13 @@
           </div>
           <div class="header-dropdown hidden" data-dropdown-target="menu">
             <% if current_user.admin? %>
-              <%= link_to "#{t('.users')}", users_path, class: 'dropdown-item' %>
+              <%= link_to "👥 #{t('.users')}", users_path, class: 'dropdown-item' %>
               <%= link_to "🔔 Notifications", admin_notifications_path, class: 'dropdown-item' %>
             <% end %>
             <% if current_project && show_project_ui? %>
-              <%= link_to "#{t('.project_settings')}", project_path(current_project), class: 'dropdown-item' %>
+              <%= link_to "🗂️ #{t('.project_settings')}", project_path(current_project), class: 'dropdown-item' %>
             <% end %>
-            <%= link_to "#{t('.account_settings')}", settings_path, class: 'dropdown-item' %>
+            <%= link_to settings_path, class: 'dropdown-item' do %><%= image_tag 'settings_icon.png', class: 'dropdown-icon' %> <%= t('.account_settings') %><% end %>
             <% unless current_user.guest? %>
               <%= button_to t('.log_out'), session_path, method: :delete, class: 'dropdown-logout', onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
             <% end %>
@@ -120,7 +120,11 @@
           <% end %>
         <% end %>
         <% unless params[:controller] == 'tanks' %>
-          <%= nav_link 'tanks', text: "🐟 #{t('.tanks')}" %>
+          <% if params[:controller] == 'tanks' && params[:action] == 'index' %>
+            <a class='navItem selected'><%= image_tag 'tank_icon.png', class: 'nav-icon' %> <span class="nav-label"><%= t('.tanks') %></span></a>
+          <% else %>
+            <%= link_to tanks_path, class: 'navItem' do %><%= image_tag 'tank_icon.png', class: 'nav-icon' %> <span class="nav-label"><%= t('.tanks') %></span><% end %>
+          <% end %>
         <% end %>
         <% unless params[:controller].in?(%w[locations zones]) %>
           <%= nav_link 'locations', text: "📍 #{t('.locations')}" %>
