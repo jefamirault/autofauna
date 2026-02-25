@@ -26,7 +26,7 @@ class PlantsController < ApplicationController
     @q = current_project.plants.ransack(params['q'])
 
     @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
-    @plants = @q.result(distinct: true).includes(:location, :recipe, :last_watering)
+    @plants = @q.result(distinct: true).includes(:location, :recipe, last_watering: [:recipe_batch])
 
     # Build location filter buttons with colors, sorted by count (descending)
     location_counts = @plants.where.not(location_id: nil).reorder(nil).group(:location_id).count

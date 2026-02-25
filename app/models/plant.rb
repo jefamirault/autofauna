@@ -58,7 +58,7 @@ class Plant < ApplicationRecord
   end
 
   def last_watering
-    super || waterings.any? ? waterings.last : nil
+    super || (waterings.any? ? waterings.last : nil)
   end
 
   def suggested_watering_unit

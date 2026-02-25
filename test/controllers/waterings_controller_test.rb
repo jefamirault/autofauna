@@ -12,6 +12,20 @@ class WateringsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "index should sort waterings newest first" do
+    plant = plants(:one)
+    Watering.create!(plant: plant, watered_at: 3.days.ago, notes: "older_watering_marker")
+    Watering.create!(plant: plant, watered_at: 1.day.ago, notes: "newer_watering_marker")
+
+    get waterings_url
+    assert_response :success
+
+    body = response.body
+    newer_pos = body.index("newer_watering_marker")
+    older_pos = body.index("older_watering_marker")
+    assert newer_pos < older_pos, "Expected newest watering to appear before oldest watering"
+  end
+
   test "should get new" do
     get new_watering_url(plant_id: @watering.plant_id)
     assert_response :success

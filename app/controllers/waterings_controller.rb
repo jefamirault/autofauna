@@ -7,7 +7,7 @@ class WateringsController < ApplicationController
 
   # GET /waterings or /waterings.json
   def index
-    @waterings = current_project.waterings.sort_by{|w| [w.watered_at, w.updated_at]}.reverse.first 500
+    @waterings = current_project.waterings.includes(:plant).reorder(watered_at: :desc, updated_at: :desc).limit(500)
   end
 
   # GET /waterings/1 or /waterings/1.json
