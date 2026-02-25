@@ -13,6 +13,8 @@ html
 body
   --header-height: 4.5rem
   --card-max-width: 650px
+  @media (max-width: 750px)
+    --card-max-width: none
   height: 100%
   display: grid
   grid-template-columns: 18rem 1fr
@@ -433,8 +435,6 @@ a.sidebarNav
     background: #7779
     color: #fffc
     text-decoration: none
-  @media (max-width: 600px)
-    display: none
   // Landscape mobile: don't scale up logo
   @media (max-width: 900px) and (min-width: 601px) and (max-height: 500px)
     #logoContainer
@@ -461,6 +461,7 @@ main
   display: flex
   flex-direction: column
   margin: 0
+  min-width: 0
   overflow-x: clip
   overflow-y: scroll
 
@@ -473,6 +474,7 @@ section#primary
   padding: 0.5em 3vw 2em
   background: #eee
   flex: 1
+  min-width: 0
 
 .plant-graphic-banner
   display: flex
@@ -539,8 +541,8 @@ aside#sidebar
     svg
       height: 20px
     .nav-icon
-      height: 1.2em
-      width: 1.2em
+      height: 1.5em
+      width: 1.5em
       object-fit: contain
       vertical-align: middle
       margin-right: 0.1em

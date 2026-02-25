@@ -175,9 +175,11 @@ The plants index is the main page with significant client-side interactivity:
   3. `<nav>` — current section's sub-nav (`.indent`) at top, remaining sections vertically centered between `.fill` divs, locale switcher at bottom. Current section omitted from nav (redundant with sidebarNav)
 - **Sidebar states:** Minimized = icon rail (4rem wide, emoji-only nav labels, hamburger title hidden); expanded = full 18rem with text labels
 - **FOUC prevention:** Inline `<script>` in `<head>` applies sidebar state before render; hamburger icon uses absolute positioning so it never shifts during sidebar width transitions; title uses opacity transitions to avoid flash
-- **Mobile (≤600px):** Sidebar hidden when minimized; hamburger button fixed top-left; sidebarNav hidden (hamburger is the only fixed button)
+- **Mobile (≤600px):** Sidebar hidden when minimized; hamburger button fixed top-left; `a.sidebarNav` with `#logoContainer` remains visible (expands to full `--logo-size` when sidebar is open, compact at header-height when minimized)
 - **Plant graphic banner:** On plant/watering show pages, `.plant-graphic-banner` renders in `section#primary` before yield; on plant edit, rendered inside `.settings-card` instead. Uses `max-width: var(--card-max-width)` (shared CSS variable with `.info-card-grid`)
-- **`--card-max-width: 650px`** CSS variable on body — shared by `.plant-graphic-banner`, `.info-card-grid:has(.details-section)`, and plants index search bar
+- **`--card-max-width: 650px`** CSS variable on body — shared by `.plant-graphic-banner`, `.info-card-grid:has(.details-section)`, and plants index search bar. Resets to `none` at ≤750px so content shrinks with the viewport.
+- **Responsive overflow prevention:** `main` and `section#primary` both have `min-width: 0` to allow shrinking inside the body grid. All flex/grid children in the content chain (`.info-card-section`, `.watering-text`, `.water-icon-link`, `.info-row .value`) also need `min-width: 0` — without it, flex/grid items default to `min-width: auto` and refuse to shrink below their content width, causing horizontal overflow that `overflow-x: clip` cannot fix.
+- **Breakpoints:** ≤600px (mobile: sidebar top-aligned, hamburger fixed), ≤750px (`--card-max-width` disabled, `.info-card-grid` single column), ≤900px landscape with ≤500px height (compact sidebar logo)
 - **Plants index header:** Two-column grid (`1fr auto`); `#headerTitle` hidden; search bar left-aligned with `max-width: var(--card-max-width)`
 - **Nav icons:** Plants uses `autofauna_icon.png` with `.nav-icon` class (other sections still use emoji, to be migrated)
 
@@ -345,6 +347,7 @@ Config in `config/deploy.rb` and `config/deploy/production.rb`
 
 ## Common Patterns & Gotchas
 
+- **Flex/grid `min-width: 0` rule:** Any flex or grid child that should shrink below its content width needs `min-width: 0`. Without it, the default `min-width: auto` prevents shrinking and causes horizontal overflow. This applies throughout the layout chain: `main`, `section#primary`, `.info-card-section`, `.watering-text`, `.water-icon-link`, `.info-row .value`. When adding new flex/grid containers with variable-width content, always add `min-width: 0` to children that need to shrink.
 - **Turbo Frame issues:** Links inside `<turbo-frame>` need `data: { turbo_frame: "_top" }` to break out of frame context, otherwise they show "Content Missing"
 - **Google Sign-In + Turbo:** Must manually call `google.accounts.id.initialize()` + `renderButton()` on `turbo:load` events (in `application.js`)
 - **Google Sign-In ux_mode:** Must include `ux_mode: "redirect"` in manual `initialize()` calls to match HTML config

@@ -539,6 +539,9 @@ table.timeline
     text-overflow: ellipsis
     white-space: nowrap
     width: 100%
+    @media (max-width: 600px)
+      white-space: normal
+      word-break: break-word
 
   tbody
     tr.log-entry-row
@@ -642,6 +645,7 @@ table.timeline
 // Info card
 .info-card
   margin: 1.5rem 0
+  max-width: 100%
 
   .info-card-grid
     display: grid
@@ -659,6 +663,7 @@ table.timeline
     background: $lightgreen
     border-radius: 8px
     border-left: 4px solid $green
+    min-width: 0
 
     &:not(.watering-section)
       padding: 1rem 1.25rem
@@ -668,6 +673,7 @@ table.timeline
     justify-content: space-between
     padding: 0.4rem 0
     border-bottom: 1px solid rgba(0, 77, 64, 0.1)
+    gap: 0.5rem
 
     &:last-of-type
       border-bottom: none
@@ -681,16 +687,21 @@ table.timeline
     .label
       color: $darkgreen
       font-weight: 500
+      flex-shrink: 0
 
     .value
       color: #333
       text-align: right
+      min-width: 0
+      overflow-wrap: break-word
 
   .watering-section
     display: flex
     align-items: stretch
     background: $lightblue
     border-left-color: $blue
+    @media (max-width: 600px)
+      flex-direction: column
 
     &.urgent
       background: $lightyellow
@@ -713,6 +724,7 @@ table.timeline
     padding: 2rem
     text-decoration: none
     flex: 1
+    min-width: 0
 
     &:hover
       background: rgba(14, 72, 123, 0.15)
@@ -764,6 +776,8 @@ table.timeline
     display: flex
     flex-direction: column
     justify-content: space-around
+    min-width: 0
+    overflow-wrap: break-word
 
   .watering-suggestion
     font-size: 1.5em
