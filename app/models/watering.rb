@@ -106,12 +106,13 @@ class Watering < ApplicationRecord
     # Skip if plant is being destroyed
     return if plant.destroyed?
 
-    watered_at_date = plant.waterings.order(:watered_at).last&.watered_at&.to_date
+    most_recent = plant.waterings.order(:watered_at).last
+    watered_at_date = most_recent&.watered_at&.to_date
     unless plant.date_last_watering == watered_at_date
       plant.update date_last_watering: watered_at_date
     end
-    unless plant.last_watering == self
-      plant.update last_watering: self
+    unless plant.last_watering_id == most_recent&.id
+      plant.update last_watering: most_recent
     end
     plant.update_watering_dates
   end

@@ -273,4 +273,69 @@ class PlantTest < ActiveSupport::TestCase
     plant = Plant.create!(name: "Daily Plant", min_watering_freq: 1, max_watering_freq: 1, project: project, uid: 153)
     assert_equal "Every 1 day", plant.watering_frequency_text
   end
+
+  # ─── last_watering ──────────────────────────────────────────────────────────
+
+  test "last_watering returns the most recent watering by watered_at" do
+    project = Project.create!(name: "Test Project", owner: users(:one))
+    plant = Plant.create!(name: "Last Watering Plant", project: project, uid: 160)
+
+    old_watering = Watering.create!(plant: plant, watered_at: 10.days.ago, notes: "Old watering")
+    recent_watering = Watering.create!(plant: plant, watered_at: 1.day.ago, notes: "Recent watering")
+    plant.reload
+
+    assert_equal recent_watering, plant.last_watering,
+      "last_watering should return the most recent watering, not an older one"
+  end
+
+  test "last_watering still returns most recent after editing an older watering" do
+    project = Project.create!(name: "Test Project", owner: users(:one))
+    plant = Plant.create!(name: "Edit Old Watering Plant", project: project, uid: 161)
+
+    old_watering = Watering.create!(plant: plant, watered_at: 10.days.ago, notes: "Old notes")
+    recent_watering = Watering.create!(plant: plant, watered_at: 1.day.ago, notes: "Recent notes")
+    plant.reload
+
+    # Edit the OLD watering — this should NOT change last_watering
+    old_watering.update!(notes: "Edited old notes")
+    plant.reload
+
+    assert_equal recent_watering, plant.last_watering,
+      "Editing an older watering should not change last_watering to that older watering"
+    assert_equal "Recent notes", plant.last_watering.notes,
+      "last_watering notes should be from the most recent watering"
+  end
+
+  test "last_watering updates correctly when a new watering is added with an earlier date" do
+    project = Project.create!(name: "Test Project", owner: users(:one))
+    plant = Plant.create!(name: "Backfill Watering Plant", project: project, uid: 162)
+
+    recent_watering = Watering.create!(plant: plant, watered_at: 1.day.ago, notes: "Recent")
+    plant.reload
+    assert_equal recent_watering, plant.last_watering
+
+    # Add a watering with an older date — last_watering should still be the recent one
+    Watering.create!(plant: plant, watered_at: 10.days.ago, notes: "Backfilled old")
+    plant.reload
+
+    assert_equal recent_watering, plant.last_watering,
+      "Adding a watering with an older date should not change last_watering"
+  end
+
+  test "last_watering data is used for Water Again link parameters" do
+    project = Project.create!(name: "Test Project", owner: users(:one))
+    recipe = Recipe.create!(name: "Test Recipe", project: project)
+    plant = Plant.create!(name: "Water Again Plant", project: project, uid: 163)
+
+    Watering.create!(plant: plant, watered_at: 10.days.ago, notes: "Old notes", volume: 1.0, units: "cups")
+    recent = Watering.create!(plant: plant, watered_at: 1.day.ago, notes: "Recent notes", volume: 2.5, units: "mL", recipe: recipe, tds: 500)
+    plant.reload
+
+    # These are the fields used by plant_water_path in the views
+    assert_equal "Recent notes", plant.last_watering.notes
+    assert_equal 2.5, plant.last_watering.volume
+    assert_equal "mL", plant.last_watering.units
+    assert_equal recipe, plant.last_watering.recipe
+    assert_equal 500, plant.last_watering.tds
+  end
 end
