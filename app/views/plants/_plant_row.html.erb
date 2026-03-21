@@ -2,7 +2,7 @@
 <% just_watered ||= nil %>
 <% watered_today = just_watered || plant.date_last_watering == Time.zone.now.to_date %>
 <% urgency = watered_today ? :normal : plant.watering_urgency %>
-<div id="<%= dom_id plant %>" class="plant-card <%= urgency %>" data-location-id="<%= plant.location_id&.to_s || 'none' %>" data-recipe-id="<%= plant.recipe_id&.to_s || 'none' %>" data-needs-watering="<%= [:urgent, :today].include?(urgency) %>" data-watering-status="<%= urgency == :urgent ? 'urgent' : (urgency == :today ? 'today' : 'scheduled') %>">
+<div id="<%= dom_id plant %>" class="plant-card <%= urgency %>" data-location-id="<%= plant.location_id&.to_s || 'none' %>" data-recipe-id="<%= plant.recipe_id&.to_s || 'none' %>" data-needs-watering="<%= [:urgent, :today].include?(urgency) %>" data-watering-status="<%= urgency == :urgent ? 'urgent' : (urgency == :today ? 'today' : 'scheduled') %>" <%= 'data-controller=inline-watering' unless archive %>>
   <div class="plant-card-graphic-col">
     <div class="plant-card-name">
       <%= link_to plant.label, plant_path(plant.id), data: { turbo_frame: "_top" } %>
@@ -49,14 +49,36 @@
         <span class="plant-card-water-helper"><%= t('plants.water_button.watered') %></span>
         <span class="plant-card-edit-watering"><%= t('plants.water_button.edit') %></span>
       <% end %>
-      <%= button_to plant_quick_water_path(plant), form_class: "plant-card-water-col water-icon-link #{urgency}" do %>
-        <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
-        </svg>
-        <span class="plant-card-water-helper desktop-only"><%= t('plants.water_button.click') %></span>
-        <span class="plant-card-water-helper mobile-only"><%= t('plants.water_button.tap') %></span>
-        <span class="plant-card-watered-text"><%= t('plants.water_button.watered') %></span>
-      <% end %>
+      <div class="plant-card-water-col water-icon-link <%= urgency %>" data-inline-watering-target="waterCol">
+        <%# Quick water form - one click POST %>
+        <%= form_with url: waterings_path, method: :post, class: "quick-water-form", data: {
+          action: "turbo:submit-start->inline-watering#submitStart turbo:submit-end->inline-watering#submitEnd"
+        } do |f| %>
+          <%= f.hidden_field :plant_id, name: "watering[plant_id]", value: plant.id %>
+          <%= f.hidden_field :watered_at, name: "watering[watered_at]", value: Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
+          <% if plant.last_watering %>
+            <%= f.hidden_field :volume, name: "watering[volume]", value: plant.last_watering.volume %>
+            <%= f.hidden_field :units, name: "watering[units]", value: plant.last_watering.units %>
+            <%= f.hidden_field :notes, name: "watering[notes]", value: plant.last_watering.notes %>
+            <%= f.hidden_field :recipe_id, name: "watering[recipe_id]", value: plant.last_watering.recipe_id %>
+            <%= f.hidden_field :recipe_batch_id, name: "watering[recipe_batch_id]", value: plant.last_watering.recipe_batch_id %>
+            <%= f.hidden_field :tds, name: "watering[tds]", value: plant.last_watering.tds %>
+          <% end %>
+          <button type="submit" class="quick-water-btn" data-inline-watering-target="quickWaterBtn">
+            <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
+            </svg>
+            <span class="plant-card-water-helper desktop-only"><%= t('plants.water_button.click') %></span>
+            <span class="plant-card-water-helper mobile-only"><%= t('plants.water_button.tap') %></span>
+          </button>
+        <% end %>
+        <button type="button" class="expand-watering-btn" data-action="click->inline-watering#expand" data-inline-watering-target="expandToggle" title="More options">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M7 10l5 5 5-5z"/></svg>
+        </button>
+      </div>
+      <div class="plant-card-inline-form" data-inline-watering-target="inlineForm" style="display: none;">
+        <%= render 'plants/inline_watering_form', plant: plant %>
+      </div>
     </div>
   <% end %>
 </div>

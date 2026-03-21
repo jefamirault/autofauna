@@ -414,6 +414,7 @@ h1
 .plant-card
   display: flex
   align-items: stretch
+  flex-wrap: wrap
   border-radius: 4px
   background: $lightblue
 
@@ -534,22 +535,22 @@ h1
   > *
     grid-area: 1 / 1
 
-  // Default: show form, hide link
+  // Default: show water button, hide watered link
   > a.plant-card-water-col
     visibility: hidden
-  > form.plant-card-water-col
+  > div.plant-card-water-col
     visibility: visible
 
-  // Watered: show link, hide form
+  // Watered: show link, hide water button
   &.is-watered > a.plant-card-water-col
     visibility: visible
-  &.is-watered > form.plant-card-water-col
+  &.is-watered > div.plant-card-water-col
     visibility: hidden
 
-  // Optimistic: form still visible but with watered styling
+  // Optimistic: water button still visible but with watered styling
   &:has(form[aria-busy="true"]) > a.plant-card-water-col
     visibility: hidden
-  &:has(form[aria-busy="true"]) > form.plant-card-water-col
+  &:has(form[aria-busy="true"]) > div.plant-card-water-col
     visibility: visible
 
 .plant-card-water-col
@@ -561,10 +562,7 @@ h1
   border-radius: 0 4px 4px 0
   text-decoration: none
   color: $blue
-
-  &:hover
-    background: rgba(14, 72, 123, 0.15)
-    text-decoration: none
+  position: relative
 
   &.normal
     color: $blue
@@ -585,7 +583,7 @@ h1
   &.none
     color: #999
 
-form.plant-card-water-col
+div.plant-card-water-col
   padding: 0
 
 .plant-card-water-col
@@ -605,8 +603,10 @@ form.plant-card-water-col
   &.watered
     color: $green
     background: $lightgreen
+    text-decoration: none
     &:hover
       background: $lightgreen
+      text-decoration: none
 
   // Optimistic state: Turbo sets aria-busy during form submission
   &[aria-busy="true"]
@@ -646,6 +646,138 @@ form.plant-card-water-col
   margin-top: 0.25rem
   white-space: nowrap
 
+// Quick water form - remove all form styling, fill the water column
+.quick-water-form
+  display: contents
+
+.quick-water-btn
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  background: none
+  border: none
+  color: inherit
+  cursor: pointer
+  padding: 0
+  font-family: inherit
+  flex: 1
+  width: 100%
+  &:disabled
+    opacity: 0.5
+    cursor: wait
+  &.submitting .water-icon
+    animation: pulse-water 0.6s ease-in-out infinite
+
+@keyframes pulse-water
+  0%, 100%
+    opacity: 1
+  50%
+    opacity: 0.4
+
+// Expand toggle for inline watering form
+.expand-watering-btn
+  display: flex
+  align-items: center
+  justify-content: center
+  background: none
+  border: none
+  color: inherit
+  cursor: pointer
+  padding: 0.15rem 0.5rem
+  opacity: 0.4
+  border-radius: 4px
+  &:hover
+    opacity: 0.8
+    background: rgba(0, 0, 0, 0.05)
+
+// Inline watering form (expanded card state)
+.plant-card-inline-form
+  width: 100%
+  border-top: 1px solid rgba(0, 0, 0, 0.08)
+  padding: 0.75rem
+  background: rgba(255, 255, 255, 0.4)
+
+.inline-watering-errors
+  color: #c0392b
+  font-size: 0.85em
+  margin-bottom: 0.5rem
+  padding: 0.25rem 0.5rem
+  background: rgba(192, 57, 43, 0.08)
+  border-radius: 4px
+
+.inline-watering-fields
+  display: flex
+  flex-direction: column
+  gap: 0.5rem
+
+.inline-watering-row
+  display: flex
+  gap: 0.5rem
+  flex-wrap: wrap
+
+.inline-field
+  display: flex
+  flex-direction: column
+  gap: 0.15rem
+  flex: 1
+  min-width: 80px
+
+  label
+    font-size: 0.75em
+    color: #666
+    white-space: nowrap
+
+.inline-field-units
+  flex: 0 0 70px
+  min-width: 70px
+
+.inline-field-tds
+  flex: 0 0 70px
+  min-width: 70px
+
+.inline-field-notes
+  flex: 2
+
+.inline-input
+  padding: 0.35rem 0.5rem
+  border: 1px solid rgba(0, 0, 0, 0.15)
+  border-radius: 4px
+  font-size: 0.9em
+  font-family: inherit
+  width: 100%
+  box-sizing: border-box
+  background: white
+
+.inline-watering-actions
+  display: flex
+  gap: 0.5rem
+  align-items: center
+  margin-top: 0.5rem
+
+.inline-water-submit
+  padding: 0.4rem 1.2rem
+  border: none
+  border-radius: 4px
+  background: $blue
+  color: white
+  font-family: inherit
+  font-size: 0.9em
+  cursor: pointer
+  &:hover
+    opacity: 0.9
+
+.inline-water-cancel
+  padding: 0.4rem 0.8rem
+  border: none
+  background: none
+  color: #666
+  font-family: inherit
+  font-size: 0.9em
+  cursor: pointer
+  &:hover
+    color: #333
+
 // Responsive visibility
 .desktop-only
   display: inline
@@ -679,7 +811,7 @@ form.plant-card-water-col
   .plant-card
     display: grid
     grid-template-columns: auto 1fr
-    grid-template-rows: 1fr auto
+    grid-template-rows: 1fr auto auto
 
   .plant-card-graphic-col
     grid-row: 1
@@ -697,11 +829,23 @@ form.plant-card-water-col
 
   .plant-card-water-col
     flex-direction: row
-    border-radius: 0 0 4px 4px
+    border-radius: 0
     padding: 0.5rem
     button[type="submit"]
       flex-direction: row
       padding: 0.5rem
+
+  .plant-card-inline-form
+    grid-column: 1 / -1
+    grid-row: 3
+    border-radius: 0 0 4px 4px
+
+  .inline-watering-row
+    flex-direction: column
+
+  .inline-field-units,
+  .inline-field-tds
+    flex: 1
 
   .plant-card-name
     white-space: normal

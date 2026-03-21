@@ -40,11 +40,22 @@ export default class extends Controller {
         this.statusResizeObserver.observe(scrollEl)
       }
     }
+
+    // Re-apply counts and pagination after Turbo Stream replaces a plant card
+    document.addEventListener("turbo:after-stream-render", this._handleStreamRender = () => {
+      this.updateResultsCount()
+      if (this.displayModeValue === "watering") {
+        this.paginateVisibleCards()
+      }
+    })
   }
 
   disconnect() {
     if (this.statusResizeObserver) {
       this.statusResizeObserver.disconnect()
+    }
+    if (this._handleStreamRender) {
+      document.removeEventListener("turbo:after-stream-render", this._handleStreamRender)
     }
   }
 

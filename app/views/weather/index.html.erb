@@ -9,8 +9,8 @@
     <div class="field">
       <%= f.label :zip, "Zip Code" %>
       <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
-        <%= f.text_field :zip, value: @zip, placeholder: "e.g. 10001", maxlength: 10, style: "flex: 1;" %>
-        <%= f.submit "Look Up", class: "saveButton" %>
+        <%= f.text_field :zip, value: @zip, placeholder: "e.g. 10001", maxlength: 10, style: "flex: 1; width: auto; min-width: 0;" %>
+        <%= f.submit "Look Up", class: "saveButton", style: "width: auto; flex-shrink: 0;" %>
       </div>
     </div>
   <% end %>
