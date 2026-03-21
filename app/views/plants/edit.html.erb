@@ -6,6 +6,10 @@
   <% content_for :header_extra do %>
     <div class="header-plant-graphic">
       <%= image_tag @plant.graphic_path, class: 'plant-graphic-image' %>
+      <div class="header-plant-name">
+        <span class="plant-number">#<%= @plant.uid %></span>
+        <span class="plant-name-text"><%= @plant.name %></span>
+      </div>
     </div>
   <% end %>
 <% end %>

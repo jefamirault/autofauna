@@ -156,7 +156,8 @@
       </nav>
     </aside>
 
-    <main class="<%= params[:controller] %> <%= params[:action] %>">
+    <main class="<%= params[:controller] %> <%= params[:action] %>"
+          <% if content_for?(:header_extra) %>data-controller="dynamic-header"<% end %>>
       <%= render 'layouts/flash' %>
 
       <% if current_user&.guest? %>

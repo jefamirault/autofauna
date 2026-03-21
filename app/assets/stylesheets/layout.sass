@@ -206,19 +206,27 @@ body.development:has(header.header-plants), body.development:has(header.header-d
   @media (max-width: 600px)
     background: linear-gradient(to right, var(--section-color-start) var(--header-height), transparent calc(var(--header-height) + 3rem)), var(--section-gradient)
 
-// Pages with plant graphic in header: taller header with second row
+// Pages with plant graphic in header: taller header with graphic + name
 body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.header-plant-graphic)
   --header-height: 14.5rem
+  grid-template-rows: 14.5rem 1fr
+  transition: grid-template-columns 0.12s, grid-template-rows 0.3s ease
   header
     grid-template-rows: 4.5rem 1fr
+    transition: grid-template-rows 0.3s ease
+    overflow: hidden
   button.hamburgerToggle
     height: 4.5rem
     .hamburger-title
       line-height: 4.5rem
-  #headerTitle, #headerRight
+  #headerTitle
+    opacity: 0
+    transition: opacity 0.2s ease
+  #headerRight
     align-self: center
   @media (max-width: 600px)
     --header-height: 11rem
+    grid-template-rows: 11rem auto 1fr auto
     header
       grid-template-rows: 4rem 1fr
       padding-left: 4rem
@@ -229,20 +237,59 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
       .hamburger-title
         line-height: 4rem
 
+  // Collapsed state: shrink to default header height
+  &.header-collapsed
+    --header-height: 4.5rem
+    grid-template-rows: 4.5rem 1fr
+    header
+      grid-template-rows: 4.5rem 0fr
+    #headerTitle
+      opacity: 1
+    .header-plant-graphic
+      opacity: 0
+      pointer-events: none
+    @media (max-width: 600px)
+      --header-height: 4rem
+      grid-template-rows: 4rem auto 1fr auto
+      header
+        grid-template-rows: 4rem 0fr
+      &.sidebarMinimized
+        grid-template-rows: 4rem 0 1fr auto
+
 .header-plant-graphic
   grid-row: 2
   grid-column: 1
   display: flex
   justify-content: center
   align-items: center
-  padding-bottom: 0.5rem
+  gap: 1rem
+  padding: 0.25rem 0 0.5rem
+  min-height: 0
+  transition: opacity 0.3s ease
   .plant-graphic-image
     max-height: 9rem
     object-fit: contain
     filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2))
+    flex-shrink: 1
+    min-height: 0
+  .header-plant-name
+    display: flex
+    flex-direction: column
+    gap: 0.15rem
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3)
+    .plant-number
+      font-size: 1rem
+      opacity: 0.8
+    .plant-name-text
+      font-size: 1.75rem
+      font-weight: 400
+      letter-spacing: -0.3px
   @media (max-width: 600px)
     .plant-graphic-image
       max-height: 6rem
+    .header-plant-name
+      .plant-name-text
+        font-size: 1.35rem
 
 // Header title — centered in the full header grid cell, independent of headerRight
 #headerTitle
