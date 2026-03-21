@@ -71,6 +71,11 @@ Rails.application.routes.draw do
 
   get 'weather', to: 'weather#index'
   post 'weather/lookup', to: 'weather#lookup', as: 'weather_lookup'
+  resources :weather_locations, only: [:create, :update, :destroy] do
+    member do
+      patch :set_primary
+    end
+  end
 
   get 'settings', to: 'settings#index'
   patch 'settings', to: 'settings#update'
