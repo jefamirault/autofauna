@@ -153,6 +153,7 @@ es:
         one: "Regar dentro de <strong>%{days} día</strong>"
         other: "Regar dentro de <strong>%{days} días</strong>"
       unscheduled: "No programado"
+      never_watered: "Riega esta planta para comenzar el seguimiento"
       short_late:
         one: "<strong>%{days} día tarde</strong>"
         other: "<strong>%{days} días tarde</strong>"
@@ -263,7 +264,7 @@ es:
       sensor_types: "Tipos de sensores"
   tds_readings: "Lecturas de TDS"
   project_settings: "Configuración del proyecto"
-  log_in: "🔐 Iniciar seción"
+  log_in: "🔐 Iniciar sesión"
   welcome: "Bienvenido"
   sign_up_heading: "Registrar"
   sign_up: "📝 Registrar"
@@ -373,8 +374,8 @@ es:
   search: "Buscar"
   text: "Texto"
   plant_id: "Número de planta"
-  scheduled_after: 'Programado antes de'
-  scheduled_before: 'Programado después de'
+  scheduled_after: 'Programado después de'
+  scheduled_before: 'Programado antes de'
   archived: '¿Archivada?'
   clear_search: 'Borrar búsqueda'
   new_log_entry: 'Nueva entrada de registro'
@@ -398,10 +399,10 @@ es:
     invalid_token: "Error al iniciar sesión con Google. Inténtalo de nuevo."
   log_entries:
     create: '💾 Crear una entrada de registro'
-    update: '💾 Atualizar entrada de registro'
+    update: '💾 Actualizar entrada de registro'
 
   date:
-    month_names: [ ~, enero, febrero, marzo, abril, mayo, junio, julio, agosto, septiembre, octobre, noviembre, deciembre ]
+    month_names: [ ~, enero, febrero, marzo, abril, mayo, junio, julio, agosto, septiembre, octubre, noviembre, diciembre ]
     abbr_month_names: [ ~, ene, feb, mar, abr, mayo, jun, jul, ago, sep, oct, nov, dic ]
     order:
       - year
