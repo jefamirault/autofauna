@@ -1,13 +1,16 @@
 <% content_for :title do %>
   Edit #<%= @plant.uid %> <%= @plant.name %>
 <% end %>
-<div class="settings-card">
-  <% if @plant&.graphic_path %>
-    <div class="plant-graphic-banner">
+
+<% if @plant&.graphic_path %>
+  <% content_for :header_extra do %>
+    <div class="header-plant-graphic">
       <%= image_tag @plant.graphic_path, class: 'plant-graphic-image' %>
     </div>
   <% end %>
+<% end %>
 
+<div class="settings-card">
   <%= render "form", plant: @plant %>
 
   <p>

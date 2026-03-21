@@ -2,20 +2,12 @@
   Watered #<%= @watering.plant.uid %> <%= @watering.plant.name %> <%= @watering.watered_at.strftime '%a %-m/%-d/%y %l:%M%P' %>
 <% end %>
 
-<h1 style="display:inline-block">
-  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= link_to @watering.plant, plant_path(@watering.plant), class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= link_to t('.waterings'), waterings_path, class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= @watering.watered_at.strftime '%a %-m/%-d/%y %l:%M%P' %>
-</h1>
+<% if @watering.plant&.graphic_path %>
+  <% content_for :header_extra do %>
+    <div class="header-plant-graphic">
+      <%= image_tag @watering.plant.graphic_path, class: 'plant-graphic-image' %>
+    </div>
+  <% end %>
+<% end %>
 
 <%= render @watering %>
-
-<p>
-  <%= link_to t('waterings.edit_watering'), edit_watering_path(@watering) %> |
-  <%= link_to t('waterings.all_waterings'), waterings_path %> |
-  <%= link_to t('waterings.water_again'), plant_water_path(@watering.plant, volume: @watering.volume, units: @watering.units, notes: @watering.notes) %>
-</p>

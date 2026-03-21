@@ -90,7 +90,7 @@ h2
   margin: .5em 0 .5em .65em
 
 main
-  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings, &.weather, &.plants, &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests, &.recipes, &.recipe_sources, &.recipe_batches
+  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings, &.weather, &.plants, &.waterings, &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests, &.recipes, &.recipe_sources, &.recipe_batches
     label
       display: block
       font-size: 85%
@@ -99,6 +99,12 @@ main
       margin-bottom: 0.5em
       input
         padding: 4px 8px
+    .field-row
+      display: flex
+      gap: 1rem
+      align-items: flex-end
+      .field-row-item
+        flex: 1
     .submit
       margin-top: 1em
 
@@ -124,6 +130,20 @@ main
             font-size: 0.875em
   &.plants
     &.new, &.edit, &.create, &.update
+      section#primary
+        background: transparent
+        display: flex
+        flex-direction: column
+        align-items: center
+        justify-content: center
+        .settings-card
+          width: 100%
+          max-width: 450px
+          @media (max-width: 600px)
+            width: calc(100% - 2rem)
+            margin: 0 1rem
+  &.waterings
+    &.new, &.edit, &.create, &.update, &.show, &.water, &.quick_water
       section#primary
         background: transparent
         display: flex

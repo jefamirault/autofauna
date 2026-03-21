@@ -2,6 +2,14 @@
   #<%= @plant.uid %> <%= @plant.name %>
 <% end %>
 
+<% if @plant&.graphic_path %>
+  <% content_for :header_extra do %>
+    <div class="header-plant-graphic">
+      <%= image_tag @plant.graphic_path, class: 'plant-graphic-image' %>
+    </div>
+  <% end %>
+<% end %>
+
 <%= render @plant %>
 
 <div class="timeline-header">

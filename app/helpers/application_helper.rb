@@ -86,12 +86,12 @@ module ApplicationHelper
     when 'plants', 'log_entries'
       section_title = t('layouts.application.plants')
       title = action.in?(%w[show edit]) && @plant ? @plant.to_s : section_title
-      plant_graphic = action == 'show' ? @plant&.graphic_path : nil
-      { icon: 'autofauna_icon.png', title: title, section_title: section_title, gradient_class: 'header-plants', nav_path: plants_path, plant_graphic: plant_graphic }
+      { icon: 'autofauna_icon.png', title: title, section_title: section_title, gradient_class: 'header-plants', nav_path: plants_path, plant_graphic: nil }
     when 'waterings'
       section_title = t('layouts.application.waterings')
-      plant_graphic = (@watering&.plant || @plant)&.graphic_path
-      { icon: 'water_icon.png', title: section_title, section_title: section_title, gradient_class: 'header-waterings', nav_path: waterings_path, plant_graphic: plant_graphic }
+      plant = @watering&.plant || @plant
+      title = action.in?(%w[show edit water quick_water]) && plant ? plant.to_s : section_title
+      { icon: 'water_icon.png', title: title, section_title: section_title, gradient_class: 'header-waterings', nav_path: waterings_path, plant_graphic: nil }
     when 'recipes'
       section_title = t('layouts.application.waterings')
       title = action.in?(%w[show edit]) && @recipe ? @recipe.to_s : section_title

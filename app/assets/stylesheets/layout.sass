@@ -206,6 +206,44 @@ body.development:has(header.header-plants), body.development:has(header.header-d
   @media (max-width: 600px)
     background: linear-gradient(to right, var(--section-color-start) var(--header-height), transparent calc(var(--header-height) + 3rem)), var(--section-gradient)
 
+// Pages with plant graphic in header: taller header with second row
+body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.header-plant-graphic)
+  --header-height: 14.5rem
+  header
+    grid-template-rows: 4.5rem 1fr
+  button.hamburgerToggle
+    height: 4.5rem
+    .hamburger-title
+      line-height: 4.5rem
+  #headerTitle, #headerRight
+    align-self: center
+  @media (max-width: 600px)
+    --header-height: 11rem
+    header
+      grid-template-rows: 4rem 1fr
+      padding-left: 4rem
+      background: linear-gradient(to right, var(--section-color-start) 4rem, transparent calc(4rem + 3rem)), var(--section-gradient) !important
+    button.hamburgerToggle
+      width: 4rem
+      height: 4rem
+      .hamburger-title
+        line-height: 4rem
+
+.header-plant-graphic
+  grid-row: 2
+  grid-column: 1
+  display: flex
+  justify-content: center
+  align-items: center
+  padding-bottom: 0.5rem
+  .plant-graphic-image
+    max-height: 9rem
+    object-fit: contain
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2))
+  @media (max-width: 600px)
+    .plant-graphic-image
+      max-height: 6rem
+
 // Header title — centered in the full header grid cell, independent of headerRight
 #headerTitle
   text-align: center
@@ -216,12 +254,6 @@ body.development:has(header.header-plants), body.development:has(header.header-d
   overflow: hidden
   text-overflow: ellipsis
   pointer-events: none
-
-// Show pages with plant-graphic-banner: align title over the banner
-body:has(.plant-graphic-banner) #headerTitle
-  width: var(--card-max-width)
-  justify-self: start
-  margin-left: 3vw
 
 // Header right section (email + dropdown)
 #headerRight

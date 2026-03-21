@@ -1,28 +1,60 @@
-<div id="<%= dom_id watering %>">
-  <h1><%= t('waterings.watered_on') %> <%= format_date @watering.watered_at, long: true %></h1>
-  <h4><%= time_ago @watering.watered_at %></h4>
-  <strong><%= t 'attributes.plant' %>:</strong>
-  <div class="plantButton">
-    <%= link_to watering.plant %>
+<div id="<%= dom_id watering %>" class="settings-card">
+  <h2><%= t('waterings.watered_on') %> <%= format_date watering.watered_at, long: true %></h2>
+  <small><%= time_ago watering.watered_at %></small>
+
+  <div class="info-row">
+    <strong><%= t 'attributes.plant' %></strong>
+    <div class="plantButton">
+      <%= link_to watering.plant %>
+    </div>
+  </div>
+
+  <div class="info-row">
+    <strong><%= t 'attributes.volume' %></strong>
+    <span class="value"><%= watering.print_volume %></span>
+  </div>
+
+  <% if watering.recipe.present? %>
+    <div class="info-row">
+      <strong>Recipe</strong>
+      <span class="value"><%= watering.recipe.name %></span>
+    </div>
+  <% end %>
+
+  <% if watering.recipe_batch.present? %>
+    <div class="info-row">
+      <strong>Batch</strong>
+      <span class="value"><%= watering.recipe_batch.label %></span>
+    </div>
+  <% end %>
+
+  <% if watering.tds.present? %>
+    <div class="info-row">
+      <strong>TDS (ppm)</strong>
+      <span class="value"><%= watering.tds %></span>
+    </div>
+  <% end %>
+
+  <% if watering.notes.present? %>
+    <div class="info-row">
+      <strong><%= t 'attributes.notes' %></strong>
+      <span class="value"><%= watering.notes.gsub("\n",'<br>').html_safe %></span>
+    </div>
+  <% end %>
+
+  <div class="info-row">
+    <strong><%= t 'attributes.logged' %></strong>
+    <span class="value"><%= format_time watering.created_at %></span>
+  </div>
+
+  <div class="info-row">
+    <strong><%= t 'attributes.updated' %></strong>
+    <span class="value"><%= format_time watering.updated_at %></span>
   </div>
 
   <p>
-    <strong><%= t 'attributes.logged' %>:</strong>
-    <%= format_time watering.created_at %>
+    <%= link_to t('waterings.edit_watering'), edit_watering_path(watering), class: 'link' %>
+    <%= link_to t('waterings.all_waterings'), waterings_path, class: 'link' %>
+    <%= link_to t('waterings.water_again'), plant_water_path(watering.plant, volume: watering.volume, units: watering.units, notes: watering.notes), class: 'link' %>
   </p>
-  <p>
-    <strong><%= t 'attributes.updated' %>:</strong>
-    <%= format_time watering.updated_at %>
-  </p>
-
-  <p>
-    <strong><%= t 'attributes.volume' %>:</strong>
-    <%= watering.print_volume %>
-  </p>
-
-  <p>
-    <strong><%= t 'attributes.notes' %>:</strong>
-    <%= watering.notes ? watering.notes.gsub("\n",'<br>').html_safe : '' %>
-  </p>
-
 </div>

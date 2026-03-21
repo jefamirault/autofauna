@@ -1,15 +1,18 @@
 <% content_for :title, "Water #{@watering.plant}" %>
 
-<h1>
-  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= link_to @watering.plant, plant_path(@watering.plant), class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= t 'waterings.new_watering'%>
-</h1>
+<% if @watering.plant&.graphic_path %>
+  <% content_for :header_extra do %>
+    <div class="header-plant-graphic">
+      <%= image_tag @watering.plant.graphic_path, class: 'plant-graphic-image' %>
+    </div>
+  <% end %>
+<% end %>
 
-<%= render "form", watering: @watering %>
+<div class="settings-card">
+  <h2><%= t 'waterings.new_watering' %></h2>
+  <%= render "form", watering: @watering %>
 
-<p>
-  <%= link_to "❌ #{t('actions.discard_changes')}", plant_path(@watering.plant), class: 'link' %>
-</p>
+  <p>
+    <%= link_to "❌ #{t('actions.discard_changes')}", plant_path(@watering.plant), class: 'link' %>
+  </p>
+</div>

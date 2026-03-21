@@ -1,22 +1,21 @@
 <% content_for :title, "Edit Watering #{@watering.plant}" %>
 
-<h1 style="display:inline-block">
-  <%= link_to t('.plants'), plants_path, class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= link_to @watering.plant, plant_path(@watering.plant), class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= link_to t('.waterings'), waterings_path, class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  <%= link_to @watering.watered_at.strftime('%a %-m/%-d/%y %l:%M%P'), watering_path(@watering), class: 'breadcrumb' %>
-  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
-  Edit
-</h1>
-<%= render "form", watering: @watering %>
+<% if @watering.plant&.graphic_path %>
+  <% content_for :header_extra do %>
+    <div class="header-plant-graphic">
+      <%= image_tag @watering.plant.graphic_path, class: 'plant-graphic-image' %>
+    </div>
+  <% end %>
+<% end %>
 
-<p>
-  <%= link_to "❌ #{t('actions.discard_changes')}", @watering, class: 'link' %>
-</p>
-<br>
-<p>
-  <%= button_to "🗑️ #{t('waterings.delete_watering')}", @watering, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('#{t 'waterings.messages.confirm_delete'}');" %>
-</p>
+<div class="settings-card">
+  <h2><%= t('waterings.edit_watering') %></h2>
+  <%= render "form", watering: @watering %>
+
+  <p>
+    <%= link_to "❌ #{t('actions.discard_changes')}", @watering, class: 'link' %>
+  </p>
+  <p>
+    <%= button_to "🗑️ #{t('waterings.delete_watering')}", @watering, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('#{t 'waterings.messages.confirm_delete'}');" %>
+  </p>
+</div>
