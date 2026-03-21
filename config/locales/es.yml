@@ -138,6 +138,8 @@ es:
     water_button:
       click: "Clic para regar"
       tap: "Toca para regar"
+      watered: "Regada!"
+      edit: "Editar"
     watering_status:
       late:
         one: "Riego <strong>%{days} día tarde</strong>"

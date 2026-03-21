@@ -11,6 +11,29 @@ class PlantsController < ApplicationController
       recipe_batch_id: params[:recipe_batch_id], recipe_id: params[:recipe_id], tds: params[:tds])
   end
 
+  def quick_water
+    @plant = current_project.plants.find(params[:plant_id])
+    watering_attrs = { watered_at: Time.current }
+
+    if (last = @plant.last_watering)
+      watering_attrs.merge!(
+        volume: last.volume,
+        units: last.units,
+        notes: last.notes,
+        recipe_id: last.recipe_id,
+        recipe_batch_id: last.recipe_batch_id,
+        tds: last.tds
+      )
+    end
+
+    @watering = @plant.waterings.create!(watering_attrs)
+
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plants_path }
+    end
+  end
+
   # GET /plants or /plants.json
   def index
     default_search_params = {

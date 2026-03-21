@@ -523,7 +523,35 @@ h1
   overflow: hidden
   text-overflow: ellipsis
 
-// Column 4: Water button + helper text
+// Column 4: Water button wrapper + states
+.plant-card-water-wrap
+  display: grid
+  flex-shrink: 0
+  border-radius: 0 4px 4px 0
+  overflow: hidden
+
+  // Both children stack in the same grid cell
+  > *
+    grid-area: 1 / 1
+
+  // Default: show form, hide link
+  > a.plant-card-water-col
+    visibility: hidden
+  > form.plant-card-water-col
+    visibility: visible
+
+  // Watered: show link, hide form
+  &.is-watered > a.plant-card-water-col
+    visibility: visible
+  &.is-watered > form.plant-card-water-col
+    visibility: hidden
+
+  // Optimistic: form still visible but with watered styling
+  &:has(form[aria-busy="true"]) > a.plant-card-water-col
+    visibility: hidden
+  &:has(form[aria-busy="true"]) > form.plant-card-water-col
+    visibility: visible
+
 .plant-card-water-col
   display: flex
   flex-direction: column
@@ -556,6 +584,57 @@ h1
 
   &.none
     color: #999
+
+form.plant-card-water-col
+  padding: 0
+
+.plant-card-water-col
+  button[type="submit"]
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    flex: 1
+    cursor: pointer
+    color: inherit
+    background: none
+    border: none
+    padding: 0.5rem 1.5rem
+    font: inherit
+
+  &.watered
+    color: $green
+    background: $lightgreen
+    &:hover
+      background: $lightgreen
+
+  // Optimistic state: Turbo sets aria-busy during form submission
+  &[aria-busy="true"]
+    color: $green
+    background: $lightgreen
+    pointer-events: none
+    .plant-card-water-helper
+      display: none
+    .plant-card-watered-text
+      display: inline
+
+.plant-card:has(.plant-card-water-col[aria-busy="true"])
+  background: $lightblue
+
+.plant-card-watered-text
+  display: none
+  font-size: 0.7em
+  color: $green
+  margin-top: 0.5rem
+  white-space: nowrap
+
+.plant-card-edit-watering
+  font-size: 0.8em
+  color: $blue
+  text-decoration: none
+  margin-top: 0.75rem
+  &:hover
+    text-decoration: underline
 
 .water-icon
   width: 3em
@@ -606,12 +685,18 @@ h1
     grid-column: 2
     grid-row: 1
 
-  .plant-card-water-col
+  .plant-card-water-wrap
     grid-column: 1 / -1
     grid-row: 2
+    border-radius: 0 0 4px 4px
+
+  .plant-card-water-col
     flex-direction: row
     border-radius: 0 0 4px 4px
     padding: 0.5rem
+    button[type="submit"]
+      flex-direction: row
+      padding: 0.5rem
 
   .plant-card-name
     white-space: normal

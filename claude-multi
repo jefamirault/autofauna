@@ -1,0 +1,90 @@
+#!/bin/bash
+# Launches a tmux session with one pane per selected branch.
+# Creates git worktrees as needed for non-main branches.
+SESSION="claude-agents"
+REPO_DIR="$HOME/autofauna"
+
+# Detect main branch
+main_branch=$(git -C "$REPO_DIR" symbolic-ref --short HEAD 2>/dev/null || echo "main")
+
+# Collect branches
+mapfile -t branches < <(git -C "$REPO_DIR" branch --format='%(refname:short)' | sort)
+
+if [ ${#branches[@]} -eq 0 ]; then
+  echo "No branches found."
+  exit 1
+fi
+
+# Display branch menu
+echo "Select branches (numbers), create new ones (names), or 'a' for all:"
+echo ""
+for i in "${!branches[@]}"; do
+  printf "  %d) %s\n" $((i + 1)) "${branches[$i]}"
+done
+echo ""
+read -rp "> " selection
+
+if [ -z "$selection" ]; then
+  echo "No branches selected."
+  exit 0
+fi
+
+# Parse selection — numbers pick existing branches, non-numbers create new ones
+selected=()
+if [ "$selection" = "a" ]; then
+  selected=("${branches[@]}")
+else
+  for token in $selection; do
+    if [[ "$token" =~ ^[0-9]+$ ]]; then
+      idx=$((token - 1))
+      if [ "$idx" -ge 0 ] && [ "$idx" -lt ${#branches[@]} ]; then
+        selected+=("${branches[$idx]}")
+      else
+        echo "Invalid selection: $token"
+        exit 1
+      fi
+    else
+      # Treat as a new branch name
+      echo "Creating new branch '$token' from $main_branch..."
+      git -C "$REPO_DIR" branch "$token" "$main_branch"
+      selected+=("$token")
+    fi
+  done
+fi
+
+if [ ${#selected[@]} -eq 0 ]; then
+  echo "No branches selected."
+  exit 0
+fi
+
+# Resolve directory for each branch (main branch uses repo dir, others use worktrees)
+dirs=()
+
+for branch in "${selected[@]}"; do
+  if [ "$branch" = "$main_branch" ]; then
+    dirs+=("$REPO_DIR")
+  else
+    worktree_dir="$REPO_DIR-$branch"
+    if [ ! -d "$worktree_dir" ]; then
+      echo "Creating worktree for '$branch' at $worktree_dir..."
+      git -C "$REPO_DIR" worktree add "$worktree_dir" "$branch"
+    fi
+    dirs+=("$worktree_dir")
+  fi
+done
+
+# Kill existing session if present
+tmux kill-session -t "$SESSION" 2>/dev/null
+
+# Create tmux session with first pane
+tmux new-session -s "$SESSION" -d
+tmux send-keys -t "$SESSION" "cd ${dirs[0]}" C-m
+
+# Add remaining panes
+for dir in "${dirs[@]:1}"; do
+  tmux split-window -h -t "$SESSION"
+  tmux send-keys -t "$SESSION" "cd $dir" C-m
+  tmux select-layout -t "$SESSION" tiled
+done
+
+tmux attach -t "$SESSION"

@@ -749,6 +749,38 @@ table.timeline
     &.none
       color: #999
 
+    &.watered
+      color: $green
+      background: $lightgreen
+      &:hover
+        background: rgba(0, 77, 64, 0.2)
+
+    button[type="submit"]
+      display: flex
+      flex-direction: column
+      align-items: center
+      justify-content: center
+      flex: 1
+      cursor: pointer
+      color: inherit
+      background: none
+      border: none
+      padding: 2rem
+      font: inherit
+
+    // Optimistic state during form submission
+    &[aria-busy="true"]
+      color: $green
+      background: $lightgreen
+      pointer-events: none
+      .click-text, .tap-text
+        display: none
+      .watered-text
+        display: inline
+
+  form.water-icon-link
+    padding: 0
+
   .water-icon
     width: 4em
     height: 4em
@@ -756,6 +788,12 @@ table.timeline
   .water-helper-text
     margin-top: 0.5em
     color: #888
+
+  .watered-text
+    display: none
+
+  .edit-text
+    margin-top: 0.5rem
 
   .click-text
     display: none

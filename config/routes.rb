@@ -47,6 +47,7 @@ Rails.application.routes.draw do
   post 'plants/import', to: 'plants#process_file'
   resources :plants do
     get 'water'
+    post 'quick_water'
     resources :log_entries
     resources :soil_moisture_readings
     collection do

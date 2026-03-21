@@ -38,6 +38,11 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
     assert_redirected_to plants_path
   end
 
+  test "user cannot quick_water another project's plant" do
+    post plant_quick_water_path(plants(:one))
+    assert_redirected_to plants_path
+  end
+
   # Waterings
 
   test "user cannot show another project's watering" do

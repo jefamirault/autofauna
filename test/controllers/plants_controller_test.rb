@@ -62,6 +62,52 @@ class PlantsControllerTest < ActionDispatch::IntegrationTest
     assert_no_match(/watering-notes-text.*Old notes from months ago/, response.body)
   end
 
+  test "quick_water creates watering and returns turbo stream" do
+    plant = Plant.create!(name: "Quick Water Test", project: @plant.project, uid: 300)
+
+    assert_difference("Watering.count") do
+      post plant_quick_water_path(plant), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :success
+    assert_includes response.body, "turbo-stream"
+  end
+
+  test "quick_water carries forward last watering details" do
+    plant = Plant.create!(name: "Carry Forward Test", project: @plant.project, uid: 301)
+    Watering.create!(plant: plant, watered_at: 3.days.ago, volume: 2.5, units: "mL", notes: "test notes", tds: 400)
+
+    assert_difference("Watering.count") do
+      post plant_quick_water_path(plant), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    new_watering = plant.waterings.reorder(watered_at: :desc).first
+    assert_equal 2.5, new_watering.volume
+    assert_equal "mL", new_watering.units
+    assert_equal "test notes", new_watering.notes
+    assert_equal 400, new_watering.tds
+  end
+
+  test "quick_water works with no watering history" do
+    plant = Plant.create!(name: "No History Test", project: @plant.project, uid: 302)
+
+    assert_difference("Watering.count") do
+      post plant_quick_water_path(plant), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    new_watering = plant.waterings.last
+    assert_not_nil new_watering.watered_at
+    assert_nil new_watering.volume
+  end
+
+  test "quick_water HTML fallback redirects to plants index" do
+    plant = Plant.create!(name: "Fallback Test", project: @plant.project, uid: 303)
+
+    post plant_quick_water_path(plant)
+
+    assert_redirected_to plants_path
+  end
+
   test "water action prepopulates form with most recent watering data" do
     plant = Plant.create!(name: "Water Again Test Plant", project: @plant.project, uid: 201)
     Watering.create!(plant: plant, watered_at: 10.days.ago, notes: "Old notes", volume: 1.0, units: "cups")

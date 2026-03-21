@@ -138,6 +138,8 @@ en:
     water_button:
       click: "Click to Water"
       tap: "Tap to Water"
+      watered: "Watered!"
+      edit: "Edit"
     watering_status:
       late:
         one: "Watering <strong>%{days} day late</strong>"

@@ -1,24 +1,38 @@
-<div id="<%= dom_id plant %>" class="info-card">
+<% just_watered ||= nil %>
+<% watered_today = just_watered || @plant.date_last_watering == Time.zone.now.to_date %>
+<% urgency = watered_today ? :normal : @plant.watering_urgency %>
+<div id="<%= dom_id plant, :show %>" class="info-card">
   <div class="info-card-grid">
-    <div class="info-card-section watering-section <%= @plant.watering_urgency %>">
-      <%= link_to plant_water_path(@plant,
-        volume: @plant.last_watering&.volume,
-        units: @plant.last_watering&.units,
-        notes: @plant.last_watering&.notes,
-        recipe_batch_id: @plant.last_watering&.recipe_batch_id,
-        recipe_id: @plant.last_watering&.recipe_id,
-        tds: @plant.last_watering&.tds),
-        class: "water-icon-link #{@plant.watering_urgency}",
-        aria: { label: t('plants.plant.water_this_plant') } do %>
-        <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
-        </svg>
-        <span class="water-helper-text click-text"><%= t('plants.water_button.click') %></span>
-        <span class="water-helper-text tap-text"><%= t('plants.water_button.tap') %></span>
+    <div class="info-card-section watering-section <%= urgency %>">
+      <% if watered_today %>
+        <%= link_to edit_watering_path(just_watered || @plant.last_watering),
+            class: "water-icon-link watered",
+            aria: { label: t('plants.water_button.edit') } do %>
+          <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
+          </svg>
+          <span class="water-helper-text"><%= t('plants.water_button.watered') %></span>
+          <span class="water-helper-text edit-text"><%= t('plants.water_button.edit') %></span>
+        <% end %>
+      <% else %>
+        <%= button_to plant_quick_water_path(@plant),
+            form_class: "water-icon-link #{urgency}",
+            aria: { label: t('plants.plant.water_this_plant') } do %>
+          <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
+          </svg>
+          <span class="water-helper-text click-text"><%= t('plants.water_button.click') %></span>
+          <span class="water-helper-text tap-text"><%= t('plants.water_button.tap') %></span>
+          <span class="water-helper-text watered-text"><%= t('plants.water_button.watered') %></span>
+        <% end %>
       <% end %>
       <div class="watering-text">
         <div class="watering-suggestion">
-          🕐 <%= @plant.time_until_watering_text.html_safe %>
+          <% if watered_today %>
+            🕐 <strong><%= t('plants.index.watered_today') %>!</strong>
+          <% else %>
+            🕐 <%= @plant.time_until_watering_text.html_safe %>
+          <% end %>
         </div>
         <% if @plant.min_watering_freq.nil? %>
           <div class="watering-frequency-prompt">
