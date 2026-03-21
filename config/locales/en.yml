@@ -169,6 +169,7 @@ en:
     create_plant: "💾 Create Plant"
     update_plant: "💾 Update Plant"
     form:
+      number: "Number"
       select_graphic: "Select a graphic..."
   waterings:
     new:
