@@ -32,7 +32,7 @@
 
   <% if plant.persisted? %>
     <div class="field">
-      <%= form.label :uid, "🌐 Number" %>
+      <%= form.label :uid, "🌐 #{t('plants.form.number')}" %>
       <%= form.number_field :uid %>
     </div>
   <% else %>

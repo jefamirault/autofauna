@@ -1,0 +1,321 @@
+#!/bin/bash
+# Launches a sprint: fetches GitHub milestone issues, groups them into worker
+# categories, sets up tmux panes with worktrees, and starts claude in each.
+#
+# Usage: ./claude-sprint <milestone> [--agents N] [--dry-run]
+#
+# Layout: 1 manager (main branch) + N worker agents (default 4) on feature branches.
+# The manager agent coordinates work; workers implement assigned issues.
+
+set -euo pipefail
+
+REPO_DIR="$HOME/autofauna"
+REPO="jefamirault/autofauna"
+SESSION="claude-sprint"
+NUM_WORKERS=4
+DRY_RUN=false
+MILESTONE=""
+
+# --- Argument parsing ---
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --agents)  NUM_WORKERS="$2"; shift 2 ;;
+    --dry-run) DRY_RUN=true; shift ;;
+    --help|-h)
+      echo "Usage: ./claude-sprint <milestone> [--agents N] [--dry-run]"
+      echo ""
+      echo "  <milestone>   GitHub milestone title (required)"
+      echo "  --agents N    Number of worker agents (default: 4)"
+      echo "  --dry-run     Show plan without launching tmux/claude"
+      exit 0
+      ;;
+    *)
+      if [ -z "$MILESTONE" ]; then
+        MILESTONE="$1"
+      else
+        echo "Unknown argument: $1"
+        exit 1
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$MILESTONE" ]; then
+  echo "Usage: ./claude-sprint <milestone> [--agents N] [--dry-run]"
+  exit 1
+fi
+
+# --- Detect main branch ---
+main_branch=$(git -C "$REPO_DIR" symbolic-ref --short HEAD 2>/dev/null || echo "main")
+
+# --- Fetch milestone issues ---
+echo "Fetching issues for milestone '$MILESTONE'..."
+
+issues_json=$(gh issue list \
+  --repo "$REPO" \
+  --milestone "$MILESTONE" \
+  --state open \
+  --limit 100 \
+  --json number,title,labels,body)
+
+issue_count=$(echo "$issues_json" | jq 'length')
+
+if [ "$issue_count" -eq 0 ]; then
+  echo "No open issues found for milestone '$MILESTONE'."
+  exit 1
+fi
+
+echo "Found $issue_count issues."
+
+# --- Extract unique labels (excluding milestone-level labels) ---
+all_labels=$(echo "$issues_json" | jq -r '.[].labels[].name' | sort -u)
+label_count=$(echo "$all_labels" | grep -c . || true)
+
+echo "Labels: $all_labels"
+echo ""
+
+# --- Group issues into worker buckets ---
+# Strategy: group by label. If more labels than workers, merge smallest groups.
+# If fewer labels, split largest group or assign round-robin for unlabeled.
+
+declare -A label_issues  # label -> comma-separated issue numbers
+declare -a unlabeled_issues=()
+
+# Assign each issue to its first label (or unlabeled)
+for i in $(seq 0 $((issue_count - 1))); do
+  issue_num=$(echo "$issues_json" | jq -r ".[$i].number")
+  issue_title=$(echo "$issues_json" | jq -r ".[$i].title")
+  first_label=$(echo "$issues_json" | jq -r ".[$i].labels[0].name // empty")
+
+  if [ -z "$first_label" ]; then
+    unlabeled_issues+=("$issue_num")
+  else
+    if [ -z "${label_issues[$first_label]:-}" ]; then
+      label_issues[$first_label]="$issue_num"
+    else
+      label_issues[$first_label]="${label_issues[$first_label]},$issue_num"
+    fi
+  fi
+done
+
+# Build worker assignments: array of "label:issue1,issue2,..."
+declare -a worker_assignments=()
+declare -a worker_labels=()
+
+for label in $(echo "$all_labels" | head -n "$NUM_WORKERS"); do
+  if [ -n "${label_issues[$label]:-}" ]; then
+    worker_assignments+=("${label_issues[$label]}")
+    worker_labels+=("$label")
+  fi
+done
+
+# If we have more labels than workers, merge extras into existing workers
+overflow_labels=$(echo "$all_labels" | tail -n +"$((NUM_WORKERS + 1))")
+worker_idx=0
+for label in $overflow_labels; do
+  if [ -n "${label_issues[$label]:-}" ]; then
+    worker_assignments[$worker_idx]="${worker_assignments[$worker_idx]},${label_issues[$label]}"
+    worker_labels[$worker_idx]="${worker_labels[$worker_idx]}+${label}"
+    worker_idx=$(( (worker_idx + 1) % NUM_WORKERS ))
+  fi
+done
+
+# Distribute unlabeled issues round-robin
+worker_idx=0
+for issue_num in "${unlabeled_issues[@]}"; do
+  if [ ${#worker_assignments[@]} -le $worker_idx ]; then
+    worker_assignments+=("$issue_num")
+    worker_labels+=("unlabeled")
+  else
+    worker_assignments[$worker_idx]="${worker_assignments[$worker_idx]},$issue_num"
+  fi
+  worker_idx=$(( (worker_idx + 1) % NUM_WORKERS ))
+done
+
+# Pad to NUM_WORKERS if we have fewer groups
+while [ ${#worker_assignments[@]} -lt "$NUM_WORKERS" ]; do
+  worker_assignments+=("")
+  worker_labels+=("idle")
+done
+
+# --- Create branch names and print plan ---
+declare -a branch_names=()
+# Sanitize milestone for branch names
+safe_milestone=$(echo "$MILESTONE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+
+for i in $(seq 0 $((NUM_WORKERS - 1))); do
+  label_slug=$(echo "${worker_labels[$i]}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9+]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+  branch_names+=("sprint/${safe_milestone}/${label_slug}")
+done
+
+echo "=== Sprint Plan ==="
+echo "Milestone:  $MILESTONE"
+echo "Manager:    $main_branch (coordinator)"
+echo ""
+
+for i in $(seq 0 $((NUM_WORKERS - 1))); do
+  issues="${worker_assignments[$i]}"
+  if [ -z "$issues" ]; then
+    echo "Worker $((i+1)):   ${branch_names[$i]} (no issues — available for overflow)"
+  else
+    # Get titles for display
+    issue_list=""
+    IFS=',' read -ra nums <<< "$issues"
+    for num in "${nums[@]}"; do
+      title=$(echo "$issues_json" | jq -r ".[] | select(.number == $num) | .title")
+      issue_list+="    #$num $title"$'\n'
+    done
+    echo "Worker $((i+1)):   ${branch_names[$i]}"
+    echo "$issue_list"
+  fi
+done
+
+if [ "$DRY_RUN" = true ]; then
+  echo "(dry run — not launching)"
+  exit 0
+fi
+
+# --- Create branches and worktrees ---
+declare -a worker_dirs=()
+
+for i in $(seq 0 $((NUM_WORKERS - 1))); do
+  branch="${branch_names[$i]}"
+  worktree_dir="$REPO_DIR-$(echo "$branch" | tr '/' '-')"
+
+  # Create branch if it doesn't exist
+  if ! git -C "$REPO_DIR" show-ref --verify --quiet "refs/heads/$branch" 2>/dev/null; then
+    echo "Creating branch '$branch'..."
+    git -C "$REPO_DIR" branch "$branch" "$main_branch"
+  fi
+
+  # Create worktree if it doesn't exist
+  if [ ! -d "$worktree_dir" ]; then
+    echo "Creating worktree at $worktree_dir..."
+    git -C "$REPO_DIR" worktree add "$worktree_dir" "$branch"
+  fi
+
+  worker_dirs+=("$worktree_dir")
+done
+
+# --- Build prompts ---
+
+# Manager prompt
+manager_issues_summary=""
+for i in $(seq 0 $((NUM_WORKERS - 1))); do
+  issues="${worker_assignments[$i]}"
+  if [ -n "$issues" ]; then
+    manager_issues_summary+="Worker $((i+1)) (branch: ${branch_names[$i]}): issues $issues"$'\n'
+  fi
+done
+
+manager_prompt=$(cat <<PROMPT
+You are the Sprint Manager for milestone "$MILESTONE" in the $REPO repository.
+
+## Your Role
+You coordinate $NUM_WORKERS worker agents, each running in a separate git worktree on its own branch. Your job is to:
+
+1. **Review the milestone issues** and ensure workers have clear, non-overlapping scopes
+2. **Monitor progress** by checking worker branches for commits
+3. **Resolve conflicts** if workers need to touch shared files
+4. **Create PRs** when workers complete their tasks
+5. **Merge completed work** back to $main_branch
+
+## Worker Assignments
+$manager_issues_summary
+
+## Workflow
+1. Start by reading all milestone issues: \`gh issue list --repo $REPO --milestone "$MILESTONE" --state open --json number,title,body,labels\`
+2. For each worker, create a detailed comment on their assigned issues with implementation guidance
+3. Periodically check worker progress: \`git log --oneline <branch> ^$main_branch\` for each worker branch
+4. When a worker's branch looks complete, review their changes: \`git diff $main_branch...<branch>\`
+5. Create PRs for completed branches: \`gh pr create --base $main_branch --head <branch>\`
+6. After all PRs are merged, close the milestone
+
+## Important
+- You are on the $main_branch — do NOT commit implementation code here
+- Use \`gh\` commands to communicate with workers via issue comments
+- If a worker needs to modify a file another worker owns, coordinate via issue comments first
+- Keep the agent_log.md updated with sprint progress
+PROMPT
+)
+
+# --- Launch tmux session ---
+tmux kill-session -t "$SESSION" 2>/dev/null || true
+
+# Create session with manager pane
+tmux new-session -s "$SESSION" -d -x 200 -y 50
+tmux send-keys -t "$SESSION" "cd $REPO_DIR" C-m
+
+# Create worker panes
+for i in $(seq 0 $((NUM_WORKERS - 1))); do
+  tmux split-window -h -t "$SESSION"
+  tmux send-keys -t "$SESSION" "cd ${worker_dirs[$i]}" C-m
+  tmux select-layout -t "$SESSION" tiled
+done
+
+# --- Write prompt files and launch claude in each pane ---
+# Write manager prompt to temp file
+manager_prompt_file=$(mktemp /tmp/claude-sprint-manager.XXXXXX)
+echo "$manager_prompt" > "$manager_prompt_file"
+
+# Launch claude in manager pane (pane 0)
+tmux send-keys -t "$SESSION:0.0" "claude --prompt-file $manager_prompt_file" C-m
+
+# Launch claude in worker panes
+for i in $(seq 0 $((NUM_WORKERS - 1))); do
+  issues="${worker_assignments[$i]}"
+  if [ -z "$issues" ]; then
+    continue
+  fi
+
+  # Build issue details for worker prompt
+  issue_details=""
+  IFS=',' read -ra nums <<< "$issues"
+  for num in "${nums[@]}"; do
+    title=$(echo "$issues_json" | jq -r ".[] | select(.number == $num) | .title")
+    body=$(echo "$issues_json" | jq -r ".[] | select(.number == $num) | .body")
+    labels=$(echo "$issues_json" | jq -r ".[] | select(.number == $num) | [.labels[].name] | join(\", \")")
+    issue_details+="### Issue #$num: $title"$'\n'
+    issue_details+="Labels: $labels"$'\n'
+    issue_details+="$body"$'\n\n'
+  done
+
+  worker_prompt=$(cat <<PROMPT
+You are Worker $((i+1)) in a sprint for milestone "$MILESTONE".
+
+## Your Scope
+You are on branch \`${branch_names[$i]}\` in a git worktree. Implement the following issues:
+
+$issue_details
+
+## Rules
+1. **Stay in scope** — only modify files relevant to your assigned issues
+2. **Commit frequently** with descriptive messages referencing issue numbers (e.g., "Fix #123: add validation")
+3. **Do not modify** files outside your scope without coordinating (check issue comments for guidance from the manager)
+4. **Read CLAUDE.md** for project conventions before starting
+5. **Run tests** after each significant change
+6. When done with all issues, commit your work and notify by commenting on the issues: \`gh issue comment <number> --repo $REPO --body "Implementation complete on branch ${branch_names[$i]}"\`
+
+## Getting Started
+1. Read CLAUDE.md for project conventions
+2. Review each issue carefully
+3. Plan your implementation approach
+4. Implement one issue at a time, committing after each
+5. Run tests to verify nothing is broken
+PROMPT
+)
+
+  worker_prompt_file=$(mktemp /tmp/claude-sprint-worker-$((i+1)).XXXXXX)
+  echo "$worker_prompt" > "$worker_prompt_file"
+
+  pane_idx=$((i + 1))
+  tmux send-keys -t "$SESSION:0.$pane_idx" "claude --prompt-file $worker_prompt_file" C-m
+done
+
+echo ""
+echo "Sprint session '$SESSION' launched with $((NUM_WORKERS + 1)) panes."
+echo "Attach with: tmux attach -t $SESSION"
+echo ""
+
+tmux attach -t "$SESSION"

@@ -153,6 +153,7 @@ en:
         one: "Water within <strong>%{days} day</strong>"
         other: "Water within <strong>%{days} days</strong>"
       unscheduled: "Unscheduled"
+      never_watered: "Water this plant to begin tracking"
       short_late:
         one: "<strong>%{days} day late</strong>"
         other: "<strong>%{days} days late</strong>"
@@ -168,6 +169,7 @@ en:
     create_plant: "💾 Create Plant"
     update_plant: "💾 Update Plant"
     form:
+      number: "Number"
       select_graphic: "Select a graphic..."
   waterings:
     new:
