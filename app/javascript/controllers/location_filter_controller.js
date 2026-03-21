@@ -42,10 +42,14 @@ export default class extends Controller {
     }
 
     // Re-apply counts and pagination after Turbo Stream replaces a plant card
-    document.addEventListener("turbo:after-stream-render", this._handleStreamRender = () => {
-      this.updateResultsCount()
-      if (this.displayModeValue === "watering") {
-        this.paginateVisibleCards()
+    document.addEventListener("turbo:before-stream-render", this._handleStreamRender = (event) => {
+      const originalRender = event.detail.render
+      event.detail.render = (streamElement) => {
+        originalRender(streamElement)
+        this.updateResultsCount()
+        if (this.displayModeValue === "watering") {
+          this.paginateVisibleCards()
+        }
       }
     })
   }
@@ -55,7 +59,7 @@ export default class extends Controller {
       this.statusResizeObserver.disconnect()
     }
     if (this._handleStreamRender) {
-      document.removeEventListener("turbo:after-stream-render", this._handleStreamRender)
+      document.removeEventListener("turbo:before-stream-render", this._handleStreamRender)
     }
   }
 
