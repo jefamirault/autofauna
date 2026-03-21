@@ -151,6 +151,26 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
 
 **To add a new controller to this pattern:** append `, body:has(main.newController):has(.header-plant-graphic)` to the selector.
 
+### Scroll-Based Header Collapse
+
+The `dynamic_header_controller` (attached to `<main>` via the layout) watches scroll position and toggles `body.header-collapsed` when the user scrolls past a threshold (default 30px). This collapses the expanded header back to default height with smooth CSS transitions:
+
+```sass
+// Collapsed state (in the plant-graphic body selector)
+&.header-collapsed
+  --header-height: 4.5rem
+  grid-template-rows: 4.5rem 1fr
+  header
+    grid-template-rows: 4.5rem 0fr    // second row collapses to 0
+  #headerTitle
+    opacity: 1                         // title fades in
+  .header-plant-graphic
+    opacity: 0                         // graphic fades out
+    pointer-events: none
+```
+
+The expanded header uses `transition: grid-template-rows 0.3s ease` and `overflow: hidden` on the header for smooth animation. When scrolled back to top, the class is removed and the header re-expands.
+
 **Important mobile overrides needed:** The hamburger button and gradient blending use `var(--header-height)` for sizing. Override these to the original base size (4rem mobile) to prevent the hamburger from stretching:
 
 ```sass

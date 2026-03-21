@@ -165,6 +165,7 @@ The plants index is the main page with significant client-side interactivity:
 | `nested_form_controller` | Add/remove rows for nested attributes (recipes) |
 | `push_notification_controller` | Push device list: inline enable/disable toggle, "This Device" detection, test button state, global toggle sync |
 | `notification_settings_controller` | Notification card: collapse/expand, frequency settings, dirty tracking, global enable/disable toggle, test button state |
+| `dynamic_header_controller` | Scroll-based header collapse on plant/watering show/edit pages. Attached to `<main>`, toggles `header-collapsed` class on `<body>` when scrolled past threshold (default 30px) |
 
 ## Layout Architecture
 
@@ -178,7 +179,8 @@ The plants index is the main page with significant client-side interactivity:
 - **Sidebar states:** Minimized = icon rail (4rem wide, emoji-only nav labels, hamburger title hidden); expanded = full 18rem with text labels
 - **FOUC prevention:** Inline `<script>` in `<head>` applies sidebar state before render; hamburger icon uses absolute positioning so it never shifts during sidebar width transitions; title uses opacity transitions to avoid flash
 - **Mobile (≤600px):** Sidebar hidden when minimized; hamburger button fixed top-left; `a.sidebarNav` with `#logoContainer` remains visible (expands to full `--logo-size` when sidebar is open, compact at header-height when minimized)
-- **Plant graphic banner:** On plant/watering show pages, `.plant-graphic-banner` renders in `section#primary` before yield; on plant edit, rendered inside `.settings-card` instead. Uses `max-width: var(--card-max-width)` (shared CSS variable with `.info-card-grid`)
+- **Dynamic header (plant/watering pages):** When `.header-plant-graphic` is present, the header expands to `14.5rem` with a 2-row grid (`4.5rem 1fr`). The `dynamic_header_controller` (attached to `<main>`) toggles `body.header-collapsed` on scroll, which collapses the header back to default height (`4.5rem`) with CSS transitions. The graphic fades out (`opacity: 0`) and `#headerTitle` fades in. All transitions use `0.3s ease`.
+- **Plant graphic banner (legacy):** On plant/watering show pages, `.plant-graphic-banner` renders in `section#primary` before yield; on plant edit, rendered inside `.settings-card` instead. Uses `max-width: var(--card-max-width)` (shared CSS variable with `.info-card-grid`). Prefer the header graphic approach (`content_for :header_extra`) over this legacy banner.
 - **`--card-max-width: 650px`** CSS variable on body — shared by `.plant-graphic-banner`, `.info-card-grid:has(.details-section)`, and plants index search bar. Resets to `none` at ≤750px so content shrinks with the viewport.
 - **Responsive overflow prevention:** `main` and `section#primary` both have `min-width: 0` to allow shrinking inside the body grid. All flex/grid children in the content chain (`.info-card-section`, `.watering-text`, `.water-icon-link`, `.info-row .value`) also need `min-width: 0` — without it, flex/grid items default to `min-width: auto` and refuse to shrink below their content width, causing horizontal overflow that `overflow-x: clip` cannot fix.
 - **Breakpoints:** ≤600px (mobile: sidebar top-aligned, hamburger fixed), ≤750px (`--card-max-width` disabled, `.info-card-grid` single column), ≤900px landscape with ≤500px height (compact sidebar logo)

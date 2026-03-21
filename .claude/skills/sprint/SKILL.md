@@ -66,6 +66,8 @@ Or with custom agent count:
 The script will:
 - Create `sprint/<milestone>/<label>` branches for each worker
 - Set up git worktrees for each branch
+- Copy `.env` to each worktree with a unique database name (`autofauna_sprint_worker_N`) and port (`3001`, `3002`, etc.)
+- Create per-worker PostgreSQL databases (schema copied from main dev DB)
 - Launch a tmux session with 5 panes (1 manager + 4 workers)
 - Start `claude` in each pane with role-specific prompts
 
@@ -91,3 +93,30 @@ When the sprint finishes:
 - User reviews and merges PRs
 - Clean up worktrees: `git worktree list` then `git worktree remove <path>`
 - Close the milestone: `gh issue list --milestone "<milestone>" --state open` to verify all done
+
+### Merging Worker Branches
+
+When the user asks to merge completed branches:
+
+1. Check each branch for commits: `git log --oneline <branch> ^main`
+2. Show diff stats: `git diff --stat main...<branch>`
+3. Merge one at a time so the user can test between merges
+4. Order by risk (smallest/safest changes first):
+   - Locale/translation fixes (YAML only)
+   - JS-only changes (Stimulus controller tweaks)
+   - Multi-file feature work (CSS + JS + views)
+5. Use `git merge <branch> --no-edit` for clean fast-forwards or simple merges
+
+### Conflict Avoidance
+
+When multiple workers touch shared files (e.g., locale YAML files), define clear scope boundaries in the implementation guidance comments:
+- Worker A: only **fixes existing** keys
+- Worker B: only **adds new** keys
+- This prevents merge conflicts even when both touch the same file
+
+### Sprint Manager Best Practices
+
+- Post implementation guidance as issue comments BEFORE workers start (gives them a roadmap)
+- Include a "Files to Modify" table and "Scope Boundaries" section in each guidance comment
+- Identify shared-file conflicts proactively and coordinate scope boundaries
+- Keep `agent_log.md` updated with sprint progress

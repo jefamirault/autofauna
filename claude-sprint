@@ -103,23 +103,18 @@ done
 declare -a worker_assignments=()
 declare -a worker_labels=()
 
-for label in $(echo "$all_labels" | head -n "$NUM_WORKERS"); do
-  if [ -n "${label_issues[$label]:-}" ]; then
+while IFS= read -r label; do
+  [ -z "$label" ] && continue
+  if [ ${#worker_assignments[@]} -lt "$NUM_WORKERS" ]; then
     worker_assignments+=("${label_issues[$label]}")
     worker_labels+=("$label")
+  else
+    # Overflow: merge into existing workers round-robin
+    overflow_idx=$(( ${#worker_assignments[@]} % NUM_WORKERS ))
+    worker_assignments[$overflow_idx]="${worker_assignments[$overflow_idx]},${label_issues[$label]}"
+    worker_labels[$overflow_idx]="${worker_labels[$overflow_idx]}+${label}"
   fi
-done
-
-# If we have more labels than workers, merge extras into existing workers
-overflow_labels=$(echo "$all_labels" | tail -n +"$((NUM_WORKERS + 1))")
-worker_idx=0
-for label in $overflow_labels; do
-  if [ -n "${label_issues[$label]:-}" ]; then
-    worker_assignments[$worker_idx]="${worker_assignments[$worker_idx]},${label_issues[$label]}"
-    worker_labels[$worker_idx]="${worker_labels[$worker_idx]}+${label}"
-    worker_idx=$(( (worker_idx + 1) % NUM_WORKERS ))
-  fi
-done
+done <<< "$all_labels"
 
 # Distribute unlabeled issues round-robin
 worker_idx=0
@@ -176,12 +171,16 @@ if [ "$DRY_RUN" = true ]; then
   exit 0
 fi
 
-# --- Create branches and worktrees ---
+# --- Create branches, worktrees, databases, and .env files ---
 declare -a worker_dirs=()
+declare -a worker_ports=()
+BASE_PORT=3001
 
 for i in $(seq 0 $((NUM_WORKERS - 1))); do
   branch="${branch_names[$i]}"
   worktree_dir="$REPO_DIR-$(echo "$branch" | tr '/' '-')"
+  worker_port=$((BASE_PORT + i))
+  worker_db="autofauna_sprint_worker_$((i + 1))"
 
   # Create branch if it doesn't exist
   if ! git -C "$REPO_DIR" show-ref --verify --quiet "refs/heads/$branch" 2>/dev/null; then
@@ -195,7 +194,33 @@ for i in $(seq 0 $((NUM_WORKERS - 1))); do
     git -C "$REPO_DIR" worktree add "$worktree_dir" "$branch"
   fi
 
+  # Copy .env and customize for this worker
+  if [ -f "$REPO_DIR/.env" ]; then
+    # Read original .env values
+    source_user=$(grep -oP '^DATABASE_USER=\K.*' "$REPO_DIR/.env" || echo "autofauna_development")
+    source_pass=$(grep -oP '^DATABASE_PASSWORD=\K.*' "$REPO_DIR/.env" || echo "")
+
+    cat > "$worktree_dir/.env" <<ENVFILE
+DATABASE=${worker_db}
+DATABASE_USER=${source_user}
+DATABASE_PASSWORD=${source_pass}
+PORT=${worker_port}
+ENVFILE
+    echo "Created .env for worker $((i + 1)): db=${worker_db}, port=${worker_port}"
+  fi
+
+  # Create the worker database if it doesn't exist
+  if ! psql -U "$source_user" -lqt 2>/dev/null | cut -d \| -f 1 | grep -qw "$worker_db"; then
+    echo "Creating database ${worker_db}..."
+    createdb -U "$source_user" "$worker_db" 2>/dev/null || echo "  (createdb failed — may need manual creation)"
+    # Copy schema from main dev database
+    pg_dump -U "$source_user" --schema-only autofauna_development 2>/dev/null | psql -U "$source_user" -d "$worker_db" -q 2>/dev/null || echo "  (schema copy failed — run db:schema:load in worktree)"
+  else
+    echo "Database ${worker_db} already exists."
+  fi
+
   worker_dirs+=("$worktree_dir")
+  worker_ports+=("$worker_port")
 done
 
 # --- Build prompts ---
@@ -254,13 +279,11 @@ for i in $(seq 0 $((NUM_WORKERS - 1))); do
   tmux select-layout -t "$SESSION" tiled
 done
 
-# --- Write prompt files and launch claude in each pane ---
-# Write manager prompt to temp file
+# --- Launch claude in each pane ---
+# Launch claude in manager pane (pane 0)
 manager_prompt_file=$(mktemp /tmp/claude-sprint-manager.XXXXXX)
 echo "$manager_prompt" > "$manager_prompt_file"
-
-# Launch claude in manager pane (pane 0)
-tmux send-keys -t "$SESSION:0.0" "claude --prompt-file $manager_prompt_file" C-m
+tmux send-keys -t "$SESSION:0.0" "claude --append-system-prompt \"\$(cat $manager_prompt_file)\"" C-m
 
 # Launch claude in worker panes
 for i in $(seq 0 $((NUM_WORKERS - 1))); do
@@ -289,6 +312,11 @@ You are on branch \`${branch_names[$i]}\` in a git worktree. Implement the follo
 
 $issue_details
 
+## Environment
+- **Database:** \`autofauna_sprint_worker_$((i+1))\` (separate from main dev DB)
+- **Dev server port:** \`${worker_ports[$i]}\` (run with \`bin/rails server -p ${worker_ports[$i]}\`)
+- **.env** is pre-configured in your worktree with the correct DATABASE and PORT
+
 ## Rules
 1. **Stay in scope** — only modify files relevant to your assigned issues
 2. **Commit frequently** with descriptive messages referencing issue numbers (e.g., "Fix #123: add validation")
@@ -310,7 +338,24 @@ PROMPT
   echo "$worker_prompt" > "$worker_prompt_file"
 
   pane_idx=$((i + 1))
-  tmux send-keys -t "$SESSION:0.$pane_idx" "claude --prompt-file $worker_prompt_file" C-m
+  tmux send-keys -t "$SESSION:0.$pane_idx" "claude --append-system-prompt \"\$(cat $worker_prompt_file)\"" C-m
+done
+
+# --- Wait for claude to start, then send kickoff messages ---
+echo "Waiting for Claude to initialize in each pane..."
+sleep 5
+
+# Kickoff manager
+tmux send-keys -t "$SESSION:0.0" "Begin the sprint. Read the milestone issues, review the worker assignments, and post implementation guidance as comments on each issue. Then monitor worker progress periodically." Enter
+
+# Kickoff workers
+for i in $(seq 0 $((NUM_WORKERS - 1))); do
+  issues="${worker_assignments[$i]}"
+  if [ -z "$issues" ]; then
+    continue
+  fi
+  pane_idx=$((i + 1))
+  tmux send-keys -t "$SESSION:0.$pane_idx" "Begin. Read CLAUDE.md, then implement your assigned issues. Start now." Enter
 done
 
 echo ""

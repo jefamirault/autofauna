@@ -6,7 +6,7 @@ efault: &default
 
 development:
   <<: *default
-  database: autofauna_development
+  database: <%= ENV.fetch("DATABASE", "autofauna_development") %>
   user: <%= ENV.fetch("DATABASE_USER") %>
   password: <%= ENV.fetch("DATABASE_PASSWORD") %>
   host: localhost
