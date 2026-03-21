@@ -41,3 +41,8 @@ Current session log. Previous logs archived in `agent_log/`.
 - Issue #79: Previous fix on main, but branch `sprint/0-9-0/localization` has additional unmerged fixes (gender agreement, typos, i18n of hardcoded "Number" label) — created PR #80
 - Issue #78 (Weather): Guidance posted, worker running in tmux, no commits yet — awaiting implementation
 - 6 claude panes active in `claude-sprint` tmux session
+
+**Sprint 0.9.0 Complete:**
+- PR #80 (localization fixes) merged
+- PR #81 (weather multi-location support) merged
+- All 4 milestone issues (#76, #77, #78, #79) closed
