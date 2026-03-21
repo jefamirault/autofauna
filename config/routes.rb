@@ -69,6 +69,9 @@ Rails.application.routes.draw do
 
   root "plants#index"
 
+  get 'weather', to: 'weather#index'
+  post 'weather/lookup', to: 'weather#lookup', as: 'weather_lookup'
+
   get 'settings', to: 'settings#index'
   patch 'settings', to: 'settings#update'
   delete 'settings', to: 'settings#destroy'

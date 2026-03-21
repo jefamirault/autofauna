@@ -125,6 +125,9 @@ module ApplicationHelper
       { icon: 'users_icon.png', title: section_title, section_title: section_title, gradient_class: 'header-users', nav_path: users_path, plant_graphic: nil }
     when 'admin/notifications'
       { icon: 'settings_icon.png', title: 'Notifications', section_title: 'Notifications', gradient_class: 'header-admin', nav_path: admin_notifications_path, plant_graphic: nil }
+    when 'weather'
+      section_title = 'Weather'
+      { icon: 'autofauna_icon.png', title: section_title, section_title: section_title, gradient_class: 'header-weather', nav_path: weather_path, plant_graphic: nil }
     when 'settings'
       section_title = t('layouts.application.account_settings')
       { icon: 'settings_icon.png', title: section_title, section_title: section_title, gradient_class: 'header-settings', nav_path: settings_path, plant_graphic: nil }

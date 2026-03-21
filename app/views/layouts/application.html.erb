@@ -129,6 +129,9 @@
         <% unless params[:controller].in?(%w[locations zones]) %>
           <%= nav_link 'locations', text: "📍 #{t('.locations')}" %>
         <% end %>
+        <% unless params[:controller] == 'weather' %>
+          <%= nav_link 'weather', text: "🌤️ Weather", path: weather_path %>
+        <% end %>
         <% if current_user&.advanced_mode? && !params[:controller].in?(%w[sensors sensor_readings sensor_types]) %>
           <%= nav_link 'sensors', text: "📡 #{t('.sensors')}" %>
         <% end %>
