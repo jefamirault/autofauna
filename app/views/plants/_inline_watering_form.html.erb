@@ -1,0 +1,74 @@
+<% watering ||= Watering.new(plant_id: plant.id, watered_at: Time.zone.now) %>
+<% last = plant.last_watering %>
+<% watering.volume ||= last&.volume %>
+<% watering.units ||= last&.units || plant.suggested_watering_unit %>
+<% watering.notes ||= last&.notes %>
+<% watering.recipe_id ||= last&.recipe_id || plant.recipe_id %>
+<% watering.recipe_batch_id ||= last&.recipe_batch_id %>
+<% watering.tds ||= last&.tds %>
+
+<div id="inline-watering-form-<%= plant.id %>" class="inline-watering-form-wrap">
+  <%= form_with(model: watering, url: waterings_path, data: {
+    controller: "watering-recipe",
+    watering_recipe_url_value: for_recipe_recipe_batches_path
+  }) do |form| %>
+    <%= form.hidden_field :plant_id, value: plant.id %>
+    <%= form.hidden_field :watered_at, value: Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
+
+    <% if watering.errors.any? %>
+      <div class="inline-watering-errors">
+        <% watering.errors.each do |error| %>
+          <div><%= error.full_message %></div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="inline-watering-fields">
+      <div class="inline-watering-row">
+        <div class="inline-field">
+          <label><%= Watering.human_attribute_name(:volume) %></label>
+          <%= form.number_field :volume, step: 'any', placeholder: "e.g. 2.0", class: "inline-input" %>
+        </div>
+        <div class="inline-field inline-field-units">
+          <label><%= t('attributes.units') %></label>
+          <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units), {}, class: "inline-input" %>
+        </div>
+        <div class="inline-field inline-field-notes">
+          <label><%= Watering.human_attribute_name(:notes) %></label>
+          <%= form.text_field :notes, placeholder: "e.g. Tap water", class: "inline-input" %>
+        </div>
+      </div>
+
+      <% if current_project.recipes.any? %>
+        <div class="inline-watering-row">
+          <div class="inline-field">
+            <label>Recipe</label>
+            <%= form.collection_select :recipe_id, current_project.recipes.order(:name), :id, :name,
+                { prompt: '-- None --', selected: watering.recipe_id },
+                { class: "inline-input", data: { watering_recipe_target: "recipeSelect", action: "change->watering-recipe#recipeChanged" } } %>
+          </div>
+          <div class="inline-field">
+            <label>Batch</label>
+            <select name="watering[recipe_batch_id]" class="inline-input" data-watering-recipe-target="batchSelect" data-action="change->watering-recipe#batchChanged">
+              <option value="">-- None --</option>
+              <% if watering.recipe_id.present? %>
+                <% current_project.recipe_batches.active.where(recipe_id: watering.recipe_id).each do |batch| %>
+                  <option value="<%= batch.id %>" data-tds="<%= batch.tds %>" <%= 'selected' if watering.recipe_batch_id == batch.id %>><%= batch.label %></option>
+                <% end %>
+              <% end %>
+            </select>
+          </div>
+          <div class="inline-field inline-field-tds">
+            <label>TDS</label>
+            <%= form.number_field :tds, placeholder: "ppm", class: "inline-input", data: { watering_recipe_target: "tdsField" } %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="inline-watering-actions">
+      <%= form.submit t('waterings.create_watering', default: 'Water'), class: 'inline-water-submit' %>
+      <button type="button" class="inline-water-cancel" data-action="click->inline-watering#collapse">Cancel</button>
+    </div>
+  <% end %>
+</div>
