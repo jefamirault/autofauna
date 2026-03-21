@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_23_100002) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_21_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -277,6 +277,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_23_100002) do
     t.index ["recipe_id"], name: "index_waterings_on_recipe_id"
   end
 
+  create_table "weather_locations", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name"
+    t.decimal "latitude", precision: 9, scale: 4, null: false
+    t.decimal "longitude", precision: 9, scale: 4, null: false
+    t.string "zip"
+    t.string "location_name"
+    t.boolean "primary", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "primary"], name: "index_weather_locations_on_user_id_and_primary"
+    t.index ["user_id"], name: "index_weather_locations_on_user_id"
+  end
+
   create_table "zones", force: :cascade do |t|
     t.string "name"
     t.integer "project_id"
@@ -301,4 +315,5 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_23_100002) do
   add_foreign_key "water_tests", "tanks"
   add_foreign_key "waterings", "recipe_batches"
   add_foreign_key "waterings", "recipes"
+  add_foreign_key "weather_locations", "users"
 end

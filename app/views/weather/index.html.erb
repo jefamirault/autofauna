@@ -2,28 +2,89 @@
 
 <h1>Weather</h1>
 
-<div class="settings-card" data-controller="weather-location">
-  <h2>Location</h2>
+<% if @weather_locations.any? %>
+  <%# Location management view %>
+  <div class="settings-card">
+    <h2>Locations</h2>
 
-  <%= form_with url: weather_lookup_path, method: :post, local: true do |f| %>
-    <div class="field">
-      <%= f.label :zip, "Zip Code" %>
-      <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
-        <%= f.text_field :zip, value: @zip, placeholder: "e.g. 10001", maxlength: 10, style: "flex: 1; width: auto; min-width: 0;" %>
-        <%= f.submit "Look Up", class: "saveButton", style: "width: auto; flex-shrink: 0;" %>
+    <% @weather_locations.each do |location| %>
+      <div class="info-row" style="align-items: center;">
+        <strong>
+          <%= location.display_name %>
+          <% if location.primary? && @weather_locations.size > 1 %>
+            <span style="font-size: 0.8em; opacity: 0.6;">(primary)</span>
+          <% end %>
+        </strong>
+        <span class="value" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+          <% unless location.primary? %>
+            <%= button_to "Set Primary", set_primary_weather_location_path(location), method: :patch, class: "buttonLinkSmall" %>
+          <% end %>
+          <%= button_to "Delete", weather_location_path(location), method: :delete, class: "buttonLinkSmall buttonLinkDanger",
+                data: { turbo_confirm: "Remove #{location.display_name}?" } %>
+        </span>
       </div>
-    </div>
-  <% end %>
 
-  <div style="margin-top: 0.75rem;">
-    <button type="button" class="buttonLink" style="width: 100%; text-align: center;"
-            data-action="click->weather-location#detectLocation"
-            data-weather-location-target="detectButton">
-      Use My Location
-    </button>
-    <p data-weather-location-target="status" style="font-size: 0.85em; color: #888; margin: 0.25rem 0 0 0; display: none;"></p>
+      <%# Inline rename form %>
+      <div style="margin: 0.25rem 0 0.75rem 0;">
+        <%= form_with model: location, url: weather_location_path(location), method: :patch, local: true do |f| %>
+          <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <%= f.text_field :name, value: location.name, placeholder: "Name this location", style: "flex: 1; width: auto; min-width: 0; font-size: 0.9em;" %>
+            <%= f.submit "Save", class: "saveButton", style: "width: auto; flex-shrink: 0; font-size: 0.9em;" %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Add another location %>
+    <details style="margin-top: 0.75rem;">
+      <summary class="buttonLink" style="text-align: center; cursor: pointer;">Add Location</summary>
+      <div style="margin-top: 0.75rem;" data-controller="weather-location" data-weather-location-create-url-value="<%= weather_locations_path %>">
+        <%= form_with url: weather_lookup_path, method: :post, local: true do |f| %>
+          <div class="field">
+            <%= f.label :zip, "Zip Code" %>
+            <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+              <%= f.text_field :zip, placeholder: "e.g. 10001", maxlength: 10, style: "flex: 1; width: auto; min-width: 0;" %>
+              <%= f.submit "Look Up", class: "saveButton", style: "width: auto; flex-shrink: 0;" %>
+            </div>
+          </div>
+        <% end %>
+
+        <div style="margin-top: 0.75rem;">
+          <button type="button" class="buttonLink" style="width: 100%; text-align: center;"
+                  data-action="click->weather-location#detectLocation"
+                  data-weather-location-target="detectButton">
+            Use My Location
+          </button>
+          <p data-weather-location-target="status" style="font-size: 0.85em; color: #888; margin: 0.25rem 0 0 0; display: none;"></p>
+        </div>
+      </div>
+    </details>
   </div>
-</div>
+<% else %>
+  <%# No locations — show setup form %>
+  <div class="settings-card" data-controller="weather-location" data-weather-location-create-url-value="<%= weather_locations_path %>">
+    <h2>Location</h2>
+
+    <%= form_with url: weather_lookup_path, method: :post, local: true do |f| %>
+      <div class="field">
+        <%= f.label :zip, "Zip Code" %>
+        <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+          <%= f.text_field :zip, placeholder: "e.g. 10001", maxlength: 10, style: "flex: 1; width: auto; min-width: 0;" %>
+          <%= f.submit "Look Up", class: "saveButton", style: "width: auto; flex-shrink: 0;" %>
+        </div>
+      </div>
+    <% end %>
+
+    <div style="margin-top: 0.75rem;">
+      <button type="button" class="buttonLink" style="width: 100%; text-align: center;"
+              data-action="click->weather-location#detectLocation"
+              data-weather-location-target="detectButton">
+        Use My Location
+      </button>
+      <p data-weather-location-target="status" style="font-size: 0.85em; color: #888; margin: 0.25rem 0 0 0; display: none;"></p>
+    </div>
+  </div>
+<% end %>
 
 <% if @weather %>
   <div class="info-card">

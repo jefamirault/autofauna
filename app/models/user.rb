@@ -5,6 +5,7 @@ class User < ApplicationRecord
   has_many :projects, foreign_key: :owner_id, dependent: :destroy
   has_many :plants, through: :projects
   has_many :push_subscriptions, dependent: :destroy
+  has_many :weather_locations, dependent: :destroy
 
   after_create :create_default_project
 

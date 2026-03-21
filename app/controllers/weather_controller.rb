@@ -2,43 +2,34 @@ class WeatherController < ApplicationController
   before_action :authenticate
 
   def index
-    if params[:lat].present? && params[:lon].present?
-      lat = params[:lat].to_f
-      lon = params[:lon].to_f
-      cookies[:weather_lat] = { value: lat.to_s, expires: 1.year }
-      cookies[:weather_lon] = { value: lon.to_s, expires: 1.year }
-      cookies.delete(:weather_zip)
-      @weather = WeatherService.fetch(lat: lat, lon: lon)
-    elsif cookies[:weather_zip].present?
-      @zip = cookies[:weather_zip]
-      geo = WeatherService.geocode_zip(@zip)
-      if geo
-        @weather = WeatherService.fetch(lat: geo[:lat], lon: geo[:lon])
-        @weather[:location_name] = geo[:name] if @weather
-      end
-    elsif cookies[:weather_lat].present? && cookies[:weather_lon].present?
-      @weather = WeatherService.fetch(lat: cookies[:weather_lat].to_f, lon: cookies[:weather_lon].to_f)
-    end
+    @weather_locations = current_user.weather_locations.order(primary: :desc, created_at: :asc)
+    @primary_location = @weather_locations.find(&:primary?) || @weather_locations.first
 
-    flash.now[:alert] = "Could not fetch weather data. Please try again." if location_provided? && @weather.nil?
+    if @primary_location
+      @weather = WeatherService.fetch(lat: @primary_location.latitude, lon: @primary_location.longitude)
+      if @weather
+        @weather[:location_name] ||= @primary_location.display_name
+      else
+        flash.now[:alert] = "Could not fetch weather data. Please try again."
+      end
+    end
   end
 
   def lookup
     zip = params[:zip].to_s.strip
     geo = WeatherService.geocode_zip(zip)
     if geo
-      cookies[:weather_zip] = { value: zip, expires: 1.year }
-      cookies[:weather_lat] = { value: geo[:lat].to_s, expires: 1.year }
-      cookies[:weather_lon] = { value: geo[:lon].to_s, expires: 1.year }
+      is_first = current_user.weather_locations.none?
+      current_user.weather_locations.create!(
+        latitude: geo[:lat],
+        longitude: geo[:lon],
+        zip: zip,
+        location_name: geo[:name],
+        primary: is_first
+      )
       redirect_to weather_path
     else
       redirect_to weather_path, alert: "Could not find location for zip code \"#{zip}\"."
     end
-  end
-
-  private
-
-  def location_provided?
-    params[:lat].present? || cookies[:weather_zip].present? || cookies[:weather_lat].present?
   end
 end

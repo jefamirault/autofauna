@@ -2,6 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["detectButton", "status"]
+  static values = { createUrl: String }
 
   detectLocation() {
     if (!navigator.geolocation) {
@@ -17,7 +18,7 @@ export default class extends Controller {
       (position) => {
         const lat = position.coords.latitude.toFixed(4)
         const lon = position.coords.longitude.toFixed(4)
-        window.location.href = `/weather?lat=${lat}&lon=${lon}`
+        this.saveLocation(lat, lon)
       },
       (error) => {
         this.detectButtonTarget.disabled = false
@@ -38,6 +39,31 @@ export default class extends Controller {
       },
       { timeout: 10000, enableHighAccuracy: false }
     )
+  }
+
+  saveLocation(lat, lon) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+    const form = document.createElement("form")
+    form.method = "post"
+    form.action = this.createUrlValue
+
+    const fields = {
+      "authenticity_token": csrfToken,
+      "weather_location[latitude]": lat,
+      "weather_location[longitude]": lon,
+      "weather_location[location_name]": "My Location"
+    }
+
+    for (const [name, value] of Object.entries(fields)) {
+      const input = document.createElement("input")
+      input.type = "hidden"
+      input.name = name
+      input.value = value
+      form.appendChild(input)
+    }
+
+    document.body.appendChild(form)
+    form.submit()
   }
 
   showStatus(message) {

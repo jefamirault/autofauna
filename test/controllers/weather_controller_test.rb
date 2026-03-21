@@ -22,4 +22,17 @@ class WeatherControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to weather_path
     assert_match "Could not find location", flash[:alert]
   end
+
+  test "should show location form when no locations saved" do
+    get weather_path
+    assert_response :success
+    assert_select ".settings-card h2", "Location"
+  end
+
+  test "should show location management when locations exist" do
+    @user.weather_locations.create!(latitude: 40.7128, longitude: -74.006, location_name: "New York", primary: true)
+    get weather_path
+    assert_response :success
+    assert_select ".settings-card h2", "Locations"
+  end
 end
