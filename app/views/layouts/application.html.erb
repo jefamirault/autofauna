@@ -157,14 +157,6 @@
 
     <main class="<%= params[:controller] %> <%= params[:action] %>"
           <% if content_for?(:header_extra) %>data-controller="dynamic-header"<% end %>>
-      <%= render 'layouts/flash' %>
-
-      <% if current_user&.guest? %>
-        <div class="guest-banner">
-          <%= t('guest.banner_message') %>
-          <%= link_to t('guest.create_account'), new_guest_conversion_path, class: 'guest-banner-link' %>
-        </div>
-      <% end %>
 
       <section id="primary">
         <% if config[:plant_graphic] %>
@@ -176,6 +168,15 @@
       </section>
 
     </main>
+
+    <%= render 'layouts/flash' %>
+
+    <% if current_user&.guest? %>
+      <div class="guest-banner">
+        <%= t('guest.banner_message') %>
+        <%= link_to t('guest.create_account'), new_guest_conversion_path, class: 'guest-banner-link' %>
+      </div>
+    <% end %>
 
   </body>
 </html>
