@@ -64,10 +64,12 @@
         </button>
         <div data-watering-recipe-target="tdsContainer" style="<%= watering.tds.present? ? 'display: block;' : 'display: none;' %>">
           <%= form.label :tds, "TDS (ppm)", style: "display: block" %>
-          <%= form.number_field :tds, placeholder: "e.g. 400", data: { watering_recipe_target: "tdsField" } %>
-          <button type="button"
-                  data-action="click->watering-recipe#hideTds"
-                  class="buttonLinkSmall">✕ Remove</button>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <%= form.number_field :tds, placeholder: "e.g. 400", data: { watering_recipe_target: "tdsField" } %>
+            <button type="button"
+                    data-action="click->watering-recipe#hideTds"
+                    class="buttonLinkSmall">✕ Remove TDS</button>
+          </div>
         </div>
       </div>
     <% end %>
