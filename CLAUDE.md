@@ -175,7 +175,7 @@ The plants index is the main page with significant client-side interactivity:
 - **Sidebar structure:** Three sections top-to-bottom:
   1. `button.hamburgerToggle` — ☰ icon (absolutely positioned in 4rem box, never moves during animation) + section title (fades with opacity transitions)
   2. `a.sidebarNav` > `#logoContainer` — tall section icon (16rem expanded via `--logo-size`, header-height minimized), always links to section index
-  3. `<nav>` — current section's sub-nav (`.indent`) at top, remaining sections vertically centered between `.fill` divs, locale switcher at bottom. Current section omitted from nav (redundant with sidebarNav)
+  3. `<nav>` — current section's sub-nav (`.indent`) at top, all sections vertically centered between `.fill` divs, locale switcher at bottom. Current section shown with `selected` class (also accessible via sidebarNav/logoContainer)
 - **Sidebar states:** Minimized = icon rail (4rem wide, emoji-only nav labels, hamburger title hidden); expanded = full 18rem with text labels
 - **FOUC prevention:** Inline `<script>` in `<head>` applies sidebar state before render; hamburger icon uses absolute positioning so it never shifts during sidebar width transitions; title uses opacity transitions to avoid flash
 - **Mobile (≤600px):** Sidebar hidden when minimized; hamburger button fixed top-left; `a.sidebarNav` with `#logoContainer` remains visible (expands to full `--logo-size` when sidebar is open, compact at header-height when minimized)

@@ -109,30 +109,24 @@
 
         <%# Remaining nav items, vertically centered %>
         <div class="fill"></div>
-        <% unless params[:controller].in?(%w[plants log_entries]) %>
+        <% if params[:controller].in?(%w[plants log_entries]) && params[:action] == 'index' %>
+          <a class='navItem selected'><%= image_tag 'autofauna_icon.png', class: 'nav-icon' %> <span class="nav-label"><%= t('.plants') %></span></a>
+        <% else %>
           <%= link_to plants_path, class: 'navItem' do %><%= image_tag 'autofauna_icon.png', class: 'nav-icon' %> <span class="nav-label"><%= t('.plants') %></span><% end %>
         <% end %>
-        <% unless params[:controller].in?(%w[waterings recipes recipe_batches recipe_sources]) %>
-          <% if params[:controller] == 'waterings' && params[:action] == 'index' %>
-            <a class='navItem selected'><%= image_tag 'water_icon.png', class: 'nav-icon' %> <span class="nav-label">Water</span></a>
-          <% else %>
-            <%= link_to waterings_path, class: 'navItem' do %><%= image_tag 'water_icon.png', class: 'nav-icon' %> <span class="nav-label">Water</span><% end %>
-          <% end %>
+        <% if params[:controller] == 'waterings' && params[:action] == 'index' %>
+          <a class='navItem selected'><%= image_tag 'water_icon.png', class: 'nav-icon' %> <span class="nav-label">Water</span></a>
+        <% else %>
+          <%= link_to waterings_path, class: 'navItem' do %><%= image_tag 'water_icon.png', class: 'nav-icon' %> <span class="nav-label">Water</span><% end %>
         <% end %>
-        <% unless params[:controller] == 'tanks' %>
-          <% if params[:controller] == 'tanks' && params[:action] == 'index' %>
-            <a class='navItem selected'><%= image_tag 'tank_icon.png', class: 'nav-icon' %> <span class="nav-label"><%= t('.tanks') %></span></a>
-          <% else %>
-            <%= link_to tanks_path, class: 'navItem' do %><%= image_tag 'tank_icon.png', class: 'nav-icon' %> <span class="nav-label"><%= t('.tanks') %></span><% end %>
-          <% end %>
+        <% if params[:controller] == 'tanks' && params[:action] == 'index' %>
+          <a class='navItem selected'><%= image_tag 'tank_icon.png', class: 'nav-icon' %> <span class="nav-label"><%= t('.tanks') %></span></a>
+        <% else %>
+          <%= link_to tanks_path, class: 'navItem' do %><%= image_tag 'tank_icon.png', class: 'nav-icon' %> <span class="nav-label"><%= t('.tanks') %></span><% end %>
         <% end %>
-        <% unless params[:controller].in?(%w[locations zones]) %>
-          <%= nav_link 'locations', text: "📍 #{t('.locations')}" %>
-        <% end %>
-        <% unless params[:controller] == 'weather' %>
-          <%= nav_link 'weather', text: "🌤️ Weather", path: weather_path %>
-        <% end %>
-        <% if current_user&.advanced_mode? && !params[:controller].in?(%w[sensors sensor_readings sensor_types]) %>
+        <%= nav_link 'locations', text: "📍 #{t('.locations')}" %>
+        <%= nav_link 'weather', text: "🌤️ Weather", path: weather_path %>
+        <% if current_user&.advanced_mode? %>
           <%= nav_link 'sensors', text: "📡 #{t('.sensors')}" %>
         <% end %>
         <div class="fill"></div>
