@@ -74,3 +74,33 @@ Current session log. Previous logs archived in `agent_log/`.
 - PR #84 (smooth mobile header) merged
 - PR #85 (sidebar navigation) merged
 - All milestone issues (#82, #83) closed
+
+---
+
+## 2026-03-22: Sprint 0.9.1 (Round 2) Kickoff
+
+**What:** Launched milestone 0.9.1 sprint with 2 parallel workers on new issues.
+
+**Worker Assignments:**
+| Worker | Branch | Issues | Scope |
+|--------|--------|--------|-------|
+| 1 | `sprint/0-9-1/plant-management` | #88 | TDS field collapsible behind "Add TDS" button |
+| 2 | `sprint/0-9-1/ux-ui` | #87, #86 | Mini plant graphic in collapsed header + toast flash notifications + floating guest banner |
+
+**Actions taken:**
+- Reviewed all 3 milestone issues and explored relevant code (watering form, header layout, flash/guest banner)
+- Posted detailed implementation guidance on issue #88 (TDS toggle — follows existing moisture field pattern)
+- Posted detailed implementation guidance on issue #87 (mini plant graphic in collapsed header)
+- Posted detailed implementation guidance on issue #86 (toast notifications + floating guest banner)
+- No file conflicts between workers — Worker 1 touches watering form/recipe controller only, Worker 2 touches layout/flash/header CSS
+
+**Worker results:**
+- Worker 1 (branch `sprint/0-9-1/plant-management`): Implemented collapsible TDS field with toggle/hide/show methods, auto-reveal on batch selection — PR #89
+- Worker 2 (branch `sprint/0-9-1/ux-ui`): Inline mini graphic in collapsed header via `header_config`, CSS-only toast flash notifications, floating guest banner — PR #90
+- Revision: moved "Remove TDS" button inline with the TDS input field
+
+**Sprint 0.9.1 (Round 2) Complete:**
+- PR #89 (collapsible TDS field) merged
+- PR #90 (mini header graphic + toast flash + floating guest banner) merged
+- All milestone issues (#86, #87, #88) closed
+- Worktrees and branches cleaned up
