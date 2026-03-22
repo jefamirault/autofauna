@@ -147,6 +147,7 @@ button.hamburgerToggle
     height: var(--header-height)
     z-index: 20
     background: var(--section-color-start)
+    border-bottom: none
     .hamburger-title
       opacity: 0
       transition: none
@@ -216,7 +217,7 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
   transition: grid-template-columns 0.12s
   header
     grid-template-rows: 1fr
-    overflow: hidden
+    overflow: visible
   button.hamburgerToggle
     height: 4.5rem
     .hamburger-title
@@ -224,11 +225,12 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
   #headerTitle
     opacity: var(--title-opacity, 0)
   #headerRight
-    align-self: start
+    align-self: center
   .header-plant-graphic
     opacity: var(--graphic-opacity, 1)
+    overflow: hidden
   @media (max-width: 600px)
-    --header-expanded: 11rem
+    --header-expanded: 14.5rem
     --header-collapsed: 4rem
     --header-height: var(--header-expanded)
     grid-template-rows: var(--header-height) auto 1fr auto
@@ -238,7 +240,7 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
       background: linear-gradient(to right, var(--section-color-start) 4rem, transparent calc(4rem + 3rem)), var(--section-gradient) !important
     button.hamburgerToggle
       width: 4rem
-      height: 4rem
+      height: var(--header-height)
       .hamburger-title
         line-height: 4rem
     &.sidebarMinimized:not(:has(.header-plant-graphic-visible))
@@ -271,13 +273,6 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
       font-size: 1.75rem
       font-weight: 400
       letter-spacing: -0.3px
-  @media (max-width: 600px)
-    .plant-graphic-image
-      max-height: 6rem
-    .header-plant-name
-      .plant-name-text
-        font-size: 1.35rem
-
 // Header title — centered in the full header grid cell, independent of headerRight
 #headerTitle
   text-align: center
