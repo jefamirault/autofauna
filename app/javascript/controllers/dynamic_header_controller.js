@@ -24,19 +24,23 @@ export default class extends Controller {
     this._wheelHandler = this._onWheel.bind(this)
     this._touchStartHandler = this._onTouchStart.bind(this)
     this._touchMoveHandler = this._onTouchMove.bind(this)
+    this._touchEndHandler = this._onTouchEnd.bind(this)
 
     this.element.addEventListener("wheel", this._wheelHandler, { passive: false })
     this.element.addEventListener("touchstart", this._touchStartHandler, { passive: true })
     this.element.addEventListener("touchmove", this._touchMoveHandler, { passive: false })
+    this.element.addEventListener("touchend", this._touchEndHandler, { passive: true })
 
     this._update()
   }
 
   disconnect() {
     if (!this._active) return
+    this._cancelMomentum()
     this.element.removeEventListener("wheel", this._wheelHandler)
     this.element.removeEventListener("touchstart", this._touchStartHandler)
     this.element.removeEventListener("touchmove", this._touchMoveHandler)
+    this.element.removeEventListener("touchend", this._touchEndHandler)
     document.body.style.removeProperty("--header-height")
     document.body.style.removeProperty("--graphic-opacity")
     document.body.style.removeProperty("--title-opacity")
@@ -74,8 +78,11 @@ export default class extends Controller {
   }
 
   _onTouchStart(e) {
+    this._cancelMomentum()
     if (e.touches.length === 1) {
       this._touchY = e.touches[0].clientY
+      this._touchVelocity = 0
+      this._lastTouchTime = e.timeStamp
     }
   }
 
@@ -85,6 +92,12 @@ export default class extends Controller {
     const deltaY = this._touchY - currentY // positive = scrolling down
     this._touchY = currentY
 
+    // Track velocity (px/ms) for momentum calculation
+    const now = e.timeStamp
+    const dt = now - (this._lastTouchTime || now)
+    if (dt > 0) this._touchVelocity = deltaY / dt
+    this._lastTouchTime = now
+
     if (deltaY > 0 && this._delta < this._scrollRange && this._shouldCollapse()) {
       e.preventDefault()
       this._delta = Math.min(this._scrollRange, this._delta + deltaY)
@@ -93,6 +106,61 @@ export default class extends Controller {
       e.preventDefault()
       this._delta = Math.max(0, this._delta + deltaY)
       this._update()
+    }
+  }
+
+  _onTouchEnd(_e) {
+    // If the header is mid-transition, use touch velocity to animate to completion
+    if (this._delta <= 0 || this._delta >= this._scrollRange) return
+    if (!this._touchVelocity) return
+
+    const velocity = this._touchVelocity // px/ms
+    const FRICTION = 0.95
+    const MIN_VELOCITY = 0.01 // px/ms threshold to stop
+
+    let v = velocity
+    let lastTime = null
+
+    const step = (timestamp) => {
+      if (lastTime === null) { lastTime = timestamp; this._momentumRaf = requestAnimationFrame(step); return }
+      const dt = timestamp - lastTime
+      lastTime = timestamp
+
+      v *= Math.pow(FRICTION, dt / 16) // normalize friction to ~60fps
+      if (Math.abs(v) < MIN_VELOCITY) { this._momentumRaf = null; return }
+
+      const px = v * dt
+
+      if (v > 0 && this._delta < this._scrollRange) {
+        // Collapsing
+        this._delta = Math.min(this._scrollRange, this._delta + px)
+        this._update()
+        if (this._delta < this._scrollRange) {
+          this._momentumRaf = requestAnimationFrame(step)
+        } else {
+          this._momentumRaf = null
+        }
+      } else if (v < 0 && this._delta > 0 && this.element.scrollTop <= 0) {
+        // Expanding
+        this._delta = Math.max(0, this._delta + px)
+        this._update()
+        if (this._delta > 0) {
+          this._momentumRaf = requestAnimationFrame(step)
+        } else {
+          this._momentumRaf = null
+        }
+      } else {
+        this._momentumRaf = null
+      }
+    }
+
+    this._momentumRaf = requestAnimationFrame(step)
+  }
+
+  _cancelMomentum() {
+    if (this._momentumRaf) {
+      cancelAnimationFrame(this._momentumRaf)
+      this._momentumRaf = null
     }
   }
 
