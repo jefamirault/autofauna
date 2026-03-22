@@ -283,6 +283,14 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
   overflow: hidden
   text-overflow: ellipsis
   pointer-events: none
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: 0.5rem
+  .header-title-graphic
+    height: 2.5rem
+    object-fit: contain
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.25))
 
 // Header right section (email + dropdown)
 #headerRight

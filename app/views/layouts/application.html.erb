@@ -46,7 +46,12 @@
     <% config = header_config %>
     <header class="<%= config[:gradient_class] %>">
       <%= yield :header_extra %>
-      <div id="headerTitle"><%= config[:title] %></div>
+      <div id="headerTitle">
+        <% if config[:plant_graphic] %>
+          <%= image_tag config[:plant_graphic], class: 'header-title-graphic' %>
+        <% end %>
+        <%= config[:title] %>
+      </div>
       <% if user_signed_in? %>
         <div id="headerRight" data-controller="dropdown">
           <div id="headerEmail" data-action="click->dropdown#toggle">
