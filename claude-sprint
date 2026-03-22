@@ -3,8 +3,9 @@
 # categories, sets up tmux panes with worktrees, and starts claude in each.
 #
 # Usage: ./claude-sprint <milestone> [--agents N] [--dry-run]
+#        ./claude-sprint --cleanup [<milestone>]
 #
-# Layout: 1 manager (main branch) + N worker agents (default 4) on feature branches.
+# Layout: 1 manager (top, full width) + N worker agents (bottom, split) on feature branches.
 # The manager agent coordinates work; workers implement assigned issues.
 
 set -euo pipefail
@@ -14,6 +15,7 @@ REPO="jefamirault/autofauna"
 SESSION="claude-sprint"
 NUM_WORKERS=4
 DRY_RUN=false
+CLEANUP=false
 MILESTONE=""
 
 # --- Argument parsing ---
@@ -21,12 +23,15 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --agents)  NUM_WORKERS="$2"; shift 2 ;;
     --dry-run) DRY_RUN=true; shift ;;
+    --cleanup) CLEANUP=true; shift ;;
     --help|-h)
       echo "Usage: ./claude-sprint <milestone> [--agents N] [--dry-run]"
+      echo "       ./claude-sprint --cleanup [<milestone>]"
       echo ""
-      echo "  <milestone>   GitHub milestone title (required)"
+      echo "  <milestone>   GitHub milestone title (required for launch, optional for cleanup)"
       echo "  --agents N    Number of worker agents (default: 4)"
       echo "  --dry-run     Show plan without launching tmux/claude"
+      echo "  --cleanup     Remove worktrees, branches, and databases from a sprint"
       exit 0
       ;;
     *)
@@ -40,6 +45,75 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+# --- Cleanup mode ---
+if [ "$CLEANUP" = true ]; then
+  echo "=== Sprint Cleanup ==="
+
+  # Read DB credentials from .env (strip \r from Windows line endings)
+  source_user=$(grep -oP '^DATABASE_USER=\K.*' "$REPO_DIR/.env" 2>/dev/null | tr -d '\r' || echo "autofauna_development")
+
+  # Find all sprint worktrees
+  worktrees=$(git -C "$REPO_DIR" worktree list --porcelain | grep -oP "^worktree \K.*sprint.*" || true)
+
+  if [ -n "$MILESTONE" ]; then
+    safe_milestone=$(echo "$MILESTONE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+    worktrees=$(echo "$worktrees" | grep "$safe_milestone" || true)
+  fi
+
+  if [ -z "$worktrees" ]; then
+    echo "No sprint worktrees found."
+  else
+    echo "Removing worktrees..."
+    while IFS= read -r wt; do
+      [ -z "$wt" ] && continue
+      echo "  Removing worktree: $wt"
+      git -C "$REPO_DIR" worktree remove --force "$wt" 2>/dev/null || rm -rf "$wt"
+    done <<< "$worktrees"
+  fi
+
+  # Remove sprint branches
+  branches=$(git -C "$REPO_DIR" branch --list 'sprint/*' | sed 's/^[* ]*//')
+  if [ -n "$MILESTONE" ]; then
+    branches=$(echo "$branches" | grep "$safe_milestone" || true)
+  fi
+
+  if [ -n "$branches" ]; then
+    echo "Removing branches..."
+    while IFS= read -r branch; do
+      [ -z "$branch" ] && continue
+      echo "  Deleting branch: $branch"
+      git -C "$REPO_DIR" branch -D "$branch" 2>/dev/null || true
+    done <<< "$branches"
+  fi
+
+  # Drop sprint databases
+  sprint_dbs=$(psql -U "$source_user" -lqt 2>/dev/null | cut -d \| -f 1 | grep -w 'autofauna_sprint_worker_[0-9]*' || true)
+  if [ -n "$sprint_dbs" ]; then
+    echo "Dropping databases..."
+    while IFS= read -r db; do
+      db=$(echo "$db" | xargs)  # trim whitespace
+      [ -z "$db" ] && continue
+      echo "  Dropping database: $db"
+      dropdb -U "$source_user" "$db" 2>/dev/null || echo "    WARNING: Failed to drop $db"
+    done <<< "$sprint_dbs"
+  fi
+
+  # Kill tmux session
+  if tmux has-session -t "$SESSION" 2>/dev/null; then
+    echo "Killing tmux session '$SESSION'..."
+    tmux kill-session -t "$SESSION"
+  fi
+
+  # Clean up temp files
+  rm -f /tmp/claude-sprint-manager.* /tmp/claude-sprint-worker-*
+
+  # Prune worktree references
+  git -C "$REPO_DIR" worktree prune
+
+  echo "Cleanup complete."
+  exit 0
+fi
 
 if [ -z "$MILESTONE" ]; then
   echo "Usage: ./claude-sprint <milestone> [--agents N] [--dry-run]"
@@ -128,11 +202,11 @@ for issue_num in "${unlabeled_issues[@]}"; do
   worker_idx=$(( (worker_idx + 1) % NUM_WORKERS ))
 done
 
-# Pad to NUM_WORKERS if we have fewer groups
-while [ ${#worker_assignments[@]} -lt "$NUM_WORKERS" ]; do
-  worker_assignments+=("")
-  worker_labels+=("idle")
-done
+# Cap NUM_WORKERS to actual number of workers with issues (no empty panes)
+actual_workers=${#worker_assignments[@]}
+if [ "$actual_workers" -lt "$NUM_WORKERS" ]; then
+  NUM_WORKERS=$actual_workers
+fi
 
 # --- Create branch names and print plan ---
 declare -a branch_names=()
@@ -147,29 +221,36 @@ done
 echo "=== Sprint Plan ==="
 echo "Milestone:  $MILESTONE"
 echo "Manager:    $main_branch (coordinator)"
+echo "Workers:    $NUM_WORKERS"
 echo ""
 
 for i in $(seq 0 $((NUM_WORKERS - 1))); do
   issues="${worker_assignments[$i]}"
-  if [ -z "$issues" ]; then
-    echo "Worker $((i+1)):   ${branch_names[$i]} (no issues — available for overflow)"
-  else
-    # Get titles for display
-    issue_list=""
-    IFS=',' read -ra nums <<< "$issues"
-    for num in "${nums[@]}"; do
-      title=$(echo "$issues_json" | jq -r ".[] | select(.number == $num) | .title")
-      issue_list+="    #$num $title"$'\n'
-    done
-    echo "Worker $((i+1)):   ${branch_names[$i]}"
-    echo "$issue_list"
-  fi
+  # Get titles for display
+  issue_list=""
+  IFS=',' read -ra nums <<< "$issues"
+  for num in "${nums[@]}"; do
+    title=$(echo "$issues_json" | jq -r ".[] | select(.number == $num) | .title")
+    issue_list+="    #$num $title"$'\n'
+  done
+  echo "Worker $((i+1)):   ${branch_names[$i]}"
+  echo "$issue_list"
 done
 
 if [ "$DRY_RUN" = true ]; then
   echo "(dry run — not launching)"
   exit 0
 fi
+
+# --- Read DB credentials from main .env ---
+if [ ! -f "$REPO_DIR/.env" ]; then
+  echo "ERROR: $REPO_DIR/.env not found. Cannot configure worker databases."
+  exit 1
+fi
+
+source_user=$(grep -oP '^DATABASE_USER=\K.*' "$REPO_DIR/.env" | tr -d '\r' || echo "autofauna_development")
+source_pass=$(grep -oP '^DATABASE_PASSWORD=\K.*' "$REPO_DIR/.env" | tr -d '\r' || echo "")
+source_db="autofauna_development"
 
 # --- Create branches, worktrees, databases, and .env files ---
 declare -a worker_dirs=()
@@ -194,30 +275,35 @@ for i in $(seq 0 $((NUM_WORKERS - 1))); do
     git -C "$REPO_DIR" worktree add "$worktree_dir" "$branch"
   fi
 
-  # Copy .env and customize for this worker
-  if [ -f "$REPO_DIR/.env" ]; then
-    # Read original .env values
-    source_user=$(grep -oP '^DATABASE_USER=\K.*' "$REPO_DIR/.env" || echo "autofauna_development")
-    source_pass=$(grep -oP '^DATABASE_PASSWORD=\K.*' "$REPO_DIR/.env" || echo "")
-
-    cat > "$worktree_dir/.env" <<ENVFILE
+  # Write .env for this worker
+  cat > "$worktree_dir/.env" <<ENVFILE
 DATABASE=${worker_db}
 DATABASE_USER=${source_user}
 DATABASE_PASSWORD=${source_pass}
 PORT=${worker_port}
 ENVFILE
-    echo "Created .env for worker $((i + 1)): db=${worker_db}, port=${worker_port}"
+  echo "Created .env for worker $((i + 1)): db=${worker_db}, port=${worker_port}"
+
+  # Create the worker database (drop + recreate to get a fresh copy each time)
+  if psql -U "$source_user" -lqt 2>/dev/null | cut -d \| -f 1 | grep -qw "$worker_db"; then
+    echo "Dropping existing database ${worker_db}..."
+    dropdb -U "$source_user" "$worker_db"
   fi
 
-  # Create the worker database if it doesn't exist
-  if ! psql -U "$source_user" -lqt 2>/dev/null | cut -d \| -f 1 | grep -qw "$worker_db"; then
-    echo "Creating database ${worker_db}..."
-    createdb -U "$source_user" "$worker_db" 2>/dev/null || echo "  (createdb failed — may need manual creation)"
-    # Copy schema from main dev database
-    pg_dump -U "$source_user" --schema-only autofauna_development 2>/dev/null | psql -U "$source_user" -d "$worker_db" -q 2>/dev/null || echo "  (schema copy failed — run db:schema:load in worktree)"
-  else
-    echo "Database ${worker_db} already exists."
+  echo "Creating database ${worker_db}..."
+  if ! createdb -U "$source_user" "$worker_db"; then
+    echo "ERROR: Failed to create database ${worker_db}."
+    echo "Check that PostgreSQL is running and user '$source_user' has createdb privileges."
+    exit 1
   fi
+
+  echo "Copying dev database to ${worker_db}..."
+  if ! pg_dump -U "$source_user" "$source_db" | psql -U "$source_user" -d "$worker_db" -q; then
+    echo "ERROR: Failed to copy database from ${source_db} to ${worker_db}."
+    exit 1
+  fi
+
+  echo "Database ${worker_db} ready."
 
   worker_dirs+=("$worktree_dir")
   worker_ports+=("$worker_port")
@@ -268,16 +354,26 @@ PROMPT
 # --- Launch tmux session ---
 tmux kill-session -t "$SESSION" 2>/dev/null || true
 
-# Create session with manager pane
+# Create session with manager pane (top, full width)
 tmux new-session -s "$SESSION" -d -x 200 -y 50
 tmux send-keys -t "$SESSION" "cd $REPO_DIR" C-m
 
-# Create worker panes
-for i in $(seq 0 $((NUM_WORKERS - 1))); do
-  tmux split-window -h -t "$SESSION"
-  tmux send-keys -t "$SESSION" "cd ${worker_dirs[$i]}" C-m
-  tmux select-layout -t "$SESSION" tiled
+# Split vertically: manager on top, first worker on bottom
+tmux split-window -v -t "$SESSION:0.0"
+tmux send-keys -t "$SESSION:0.1" "cd ${worker_dirs[0]}" C-m
+
+# Split the bottom area horizontally for additional workers
+for i in $(seq 1 $((NUM_WORKERS - 1))); do
+  tmux split-window -h -t "$SESSION:0.$i"
+  tmux send-keys -t "$SESSION:0.$((i + 1))" "cd ${worker_dirs[$i]}" C-m
 done
+
+# Even out the bottom worker panes
+if [ "$NUM_WORKERS" -gt 1 ]; then
+  # Select all bottom panes and re-tile just the bottom row
+  # Use select-layout to balance the panes while preserving top/bottom split
+  tmux select-layout -t "$SESSION" main-horizontal
+fi
 
 # --- Launch claude in each pane ---
 # Launch claude in manager pane (pane 0)
@@ -288,9 +384,6 @@ tmux send-keys -t "$SESSION:0.0" "claude --append-system-prompt \"\$(cat $manage
 # Launch claude in worker panes
 for i in $(seq 0 $((NUM_WORKERS - 1))); do
   issues="${worker_assignments[$i]}"
-  if [ -z "$issues" ]; then
-    continue
-  fi
 
   # Build issue details for worker prompt
   issue_details=""
@@ -350,17 +443,14 @@ tmux send-keys -t "$SESSION:0.0" "Begin the sprint. Read the milestone issues, r
 
 # Kickoff workers
 for i in $(seq 0 $((NUM_WORKERS - 1))); do
-  issues="${worker_assignments[$i]}"
-  if [ -z "$issues" ]; then
-    continue
-  fi
   pane_idx=$((i + 1))
   tmux send-keys -t "$SESSION:0.$pane_idx" "Begin. Read CLAUDE.md, then implement your assigned issues. Start now." Enter
 done
 
 echo ""
-echo "Sprint session '$SESSION' launched with $((NUM_WORKERS + 1)) panes."
+echo "Sprint launched: 1 manager + $NUM_WORKERS workers ($((NUM_WORKERS + 1)) panes total)"
 echo "Attach with: tmux attach -t $SESSION"
+echo "Cleanup with: ./claude-sprint --cleanup${MILESTONE:+ $MILESTONE}"
 echo ""
 
 tmux attach -t "$SESSION"
