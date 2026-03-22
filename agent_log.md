@@ -46,3 +46,31 @@ Current session log. Previous logs archived in `agent_log/`.
 - PR #80 (localization fixes) merged
 - PR #81 (weather multi-location support) merged
 - All 4 milestone issues (#76, #77, #78, #79) closed
+
+---
+
+## 2026-03-22: Sprint 0.9.1 Kickoff
+
+**What:** Launched milestone 0.9.1 sprint with 2 parallel workers.
+
+**Worker Assignments:**
+| Worker | Branch | Issue | Scope |
+|--------|--------|-------|-------|
+| 1 | `sprint/0-9-1/ux-ui` | #82 | Smooth mobile touch header collapse/expand with momentum |
+| 2 | `sprint/0-9-1/navigation` | #83 | Keep all nav links visible in sidebar (remove `unless` guards) |
+
+**Actions taken:**
+- Reviewed both milestone issues and analyzed relevant source code
+- Posted detailed implementation guidance on issue #82 (touch momentum/inertia for dynamic header)
+- Posted detailed implementation guidance on issue #83 (always-visible nav links with selected state)
+- No file conflicts between workers — #82 touches only JS, #83 touches only ERB/helpers/CSS
+
+**Worker results:**
+- Worker 1 (branch `sprint/0-9-1/ux-ui`): Implemented momentum scrolling with velocity tracking, friction-based rAF loop on touchend, and cancel-on-new-touch — PR #84
+- Worker 2 (branch `sprint/0-9-1/navigation`): Removed all `unless` guards from nav items, all sections always visible, current section gets `selected` class — PR #85
+- Both branches also updated CLAUDE.md documentation (non-overlapping sections, no conflict)
+
+**Sprint 0.9.1 Complete:**
+- PR #84 (smooth mobile header) merged
+- PR #85 (sidebar navigation) merged
+- All milestone issues (#82, #83) closed

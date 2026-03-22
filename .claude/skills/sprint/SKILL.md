@@ -67,32 +67,70 @@ The script will:
 - Create `sprint/<milestone>/<label>` branches for each worker
 - Set up git worktrees for each branch
 - Copy `.env` to each worktree with a unique database name (`autofauna_sprint_worker_N`) and port (`3001`, `3002`, etc.)
-- Create per-worker PostgreSQL databases (schema copied from main dev DB)
-- Launch a tmux session with 5 panes (1 manager + 4 workers)
+- Create per-worker PostgreSQL databases (full copy of dev DB — data + schema)
+- Launch a tmux session with manager (top, full width) + N workers (bottom, split)
 - Start `claude` in each pane with role-specific prompts
+
+### Dynamic Pane Count
+
+The number of tmux panes adapts to the actual number of worker groups with issues assigned, not a fixed count. For example, 2 issues with 2 labels = 3 panes total (1 manager + 2 workers), not 5.
+
+### Tmux Layout
+
+```
++---------------------------+
+|        Manager            |
++-------------+-------------+
+|  Worker 1   |  Worker 2   |
++-------------+-------------+
+```
+
+- **Manager** (pane 0): top row, full width, on main branch
+- **Workers** (panes 1-N): bottom row, split evenly, each in its own worktree
 
 ### How the Sprint Works
 
-**Manager agent** (main branch, pane 0):
+**Manager agent** (main branch, top pane):
 - Reads all milestone issues
 - Posts implementation guidance as issue comments
 - Monitors worker progress via `git log`
 - Creates PRs when workers finish
 - Coordinates if workers need shared files
 
-**Worker agents** (feature branches, panes 1-4):
+**Worker agents** (feature branches, bottom panes):
 - Implement assigned issues on their branch
 - Commit with issue references (`Fix #123: ...`)
 - Run tests after changes
 - Comment on issues when done
 
+### Cleanup
+
+When the sprint finishes, run cleanup to tear down everything:
+
+```
+! ./claude-sprint --cleanup
+```
+
+Or for a specific milestone only:
+
+```
+! ./claude-sprint --cleanup "<milestone>"
+```
+
+This removes:
+- Git worktrees
+- Sprint branches (`sprint/*`)
+- Worker databases (`autofauna_sprint_worker_*`)
+- The tmux session
+- Temp prompt files
+
 ### After the Sprint
 
 When the sprint finishes:
-- Manager creates PRs for each worker branch
-- User reviews and merges PRs
-- Clean up worktrees: `git worktree list` then `git worktree remove <path>`
-- Close the milestone: `gh issue list --milestone "<milestone>" --state open` to verify all done
+1. Manager creates PRs for each worker branch
+2. User reviews and merges PRs
+3. Run `./claude-sprint --cleanup` to tear down worktrees, branches, and databases
+4. Close the milestone: `gh issue list --milestone "<milestone>" --state open` to verify all done
 
 ### Merging Worker Branches
 
@@ -120,3 +158,7 @@ When multiple workers touch shared files (e.g., locale YAML files), define clear
 - Include a "Files to Modify" table and "Scope Boundaries" section in each guidance comment
 - Identify shared-file conflicts proactively and coordinate scope boundaries
 - Keep `agent_log.md` updated with sprint progress
+
+### Known Gotcha: .env Carriage Returns
+
+The `.env` file may have Windows-style `\r\n` line endings. The `claude-sprint` script strips `\r` when reading credentials to prevent silent failures in `psql`/`createdb`/`dropdb` commands.
