@@ -47,11 +47,21 @@
     </div>
   <% end %>
 
-  <% recipes = current_project.recipes %>
+  <% recipes = current_project.recipes.order(:name) %>
   <% unless recipes.empty? %>
     <div class="field">
-      <%= form.label :recipe_id, "🧪 Recipe" %>
-      <%= form.collection_select :recipe_id, recipes.order(:name), :id, :name, include_blank: '-- None --' %>
+      <label>🧪 Recipes</label>
+      <div class="recipe-checkboxes">
+        <% recipes.each do |recipe| %>
+          <label class="checkbox-label">
+            <input type="checkbox" name="plant[recipe_ids][]"
+                   value="<%= recipe.id %>"
+                   <%= 'checked' if plant.recipes.map(&:id).include?(recipe.id) %>>
+            <%= recipe.name %>
+          </label>
+        <% end %>
+      </div>
+      <small>Select zero or more recipes. The first selected recipe is used for filtering.</small>
     </div>
   <% end %>
 

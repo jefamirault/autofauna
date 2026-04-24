@@ -48,7 +48,9 @@
           <% if @plant.last_watering&.notes.present? %>
             <span class="watering-notes-text">📝 <%= @plant.last_watering.notes %></span>
           <% end %>
-          <% if @plant.last_watering&.recipe.present? %>
+          <% if @plant.last_watering&.recipe_source.present? %>
+            <span class="watering-recipe-text">💧 <%= @plant.last_watering.recipe_source.name %></span>
+          <% elsif @plant.last_watering&.recipe.present? %>
             <span class="watering-recipe-text">🧪 <%= @plant.last_watering.recipe.name %></span>
           <% end %>
           <% if @plant.last_watering&.recipe_batch.present? %>
@@ -88,10 +90,15 @@
           <span class="value"><%= plant.pot %></span>
         </div>
       <% end %>
-      <% if plant.recipe.present? %>
+      <% plant_recipe_list = plant.plant_recipes.includes(:recipe).map(&:recipe) %>
+      <% if plant_recipe_list.any? %>
         <div class="info-row">
-          <span class="label">🧪 Recipe:</span>
-          <span class="value"><%= link_to plant.recipe.name, recipe_path(plant.recipe) %></span>
+          <span class="label">🧪 <%= plant_recipe_list.size == 1 ? 'Recipe' : 'Recipes' %>:</span>
+          <span class="value">
+            <% plant_recipe_list.each_with_index do |r, i| %>
+              <%= link_to r.name, recipe_path(r) %><%= i < plant_recipe_list.size - 1 ? ', ' : '' %>
+            <% end %>
+          </span>
         </div>
       <% end %>
       <% if @plant.archived %>
