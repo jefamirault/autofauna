@@ -6,6 +6,7 @@
   <h2>Active</h2>
   <div class="resource-cards">
     <% @active_batches.each do |batch| %>
+      <% urgency = batch.replenishment_urgency %>
       <div class="info-card">
         <div class="info-card-grid">
           <div class="info-card-section" style="background: color-mix(in srgb, <%= batch.recipe.hex_color %> 12%, transparent); border-left: 3px solid color-mix(in srgb, <%= batch.recipe.hex_color %> 80%, black);">
@@ -25,6 +26,30 @@
               <div class="info-row">
                 <span class="label">Volume</span>
                 <span class="value"><%= sprintf('%g', batch.volume) %> <%= batch.volume_units %></span>
+              </div>
+            <% end %>
+            <% if batch.remaining_volume.present? %>
+              <div class="info-row">
+                <span class="label">Remaining</span>
+                <span class="value">
+                  <%= sprintf('%g', batch.remaining_volume.round(3)) %> <%= batch.volume_units %>
+                  <% if batch.remaining_percent %>
+                    (<%= batch.remaining_percent %>%)
+                  <% end %>
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="label">Runs Out</span>
+                <span class="value">
+                  <% runout = batch.projected_runout %>
+                  <% if runout %>
+                    <span style="<%= urgency == :critical ? 'color: #c62828; font-weight: 600;' : urgency == :soon ? 'color: #e65100;' : '' %>">
+                      ~<%= format_date runout %> (<%= (runout - Date.current).to_i %> days)
+                    </span>
+                  <% else %>
+                    <span style="color: #666;">No recent usage</span>
+                  <% end %>
+                </span>
               </div>
             <% end %>
             <% if batch.mixed_on.present? %>

@@ -14,6 +14,9 @@ class Watering < ApplicationRecord
   after_save_commit :update_last_watering
   after_destroy :update_last_watering
 
+  after_save_commit :adjust_batch_remaining_on_save
+  after_destroy :adjust_batch_remaining_on_destroy
+
   after_save :create_moisture_readings,
     if: -> { @pre_moisture.present? || @post_moisture.present? }
 
@@ -84,6 +87,33 @@ class Watering < ApplicationRecord
   attr_accessor :pre_moisture, :post_moisture, :pre_moisture_reading_id
 
   private
+
+  def adjust_batch_remaining_on_save
+    return unless recipe_batch.present? && volume.present?
+
+    if previous_changes[:recipe_batch_id]
+      old_batch_id = previous_changes[:recipe_batch_id].first
+      if old_batch_id.present?
+        old_batch = RecipeBatch.find_by(id: old_batch_id)
+        old_volume = previous_changes[:volume]&.first || volume
+        old_units = previous_changes[:units]&.first || units
+        old_batch&.increment_remaining!(old_volume, old_units)
+      end
+      recipe_batch.decrement_remaining!(volume, units)
+    elsif previous_changes[:id]
+      recipe_batch.decrement_remaining!(volume, units)
+    elsif previous_changes[:volume] || previous_changes[:units]
+      old_volume = previous_changes[:volume]&.first || volume
+      old_units = previous_changes[:units]&.first || units
+      recipe_batch.increment_remaining!(old_volume, old_units)
+      recipe_batch.decrement_remaining!(volume, units)
+    end
+  end
+
+  def adjust_batch_remaining_on_destroy
+    return unless recipe_batch.present? && volume.present?
+    recipe_batch.increment_remaining!(volume, units)
+  end
 
   def set_recipe_from_batch
     if recipe_batch.present? && recipe.blank?

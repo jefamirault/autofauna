@@ -38,6 +38,12 @@
   </div>
 
   <div>
+    <%= form.label :remaining_volume, "Remaining Volume (optional)", style: "display: block" %>
+    <%= form.number_field :remaining_volume, step: 'any', placeholder: "Leave blank to track manually" %>
+    <small>How much is currently in this batch. Defaults to full volume if left blank.</small>
+  </div>
+
+  <div>
     <%= form.label :notes, style: "display: block" %>
     <%= form.textarea :notes %>
   </div>
