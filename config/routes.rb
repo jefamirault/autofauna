@@ -23,6 +23,7 @@ Rails.application.routes.draw do
   resources :recipe_batches do
     collection do
       get :for_recipe
+      get :for_project
     end
   end
   resources :tanks do

@@ -2,8 +2,8 @@ class RecipeBatchesController < ApplicationController
   before_action :authenticate
   before_action :ensure_project
   before_action :set_recipe_batch, only: %i[show edit update destroy]
-  before_action :authorize_viewer, only: [:index, :show, :for_recipe]
-  before_action :authorize_editor, except: [:index, :show, :for_recipe]
+  before_action :authorize_viewer, only: [:index, :show, :for_recipe, :for_project]
+  before_action :authorize_editor, except: [:index, :show, :for_recipe, :for_project]
 
   def index
     @active_batches = current_project.recipe_batches.includes(:recipe).active.order(mixed_on: :desc)
@@ -59,6 +59,15 @@ class RecipeBatchesController < ApplicationController
   def for_recipe
     batches = current_project.recipe_batches.active.where(recipe_id: params[:recipe_id])
     render json: batches.map { |b| { id: b.id, label: b.label, tds: b.tds } }
+  end
+
+  def for_project
+    batches = current_project.recipe_batches.includes(:recipe).active.order(mixed_on: :desc)
+    render json: batches.map { |b|
+      { id: b.id, label: b.label, tds: b.tds,
+        recipe_id: b.recipe_id, recipe_name: b.recipe.name,
+        recipe_default_tds: b.recipe.default_tds }
+    }
   end
 
   private

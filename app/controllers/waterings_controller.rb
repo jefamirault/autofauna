@@ -44,6 +44,7 @@ class WateringsController < ApplicationController
 
   # GET /waterings/1/edit
   def edit
+    @recent_moisture_reading = nil
   end
 
   # POST /waterings or /waterings.json
