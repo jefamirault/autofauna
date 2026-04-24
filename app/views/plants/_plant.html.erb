@@ -104,6 +104,20 @@
       <div class="plant-detail-actions">
         <%= link_to "✏️ #{t('plants.show.edit_this_plant')}", edit_plant_path(@plant), class: 'link' %>
         <%= link_to "📈 #{t('plants.show.export_plant')}", plant_path(@plant, format: :json), class: 'link' %>
+        <% if @plant.snoozed? %>
+          <span class="snooze-status">😴 Snoozed until <%= @plant.snoozed_until.strftime('%a, %b %-d') %></span>
+          <%= button_to "☀️ Remove Snooze", plant_unsnooze_path(@plant), method: :delete, class: 'link buttonLink snooze-btn' %>
+        <% else %>
+          <div data-controller="snooze-plant" style="display: inline-flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="link" data-action="click->snooze-plant#toggle" data-snooze-plant-target="toggleBtn">😴 Snooze</button>
+            <div class="snooze-duration-picker" data-snooze-plant-target="picker" style="display: none;">
+              <span class="snooze-label">for:</span>
+              <%= button_to "1 day", plant_snooze_path(@plant), params: { days: 1 }, class: "snooze-duration-btn" %>
+              <%= button_to "3 days", plant_snooze_path(@plant), params: { days: 3 }, class: "snooze-duration-btn" %>
+              <%= button_to "1 week", plant_snooze_path(@plant), params: { days: 7 }, class: "snooze-duration-btn" %>
+            </div>
+          </div>
+        <% end %>
         <% sharing_active = @plant.shared? || @plant.view_shared? %>
         <a href="#" class="link sharing-toggle<%= ' sharing-active' if sharing_active %>" data-action="click->sharing-toggle#toggle" data-sharing-toggle-target="button" style="opacity: <%= sharing_active ? '1' : '0.7' %>"><%= sharing_active ? "🔓 Sharing Enabled" : "🔒 Sharing Disabled" %></a>
       </div>

@@ -60,6 +60,8 @@ Rails.application.routes.draw do
       post 'view_share', to: 'plants#create_view_share', as: 'create_view_share'
       delete 'view_share', to: 'plants#revoke_view_share', as: 'revoke_view_share'
       post 'regenerate_view_share', to: 'plants#regenerate_view_share', as: 'regenerate_view_share'
+      post 'snooze', to: 'plants#snooze', as: 'snooze'
+      delete 'snooze', to: 'plants#unsnooze', as: 'unsnooze'
     end
   end
 

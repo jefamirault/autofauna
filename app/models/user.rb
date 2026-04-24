@@ -77,6 +77,7 @@ class User < ApplicationRecord
     Plant.where(project_id: project_ids, archived: false)
       .where.not(date_sort_watering: nil)
       .where("date_sort_watering <= ?", Date.current)
+      .where("snoozed_until IS NULL OR snoozed_until <= ?", Time.current)
   end
 
   def should_send_notification?(channel)

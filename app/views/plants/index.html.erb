@@ -307,10 +307,20 @@
   <div class="pagination-info" data-location-filter-target="paginationInfo"></div>
 </div>
 
-<div style=" text-align: center;">
+<div style="text-align: center;">
   <div class="plantButton">
     <%= link_to "🌱 #{t '.new_plant'}", new_plant_path, data: { turbo_frame: "_top" } %>
   </div>
+  <% snoozed_count = @snoozed_count || current_project.plants.where(archived: false).where("snoozed_until > ?", Time.current).count %>
+  <% if snoozed_count > 0 && !@show_snoozed %>
+    <div class="snoozed-toggle">
+      <%= link_to "😴 Show #{snoozed_count} snoozed plant#{'s' if snoozed_count != 1}", plants_path(show_snoozed: true), data: { turbo_frame: "plants-results" }, class: "snoozed-toggle-link" %>
+    </div>
+  <% elsif @show_snoozed %>
+    <div class="snoozed-toggle">
+      <%= link_to "Hide snoozed plants", plants_path, data: { turbo_frame: "plants-results" }, class: "snoozed-toggle-link" %>
+    </div>
+  <% end %>
 </div>
 </div>
 <% end %>

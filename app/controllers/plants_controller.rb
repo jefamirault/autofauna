@@ -1,7 +1,7 @@
 class PlantsController < ApplicationController
   before_action :authenticate
   before_action :set_project
-  before_action :set_plant, only: %i[ show edit update destroy create_share revoke_share regenerate_share create_view_share revoke_view_share regenerate_view_share ]
+  before_action :set_plant, only: %i[ show edit update destroy create_share revoke_share regenerate_share create_view_share revoke_view_share regenerate_view_share snooze unsnooze ]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
 
@@ -49,7 +49,10 @@ class PlantsController < ApplicationController
     @q = current_project.plants.ransack(params['q'])
 
     @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
-    @plants = @q.result(distinct: true).includes(:location, :recipe, last_watering: [:recipe_batch])
+    @show_snoozed = params[:show_snoozed] == 'true'
+    plants_scope = @q.result(distinct: true)
+    plants_scope = plants_scope.where("snoozed_until IS NULL OR snoozed_until <= ?", Time.current) unless @show_snoozed
+    @plants = plants_scope.includes(:location, :recipe, last_watering: [:recipe_batch])
 
     # Build location filter buttons with colors, sorted by count (descending)
     location_counts = @plants.where.not(location_id: nil).reorder(nil).group(:location_id).count
@@ -103,6 +106,8 @@ class PlantsController < ApplicationController
     ].select { |g| g[:count] > 0 }
 
     @needs_watering_count = urgency_counts[:needs_water]
+    @snoozed_count = current_project.plants.where(archived: false)
+                                    .where("snoozed_until > ?", Time.current).count
 
     @display_mode = params[:display] || "watering"
 
@@ -275,6 +280,24 @@ class PlantsController < ApplicationController
     respond_to do |format|
       format.turbo_stream
       format.html { redirect_to plant_path(@plant), notice: t('plants.messages.view_share_regenerated', default: 'Viewing link regenerated') }
+    end
+  end
+
+  def snooze
+    days = params[:days].to_i
+    days = 1 unless [1, 3, 7].include?(days)
+    @plant.snooze!(days)
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plants_path, notice: t('plants.messages.snoozed', default: "#{@plant.name} snoozed for #{days} day(s)") }
+    end
+  end
+
+  def unsnooze
+    @plant.unsnooze!
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plants_path, notice: t('plants.messages.unsnoozed', default: "#{@plant.name} snooze cancelled") }
     end
   end
 

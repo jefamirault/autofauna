@@ -14,7 +14,11 @@
   <div class="plant-card-details">
     <% unless archive %>
       <div class="plant-card-watering">
-        🕐 <span class="long-text"><%= plant.time_until_watering_text.html_safe %></span><span class="short-text"><%= plant.time_until_watering_short_text.html_safe %></span>
+        <% if plant.snoozed? %>
+          😴 <span>Snoozed until <%= plant.snoozed_until.strftime('%a %-m/%-d') %></span>
+        <% else %>
+          🕐 <span class="long-text"><%= plant.time_until_watering_text.html_safe %></span><span class="short-text"><%= plant.time_until_watering_short_text.html_safe %></span>
+        <% end %>
       </div>
     <% end %>
     <div class="plant-card-meta">
@@ -78,6 +82,23 @@
       </div>
       <div class="plant-card-inline-form" data-inline-watering-target="inlineForm" style="display: none;">
         <%= render 'plants/inline_watering_form', plant: plant %>
+        <div class="inline-snooze-section" data-controller="snooze-plant">
+          <% if plant.snoozed? %>
+            <%= button_to plant_unsnooze_path(plant), method: :delete, class: "inline-snooze-btn", data: { turbo_frame: "_top" } do %>
+              ☀️ Remove Snooze
+            <% end %>
+          <% else %>
+            <button type="button" class="inline-snooze-btn" data-action="click->snooze-plant#toggle" data-snooze-plant-target="toggleBtn">
+              😴 Snooze
+            </button>
+            <div class="snooze-duration-picker" data-snooze-plant-target="picker" style="display: none;">
+              <span class="snooze-label">Snooze for:</span>
+              <%= button_to "1 day", plant_snooze_path(plant), params: { days: 1 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
+              <%= button_to "3 days", plant_snooze_path(plant), params: { days: 3 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
+              <%= button_to "1 week", plant_snooze_path(plant), params: { days: 7 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
+            </div>
+          <% end %>
+        </div>
       </div>
     </div>
   <% end %>

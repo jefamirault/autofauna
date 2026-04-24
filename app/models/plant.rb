@@ -165,6 +165,18 @@ class Plant < ApplicationRecord
     end
   end
 
+  def snoozed?
+    snoozed_until.present? && snoozed_until > Time.current
+  end
+
+  def snooze!(duration_days)
+    update!(snoozed_until: duration_days.days.from_now)
+  end
+
+  def unsnooze!
+    update!(snoozed_until: nil)
+  end
+
   def watering_urgency
     return :scheduled unless date_last_watering && max_watering_freq
     max_watering_days = ((date_last_watering + max_watering_freq.days) - Time.zone.now.to_date).to_i
