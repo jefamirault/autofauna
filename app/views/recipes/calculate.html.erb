@@ -1,0 +1,83 @@
+<% content_for :title, "Calculator: #{@recipe}" %>
+
+<h1>
+  <%= link_to "Recipes", recipes_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @recipe.name, recipe_path(@recipe), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  Calculator
+</h1>
+
+<div class="settings-card"
+     data-controller="recipe-calculator"
+     data-recipe-calculator-url-value="<%= calculate_recipe_path(@recipe, format: :json) %>">
+
+  <h2>Batch Calculator</h2>
+
+  <div class="field-row">
+    <div class="field-row-item">
+      <label>Target Volume</label>
+      <input type="number" step="any" placeholder="e.g. 5.0" min="0"
+             data-recipe-calculator-target="volume"
+             data-action="input->recipe-calculator#calculate">
+    </div>
+    <div class="field-row-item">
+      <label>Units</label>
+      <select data-recipe-calculator-target="units"
+              data-action="change->recipe-calculator#calculate">
+        <% @supported_units.each do |unit| %>
+          <option value="<%= unit %>" <%= 'selected' if unit == 'gal' %>><%= unit %></option>
+        <% end %>
+      </select>
+    </div>
+  </div>
+
+  <details>
+    <summary class="buttonLink" style="display: inline-block; margin-bottom: 0.5rem;">Reference / Concentration Options</summary>
+    <div style="margin-top: 0.5rem;">
+      <div class="field-row">
+        <div class="field-row-item">
+          <label>Reference Volume</label>
+          <input type="number" step="any" value="1" min="0"
+                 data-recipe-calculator-target="referenceVolume"
+                 data-action="input->recipe-calculator#calculate">
+        </div>
+        <div class="field-row-item">
+          <label>Reference Units</label>
+          <select data-recipe-calculator-target="referenceUnits"
+                  data-action="change->recipe-calculator#calculate">
+            <% @supported_units.each do |unit| %>
+              <option value="<%= unit %>" <%= 'selected' if unit == 'gal' %>><%= unit %></option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-row-item">
+          <label>Reference Concentration (ppm)</label>
+          <input type="number" step="1" placeholder="e.g. 400" min="0"
+                 data-recipe-calculator-target="referenceConcentration"
+                 data-action="input->recipe-calculator#calculate">
+        </div>
+        <div class="field-row-item">
+          <label>Target Concentration (ppm)</label>
+          <input type="number" step="1" placeholder="e.g. 800" min="0"
+                 data-recipe-calculator-target="targetConcentration"
+                 data-action="input->recipe-calculator#calculate">
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <div data-recipe-calculator-target="results" style="margin-top: 1rem;">
+    <% if params[:volume].present? %>
+      <%= render 'calculator_result', results: @results %>
+    <% end %>
+  </div>
+</div>
+
+<div>
+  <%= link_to "↩️ Back to Recipe", recipe_path(@recipe), class: 'link' %>
+  <%= link_to "➕ New Batch", new_recipe_batch_path(recipe_id: @recipe.id), class: 'link' %>
+</div>

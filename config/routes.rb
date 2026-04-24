@@ -19,10 +19,17 @@ Rails.application.routes.draw do
 
   resources :locations
   resources :recipe_sources
-  resources :recipes
+  resources :recipes do
+    member do
+      get :calculate
+    end
+  end
   resources :recipe_batches do
     collection do
       get :for_recipe
+    end
+    member do
+      patch :adjust_remaining
     end
   end
   resources :tanks do
