@@ -762,13 +762,13 @@ table.timeline
     @media (max-width: 600px)
       flex-direction: column
 
-    &.urgent
+    &.needs_water
       background: $lightyellow
       border-left-color: $yellow
       .watering-suggestion
         color: $yellow
 
-    &.today
+    &.scheduled
       background: $lightgreen
       border-left-color: $green
       .watering-suggestion
@@ -793,20 +793,17 @@ table.timeline
       color: $blue
       background: rgba(14, 72, 123, 0.05)
 
-    &.today
+    &.scheduled
       color: $green
       background: rgba(0, 77, 64, 0.05)
       &:hover
         background: $lightgreen
 
-    &.urgent
+    &.needs_water
       color: $yellow
       background: rgba(206, 154, 0, 0.07)
       &:hover
         background: $lightyellow
-
-    &.none
-      color: #999
 
     &.watered
       color: $green
@@ -1336,20 +1333,17 @@ main.plants
         color: $blue
         background: rgba(14, 72, 123, 0.05)
 
-      &.today
+      &.scheduled
         color: $green
         background: rgba(0, 77, 64, 0.05)
         &:hover
           background: $lightgreen
 
-      &.urgent
+      &.needs_water
         color: $yellow
         background: rgba(206, 154, 0, 0.07)
         &:hover
           background: $lightyellow
-
-      &.none
-        color: #999
 
     .water-icon
       width: 4em

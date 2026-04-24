@@ -166,15 +166,9 @@ class Plant < ApplicationRecord
   end
 
   def watering_urgency
-    return :none unless date_last_watering && max_watering_freq
+    return :scheduled unless date_last_watering && max_watering_freq
     max_watering_days = ((date_last_watering + max_watering_freq.days) - Time.zone.now.to_date).to_i
-    if max_watering_days < 0
-      :urgent
-    elsif max_watering_days == 0
-      :today
-    else
-      :normal
-    end
+    max_watering_days <= 0 ? :needs_water : :scheduled
   end
 
   def last_fertilized

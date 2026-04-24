@@ -94,16 +94,15 @@ class PlantsController < ApplicationController
     } if no_recipe_count > 0
 
     # Build watering status groups for filtering (single pass)
-    urgency_counts = { urgent: 0, today: 0, normal: 0, none: 0 }
+    urgency_counts = { needs_water: 0, scheduled: 0 }
     @plants.each { |p| urgency_counts[p.watering_urgency] += 1 }
 
     @watering_status_groups = [
-      { status: 'urgent', name: I18n.t('plants.index.overdue'), count: urgency_counts[:urgent] },
-      { status: 'today', name: I18n.t('plants.index.needs_water_today'), count: urgency_counts[:today] },
-      { status: 'scheduled', name: I18n.t('plants.index.scheduled'), count: urgency_counts[:normal] + urgency_counts[:none] }
-    ]
+      { status: 'needs_water', name: I18n.t('plants.index.needs_water'), count: urgency_counts[:needs_water] },
+      { status: 'scheduled', name: I18n.t('plants.index.scheduled'), count: urgency_counts[:scheduled] }
+    ].select { |g| g[:count] > 0 }
 
-    @needs_watering_count = urgency_counts[:urgent] + urgency_counts[:today]
+    @needs_watering_count = urgency_counts[:needs_water]
 
     @display_mode = params[:display] || "watering"
 

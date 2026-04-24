@@ -247,36 +247,26 @@ h1
 
 .watering-status-btn
   // Inactive states with light backgrounds
-  &[data-status="urgent"]
+  &[data-status="needs_water"]
     background: color-mix(in srgb, #f59e0b 15%, transparent)
     color: #f59e0b
     &:hover
       background: color-mix(in srgb, #f59e0b 25%, transparent)
-  &[data-status="today"]
+  &[data-status="scheduled"]
     background: color-mix(in srgb, #10b981 15%, transparent)
     color: #10b981
     &:hover
       background: color-mix(in srgb, #10b981 25%, transparent)
-  &[data-status="scheduled"]
-    background: color-mix(in srgb, #3b82f6 15%, transparent)
-    color: #3b82f6
-    &:hover
-      background: color-mix(in srgb, #3b82f6 25%, transparent)
 
   // Active states with solid backgrounds
   &.active
-    &[data-status="urgent"]
+    &[data-status="needs_water"]
       background: #f59e0b
       color: white
       &:hover
         opacity: 0.9
-    &[data-status="today"]
-      background: #10b981
-      color: white
-      &:hover
-        opacity: 0.9
     &[data-status="scheduled"]
-      background: #3b82f6
+      background: #10b981
       color: white
       &:hover
         opacity: 0.9
@@ -425,18 +415,15 @@ h1
   &.normal
     background: $lightblue
 
-  &.today
+  &.scheduled
     background: $lightgreen
     .plant-card-watering
       color: $green
 
-  &.urgent
+  &.needs_water
     background: $lightyellow
     .plant-card-watering
       color: $yellow
-
-  &.none
-    background: rgba(153, 153, 153, 0.1)
 
 // Column 2: Name + Graphic
 .plant-card-graphic-col
@@ -568,20 +555,17 @@ h1
     color: $blue
     background: rgba(14, 72, 123, 0.05)
 
-  &.today
+  &.scheduled
     color: $green
     background: rgba(0, 77, 64, 0.05)
     &:hover
       background: $lightgreen
 
-  &.urgent
+  &.needs_water
     color: $yellow
     background: rgba(206, 154, 0, 0.07)
     &:hover
       background: $lightyellow
-
-  &.none
-    color: #999
 
 div.plant-card-water-col
   padding: 0
