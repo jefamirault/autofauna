@@ -2,6 +2,7 @@ class Watering < ApplicationRecord
   belongs_to :plant
   belongs_to :recipe_batch, optional: true
   belongs_to :recipe, optional: true
+  belongs_to :recipe_source, optional: true
   has_many :soil_moisture_readings, dependent: :nullify
 
   validates :watered_at, presence: true
@@ -115,9 +116,22 @@ class Watering < ApplicationRecord
     recipe_batch.increment_remaining!(volume, units)
   end
 
+  def product_label
+    if recipe_batch.present?
+      recipe_batch.label
+    elsif recipe.present?
+      recipe.name
+    elsif recipe_source.present?
+      recipe_source.name
+    end
+  end
+
   def set_recipe_from_batch
     if recipe_batch.present? && recipe.blank?
       self.recipe = recipe_batch.recipe
+    end
+    if recipe_batch.present? || recipe.present?
+      self.recipe_source = nil
     end
   end
 

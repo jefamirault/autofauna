@@ -17,7 +17,7 @@ class WateringsController < ApplicationController
   # GET /waterings/new
   def new
     @watering = Watering.new plant_id: params[:plant_id], watered_at: Time.zone.now, volume: params[:volume], units: params[:units], notes: params[:notes],
-      recipe_batch_id: params[:recipe_batch_id], recipe_id: params[:recipe_id], tds: params[:tds]
+      recipe_batch_id: params[:recipe_batch_id], recipe_id: params[:recipe_id], recipe_source_id: params[:recipe_source_id], tds: params[:tds]
 
     # Check for recent standalone moisture reading (within last hour) to pre-fill
     if @watering.plant
@@ -111,6 +111,6 @@ class WateringsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def watering_params
-      params.require(:watering).permit(:plant_id, :watered_at, :notes, :volume, :units, :tds, :recipe_batch_id, :recipe_id, :pre_moisture, :post_moisture, :pre_moisture_reading_id)
+      params.require(:watering).permit(:plant_id, :watered_at, :notes, :volume, :units, :tds, :recipe_batch_id, :recipe_id, :recipe_source_id, :pre_moisture, :post_moisture, :pre_moisture_reading_id)
     end
 end
