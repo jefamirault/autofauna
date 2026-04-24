@@ -1,0 +1,42 @@
+<%= form_with model: [@tank, @feeding_instruction], local: true do |form| %>
+  <% if @feeding_instruction.errors.any? %>
+    <div class="auth-errors">
+      <h3>Please fix the following errors:</h3>
+      <ul>
+        <% @feeding_instruction.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :food_name, "Food Name" %>
+    <%= form.text_field :food_name, placeholder: "e.g. Hikari Cichlid Staple" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :amount, "Amount" %>
+    <%= form.text_field :amount, placeholder: "e.g. 10" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :unit, "Unit" %>
+    <%= form.text_field :unit, placeholder: "e.g. pellets, flakes, ml" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :frequency, "Frequency" %>
+    <%= form.text_field :frequency, placeholder: "e.g. 1x/day, 2x/week" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :notes, "Livestock / Notes" %>
+    <%= form.text_area :notes, rows: 3, placeholder: "e.g. 1 x Oscar Cichlid, 2 x Silver Dollar" %>
+  </div>
+
+  <div class="submit">
+    <%= form.submit "💾 #{@feeding_instruction.new_record? ? 'Add' : 'Update'} Feeding Instruction", class: "saveButton" %>
+    <%= link_to "❌ Cancel", tank_path(@tank), class: "linkDanger" %>
+  </div>
+<% end %>

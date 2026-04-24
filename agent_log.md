@@ -77,6 +77,20 @@ Current session log. Previous logs archived in `agent_log/`.
 
 ---
 
+## 2026-04-24: Sprint v0.9.2 — Worker 3 — Tank Management
+
+**Issues:** #44 (water change log), #45 (feeding instructions), #46 (equipment maintenance logs)
+
+**Plan:**
+- Migrations: add water_change schedule to tanks; create water_changes, feeding_instructions, equipment, maintenance_logs tables
+- Models: WaterChange, FeedingInstruction, Equipment, MaintenanceLog; Tank model updated with associations
+- Controllers: WaterChangesController, FeedingInstructionsController, EquipmentController, MaintenanceLogsController (all nested under tanks)
+- Routes: nested resources under tanks
+- Views: standard CRUD forms; tank show updated with new sections
+- Tests: controller tests; fixtures for water_changes only (equipment/feeding_instructions load before tanks alphabetically)
+
+---
+
 ## 2026-03-22: Sprint 0.9.1 (Round 2) Kickoff
 
 **What:** Launched milestone 0.9.1 sprint with 2 parallel workers on new issues.

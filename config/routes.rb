@@ -27,6 +27,11 @@ Rails.application.routes.draw do
   end
   resources :tanks do
     resources :water_tests
+    resources :water_changes, except: [:show]
+    resources :feeding_instructions, except: [:show]
+    resources :equipment do
+      resources :maintenance_logs
+    end
   end
   resources :sensor_types
   resources :sensors

@@ -1,0 +1,33 @@
+<%= form_with model: [@tank, @equipment_item], local: true do |form| %>
+  <% if @equipment_item.errors.any? %>
+    <div class="auth-errors">
+      <h3>Please fix the following errors:</h3>
+      <ul>
+        <% @equipment_item.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name, "Equipment Name" %>
+    <%= form.text_field :name, placeholder: "e.g. Filter, Lights, Aerator, CO2 Diffuser" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :maintenance_instructions, "Maintenance Instructions" %>
+    <%= form.text_area :maintenance_instructions, rows: 4,
+                       placeholder: "e.g. Clean filter media 1x/month, rinse in tank water" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :maintenance_interval_days, "Maintenance Interval (days)" %>
+    <%= form.number_field :maintenance_interval_days, min: 1, placeholder: "e.g. 30 for monthly, 7 for weekly" %>
+  </div>
+
+  <div class="submit">
+    <%= form.submit "💾 #{@equipment_item.new_record? ? 'Add' : 'Update'} Equipment", class: "saveButton" %>
+    <%= link_to "❌ Cancel", tank_path(@tank), class: "linkDanger" %>
+  </div>
+<% end %>

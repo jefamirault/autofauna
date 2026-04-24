@@ -1,0 +1,28 @@
+<%= form_with model: [@tank, @equipment_item, @maintenance_log], local: true do |form| %>
+  <% if @maintenance_log.errors.any? %>
+    <div class="auth-errors">
+      <h3>Please fix the following errors:</h3>
+      <ul>
+        <% @maintenance_log.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :performed_at, "Date & Time" %>
+    <%= form.datetime_local_field :performed_at,
+                                  value: (@maintenance_log.performed_at&.strftime("%Y-%m-%dT%H:%M") || Time.current.strftime("%Y-%m-%dT%H:%M")) %>
+  </div>
+
+  <div class="field">
+    <%= form.label :notes %>
+    <%= form.text_area :notes, rows: 3, placeholder: "Optional notes about what was done..." %>
+  </div>
+
+  <div class="submit">
+    <%= form.submit "💾 #{@maintenance_log.new_record? ? 'Log' : 'Update'} Maintenance", class: "saveButton" %>
+    <%= link_to "❌ Cancel", tank_equipment_path(@tank, @equipment_item), class: "linkDanger" %>
+  </div>
+<% end %>
