@@ -301,6 +301,9 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
   z-index: 1
 
 #headerEmail
+  display: flex
+  align-items: center
+  gap: 0.35rem
   padding: 0.75rem 1rem
   font-size: 1.1rem
   color: rgba(255, 255, 255, 0.85)
@@ -320,6 +323,9 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
     font-size: 1.4rem
     @media (max-width: 600px)
       display: inline
+  .dropdown-chevron
+    font-size: 0.85rem
+    opacity: 0.7
 
 // Header dropdown menu
 .header-dropdown
@@ -470,12 +476,12 @@ body:has(main.plants.index)
     &:hover
       background: #777
   .locale-options
-    border-top: 1px solid #fff7
+    border-bottom: 1px solid #fff7
     .locale-option
-      border-bottom: 1px solid #fff7
+      border-top: 1px solid #fff3
       &.selected
-        background: #777
-        cursor: default
+        background: #444
+        font-weight: 500
 
 .hidden
   display: none !important
