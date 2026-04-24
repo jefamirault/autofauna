@@ -247,6 +247,49 @@ tbody
     td:last-child
       border-right: 2px solid $lightgreen
 
+.waterings-count-info
+  color: #666
+  font-size: 0.9em
+  margin: 0.5rem 0 0.25rem
+  clear: both
+
+.waterings-pagination
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: 0.25rem
+  padding: 1rem 0
+  flex-wrap: wrap
+
+.pagination-btn
+  display: inline-block
+  padding: 0.25rem 0.6rem
+  border-radius: 999px
+  font-size: 0.85em
+  border: 1px solid rgba(14, 72, 123, 0.3)
+  background: transparent
+  color: $blue
+  text-decoration: none
+  transition: all 0.2s ease
+  white-space: nowrap
+  min-width: 2rem
+  text-align: center
+  &:hover
+    background: $lightblue
+    border-style: solid
+    text-decoration: none
+  &.active
+    background: $blue
+    color: white
+    border-color: $blue
+  &.disabled
+    opacity: 0.4
+    cursor: default
+
+.pagination-ellipsis
+  color: #999
+  padding: 0 0.25rem
+
 table.blue
   border-color: $blue
 
