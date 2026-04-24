@@ -85,7 +85,11 @@
       </button>
       <%= link_to config[:nav_path], class: 'sidebarNav' do %>
         <div id="logoContainer">
-          <%= image_tag config[:icon] %>
+          <% if config[:sidebar_graphic] %>
+            <%= image_tag config[:sidebar_graphic], class: 'plant-graphic-image' %>
+          <% else %>
+            <%= image_tag config[:icon] %>
+          <% end %>
         </div>
       <% end %>
       <nav data-action="click->sidebar#handleNavClick">

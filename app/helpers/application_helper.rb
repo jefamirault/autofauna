@@ -87,13 +87,13 @@ module ApplicationHelper
       section_title = t('layouts.application.plants')
       title = action.in?(%w[show edit]) && @plant ? @plant.to_s : section_title
       graphic = action.in?(%w[show edit]) ? @plant&.graphic_path : nil
-      { icon: 'autofauna_icon.png', title: title, section_title: section_title, gradient_class: 'header-plants', nav_path: plants_path, plant_graphic: graphic }
+      { icon: 'autofauna_icon.png', title: title, section_title: section_title, gradient_class: 'header-plants', nav_path: plants_path, plant_graphic: nil, sidebar_graphic: graphic }
     when 'waterings'
       section_title = t('layouts.application.waterings')
       plant = @watering&.plant || @plant
       title = action.in?(%w[show edit water quick_water]) && plant ? plant.to_s : section_title
       graphic = action.in?(%w[show edit new water quick_water]) ? plant&.graphic_path : nil
-      { icon: 'water_icon.png', title: title, section_title: section_title, gradient_class: 'header-waterings', nav_path: waterings_path, plant_graphic: graphic }
+      { icon: 'water_icon.png', title: title, section_title: section_title, gradient_class: 'header-waterings', nav_path: waterings_path, plant_graphic: nil, sidebar_graphic: graphic }
     when 'recipes'
       section_title = t('layouts.application.waterings')
       title = action.in?(%w[show edit]) && @recipe ? @recipe.to_s : section_title
