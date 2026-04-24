@@ -105,6 +105,8 @@ class PlantsController < ApplicationController
 
     @needs_watering_count = urgency_counts[:urgent] + urgency_counts[:today]
 
+    @saved_searches = current_project.saved_searches.where(user_id: current_user.id).order(:name)
+
     @display_mode = params[:display] || "watering"
 
     # Always build location groups (needed for client-side display mode switching)
