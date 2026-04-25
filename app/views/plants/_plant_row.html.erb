@@ -84,7 +84,7 @@
         <%= render 'plants/inline_watering_form', plant: plant %>
         <div class="inline-snooze-section" data-controller="snooze-plant">
           <% if plant.snoozed? %>
-            <%= button_to plant_unsnooze_path(plant), method: :delete, class: "inline-snooze-btn", data: { turbo_frame: "_top" } do %>
+            <%= button_to unsnooze_plant_path(plant), method: :delete, class: "inline-snooze-btn", data: { turbo_frame: "_top" } do %>
               ☀️ Remove Snooze
             <% end %>
           <% else %>
@@ -93,9 +93,9 @@
             </button>
             <div class="snooze-duration-picker" data-snooze-plant-target="picker" style="display: none;">
               <span class="snooze-label">Snooze for:</span>
-              <%= button_to "1 day", plant_snooze_path(plant), params: { days: 1 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
-              <%= button_to "3 days", plant_snooze_path(plant), params: { days: 3 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
-              <%= button_to "1 week", plant_snooze_path(plant), params: { days: 7 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
+              <%= button_to "1 day", snooze_plant_path(plant), params: { days: 1 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
+              <%= button_to "3 days", snooze_plant_path(plant), params: { days: 3 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
+              <%= button_to "1 week", snooze_plant_path(plant), params: { days: 7 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
             </div>
           <% end %>
         </div>

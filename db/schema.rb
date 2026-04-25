@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_21_100001) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -88,6 +88,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_21_100001) do
     t.bigint "recipe_id"
     t.string "view_share_token"
     t.boolean "view_share_enabled", default: false
+    t.datetime "snoozed_until"
     t.index ["last_watering_id"], name: "index_plants_on_last_watering_id"
     t.index ["location_id"], name: "index_plants_on_location_id"
     t.index ["recipe_id"], name: "index_plants_on_recipe_id"
@@ -167,6 +168,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_21_100001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "color", default: "#7B1FA2"
+    t.integer "default_tds"
     t.index ["project_id", "name"], name: "index_recipes_on_project_id_and_name", unique: true
     t.index ["project_id"], name: "index_recipes_on_project_id"
   end
