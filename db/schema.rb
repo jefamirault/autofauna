@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_24_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -18,6 +18,28 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
     t.integer "user_id"
     t.integer "project_id"
     t.integer "role"
+  end
+
+  create_table "equipment", force: :cascade do |t|
+    t.bigint "tank_id", null: false
+    t.string "name"
+    t.text "maintenance_instructions"
+    t.integer "maintenance_interval_days"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tank_id"], name: "index_equipment_on_tank_id"
+  end
+
+  create_table "feeding_instructions", force: :cascade do |t|
+    t.bigint "tank_id", null: false
+    t.string "food_name"
+    t.string "amount"
+    t.string "unit"
+    t.string "frequency"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tank_id"], name: "index_feeding_instructions_on_tank_id"
   end
 
   create_table "hygro_sensor_readings", force: :cascade do |t|
@@ -54,6 +76,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
     t.index ["user_id"], name: "index_log_entries_on_user_id"
   end
 
+  create_table "maintenance_logs", force: :cascade do |t|
+    t.bigint "equipment_id", null: false
+    t.datetime "performed_at"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["equipment_id"], name: "index_maintenance_logs_on_equipment_id"
+    t.index ["performed_at"], name: "index_maintenance_logs_on_performed_at"
+  end
+
   create_table "notification_configs", force: :cascade do |t|
     t.string "cron_expression", default: "0 * * * *", null: false
     t.boolean "notifications_paused", default: false, null: false
@@ -63,6 +95,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
     t.string "push_body_template", default: "{{plant_label}} is due for watering", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "plant_recipes", force: :cascade do |t|
+    t.bigint "plant_id", null: false
+    t.bigint "recipe_id", null: false
+    t.integer "position", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plant_id", "recipe_id"], name: "index_plant_recipes_on_plant_id_and_recipe_id", unique: true
+    t.index ["plant_id"], name: "index_plant_recipes_on_plant_id"
+    t.index ["recipe_id"], name: "index_plant_recipes_on_recipe_id"
   end
 
   create_table "plants", force: :cascade do |t|
@@ -132,6 +175,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
     t.boolean "active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.float "remaining_volume"
+    t.datetime "last_adjusted_at"
     t.index ["project_id"], name: "index_recipe_batches_on_project_id"
     t.index ["recipe_id"], name: "index_recipe_batches_on_recipe_id"
   end
@@ -171,6 +216,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
     t.integer "default_tds"
     t.index ["project_id", "name"], name: "index_recipes_on_project_id_and_name", unique: true
     t.index ["project_id"], name: "index_recipes_on_project_id"
+  end
+
+  create_table "saved_searches", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "project_id", null: false
+    t.string "name", null: false
+    t.string "query_term", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "project_id"], name: "index_saved_searches_on_user_id_and_project_id"
   end
 
   create_table "sensor_types", force: :cascade do |t|
@@ -225,6 +280,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
     t.integer "capacity_units"
     t.integer "project_id"
     t.integer "location_id"
+    t.integer "water_change_min_days"
+    t.integer "water_change_max_days"
   end
 
   create_table "users", force: :cascade do |t|
@@ -251,6 +308,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
     t.index ["google_uid"], name: "index_users_on_google_uid", unique: true
   end
 
+  create_table "water_changes", force: :cascade do |t|
+    t.bigint "tank_id", null: false
+    t.datetime "changed_at"
+    t.float "percentage"
+    t.float "volume"
+    t.integer "volume_units"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["changed_at"], name: "index_water_changes_on_changed_at"
+    t.index ["tank_id"], name: "index_water_changes_on_tank_id"
+  end
+
   create_table "water_tests", force: :cascade do |t|
     t.bigint "tank_id", null: false
     t.jsonb "parameters", default: {}, null: false
@@ -275,8 +345,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
     t.integer "tds"
     t.bigint "recipe_batch_id"
     t.bigint "recipe_id"
+    t.bigint "recipe_source_id"
     t.index ["recipe_batch_id"], name: "index_waterings_on_recipe_batch_id"
     t.index ["recipe_id"], name: "index_waterings_on_recipe_id"
+    t.index ["recipe_source_id"], name: "index_waterings_on_recipe_source_id"
   end
 
   create_table "weather_locations", force: :cascade do |t|
@@ -301,7 +373,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "equipment", "tanks"
+  add_foreign_key "feeding_instructions", "tanks"
   add_foreign_key "log_entries", "users", on_delete: :nullify
+  add_foreign_key "maintenance_logs", "equipment"
+  add_foreign_key "plant_recipes", "plants"
+  add_foreign_key "plant_recipes", "recipes"
   add_foreign_key "plants", "locations"
   add_foreign_key "plants", "recipes"
   add_foreign_key "push_subscriptions", "users"
@@ -312,10 +389,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_100002) do
   add_foreign_key "recipe_sources", "projects"
   add_foreign_key "recipe_sources", "tanks"
   add_foreign_key "recipes", "projects"
+  add_foreign_key "saved_searches", "projects"
+  add_foreign_key "saved_searches", "users"
   add_foreign_key "soil_moisture_readings", "plants"
   add_foreign_key "soil_moisture_readings", "waterings"
+  add_foreign_key "water_changes", "tanks"
   add_foreign_key "water_tests", "tanks"
   add_foreign_key "waterings", "recipe_batches"
+  add_foreign_key "waterings", "recipe_sources"
   add_foreign_key "waterings", "recipes"
   add_foreign_key "weather_locations", "users"
 end
