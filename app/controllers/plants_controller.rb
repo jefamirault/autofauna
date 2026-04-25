@@ -50,8 +50,10 @@ class PlantsController < ApplicationController
 
     @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
     @show_snoozed = params[:show_snoozed] == 'true'
+    @hide_scheduled = params[:hide_scheduled] == 'true'
     plants_scope = @q.result(distinct: true)
     plants_scope = plants_scope.where("snoozed_until IS NULL OR snoozed_until <= ?", Time.current) unless @show_snoozed
+    plants_scope = plants_scope.where("date_max_watering IS NOT NULL AND date_max_watering <= ?", Date.today) if @hide_scheduled
     @plants = plants_scope.includes(:location, :recipe, :plant_recipes, :recipes, last_watering: [:recipe_batch, :recipe_source])
 
     # Build location filter buttons with colors, sorted by count (descending)
@@ -96,16 +98,7 @@ class PlantsController < ApplicationController
       color: '#999999'
     } if no_recipe_count > 0
 
-    # Build watering status groups for filtering (single pass)
-    urgency_counts = { needs_water: 0, scheduled: 0 }
-    @plants.each { |p| urgency_counts[p.watering_urgency] += 1 }
-
-    @watering_status_groups = [
-      { status: 'needs_water', name: I18n.t('plants.index.needs_water'), count: urgency_counts[:needs_water] },
-      { status: 'scheduled', name: I18n.t('plants.index.scheduled'), count: urgency_counts[:scheduled] }
-    ].select { |g| g[:count] > 0 }
-
-    @needs_watering_count = urgency_counts[:needs_water]
+    @needs_watering_count = plants_scope.where("date_max_watering IS NOT NULL AND date_max_watering <= ?", Date.today).count
     @snoozed_count = current_project.plants.where(archived: false)
                                     .where("snoozed_until > ?", Time.current).count
 

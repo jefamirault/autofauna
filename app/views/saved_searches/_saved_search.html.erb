@@ -1,8 +1,13 @@
 <div class="saved-search-chip" id="<%= dom_id(saved_search) %>">
-  <%= link_to plants_path('q' => { 'name_or_location_name_cont' => saved_search.query_term }),
+  <% chip_url = saved_search.filter_params.present? ?
+      plants_path + saved_search.filter_params :
+      plants_path('q' => { 'name_or_location_name_cont' => saved_search.query_term }) %>
+  <%= link_to chip_url,
       class: "saved-search-link",
-      title: saved_search.query_term,
-      data: { turbo_frame: "plants-results" } do %>
+      title: saved_search.name,
+      data: { turbo_frame: "plants-results", turbo_action: "advance",
+              action: "click->location-filter#loadSavedSearch",
+              query_term: saved_search.query_term.to_s } do %>
     ⭐ <%= saved_search.name %>
   <% end %>
   <%= button_to "✕", saved_search_path(saved_search), method: :delete,

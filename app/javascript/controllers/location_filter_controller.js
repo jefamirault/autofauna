@@ -4,12 +4,13 @@ export default class extends Controller {
   static targets = [
     "filterButton", "recipeFilterButton", "buttonContainer", "recipeButtonContainer",
     "locationGroup", "recipeGroup", "resultsCount", "wateringCount", "totalCount",
-    "searchInput", "clearSearchBtn", "wateringStatusButton", "wateringStatusContainer",
+    "searchInput", "clearSearchBtn",
     "wateringGroup", "groupCount",
-    "addStatusFilterBtn", "addRecipeFilterBtn", "addLocationFilterBtn",
+    "addRecipeFilterBtn", "addLocationFilterBtn",
     "locationFilterContainer", "recipeFilterContainer", "addFiltersContainer", "filterRow",
     "locationGroupsContainer", "recipeGroupsContainer", "wateringGroupsContainer",
-    "paginationControls", "paginationNav", "paginationInfo"
+    "paginationControls", "paginationNav", "paginationInfo",
+    "saveSearchContainer", "filterParamsInput"
   ]
   static values = {
     displayMode: String,
@@ -21,25 +22,20 @@ export default class extends Controller {
     searchTerm: String,
     perPage: { type: Number, default: 20 },
     currentPage: { type: Number, default: 1 },
-    showingTemplate: String
+    showingTemplate: String,
+    clearSearchLabel: { type: String, default: "Clear Search" }
   }
 
   connect() {
     this.selectedLocations = new Set()
     this.selectedRecipes = new Set()
-    this.selectedWateringStatuses = new Set()
     this.updateSearchClearButton()
+    this.cleanUrl()
+    this.initFromUrl()
     this.updateAddFiltersVisibility()
+    this.updateSaveFormVisibility()
+    if (this.hasFilterParamsInputTarget) this.filterParamsInputTarget.value = window.location.search
     this.paginateVisibleCards()
-
-    // Observe status filter scroll container for overflow
-    if (this.hasWateringStatusContainerTarget) {
-      const scrollEl = this.wateringStatusContainerTarget.querySelector('.filter-buttons-scroll')
-      if (scrollEl) {
-        this.statusResizeObserver = new ResizeObserver(() => this.checkStatusOverflow())
-        this.statusResizeObserver.observe(scrollEl)
-      }
-    }
 
     // Re-apply counts and pagination after Turbo Stream replaces a plant card
     document.addEventListener("turbo:before-stream-render", this._handleStreamRender = (event) => {
@@ -55,9 +51,6 @@ export default class extends Controller {
   }
 
   disconnect() {
-    if (this.statusResizeObserver) {
-      this.statusResizeObserver.disconnect()
-    }
     if (this._handleStreamRender) {
       document.removeEventListener("turbo:before-stream-render", this._handleStreamRender)
     }
@@ -89,6 +82,8 @@ export default class extends Controller {
     this.currentPageValue = 1
     this.filterPlants()
     this.updateResultsCount()
+    this.syncFiltersToUrl()
+    this.updateSaveFormVisibility()
   }
 
   updateButtonStates() {
@@ -121,7 +116,6 @@ export default class extends Controller {
   filterPlants() {
     const showAllLocations = this.selectedLocations.size === 0
     const showAllRecipes = this.selectedRecipes.size === 0
-    const showAllStatuses = this.selectedWateringStatuses.size === 0
 
     if (this.displayModeValue === "location") {
       this.locationGroupTargets.forEach(group => {
@@ -134,14 +128,11 @@ export default class extends Controller {
 
           cards.forEach(card => {
             const recipeId = card.dataset.recipeId
-            const wateringStatus = card.dataset.wateringStatus
             const recipeMatch = showAllRecipes || this.selectedRecipes.has(recipeId)
-            const statusMatch = showAllStatuses || this.selectedWateringStatuses.has(wateringStatus)
-            const visible = recipeMatch && statusMatch
             card.removeAttribute("data-filter-hidden")
-            card.style.display = visible ? "" : "none"
-            if (!visible) card.setAttribute("data-filter-hidden", "true")
-            if (visible) visibleCount++
+            card.style.display = recipeMatch ? "" : "none"
+            if (!recipeMatch) card.setAttribute("data-filter-hidden", "true")
+            if (recipeMatch) visibleCount++
           })
 
           group.style.display = visibleCount > 0 ? "" : "none"
@@ -164,14 +155,11 @@ export default class extends Controller {
 
           cards.forEach(card => {
             const locationId = card.dataset.locationId
-            const wateringStatus = card.dataset.wateringStatus
             const locationMatch = showAllLocations || this.selectedLocations.has(locationId)
-            const statusMatch = showAllStatuses || this.selectedWateringStatuses.has(wateringStatus)
-            const visible = locationMatch && statusMatch
             card.removeAttribute("data-filter-hidden")
-            card.style.display = visible ? "" : "none"
-            if (!visible) card.setAttribute("data-filter-hidden", "true")
-            if (visible) visibleCount++
+            card.style.display = locationMatch ? "" : "none"
+            if (!locationMatch) card.setAttribute("data-filter-hidden", "true")
+            if (locationMatch) visibleCount++
           })
 
           group.style.display = visibleCount > 0 ? "" : "none"
@@ -189,13 +177,10 @@ export default class extends Controller {
       cards.forEach(card => {
         const locationId = card.dataset.locationId
         const recipeId = card.dataset.recipeId
-        const wateringStatus = card.dataset.wateringStatus
         const locationMatch = showAllLocations || this.selectedLocations.has(locationId)
         const recipeMatch = showAllRecipes || this.selectedRecipes.has(recipeId)
-        const statusMatch = showAllStatuses || this.selectedWateringStatuses.has(wateringStatus)
-        const visible = locationMatch && recipeMatch && statusMatch
         card.removeAttribute("data-filter-hidden")
-        if (!visible) {
+        if (!locationMatch || !recipeMatch) {
           card.setAttribute("data-filter-hidden", "true")
         }
       })
@@ -341,7 +326,6 @@ export default class extends Controller {
     if (!this.hasWateringCountTarget || !this.hasTotalCountTarget) return
     const showAllLocations = this.selectedLocations.size === 0
     const showAllRecipes = this.selectedRecipes.size === 0
-    const showAllStatuses = this.selectedWateringStatuses.size === 0
 
     // Only count cards in the currently visible display mode container
     let container
@@ -367,11 +351,9 @@ export default class extends Controller {
       } else {
         const locationId = card.dataset.locationId
         const recipeId = card.dataset.recipeId
-        const wateringStatus = card.dataset.wateringStatus
         const locationMatch = showAllLocations || this.selectedLocations.has(locationId)
         const recipeMatch = showAllRecipes || this.selectedRecipes.has(recipeId)
-        const statusMatch = showAllStatuses || this.selectedWateringStatuses.has(wateringStatus)
-        visible = locationMatch && recipeMatch && statusMatch
+        visible = locationMatch && recipeMatch
       }
 
       if (visible) {
@@ -389,7 +371,7 @@ export default class extends Controller {
 
     // Update total count (second line)
     let totalText
-    const hasActiveFilters = !showAllLocations || !showAllRecipes || !showAllStatuses
+    const hasActiveFilters = !showAllLocations || !showAllRecipes
 
     if (hasActiveFilters && this.searchTermValue) {
       // Filters + search active
@@ -411,33 +393,26 @@ export default class extends Controller {
         .replace("__TOTAL__", total)
     }
 
-    // Preserve the "Clear Search" link if present
-    const clearLink = this.totalCountTarget.querySelector("a")
-    const clearLinkClone = clearLink ? clearLink.cloneNode(true) : null
-
     // Update the text content
     this.totalCountTarget.textContent = totalText
 
-    // Re-append the clear link if it existed
-    if (clearLinkClone) {
+    // Show/hide "Clear Search" link based on any active state
+    const shouldShowClear = hasActiveFilters || !!this.searchTermValue || this.displayModeValue !== "watering"
+    const existingLink = this.totalCountTarget.querySelector("a")
+    if (shouldShowClear && !existingLink) {
+      const link = document.createElement("a")
+      link.href = "#"
+      link.textContent = this.clearSearchLabelValue
+      link.dataset.action = "click->location-filter#clearSearch"
       this.totalCountTarget.appendChild(document.createTextNode(" - "))
-      this.totalCountTarget.appendChild(clearLinkClone)
+      this.totalCountTarget.appendChild(link)
+    } else if (!shouldShowClear && existingLink) {
+      existingLink.previousSibling?.remove()
+      existingLink.remove()
     }
 
     // Update group counts
     this.updateGroupCounts()
-  }
-
-  clearSearch(event) {
-    event.preventDefault()
-    const searchInput = document.querySelector('#headerSearch input[type="search"]')
-    if (searchInput) {
-      searchInput.value = ""
-      const form = document.querySelector('#headerSearch form')
-      if (form) {
-        form.requestSubmit()
-      }
-    }
   }
 
   toggleRecipeFilter(event) {
@@ -456,6 +431,8 @@ export default class extends Controller {
     this.currentPageValue = 1
     this.filterPlants()
     this.updateResultsCount()
+    this.syncFiltersToUrl()
+    this.updateSaveFormVisibility()
   }
 
   updateRecipeButtonStates() {
@@ -617,6 +594,9 @@ export default class extends Controller {
 
     this.currentPageValue = 1
     this.updateDisplayMode()
+    this.updateSaveFormVisibility()
+    if (this.hasFilterParamsInputTarget) this.filterParamsInputTarget.value = url.search
+    this.updateSearchClearButton()
   }
 
   updateDisplayMode() {
@@ -643,64 +623,133 @@ export default class extends Controller {
     this.updateResultsCount()
   }
 
-  // Watering status filtering
-  toggleWateringStatusFilter(event) {
-    const status = event.currentTarget.dataset.status
-    if (this.selectedWateringStatuses.has(status)) {
-      this.selectedWateringStatuses.delete(status)
-    } else {
-      this.selectedWateringStatuses.add(status)
-    }
-    this.applyWateringStatusFilter()
+  clearSearch(event) {
+    event.preventDefault()
+    // Clear filter URL params so _injectFilterParams doesn't carry them forward
+    const url = new URL(window.location.href)
+    url.searchParams.delete("locations[]")
+    url.searchParams.delete("recipes[]")
+    url.searchParams.delete("hide_scheduled")
+    window.history.replaceState({}, "", url.toString())
+
+    this._resetInstantly()
+
+    const form = this.hasSearchInputTarget
+      ? this.searchInputTarget.closest("form")
+      : document.querySelector('#headerSearch form')
+    if (form) form.requestSubmit()
   }
 
-  applyWateringStatusFilter() {
-    this.updateWateringStatusButtonStates()
-    this.currentPageValue = 1
-    this.filterPlants()
-    this.updateResultsCount()
-  }
+  _resetInstantly() {
+    // Clear filter selection state
+    this.selectedLocations.clear()
+    this.selectedRecipes.clear()
 
-  updateWateringStatusButtonStates() {
-    if (!this.hasWateringStatusButtonTarget) return
-    this.wateringStatusButtonTargets.forEach(button => {
-      const status = button.dataset.status
-      if (this.selectedWateringStatuses.has(status)) {
-        button.classList.add("active")
-      } else {
-        button.classList.remove("active")
+    // Deactivate all filter buttons (works across both controller instances)
+    document.querySelectorAll('[data-location-filter-target="filterButton"]').forEach(b => b.classList.remove("active"))
+    document.querySelectorAll('[data-location-filter-target="recipeFilterButton"]').forEach(b => b.classList.remove("active"))
+
+    // Reset hide-scheduled switch
+    this._syncHideScheduledSwitch(false)
+
+    // Clear search input
+    const searchInput = this.hasSearchInputTarget
+      ? this.searchInputTarget
+      : document.querySelector('[data-location-filter-target="searchInput"]')
+    if (searchInput) searchInput.value = ""
+
+    // Hide ✕ clear button
+    const clearBtn = this.hasClearSearchBtnTarget
+      ? this.clearSearchBtnTarget
+      : document.querySelector('[data-location-filter-target="clearSearchBtn"]')
+    if (clearBtn) clearBtn.style.display = "none"
+
+    // Remove "Clear Search" text link
+    const totalCount = this.hasTotalCountTarget
+      ? this.totalCountTarget
+      : document.querySelector('[data-location-filter-target="totalCount"]')
+    if (totalCount) {
+      const link = totalCount.querySelector("a")
+      if (link) {
+        if (link.previousSibling?.nodeType === Node.TEXT_NODE) link.previousSibling.remove()
+        link.remove()
       }
+    }
+
+    // Mark frame as loading so CSS can show a loading indicator
+    const frame = document.querySelector('turbo-frame#plants-results')
+    if (frame) frame.setAttribute('aria-busy', 'true')
+  }
+
+  toggleHideScheduled(event) {
+    const checkbox = event.currentTarget
+    const isActive = checkbox.checked
+    const label = checkbox.closest('.hide-scheduled-switch')?.querySelector('.hide-scheduled-label')
+    if (label) {
+      this._fadeLabel(label, isActive
+        ? (checkbox.dataset.showWateredLabel || 'Watered Plants\nHidden')
+        : (checkbox.dataset.hideWateredLabel || 'Showing\nWatered Plants'))
+    }
+    const form = checkbox.closest('form')
+    if (form) form.requestSubmit()
+  }
+
+  _syncHideScheduledSwitch(isActive) {
+    const checkbox = document.querySelector('input[name="hide_scheduled"]')
+    if (!checkbox) return
+    checkbox.checked = isActive
+    const label = checkbox.closest('.hide-scheduled-switch')?.querySelector('.hide-scheduled-label')
+    if (label) {
+      label.textContent = isActive
+        ? (checkbox.dataset.showWateredLabel || 'Watered Plants\nHidden')
+        : (checkbox.dataset.hideWateredLabel || 'Showing\nWatered Plants')
+    }
+  }
+
+  _fadeLabel(label, text) {
+    label.classList.add('fading')
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        label.textContent = text
+        label.classList.remove('fading')
+      })
     })
   }
 
-  // Search clear button
-  clearSearch(event) {
-    event.preventDefault()
+  loadSavedSearch(event) {
+    const queryTerm = event.currentTarget.dataset.queryTerm || ""
     if (this.hasSearchInputTarget) {
-      this.searchInputTarget.value = ""
+      this.searchInputTarget.value = queryTerm
       this.updateSearchClearButton()
-      // Trigger form submission to reload with empty search
-      const form = this.searchInputTarget.closest('form')
-      if (form) {
-        form.requestSubmit()
-      }
     } else {
-      // Fallback to old method
-      const searchInput = document.querySelector('#headerSearch input[type="search"]')
+      const searchInput = document.querySelector('[data-location-filter-target="searchInput"]')
+      const clearBtn = document.querySelector('[data-location-filter-target="clearSearchBtn"]')
       if (searchInput) {
-        searchInput.value = ""
-        const form = document.querySelector('#headerSearch form')
-        if (form) {
-          form.requestSubmit()
-        }
+        searchInput.value = queryTerm
+        if (clearBtn) clearBtn.style.display = queryTerm.length > 0 ? "" : "none"
       }
     }
+
+    // Sync hide-scheduled switch from the saved search's URL
+    const href = event.currentTarget.getAttribute('href') || ""
+    const savedParams = new URLSearchParams(href.includes('?') ? href.split('?')[1] : '')
+    this._syncHideScheduledSwitch(savedParams.get('hide_scheduled') === 'true')
   }
 
   updateSearchClearButton() {
-    if (!this.hasSearchInputTarget || !this.hasClearSearchBtnTarget) return
-    const hasValue = this.searchInputTarget.value.trim().length > 0
-    this.clearSearchBtnTarget.style.display = hasValue ? "" : "none"
+    const clearBtn = this.hasClearSearchBtnTarget
+      ? this.clearSearchBtnTarget
+      : document.querySelector('[data-location-filter-target="clearSearchBtn"]')
+    if (!clearBtn) return
+    const searchInput = this.hasSearchInputTarget
+      ? this.searchInputTarget
+      : document.querySelector('[data-location-filter-target="searchInput"]')
+    const hasText = (searchInput?.value?.trim()?.length ?? 0) > 0
+    const params = new URLSearchParams(window.location.search)
+    const hasFilters = params.has("locations[]") || params.has("recipes[]")
+    const nonDefaultDisplay = params.get("display") && params.get("display") !== "watering"
+    const hideScheduledActive = params.get("hide_scheduled") === "true"
+    clearBtn.style.display = (hasText || hasFilters || nonDefaultDisplay || hideScheduledActive) ? "" : "none"
   }
 
   // Update group counts for location and recipe groups
@@ -720,31 +769,6 @@ export default class extends Controller {
   }
 
   // Show/hide filter sections
-  showStatusFilter() {
-    const addBtn = this.hasAddStatusFilterBtnTarget ? this.addStatusFilterBtnTarget : null
-    const container = this.hasWateringStatusContainerTarget ? this.wateringStatusContainerTarget : null
-
-    this.animateAddFilter(addBtn, container)
-
-    if (container) this.checkStatusOverflow()
-    this.updateAddFiltersVisibility()
-  }
-
-  hideStatusFilter() {
-    // Clear active filters
-    this.selectedWateringStatuses.clear()
-    this.updateWateringStatusButtonStates()
-
-    const addBtn = this.hasAddStatusFilterBtnTarget ? this.addStatusFilterBtnTarget : null
-    const container = this.hasWateringStatusContainerTarget ? this.wateringStatusContainerTarget : null
-    this.animateRemoveFilter(addBtn, container)
-
-    this.currentPageValue = 1
-    this.filterPlants()
-    this.updateResultsCount()
-    this.updateAddFiltersVisibility()
-  }
-
   showRecipeFilter() {
     const addBtn = this.hasAddRecipeFilterBtnTarget ? this.addRecipeFilterBtnTarget : null
     const container = this.hasRecipeFilterContainerTarget ? this.recipeFilterContainerTarget : null
@@ -766,6 +790,8 @@ export default class extends Controller {
     this.filterPlants()
     this.updateResultsCount()
     this.updateAddFiltersVisibility()
+    this.syncFiltersToUrl()
+    this.updateSaveFormVisibility()
   }
 
   showLocationFilter() {
@@ -789,6 +815,8 @@ export default class extends Controller {
     this.filterPlants()
     this.updateResultsCount()
     this.updateAddFiltersVisibility()
+    this.syncFiltersToUrl()
+    this.updateSaveFormVisibility()
   }
 
   // Update visibility of "Add filter:" container and filter row
@@ -808,16 +836,7 @@ export default class extends Controller {
     }
   }
 
-  checkStatusOverflow() {
-    if (!this.hasWateringStatusContainerTarget) return
-    const el = this.wateringStatusContainerTarget.querySelector('.filter-buttons-scroll')
-    if (!el) return
-    const overflowing = el.scrollWidth > el.clientWidth
-    el.classList.toggle("is-overflowing", overflowing)
-  }
-
   areAnyFiltersVisible() {
-    if (this.hasWateringStatusContainerTarget && this.wateringStatusContainerTarget.style.display !== "none") return true
     if (this.hasRecipeFilterContainerTarget && this.recipeFilterContainerTarget.style.display !== "none") return true
     if (this.hasLocationFilterContainerTarget && this.locationFilterContainerTarget.style.display !== "none") return true
     return false
@@ -826,24 +845,76 @@ export default class extends Controller {
   areAllFiltersVisible() {
     let allVisible = true
 
-    // Check status filter
-    if (this.hasWateringStatusContainerTarget) {
-      const isVisible = this.wateringStatusContainerTarget.style.display !== "none"
-      if (!isVisible) allVisible = false
-    }
-
-    // Check recipe filter
     if (this.hasRecipeFilterContainerTarget) {
-      const isVisible = this.recipeFilterContainerTarget.style.display !== "none"
-      if (!isVisible) allVisible = false
+      if (this.recipeFilterContainerTarget.style.display === "none") allVisible = false
     }
 
-    // Check location filter
     if (this.hasLocationFilterContainerTarget) {
-      const isVisible = this.locationFilterContainerTarget.style.display !== "none"
-      if (!isVisible) allVisible = false
+      if (this.locationFilterContainerTarget.style.display === "none") allVisible = false
     }
 
     return allVisible
+  }
+
+  updateSaveFormVisibility() {
+    if (!this.hasSaveSearchContainerTarget) return
+    const hideScheduledActive = new URLSearchParams(window.location.search).get('hide_scheduled') === 'true'
+    const hasActiveState =
+      this.selectedLocations.size > 0 ||
+      this.selectedRecipes.size > 0 ||
+      this.displayModeValue !== "watering" ||
+      this.searchTermValue.length > 0 ||
+      hideScheduledActive
+    this.saveSearchContainerTarget.style.display = hasActiveState ? "" : "none"
+  }
+
+  cleanUrl() {
+    const url = new URL(window.location.href)
+    const key = "q[name_or_location_name_cont]"
+    if (url.searchParams.has(key) && url.searchParams.get(key) === "") {
+      url.searchParams.delete(key)
+      window.history.replaceState({}, "", url.toString())
+    }
+  }
+
+  initFromUrl() {
+    const params = new URLSearchParams(window.location.search)
+    const locationIds = params.getAll("locations[]")
+    const recipeIds = params.getAll("recipes[]")
+
+    if (locationIds.length === 0 && recipeIds.length === 0) return
+
+    locationIds.forEach(id => this.selectedLocations.add(id))
+    recipeIds.forEach(id => this.selectedRecipes.add(id))
+
+    if (locationIds.length > 0 && this.hasLocationFilterContainerTarget) {
+      this.locationFilterContainerTarget.style.display = ""
+      if (this.hasAddLocationFilterBtnTarget) this.addLocationFilterBtnTarget.style.display = "none"
+    }
+    if (recipeIds.length > 0 && this.hasRecipeFilterContainerTarget) {
+      this.recipeFilterContainerTarget.style.display = ""
+      if (this.hasAddRecipeFilterBtnTarget) this.addRecipeFilterBtnTarget.style.display = "none"
+    }
+    if (this.hasFilterRowTarget) this.filterRowTarget.style.display = ""
+
+    this.updateButtonStates()
+    this.updateRecipeButtonStates()
+    this.reorderButtons()
+    this.reorderRecipeButtons()
+    this.filterPlants()
+    this.updateResultsCount()
+    this.updateSaveFormVisibility()
+    this.updateSearchClearButton()
+  }
+
+  syncFiltersToUrl() {
+    const url = new URL(window.location.href)
+    url.searchParams.delete("locations[]")
+    url.searchParams.delete("recipes[]")
+    this.selectedLocations.forEach(id => url.searchParams.append("locations[]", id))
+    this.selectedRecipes.forEach(id => url.searchParams.append("recipes[]", id))
+    window.history.replaceState({}, "", url.toString())
+    if (this.hasFilterParamsInputTarget) this.filterParamsInputTarget.value = url.search
+    this.updateSearchClearButton()
   }
 }

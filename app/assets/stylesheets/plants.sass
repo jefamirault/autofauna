@@ -6,6 +6,47 @@ $lightblue: rgba(14, 72, 123, 0.1)
 $yellow: #8C6800
 $lightyellow: rgba(206, 154, 0, 0.2)
 
+// Hide watered plants switch in header
+.hide-scheduled-switch
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  flex-shrink: 0
+  cursor: pointer
+  color: rgba(255,255,255,0.85)
+  font-size: 1rem
+  white-space: nowrap
+  user-select: none
+  &:hover
+    color: white
+  .hide-scheduled-label
+    display: inline-block
+    white-space: pre-line
+    line-height: 1.2
+    text-align: center
+    opacity: 0.75
+    transition: opacity 200ms ease
+    &.fading
+      opacity: 0
+      transition: none
+
+.switch.switch-light
+  width: 46px
+  height: 26px
+  .switch-slider
+    background-color: rgba(255,255,255,0.3)
+    border-radius: 26px
+    &::before
+      height: 18px
+      width: 18px
+      left: 4px
+      bottom: 4px
+  input:checked + .switch-slider
+    background-color: rgba(255,255,255,0.9)
+  input:checked + .switch-slider::before
+    background-color: $green
+    transform: translateX(20px)
+
 // Page headers
 h1
   margin-bottom: 0.25rem
@@ -264,11 +305,16 @@ h1
     &:hover
       background: rgba(14, 72, 123, 0.1)
       text-decoration: none
-  form
-    display: inline-flex
+  form.button_to
+    display: flex
+    align-self: stretch
+    align-items: stretch
     padding: 0
   .saved-search-delete-btn
-    padding: 0.25rem 0.5rem
+    display: flex
+    align-items: center
+    flex: 1
+    padding: 0 0.5rem
     background: none
     border: none
     border-left: 1px solid rgba(14, 72, 123, 0.2)
@@ -294,7 +340,7 @@ h1
     background: transparent
     color: inherit
     font-family: inherit
-    width: 9rem
+    width: 12rem
     &:focus
       outline: none
       border-style: solid
@@ -478,6 +524,7 @@ h1
   display: flex
   flex-direction: column
   gap: 0.5rem
+  transition: opacity 0.4s ease
 
 .plant-card
   display: flex
@@ -962,6 +1009,7 @@ div.plant-card-water-col
   gap: 1rem
   padding: 1rem 0.5rem
   flex-wrap: wrap
+  transition: opacity 0.4s ease
 
 .pagination-per-page
   display: flex
@@ -1081,3 +1129,10 @@ div.plant-card-water-col
   text-decoration: none
   &:hover
     text-decoration: underline
+
+turbo-frame#plants-results[aria-busy]
+  cursor: wait
+  .plant-cards, .pagination-controls
+    opacity: 0.4
+    pointer-events: none
+    transition: opacity 0.1s ease

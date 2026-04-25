@@ -22,6 +22,19 @@
           ✕
         </button>
       </div>
+      <label class="hide-scheduled-switch">
+        <span class="switch switch-light">
+          <input type="checkbox"
+                 name="hide_scheduled"
+                 value="true"
+                 <%= 'checked' if @hide_scheduled %>
+                 data-show-watered-label="<%= t('.show_watered_plants') %>"
+                 data-hide-watered-label="<%= t('.hide_watered_plants') %>"
+                 data-action="change->location-filter#toggleHideScheduled">
+          <span class="switch-slider"></span>
+        </span>
+        <span class="hide-scheduled-label"><%= @hide_scheduled ? t('.show_watered_plants') : t('.hide_watered_plants') %></span>
+      </label>
     <% end %>
   </div>
 <% end %>
@@ -37,7 +50,8 @@
      data-location-filter-search-term-value="<%= params.dig('q', 'name_or_location_name_cont') || '' %>"
      data-location-filter-per-page-value="20"
      data-location-filter-current-page-value="1"
-     data-location-filter-showing-template-value="<%= t('.showing_info', from: '__FROM__', to: '__TO__', total: '__TOTAL__') %>">
+     data-location-filter-showing-template-value="<%= t('.showing_info', from: '__FROM__', to: '__TO__', total: '__TOTAL__') %>"
+     data-location-filter-clear-search-label-value="<%= t('clear_search') %>">
 
 <div class="plants-count-headers" data-location-filter-target="resultsCount">
   <% search_term = params.dig('q', 'name_or_location_name_cont') %>
@@ -63,11 +77,7 @@
         <%= render 'saved_searches/saved_search', saved_search: ss %>
       <% end %>
     </div>
-    <% if search_term.present? %>
-      <%= render 'saved_searches/save_form', query_term: search_term %>
-    <% else %>
-      <div id="save-search-form-container"></div>
-    <% end %>
+    <%= render 'saved_searches/save_form', query_term: search_term, hidden: !search_term.present? %>
   </div>
 
   <% if @location_filters.size > 1 || @recipe_filters.any? %>
@@ -100,14 +110,6 @@
 
   <div class="add-filters" data-location-filter-target="addFiltersContainer">
     <span class="row-label"><%= t('.add_filters') %>:</span>
-    <% if @watering_status_groups.any? %>
-      <button type="button"
-              class="add-filter-btn"
-              data-location-filter-target="addStatusFilterBtn"
-              data-action="click->location-filter#showStatusFilter">
-        🕐 <%= t('.status') %>
-      </button>
-    <% end %>
     <% if @location_filters.size > 1 %>
       <button type="button"
               class="add-filter-btn"
@@ -129,31 +131,6 @@
   <div class="filter-row" data-location-filter-target="filterRow" style="display: none;">
     <span class="row-label"><%= t('.filter') %>:</span>
     <div class="filter-row-content">
-
-      <% if @watering_status_groups.any? %>
-        <div class="collapsible-filter" data-location-filter-target="wateringStatusContainer" style="display: none;">
-          <div class="filter-buttons-scroll watering-status-filters">
-            <span class="filter-section-label">🕐 <span class="filter-label-text"><%= t('.status_label') %>:</span></span>
-            <% @watering_status_groups.each do |group| %>
-              <button type="button"
-                      class="display-toggle-btn watering-status-btn"
-                      data-location-filter-target="wateringStatusButton"
-                      data-status="<%= group[:status] %>"
-                      data-status-count="<%= group[:count] %>"
-                      data-action="click->location-filter#toggleWateringStatusFilter">
-                <%= "#{group[:name]} (#{group[:count]})" %>
-              </button>
-            <% end %>
-            <span class="filter-actions">
-              <button type="button"
-                      class="remove-filter-btn"
-                      data-action="click->location-filter#hideStatusFilter">
-                ✕
-              </button>
-            </span>
-          </div>
-        </div>
-      <% end %>
 
       <% if @location_filters.size > 1 %>
         <div data-location-filter-target="locationFilterContainer" style="display: none;"

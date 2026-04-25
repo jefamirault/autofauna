@@ -30,6 +30,6 @@ class SavedSearchesController < ApplicationController
   private
 
   def saved_search_params
-    params.require(:saved_search).permit(:name, :query_term)
+    params.require(:saved_search).permit(:name, :query_term, :filter_params)
   end
 end
