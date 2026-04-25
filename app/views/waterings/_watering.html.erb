@@ -9,10 +9,12 @@
     </div>
   </div>
 
-  <div class="info-row">
-    <strong><%= t 'attributes.volume' %></strong>
-    <span class="value"><%= watering.print_volume %></span>
-  </div>
+  <% if watering.volume.present? %>
+    <div class="info-row">
+      <strong><%= t 'attributes.volume' %></strong>
+      <span class="value"><%= watering.print_volume %></span>
+    </div>
+  <% end %>
 
   <% if watering.recipe_source.present? %>
     <div class="info-row">
@@ -24,7 +26,7 @@
   <% if watering.recipe.present? %>
     <div class="info-row">
       <strong>Recipe</strong>
-      <span class="value"><%= link_to watering.recipe.name, recipe_path(watering.recipe) %></span>
+      <span class="value"><%= link_to watering.recipe.name, recipe_path(watering.recipe), class: 'link' %></span>
     </div>
   <% end %>
 
@@ -49,19 +51,31 @@
     </div>
   <% end %>
 
+  <% pre = watering.soil_moisture_readings.find_by(timing: :pre_watering) %>
+  <% post = watering.soil_moisture_readings.find_by(timing: :post_watering) %>
+  <% if pre || post %>
+    <% if pre %>
+      <div class="info-row">
+        <strong>Pre-Watering Moisture</strong>
+        <span class="value"><%= pre.display_value %></span>
+      </div>
+    <% end %>
+    <% if post %>
+      <div class="info-row">
+        <strong>Post-Watering Moisture</strong>
+        <span class="value"><%= post.display_value %></span>
+      </div>
+    <% end %>
+  <% end %>
+
   <div class="info-row">
     <strong><%= t 'attributes.logged' %></strong>
     <span class="value"><%= format_time watering.created_at %></span>
   </div>
 
-  <div class="info-row">
-    <strong><%= t 'attributes.updated' %></strong>
-    <span class="value"><%= format_time watering.updated_at %></span>
-  </div>
-
   <p>
     <%= link_to t('waterings.edit_watering'), edit_watering_path(watering), class: 'link' %>
     <%= link_to t('waterings.all_waterings'), waterings_path, class: 'link' %>
-    <%= link_to t('waterings.water_again'), plant_water_path(watering.plant, volume: watering.volume, units: watering.units, notes: watering.notes), class: 'link' %>
+    <%= link_to t('waterings.water_again'), plant_water_path(watering.plant, volume: watering.volume, units: watering.units, notes: watering.notes, recipe_id: watering.recipe_id, recipe_batch_id: watering.recipe_batch_id, tds: watering.tds), class: 'link' %>
   </p>
 </div>

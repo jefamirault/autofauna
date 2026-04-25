@@ -1,4 +1,4 @@
-  <%= form_with(model: watering, data: { controller: "watering-moisture", turbo: false }) do |form| %>
+  <%= form_with(model: watering, data: { controller: "watering-recipe watering-moisture", watering_recipe_url_value: for_recipe_recipe_batches_path, watering_recipe_project_url_value: for_project_recipe_batches_path, turbo: false }) do |form| %>
     <% if watering.errors.any? %>
       <div style="color: red">
         <h2><%= pluralize(watering.errors.count, "error") %> prohibited this watering from being saved:</h2>
@@ -11,77 +11,94 @@
       </div>
     <% end %>
 
-    <%= form.label :plant, style: "display: block" %>
-    <div class="plantButton">
-      <%= link_to watering.plant %>
-      <%= form.hidden_field :plant_id, value: watering.plant&.id %>
+    <div class="field">
+      <%= form.label :plant, style: "display: block" %>
+      <div class="plantButton">
+        <%= link_to watering.plant %>
+        <%= form.hidden_field :plant_id, value: watering.plant&.id %>
+      </div>
     </div>
 
-    <div>
+    <div class="field">
       <%= form.label :watered_at, "Date & Time", style: "display: block" %>
       <%= form.datetime_local_field :watered_at,
           value: watering.watered_at&.strftime("%Y-%m-%dT%H:%M") ||
                  Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
     </div>
 
-    <div class="field-row">
-      <div class="field-row-item">
-        <%= form.label :volume, style: "display: block" %>
-        <%= form.number_field :volume, step: 'any', placeholder: "e.g. 2.0" %>
+    <%# Volume section: optional, toggled by button %>
+    <div data-watering-recipe-target="volumeSection"
+         style="<%= watering.volume.present? ? '' : 'display: none;' %>">
+      <div class="field-row">
+        <div class="field-row-item">
+          <%= form.label :volume, style: "display: block" %>
+          <%= form.number_field :volume, step: 'any', placeholder: "e.g. 2.0", data: { watering_recipe_target: "volumeField" } %>
+        </div>
+        <div class="field-row-item">
+          <%= form.label :units, t('attributes.units'), style: "display: block" %>
+          <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units || watering.plant.suggested_watering_unit), {}, { data: { watering_recipe_target: "unitsSelect" } } %>
+        </div>
       </div>
-      <div class="field-row-item">
-        <%= form.label :units, t('attributes.units'), style: "display: block" %>
-        <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units || watering.plant.suggested_watering_unit) %>
-      </div>
+      <button type="button"
+              data-action="click->watering-recipe#hideVolume"
+              class="buttonLinkSmall">✕ Remove Volume</button>
     </div>
+
+    <button type="button"
+            data-action="click->watering-recipe#showVolume"
+            data-watering-recipe-target="volumeButton"
+            class="buttonLink"
+            style="<%= watering.volume.present? ? 'display: none;' : '' %>">
+      ➕ Add Volume
+    </button>
 
     <% has_recipes = current_project.recipes.any? %>
     <% has_sources = current_project.recipe_sources.any? %>
     <% if has_recipes || has_sources %>
-      <div data-controller="watering-recipe"
-           data-watering-recipe-url-value="<%= for_recipe_recipe_batches_path %>">
-
+      <% if has_sources %>
         <div style="margin-bottom: 0.5rem;">
           <%= form.label :recipe_source_id, "Source (water type)", style: "display: block" %>
           <%= form.collection_select :recipe_source_id, current_project.recipe_sources.order(:name), :id, :name,
               { prompt: '-- None (use recipe below) --', selected: watering.recipe_source_id },
               { data: { watering_recipe_target: "sourceSelect", action: "change->watering-recipe#sourceChanged" } } %>
         </div>
+      <% end %>
 
-        <% if has_recipes %>
-          <div class="field-row" data-watering-recipe-target="recipeSection"
-               style="<%= watering.recipe_source_id.present? ? 'display: none;' : '' %>">
-            <div class="field-row-item">
-              <%= form.label :recipe_id, "Recipe", style: "display: block" %>
-              <%= form.collection_select :recipe_id, current_project.recipes.order(:name), :id, :name,
-                  { prompt: '-- None --', selected: watering.recipe_id },
-                  { data: { watering_recipe_target: "recipeSelect", action: "change->watering-recipe#recipeChanged" } } %>
-            </div>
-            <div class="field-row-item">
-              <%= form.label :recipe_batch_id, "Batch", style: "display: block" %>
-              <select name="watering[recipe_batch_id]" id="watering_recipe_batch_id"
-                      data-watering-recipe-target="batchSelect"
-                      data-action="change->watering-recipe#batchChanged">
-                <option value="">-- None --</option>
-                <% if watering.recipe_id.present? %>
-                  <% current_project.recipe_batches.active.where(recipe_id: watering.recipe_id).each do |batch| %>
-                    <option value="<%= batch.id %>" data-tds="<%= batch.tds %>" <%= 'selected' if watering.recipe_batch_id == batch.id %>><%= batch.label %></option>
-                  <% end %>
-                <% end %>
-              </select>
-            </div>
+      <% if has_recipes %>
+        <div class="field-row" data-watering-recipe-target="recipeSection"
+             style="<%= watering.recipe_source_id.present? ? 'display: none;' : '' %>">
+          <div class="field-row-item">
+            <%= form.label :recipe_id, "Recipe", style: "display: block" %>
+            <%= form.collection_select :recipe_id, current_project.recipes.order(:name), :id, :name,
+                { prompt: '-- None --', selected: watering.recipe_id },
+                { data: { watering_recipe_target: "recipeSelect", action: "change->watering-recipe#recipeChanged" } } %>
           </div>
-        <% end %>
+          <div class="field-row-item">
+            <%= form.label :recipe_batch_id, "Batch", style: "display: block" %>
+            <select name="watering[recipe_batch_id]" id="watering_recipe_batch_id"
+                    data-watering-recipe-target="batchSelect"
+                    data-action="change->watering-recipe#batchChanged">
+              <option value="">-- None --</option>
+              <% if watering.recipe_id.present? %>
+                <% current_project.recipe_batches.active.where(recipe_id: watering.recipe_id).each do |batch| %>
+                  <option value="<%= batch.id %>" data-tds="<%= batch.tds %>" <%= 'selected' if watering.recipe_batch_id == batch.id %>><%= batch.label %></option>
+                <% end %>
+              <% end %>
+            </select>
+          </div>
+        </div>
+      <% end %>
 
-        <div>
-          <button type="button"
-                  data-action="click->watering-recipe#toggleTds"
-                  data-watering-recipe-target="tdsButton"
-                  class="buttonLink"
-                  style="<%= 'display: none;' if watering.tds.present? %>">
-            ➕ Add TDS
-          </button>
-          <div data-watering-recipe-target="tdsContainer" style="<%= watering.tds.present? ? 'display: block;' : 'display: none;' %>">
+      <div>
+        <button type="button"
+                data-action="click->watering-recipe#toggleTds"
+                data-watering-recipe-target="tdsButton"
+                class="buttonLink"
+                style="<%= 'display: none;' if watering.tds.present? %>">
+          ➕ Add TDS
+        </button>
+        <div data-watering-recipe-target="tdsContainer" style="<%= watering.tds.present? ? 'display: block;' : 'display: none;' %>">
+          <div class="field">
             <%= form.label :tds, "TDS (ppm)", style: "display: block" %>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               <%= form.number_field :tds, placeholder: "e.g. 400", data: { watering_recipe_target: "tdsField" } %>
@@ -94,7 +111,7 @@
       </div>
     <% end %>
 
-    <div>
+    <div class="field">
       <%= form.label :notes, style: "display: block" %>
       <%= form.text_area :notes, autofocus: watering.notes.nil? || watering.notes == '', placeholder: "e.g. Tap water" %>
     </div>

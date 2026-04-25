@@ -7,7 +7,15 @@ class WateringsController < ApplicationController
 
   # GET /waterings or /waterings.json
   def index
-    @waterings = current_project.waterings.includes(:plant).reorder(watered_at: :desc, updated_at: :desc).limit(500)
+    @per_page = 50
+    @total = current_project.waterings.count
+    @total_pages = (@total.to_f / @per_page).ceil
+    @page = [[params[:page].to_i, 1].max, @total_pages].min
+    @page = 1 if @page < 1
+    @waterings = current_project.waterings.includes(:plant)
+                                .reorder(watered_at: :desc, updated_at: :desc)
+                                .offset((@page - 1) * @per_page)
+                                .limit(@per_page)
   end
 
   # GET /waterings/1 or /waterings/1.json
@@ -36,6 +44,7 @@ class WateringsController < ApplicationController
 
   # GET /waterings/1/edit
   def edit
+    @recent_moisture_reading = nil
   end
 
   # POST /waterings or /waterings.json

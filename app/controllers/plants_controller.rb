@@ -1,7 +1,7 @@
 class PlantsController < ApplicationController
   before_action :authenticate
   before_action :set_project
-  before_action :set_plant, only: %i[ show edit update destroy create_share revoke_share regenerate_share create_view_share revoke_view_share regenerate_view_share ]
+  before_action :set_plant, only: %i[ show edit update destroy create_share revoke_share regenerate_share create_view_share revoke_view_share regenerate_view_share snooze unsnooze ]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
 
@@ -49,7 +49,10 @@ class PlantsController < ApplicationController
     @q = current_project.plants.ransack(params['q'])
 
     @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
-    @plants = @q.result(distinct: true).includes(:location, :recipe, :plant_recipes, :recipes, last_watering: [:recipe_batch, :recipe_source])
+    @show_snoozed = params[:show_snoozed] == 'true'
+    plants_scope = @q.result(distinct: true)
+    plants_scope = plants_scope.where("snoozed_until IS NULL OR snoozed_until <= ?", Time.current) unless @show_snoozed
+    @plants = plants_scope.includes(:location, :recipe, :plant_recipes, :recipes, last_watering: [:recipe_batch, :recipe_source])
 
     # Build location filter buttons with colors, sorted by count (descending)
     location_counts = @plants.where.not(location_id: nil).reorder(nil).group(:location_id).count
@@ -94,16 +97,17 @@ class PlantsController < ApplicationController
     } if no_recipe_count > 0
 
     # Build watering status groups for filtering (single pass)
-    urgency_counts = { urgent: 0, today: 0, normal: 0, none: 0 }
+    urgency_counts = { needs_water: 0, scheduled: 0 }
     @plants.each { |p| urgency_counts[p.watering_urgency] += 1 }
 
     @watering_status_groups = [
-      { status: 'urgent', name: I18n.t('plants.index.overdue'), count: urgency_counts[:urgent] },
-      { status: 'today', name: I18n.t('plants.index.needs_water_today'), count: urgency_counts[:today] },
-      { status: 'scheduled', name: I18n.t('plants.index.scheduled'), count: urgency_counts[:normal] + urgency_counts[:none] }
-    ]
+      { status: 'needs_water', name: I18n.t('plants.index.needs_water'), count: urgency_counts[:needs_water] },
+      { status: 'scheduled', name: I18n.t('plants.index.scheduled'), count: urgency_counts[:scheduled] }
+    ].select { |g| g[:count] > 0 }
 
-    @needs_watering_count = urgency_counts[:urgent] + urgency_counts[:today]
+    @needs_watering_count = urgency_counts[:needs_water]
+    @snoozed_count = current_project.plants.where(archived: false)
+                                    .where("snoozed_until > ?", Time.current).count
 
     @saved_searches = current_project.saved_searches.where(user_id: current_user.id).order(:name)
 
@@ -280,6 +284,24 @@ class PlantsController < ApplicationController
     respond_to do |format|
       format.turbo_stream
       format.html { redirect_to plant_path(@plant), notice: t('plants.messages.view_share_regenerated', default: 'Viewing link regenerated') }
+    end
+  end
+
+  def snooze
+    days = params[:days].to_i
+    days = 1 unless [1, 3, 7].include?(days)
+    @plant.snooze!(days)
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plants_path, notice: t('plants.messages.snoozed', default: "#{@plant.name} snoozed for #{days} day(s)") }
+    end
+  end
+
+  def unsnooze
+    @plant.unsnooze!
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plants_path, notice: t('plants.messages.unsnoozed', default: "#{@plant.name} snooze cancelled") }
     end
   end
 

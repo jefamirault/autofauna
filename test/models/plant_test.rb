@@ -88,41 +88,41 @@ class PlantTest < ActiveSupport::TestCase
 
   # ─── watering_urgency ───────────────────────────────────────────────────────
 
-  test "watering_urgency returns :none when no schedule" do
+  test "watering_urgency returns :scheduled when no schedule" do
     project = Project.create!(name: "Test Project", owner: users(:one))
     plant = Plant.create!(name: "No Schedule", project: project, uid: 110)
-    assert_equal :none, plant.watering_urgency
+    assert_equal :scheduled, plant.watering_urgency
   end
 
-  test "watering_urgency returns :none when not yet watered" do
+  test "watering_urgency returns :scheduled when not yet watered" do
     project = Project.create!(name: "Test Project", owner: users(:one))
     plant = Plant.create!(name: "Never Watered", min_watering_freq: 7, max_watering_freq: 14, project: project, uid: 111)
-    # date_last_watering is nil so urgency should be :none
-    assert_equal :none, plant.watering_urgency
+    # date_last_watering is nil so urgency should be :scheduled
+    assert_equal :scheduled, plant.watering_urgency
   end
 
-  test "watering_urgency returns :urgent when overdue" do
+  test "watering_urgency returns :needs_water when overdue" do
     project = Project.create!(name: "Test Project", owner: users(:one))
     plant = Plant.create!(name: "Overdue Plant", min_watering_freq: 7, max_watering_freq: 14, project: project, uid: 112)
     # Set last watering to 20 days ago — overdue past max freq
     plant.update!(date_last_watering: 20.days.ago.to_date)
-    assert_equal :urgent, plant.watering_urgency
+    assert_equal :needs_water, plant.watering_urgency
   end
 
-  test "watering_urgency returns :today when due today" do
+  test "watering_urgency returns :needs_water when due today" do
     project = Project.create!(name: "Test Project", owner: users(:one))
     plant = Plant.create!(name: "Due Today Plant", min_watering_freq: 7, max_watering_freq: 14, project: project, uid: 113)
     # Last watered exactly max_watering_freq days ago
     plant.update!(date_last_watering: 14.days.ago.to_date)
-    assert_equal :today, plant.watering_urgency
+    assert_equal :needs_water, plant.watering_urgency
   end
 
-  test "watering_urgency returns :normal when not yet due" do
+  test "watering_urgency returns :scheduled when not yet due" do
     project = Project.create!(name: "Test Project", owner: users(:one))
     plant = Plant.create!(name: "Upcoming Plant", min_watering_freq: 7, max_watering_freq: 14, project: project, uid: 114)
     # Last watered 5 days ago — within schedule
     plant.update!(date_last_watering: 5.days.ago.to_date)
-    assert_equal :normal, plant.watering_urgency
+    assert_equal :scheduled, plant.watering_urgency
   end
 
   # ─── time_until_watering ────────────────────────────────────────────────────

@@ -325,36 +325,26 @@ h1
 
 .watering-status-btn
   // Inactive states with light backgrounds
-  &[data-status="urgent"]
+  &[data-status="needs_water"]
     background: color-mix(in srgb, #f59e0b 15%, transparent)
     color: #f59e0b
     &:hover
       background: color-mix(in srgb, #f59e0b 25%, transparent)
-  &[data-status="today"]
+  &[data-status="scheduled"]
     background: color-mix(in srgb, #10b981 15%, transparent)
     color: #10b981
     &:hover
       background: color-mix(in srgb, #10b981 25%, transparent)
-  &[data-status="scheduled"]
-    background: color-mix(in srgb, #3b82f6 15%, transparent)
-    color: #3b82f6
-    &:hover
-      background: color-mix(in srgb, #3b82f6 25%, transparent)
 
   // Active states with solid backgrounds
   &.active
-    &[data-status="urgent"]
+    &[data-status="needs_water"]
       background: #f59e0b
       color: white
       &:hover
         opacity: 0.9
-    &[data-status="today"]
-      background: #10b981
-      color: white
-      &:hover
-        opacity: 0.9
     &[data-status="scheduled"]
-      background: #3b82f6
+      background: #10b981
       color: white
       &:hover
         opacity: 0.9
@@ -503,18 +493,15 @@ h1
   &.normal
     background: $lightblue
 
-  &.today
+  &.scheduled
     background: $lightgreen
     .plant-card-watering
       color: $green
 
-  &.urgent
+  &.needs_water
     background: $lightyellow
     .plant-card-watering
       color: $yellow
-
-  &.none
-    background: rgba(153, 153, 153, 0.1)
 
 // Column 2: Name + Graphic
 .plant-card-graphic-col
@@ -646,20 +633,17 @@ h1
     color: $blue
     background: rgba(14, 72, 123, 0.05)
 
-  &.today
+  &.scheduled
     color: $green
     background: rgba(0, 77, 64, 0.05)
     &:hover
       background: $lightgreen
 
-  &.urgent
+  &.needs_water
     color: $yellow
     background: rgba(206, 154, 0, 0.07)
     &:hover
       background: $lightyellow
-
-  &.none
-    color: #999
 
 div.plant-card-water-col
   padding: 0
@@ -1033,3 +1017,67 @@ div.plant-card-water-col
   font-size: 0.85em
   color: #666
   white-space: nowrap
+
+// Snooze UI
+.inline-snooze-section
+  display: flex
+  align-items: center
+  flex-wrap: wrap
+  gap: 0.5rem
+  margin-top: 0.5rem
+  padding-top: 0.5rem
+  border-top: 1px solid rgba(0, 0, 0, 0.06)
+
+.inline-snooze-btn
+  padding: 0.3rem 0.75rem
+  border: none
+  border-radius: 4px
+  background: rgba(0, 0, 0, 0.06)
+  color: #555
+  font-family: inherit
+  font-size: 0.85em
+  cursor: pointer
+  &:hover
+    background: rgba(0, 0, 0, 0.12)
+
+.snooze-duration-picker
+  display: flex
+  align-items: center
+  gap: 0.4rem
+  flex-wrap: wrap
+
+.snooze-label
+  font-size: 0.8em
+  color: #666
+
+.snooze-duration-btn
+  padding: 0.25rem 0.6rem
+  border: 1px solid rgba(0, 0, 0, 0.15)
+  border-radius: 4px
+  background: white
+  color: #555
+  font-family: inherit
+  font-size: 0.8em
+  cursor: pointer
+  &:hover
+    background: $lightyellow
+    border-color: $yellow
+    color: $yellow
+
+.snooze-status
+  font-size: 0.85em
+  color: #888
+  font-style: italic
+
+.snooze-btn
+  font-size: 0.85em
+
+.snoozed-toggle
+  margin-top: 0.75rem
+
+.snoozed-toggle-link
+  font-size: 0.9em
+  color: #888
+  text-decoration: none
+  &:hover
+    text-decoration: underline

@@ -28,6 +28,12 @@
     <small>Used for filter buttons</small>
   </div>
 
+  <div>
+    <%= form.label :default_tds, "Default TDS (ppm)", style: "display: block" %>
+    <%= form.number_field :default_tds, placeholder: "e.g. 400" %>
+    <small>Auto-filled in waterings when this recipe is selected</small>
+  </div>
+
   <h3>Sources</h3>
   <div data-nested-form-target="container">
     <% recipe.recipe_ingredients.each do |ingredient| %>

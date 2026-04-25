@@ -8,6 +8,16 @@
   <%= link_to t('.export_waterings'), waterings_path(format: :json) %>
 </div>
 
+<p class="waterings-count-info">
+  <% from = (@page - 1) * @per_page + 1 %>
+  <% to = [@page * @per_page, @total].min %>
+  <% if @total > 0 %>
+    Showing <%= from %>–<%= to %> of <%= @total %> waterings
+  <% else %>
+    No waterings recorded yet.
+  <% end %>
+</p>
+
 <table class="waterings blue">
   <thead>
   <tr>
@@ -30,3 +40,37 @@
   <% end %>
   </tbody>
 </table>
+
+<% if @total_pages > 1 %>
+  <div class="waterings-pagination">
+    <% if @page > 1 %>
+      <%= link_to "‹ Previous", waterings_path(page: @page - 1), class: "pagination-btn" %>
+    <% else %>
+      <span class="pagination-btn disabled">‹ Previous</span>
+    <% end %>
+
+    <% start_page = [@page - 2, 1].max %>
+    <% end_page = [start_page + 4, @total_pages].min %>
+    <% start_page = [end_page - 4, 1].max %>
+
+    <% if start_page > 1 %>
+      <%= link_to "1", waterings_path(page: 1), class: "pagination-btn" %>
+      <span class="pagination-ellipsis">…</span>
+    <% end %>
+
+    <% (start_page..end_page).each do |p| %>
+      <%= link_to p.to_s, waterings_path(page: p), class: "pagination-btn #{p == @page ? 'active' : ''}" %>
+    <% end %>
+
+    <% if end_page < @total_pages %>
+      <span class="pagination-ellipsis">…</span>
+      <%= link_to @total_pages.to_s, waterings_path(page: @total_pages), class: "pagination-btn" %>
+    <% end %>
+
+    <% if @page < @total_pages %>
+      <%= link_to "Next ›", waterings_path(page: @page + 1), class: "pagination-btn" %>
+    <% else %>
+      <span class="pagination-btn disabled">Next ›</span>
+    <% end %>
+  </div>
+<% end %>
