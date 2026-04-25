@@ -101,6 +101,7 @@ en:
       show_per_page: "Show"
       all: "All"
       showing_info: "Showing %{from}-%{to} of %{total}"
+      toggle_filters: "Toggle filters"
     show:
       edit_this_plant: "Edit this plant"
       water_this_plant: "Water this Plant"

@@ -68,6 +68,11 @@ html.sidebarMinimized body
   @media (min-width: 601px)
     grid-template-columns: 4rem 1fr
 
+// Plants index has auto header row — override FOUC rule to keep auto instead of fixed header height
+html.sidebarMinimized body:has(main.plants.index)
+  @media (max-width: 600px)
+    grid-template-rows: auto 0 1fr auto
+
 $reduction: 12px
 
 header
@@ -377,12 +382,14 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
 // Header search form
 #headerSearch
   display: flex
-  align-items: center
+  flex-direction: column
+  align-items: stretch
+  justify-content: center
+  min-height: var(--header-height)
   margin: 0 1rem
   z-index: 1
   form
     display: flex
-    width: 100%
     align-items: center
     gap: 0.5rem
   .search-input-wrapper
@@ -442,18 +449,99 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
       .search-toggle-btn
         display: none
 
-// Plants index: two-column header with search + email side by side
+// Plants index: two-column header; filter row spans full width on second row
 body:has(main.plants.index)
+  grid-template-rows: auto 1fr
+  @media (max-width: 600px)
+    grid-template-rows: auto auto 1fr auto
+    &.sidebarMinimized
+      grid-template-rows: auto 0 1fr auto
+      aside#sidebar
+        visibility: hidden
+        pointer-events: none
   header
     grid-template-columns: minmax(0, 1fr) auto
+    grid-template-rows: auto auto
+    align-items: start
     > *
       grid-row: auto
       grid-column: auto
+    // Filter row and add-filters: white-tinted on dark header
+    .row-label
+      color: rgba(255,255,255,0.7)
+    .filter-section-label
+      color: rgba(255,255,255,0.7)
+    .add-filter-btn
+      color: rgba(255,255,255,0.85)
+      border-color: rgba(255,255,255,0.4)
+      &:hover
+        color: white
+        background: rgba(255,255,255,0.15)
+        border-style: solid
+        border-color: rgba(255,255,255,0.6)
+    .remove-filter-btn
+      color: rgba(255,255,255,0.6)
+      &:hover
+        color: white
+    .filter-toggle-btn
+      color: rgba(255,255,255,0.6)
+      background: none
+      border: none
+      cursor: pointer
+      font-family: inherit
+      font-size: 0.85em
+      padding: 0.1rem 0.4rem
+      &:hover
+        color: white
+    .display-toggle-btn[data-location-color],
+    .display-toggle-btn[data-recipe-color]
+      background: #fff4
+      border: 2px solid #fff4
+      color: var(--filter-color)
+      &:hover
+        opacity: 0.85
+      &.active
+        background: var(--filter-color)
+        border-color: #dddc
+        color: #dddc
   #headerTitle
     display: none !important
   #headerSearch
+    grid-column: 1
+    grid-row: 1
     max-width: var(--card-max-width)
     margin-left: 1rem
+  #headerRight
+    grid-column: 2
+    grid-row: 1
+    align-self: center
+  .filter-row
+    grid-column: 1 / -1
+    grid-row: 2
+    padding: 0 1rem
+  .filter-row-content
+    padding-bottom: 0.4rem
+  .filter-collapse-btn
+    background: none
+    border: none
+    color: rgba(255, 255, 255, 0.7)
+    cursor: pointer
+    padding: 0.35rem 0.6rem
+    border-radius: 4px
+    font-size: 0.9rem
+    line-height: 1
+    flex-shrink: 0
+    transition: color 0.15s ease, background 0.15s ease
+    &[aria-expanded="false"]
+      .filter-collapse-icon
+        display: inline-block
+        transform: rotate(180deg)
+    .filter-collapse-icon
+      display: inline-block
+      transition: transform 0.3s ease
+    &:hover
+      color: white
+      background: rgba(255, 255, 255, 0.12)
   @media (max-width: 600px)
     #headerSearch
       max-width: none
@@ -461,6 +549,9 @@ body:has(main.plants.index)
         display: flex !important
       .search-toggle-btn
         display: none !important
+      .add-filters
+        .row-label
+          display: none
 
 // Sidebar locale switcher
 #sidebarLocale

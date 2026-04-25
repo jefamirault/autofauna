@@ -6,8 +6,6 @@ export default class extends Controller {
     "locationGroup", "recipeGroup", "resultsCount", "wateringCount", "totalCount",
     "searchInput", "clearSearchBtn",
     "wateringGroup", "groupCount",
-    "addRecipeFilterBtn", "addLocationFilterBtn",
-    "locationFilterContainer", "recipeFilterContainer", "addFiltersContainer", "filterRow",
     "locationGroupsContainer", "recipeGroupsContainer", "wateringGroupsContainer",
     "paginationControls", "paginationNav", "paginationInfo",
     "saveSearchContainer", "filterParamsInput"
@@ -32,9 +30,9 @@ export default class extends Controller {
     this.updateSearchClearButton()
     this.cleanUrl()
     this.initFromUrl()
-    this.updateAddFiltersVisibility()
     this.updateSaveFormVisibility()
-    if (this.hasFilterParamsInputTarget) this.filterParamsInputTarget.value = window.location.search
+    const filterParamsInput = this._crossTarget('filterParamsInput')
+    if (filterParamsInput) filterParamsInput.value = window.location.search
     this.paginateVisibleCards()
 
     // Re-apply counts and pagination after Turbo Stream replaces a plant card
@@ -48,11 +46,25 @@ export default class extends Controller {
         }
       }
     })
+
+    // Inner controller: receive filter state dispatched by the outer (header) controller
+    document.addEventListener('location-filter:apply', this._handleApply = (e) => {
+      if (!this.hasWateringGroupsContainerTarget && !this.hasLocationGroupsContainerTarget) return
+      this.selectedLocations = new Set(e.detail.locations)
+      this.selectedRecipes = new Set(e.detail.recipes)
+      if (e.detail.currentPage !== undefined) this.currentPageValue = e.detail.currentPage
+      this.filterPlants()
+      this.updateResultsCount()
+      if (this.displayModeValue === "watering") this.paginateVisibleCards()
+    })
   }
 
   disconnect() {
     if (this._handleStreamRender) {
       document.removeEventListener("turbo:before-stream-render", this._handleStreamRender)
+    }
+    if (this._handleApply) {
+      document.removeEventListener('location-filter:apply', this._handleApply)
     }
   }
 
@@ -80,14 +92,23 @@ export default class extends Controller {
     this.updateButtonStates()
     this.reorderButtons()
     this.currentPageValue = 1
-    this.filterPlants()
-    this.updateResultsCount()
+    this._dispatchApply()
     this.syncFiltersToUrl()
     this.updateSaveFormVisibility()
   }
 
+  _dispatchApply() {
+    document.dispatchEvent(new CustomEvent('location-filter:apply', {
+      detail: {
+        locations: [...this.selectedLocations],
+        recipes: [...this.selectedRecipes],
+        currentPage: this.currentPageValue
+      }
+    }))
+  }
+
   updateButtonStates() {
-    this.filterButtonTargets.forEach(button => {
+    this._crossTargets('filterButton').forEach(button => {
       const locationId = button.dataset.locationId
       if (this.selectedLocations.has(locationId)) {
         button.classList.add("active")
@@ -98,10 +119,10 @@ export default class extends Controller {
   }
 
   reorderButtons() {
-    if (!this.hasButtonContainerTarget) return
-    const container = this.buttonContainerTarget
+    const container = this._crossTarget('buttonContainer')
+    if (!container) return
 
-    const buttons = this.filterButtonTargets.slice()
+    const buttons = this._crossTargets('filterButton').slice()
 
     buttons.sort((a, b) => {
       const aActive = this.selectedLocations.has(a.dataset.locationId) ? 0 : 1
@@ -429,15 +450,13 @@ export default class extends Controller {
     this.updateRecipeButtonStates()
     this.reorderRecipeButtons()
     this.currentPageValue = 1
-    this.filterPlants()
-    this.updateResultsCount()
+    this._dispatchApply()
     this.syncFiltersToUrl()
     this.updateSaveFormVisibility()
   }
 
   updateRecipeButtonStates() {
-    if (!this.hasRecipeFilterButtonTarget) return
-    this.recipeFilterButtonTargets.forEach(button => {
+    this._crossTargets('recipeFilterButton').forEach(button => {
       const recipeId = button.dataset.recipeId
       if (this.selectedRecipes.has(recipeId)) {
         button.classList.add("active")
@@ -448,10 +467,10 @@ export default class extends Controller {
   }
 
   reorderRecipeButtons() {
-    if (!this.hasRecipeButtonContainerTarget) return
-    const container = this.recipeButtonContainerTarget
+    const container = this._crossTarget('recipeButtonContainer')
+    if (!container) return
 
-    const buttons = this.recipeFilterButtonTargets.slice()
+    const buttons = this._crossTargets('recipeFilterButton').slice()
 
     buttons.sort((a, b) => {
       const aActive = this.selectedRecipes.has(a.dataset.recipeId) ? 0 : 1
@@ -463,81 +482,16 @@ export default class extends Controller {
     this.animateReorder(container, buttons)
   }
 
-  animateAddFilter(addBtn, filterContainer) {
-    if (!addBtn || !filterContainer) {
-      if (filterContainer) filterContainer.style.display = ""
-      if (addBtn) addBtn.style.display = "none"
-      return
-    }
-
-    // Capture the add-filter button's position
-    const startRect = addBtn.getBoundingClientRect()
-
-    // Hide add button, show filter container and filter row
-    addBtn.style.display = "none"
-    filterContainer.style.display = ""
-    if (this.hasFilterRowTarget) {
-      this.filterRowTarget.style.display = ""
-    }
-
-    // Find the filter-section-label in the new container
-    const label = filterContainer.querySelector('.filter-section-label')
-    if (!label) return
-
-    const endRect = label.getBoundingClientRect()
-    const dx = startRect.left - endRect.left
-    const dy = startRect.top - endRect.top
-
-    if (dx === 0 && dy === 0) return
-
-    label.style.transition = 'none'
-    label.style.transform = `translate(${dx}px, ${dy}px)`
-    label.offsetHeight // force reflow
-    label.style.transition = 'transform 0.12s ease'
-    label.style.transform = ''
-    label.addEventListener('transitionend', () => {
-      label.style.transition = ''
-    }, { once: true })
+  // Returns target from this controller instance, falling back to a document-wide lookup.
+  // Used for cross-instance communication between the outer (header) and inner (turbo-frame) controllers.
+  _crossTarget(name) {
+    const hasKey = `has${name[0].toUpperCase()}${name.slice(1)}Target`
+    return this[hasKey] ? this[`${name}Target`] : document.querySelector(`[data-location-filter-target="${name}"]`)
   }
 
-  animateRemoveFilter(addBtn, filterContainer) {
-    if (!addBtn || !filterContainer) {
-      if (filterContainer) filterContainer.style.display = "none"
-      if (addBtn) addBtn.style.display = ""
-      return
-    }
-
-    // Capture the filter-section-label's position before hiding
-    const label = filterContainer.querySelector('.filter-section-label')
-    if (!label) {
-      filterContainer.style.display = "none"
-      addBtn.style.display = ""
-      return
-    }
-
-    const startRect = label.getBoundingClientRect()
-
-    // Hide filter container, show add button and add-filters row
-    filterContainer.style.display = "none"
-    addBtn.style.display = ""
-    if (this.hasAddFiltersContainerTarget) {
-      this.addFiltersContainerTarget.style.display = ""
-    }
-
-    const endRect = addBtn.getBoundingClientRect()
-    const dx = startRect.left - endRect.left
-    const dy = startRect.top - endRect.top
-
-    if (dx === 0 && dy === 0) return
-
-    addBtn.style.transition = 'none'
-    addBtn.style.transform = `translate(${dx}px, ${dy}px)`
-    addBtn.offsetHeight // force reflow
-    addBtn.style.transition = 'transform 0.12s ease'
-    addBtn.style.transform = ''
-    addBtn.addEventListener('transitionend', () => {
-      addBtn.style.transition = ''
-    }, { once: true })
+  _crossTargets(name) {
+    const hasKey = `has${name[0].toUpperCase()}${name.slice(1)}Target`
+    return this[hasKey] ? this[`${name}Targets`] : Array.from(document.querySelectorAll(`[data-location-filter-target="${name}"]`))
   }
 
   animateReorder(container, sortedButtons) {
@@ -768,96 +722,27 @@ export default class extends Controller {
     })
   }
 
-  // Show/hide filter sections
-  showRecipeFilter() {
-    const addBtn = this.hasAddRecipeFilterBtnTarget ? this.addRecipeFilterBtnTarget : null
-    const container = this.hasRecipeFilterContainerTarget ? this.recipeFilterContainerTarget : null
-
-    this.animateAddFilter(addBtn, container)
-    this.updateAddFiltersVisibility()
-  }
-
-  hideRecipeFilter() {
-    // Clear active filters
-    this.selectedRecipes.clear()
-    this.updateRecipeButtonStates()
-
-    const addBtn = this.hasAddRecipeFilterBtnTarget ? this.addRecipeFilterBtnTarget : null
-    const container = this.hasRecipeFilterContainerTarget ? this.recipeFilterContainerTarget : null
-    this.animateRemoveFilter(addBtn, container)
-
-    this.currentPageValue = 1
-    this.filterPlants()
-    this.updateResultsCount()
-    this.updateAddFiltersVisibility()
-    this.syncFiltersToUrl()
-    this.updateSaveFormVisibility()
-  }
-
-  showLocationFilter() {
-    const addBtn = this.hasAddLocationFilterBtnTarget ? this.addLocationFilterBtnTarget : null
-    const container = this.hasLocationFilterContainerTarget ? this.locationFilterContainerTarget : null
-
-    this.animateAddFilter(addBtn, container)
-    this.updateAddFiltersVisibility()
-  }
-
-  hideLocationFilter() {
-    // Clear active filters
+  clearLocationFilter() {
     this.selectedLocations.clear()
     this.updateButtonStates()
-
-    const addBtn = this.hasAddLocationFilterBtnTarget ? this.addLocationFilterBtnTarget : null
-    const container = this.hasLocationFilterContainerTarget ? this.locationFilterContainerTarget : null
-    this.animateRemoveFilter(addBtn, container)
-
     this.currentPageValue = 1
-    this.filterPlants()
-    this.updateResultsCount()
-    this.updateAddFiltersVisibility()
+    this._dispatchApply()
     this.syncFiltersToUrl()
     this.updateSaveFormVisibility()
   }
 
-  // Update visibility of "Add filter:" container and filter row
-  updateAddFiltersVisibility() {
-    if (!this.hasAddFiltersContainerTarget) return
-
-    // Check if all available filter sections are visible
-    const allVisible = this.areAllFiltersVisible()
-    const anyVisible = this.areAnyFiltersVisible()
-
-    // Hide "Add filter:" section if all filters are visible, show it otherwise
-    this.addFiltersContainerTarget.style.display = allVisible ? "none" : ""
-
-    // Show filter row only when at least one filter section is active
-    if (this.hasFilterRowTarget) {
-      this.filterRowTarget.style.display = anyVisible ? "" : "none"
-    }
-  }
-
-  areAnyFiltersVisible() {
-    if (this.hasRecipeFilterContainerTarget && this.recipeFilterContainerTarget.style.display !== "none") return true
-    if (this.hasLocationFilterContainerTarget && this.locationFilterContainerTarget.style.display !== "none") return true
-    return false
-  }
-
-  areAllFiltersVisible() {
-    let allVisible = true
-
-    if (this.hasRecipeFilterContainerTarget) {
-      if (this.recipeFilterContainerTarget.style.display === "none") allVisible = false
-    }
-
-    if (this.hasLocationFilterContainerTarget) {
-      if (this.locationFilterContainerTarget.style.display === "none") allVisible = false
-    }
-
-    return allVisible
+  clearRecipeFilter() {
+    this.selectedRecipes.clear()
+    this.updateRecipeButtonStates()
+    this.currentPageValue = 1
+    this._dispatchApply()
+    this.syncFiltersToUrl()
+    this.updateSaveFormVisibility()
   }
 
   updateSaveFormVisibility() {
-    if (!this.hasSaveSearchContainerTarget) return
+    const saveSearchContainer = this._crossTarget('saveSearchContainer')
+    if (!saveSearchContainer) return
     const hideScheduledActive = new URLSearchParams(window.location.search).get('hide_scheduled') === 'true'
     const hasActiveState =
       this.selectedLocations.size > 0 ||
@@ -865,7 +750,7 @@ export default class extends Controller {
       this.displayModeValue !== "watering" ||
       this.searchTermValue.length > 0 ||
       hideScheduledActive
-    this.saveSearchContainerTarget.style.display = hasActiveState ? "" : "none"
+    saveSearchContainer.style.display = hasActiveState ? "" : "none"
   }
 
   cleanUrl() {
@@ -887,16 +772,6 @@ export default class extends Controller {
     locationIds.forEach(id => this.selectedLocations.add(id))
     recipeIds.forEach(id => this.selectedRecipes.add(id))
 
-    if (locationIds.length > 0 && this.hasLocationFilterContainerTarget) {
-      this.locationFilterContainerTarget.style.display = ""
-      if (this.hasAddLocationFilterBtnTarget) this.addLocationFilterBtnTarget.style.display = "none"
-    }
-    if (recipeIds.length > 0 && this.hasRecipeFilterContainerTarget) {
-      this.recipeFilterContainerTarget.style.display = ""
-      if (this.hasAddRecipeFilterBtnTarget) this.addRecipeFilterBtnTarget.style.display = "none"
-    }
-    if (this.hasFilterRowTarget) this.filterRowTarget.style.display = ""
-
     this.updateButtonStates()
     this.updateRecipeButtonStates()
     this.reorderButtons()
@@ -914,7 +789,8 @@ export default class extends Controller {
     this.selectedLocations.forEach(id => url.searchParams.append("locations[]", id))
     this.selectedRecipes.forEach(id => url.searchParams.append("recipes[]", id))
     window.history.replaceState({}, "", url.toString())
-    if (this.hasFilterParamsInputTarget) this.filterParamsInputTarget.value = url.search
+    const filterParamsInput = this._crossTarget('filterParamsInput')
+    if (filterParamsInput) filterParamsInput.value = url.search
     this.updateSearchClearButton()
   }
 }

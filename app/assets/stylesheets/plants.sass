@@ -88,15 +88,17 @@ h1
     color: white
   // Color-aware filter buttons
   &[data-location-color], &[data-recipe-color]
-    background: color-mix(in srgb, var(--filter-color) 15%, transparent)
-    color: var(--filter-color)
+    background: #fff4
+    color: white
+    border: 1px solid transparent
     &:hover
-      background: color-mix(in srgb, var(--filter-color) 25%, transparent)
+      background: #fff6
     &.active
-      background: var(--filter-color)
-      color: white
+      background: #fffe
+      color: var(--filter-color)
+      border-color: var(--filter-color)
       &:hover
-        background: var(--filter-color)
+        background: #fffe
         opacity: 0.9
 
 // Filter controls wrapper - stacked rows
@@ -125,6 +127,8 @@ h1
 .filter-row
   display: flex
   gap: 0.5rem
+  overflow: hidden
+  transition: height 0.3s ease
 
   @media (max-width: 500px)
     flex-direction: column
@@ -218,27 +222,17 @@ h1
     cursor: pointer
     font-family: inherit
 
-// Filter actions container (sticky at right edge of scroll)
+// Filter actions container (toggle + remove, sits outside the scroll area)
 .filter-actions
-  position: sticky
-  right: 0
   display: flex
   align-items: center
-  align-self: stretch
   gap: 0.25rem
   flex-shrink: 0
-  background: #eee
-  padding-left: 0.25rem
 
-  .is-overflowing > &::before
-    content: ""
-    position: absolute
-    right: 100%
-    top: 0
-    bottom: 0
-    width: 3em
-    background: linear-gradient(to right, transparent, #eee)
-    pointer-events: none
+// Fade out right edge of filter buttons when overflowing (works on any background)
+.filter-buttons-scroll.is-overflowing
+  mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent 100%)
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent 100%)
 
 // Shared filter toggle button (show more/less)
 .filter-toggle-btn

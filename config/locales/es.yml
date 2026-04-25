@@ -102,6 +102,7 @@ es:
       show_per_page: "Mostrar"
       all: "Todos"
       showing_info: "Mostrando %{from}-%{to} de %{total}"
+      toggle_filters: "Mostrar/ocultar filtros"
     show:
       edit_this_plant: "Editar esta planta"
       water_this_plant: "Regar esta planta"
