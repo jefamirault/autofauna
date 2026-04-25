@@ -1,0 +1,11 @@
+<div class="saved-search-chip" id="<%= dom_id(saved_search) %>">
+  <%= link_to plants_path('q' => { 'name_or_location_name_cont' => saved_search.query_term }),
+      class: "saved-search-link",
+      title: saved_search.query_term,
+      data: { turbo_frame: "plants-results" } do %>
+    ⭐ <%= saved_search.name %>
+  <% end %>
+  <%= button_to "✕", saved_search_path(saved_search), method: :delete,
+      class: "saved-search-delete-btn",
+      title: t('saved_searches.delete') %>
+</div>

@@ -57,6 +57,7 @@
           <div id="headerEmail" data-action="click->dropdown#toggle">
             <span class="email-text"><%= current_user.guest? ? t('guest.guest') : current_user.email %></span>
             <span class="mobile-user-icon">&#128100;</span>
+            <span class="dropdown-chevron">▾</span>
           </div>
           <div class="header-dropdown hidden" data-dropdown-target="menu">
             <% if current_user.admin? %>
@@ -68,7 +69,7 @@
             <% end %>
             <%= link_to settings_path, class: 'dropdown-item' do %><%= image_tag 'settings_icon.png', class: 'dropdown-icon' %> <%= t('.account_settings') %><% end %>
             <% unless current_user.guest? %>
-              <%= button_to t('.log_out'), session_path, method: :delete, class: 'dropdown-logout', onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
+              <%= button_to "🚪 #{t('.log_out')}", session_path, method: :delete, class: 'dropdown-logout', onclick: "return confirm('#{t 'account.confirm_logout'}');" %>
             <% end %>
           </div>
         </div>
@@ -136,17 +137,13 @@
         <% end %>
         <div class="fill"></div>
 
-        <div id="sidebarLocale" data-controller="locale-popup" data-locale-popup-flag-value="<%= current_locale == 'es' ? '🇲🇽' : '🇺🇸' %>">
+        <div id="sidebarLocale" data-controller="locale-popup">
           <div class="locale-options hidden" data-locale-popup-target="menu">
-            <% if current_locale != 'en' %>
-              <%= link_to raw('🇺🇸 <span class="nav-label">English</span>'), "?locale=en", class: "navItem locale-option" %>
-            <% end %>
-            <% if current_locale != 'es' %>
-              <%= link_to raw('🇲🇽 <span class="nav-label">Español</span>'), "?locale=es", class: "navItem locale-option" %>
-            <% end %>
+            <%= link_to raw('🇺🇸 <span class="nav-label">English</span>'), "?locale=en", class: "navItem locale-option#{' selected' if (current_locale || 'en') != 'es'}" %>
+            <%= link_to raw('🇲🇽 <span class="nav-label">Español</span>'), "?locale=es", class: "navItem locale-option#{' selected' if current_locale == 'es'}" %>
           </div>
           <button class="locale-toggle-btn navItem" data-action="click->locale-popup#toggle" aria-label="Change language">
-            <span data-locale-popup-target="icon">🌐</span> <span class="nav-label"><%= current_locale == 'es' ? 'Español' : 'English' %></span>
+            <%= current_locale == 'es' ? '🇲🇽' : '🇺🇸' %> <span class="nav-label"><%= current_locale == 'es' ? 'Español' : 'English' %></span>
           </button>
         </div>
         <% unless user_signed_in? %>

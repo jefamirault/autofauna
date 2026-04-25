@@ -118,3 +118,25 @@ Current session log. Previous logs archived in `agent_log/`.
 - PR #90 (mini header graphic + toast flash + floating guest banner) merged
 - All milestone issues (#86, #87, #88) closed
 - Worktrees and branches cleaned up
+
+---
+
+## 2026-04-24: Sprint 0.9.2 — Issues #71 and #21 (Worker 4, branch sprint/v0-9-2/ux-ui)
+
+### Issue #71: Locale switcher + email dropdown styles
+
+- Locale button now always shows current locale flag (🇺🇸/🇲🇽) — no longer shows globe icon
+- Locale dropdown shows ALL options (English and Español) with flags; selected locale is highlighted
+- `locale_popup_controller.js` simplified — flag display handled server-side
+- Email button (`#headerEmail`) gains a `▾` chevron on the right using flex layout
+- Logout button gets 🚪 icon for consistency with other dropdown items
+
+### Issue #21: Saved Searches
+
+- **Migration** `20260424130000_create_saved_searches.rb` — new `saved_searches` table
+- **Model** `SavedSearch` with user/project associations and name/query_term validations
+- **Controller** `SavedSearchesController` — create and destroy actions (Turbo Stream responses)
+- **Route** `resources :saved_searches, only: [:create, :destroy]`
+- **Plants index** — saved searches row at top of `#search-options`: chips for each saved search (click to apply, ✕ to delete) + inline save form when a search term is active
+- **CSS** in `plants.sass` — pill-style chips, inline save form, auto-hide empty row via CSS `:has()`
+- **Note:** Migration must be run: `bin/rails db:migrate`

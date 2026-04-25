@@ -1,0 +1,11 @@
+<div class="save-search-area" id="save-search-form-container">
+  <%= form_with model: SavedSearch.new, url: saved_searches_path, class: "save-search-form" do |f| %>
+    <%= f.hidden_field :query_term, value: query_term %>
+    <%= f.text_field :name,
+        placeholder: t('saved_searches.name_placeholder'),
+        maxlength: 50,
+        class: "save-search-input",
+        value: query_term.to_s.titleize %>
+    <%= f.submit "💾", class: "save-search-btn", title: t('saved_searches.save') %>
+  <% end %>
+</div>

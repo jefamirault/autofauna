@@ -17,6 +17,7 @@ class Project < ApplicationRecord
   has_many :recipe_sources, dependent: :destroy
   has_many :recipes, dependent: :destroy
   has_many :recipe_batches, dependent: :destroy
+  has_many :saved_searches, dependent: :destroy
 
   enum :moisture_measurement_type, { numeric: 0, categorical: 1 }
 

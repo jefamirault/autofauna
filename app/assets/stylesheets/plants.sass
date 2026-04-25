@@ -233,6 +233,84 @@ h1
     background: rgba(14, 72, 123, 0.1)
     color: $blue
 
+// Saved searches row
+.saved-searches-row
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  flex-wrap: wrap
+  min-height: 0
+  // Hide when no chips and no save form
+  &:not(:has(.saved-search-chip, .save-search-area))
+    display: none
+
+#saved-searches-list
+  display: contents
+
+.saved-search-chip
+  display: inline-flex
+  align-items: center
+  gap: 0
+  border-radius: 999px
+  background: $lightblue
+  border: 1px solid rgba(14, 72, 123, 0.25)
+  overflow: hidden
+  .saved-search-link
+    padding: 0.25rem 0.5rem 0.25rem 0.75rem
+    font-size: 0.9em
+    color: $blue
+    text-decoration: none
+    white-space: nowrap
+    &:hover
+      background: rgba(14, 72, 123, 0.1)
+      text-decoration: none
+  form
+    display: inline-flex
+    padding: 0
+  .saved-search-delete-btn
+    padding: 0.25rem 0.5rem
+    background: none
+    border: none
+    border-left: 1px solid rgba(14, 72, 123, 0.2)
+    color: rgba(14, 72, 123, 0.5)
+    cursor: pointer
+    font-size: 0.8em
+    line-height: 1
+    &:hover
+      background: rgba(14, 72, 123, 0.15)
+      color: $blue
+
+.save-search-area
+  display: flex
+  .save-search-form
+    display: flex
+    align-items: center
+    gap: 0.25rem
+  .save-search-input
+    padding: 0.2rem 0.5rem
+    border-radius: 999px
+    border: 1px dashed rgba(14, 72, 123, 0.4)
+    font-size: 0.9em
+    background: transparent
+    color: inherit
+    font-family: inherit
+    width: 9rem
+    &:focus
+      outline: none
+      border-style: solid
+      border-color: rgba(14, 72, 123, 0.6)
+  .save-search-btn
+    padding: 0.2rem 0.5rem
+    border-radius: 999px
+    border: none
+    background: $lightblue
+    cursor: pointer
+    font-size: 0.9em
+    font-family: inherit
+    color: $blue
+    &:hover
+      background: rgba(14, 72, 123, 0.2)
+
 // Watering status filters
 .watering-status-filters
   display: flex
