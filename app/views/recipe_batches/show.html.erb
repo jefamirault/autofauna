@@ -29,6 +29,28 @@
           <span class="value"><%= format_date @recipe_batch.mixed_on %></span>
         </div>
       <% end %>
+      <% if @recipe_batch.remaining_volume.present? %>
+        <div class="info-row">
+          <span class="label">Remaining</span>
+          <span class="value">
+            <%= sprintf('%g', @recipe_batch.remaining_volume.round(3)) %> <%= @recipe_batch.volume_units %>
+            <% if @recipe_batch.remaining_percent %>
+              (<%= @recipe_batch.remaining_percent %>%)
+            <% end %>
+          </span>
+        </div>
+        <% runout = @recipe_batch.projected_runout %>
+        <div class="info-row">
+          <span class="label">Runs Out</span>
+          <span class="value">
+            <% if runout %>
+              ~<%= format_date runout %> (<%= (runout - Date.current).to_i %> days)
+            <% else %>
+              No recent usage
+            <% end %>
+          </span>
+        </div>
+      <% end %>
       <div class="info-row">
         <span class="label">Status</span>
         <span class="value"><%= @recipe_batch.active? ? "Active" : "Inactive" %></span>
@@ -41,6 +63,24 @@
       <% end %>
     </div>
   </div>
+</div>
+
+<div class="settings-card">
+  <h3>Adjust Remaining Volume</h3>
+  <%= form_with url: adjust_remaining_recipe_batch_path(@recipe_batch), method: :patch, data: { turbo: false } do |f| %>
+    <div class="field-row">
+      <div class="field-row-item">
+        <%= f.number_field :volume, step: 'any', placeholder: "e.g. 1.5", id: "adjust_volume" %>
+      </div>
+      <div class="field-row-item">
+        <%= f.select :units, options_for_select(RecipeBatch.volume_units.map { |k, v| [k, k] }, @recipe_batch.volume_units), {}, { id: "adjust_units" } %>
+      </div>
+      <div class="field-row-item">
+        <%= f.select :adjust_action, [["➕ Add", "add"], ["➖ Subtract", "subtract"], ["Set to", "set"]] %>
+      </div>
+    </div>
+    <%= f.submit "Update Remaining", class: 'saveButton' %>
+  <% end %>
 </div>
 
 <div>

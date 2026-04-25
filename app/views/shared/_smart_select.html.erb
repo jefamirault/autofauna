@@ -1,0 +1,54 @@
+<%#
+  Renders a smart select field with top suggestions shown prominently
+  and the full list in a collapsible "Show all" section.
+
+  Locals:
+    field_name  - form field name, e.g. "plant[location_id]"
+    field_id    - HTML id for the select element
+    label       - label text
+    suggestions - array of SmartSuggestions::Suggestion (id, label, score)
+    all_items   - full AR collection / array (responds to .id and .to_s)
+    selected_id - currently selected id (integer or nil)
+    prompt      - placeholder text (default: "-- Select --")
+    include_blank - whether to include a blank option in full list
+%>
+<% prompt ||= "-- Select --" %>
+<% include_blank ||= true %>
+
+<div class="smart-select" data-controller="smart-select">
+  <label><%= label %></label>
+
+  <% if suggestions.any? %>
+    <div class="smart-select-suggestions">
+      <span class="suggestions-label">Suggested:</span>
+      <% suggestions.each do |s| %>
+        <button type="button"
+                class="suggestion-chip<%= ' selected' if s.id == selected_id %>"
+                data-action="click->smart-select#pickSuggestion"
+                data-smart-select-target="chip"
+                data-id="<%= s.id %>"
+                data-field-id="<%= field_id %>">
+          <%= s.label %>
+        </button>
+      <% end %>
+    </div>
+  <% end %>
+
+  <details data-smart-select-target="details">
+    <summary class="buttonLinkSmall">Show all &darr;</summary>
+    <select name="<%= field_name %>" id="<%= field_id %>"
+            data-smart-select-target="select"
+            data-action="change->smart-select#selectChanged">
+      <% if include_blank %>
+        <option value=""><%= prompt %></option>
+      <% end %>
+      <% all_items.each do |item| %>
+        <option value="<%= item.id %>" <%= 'selected' if item.id == selected_id %>><%= item.to_s %></option>
+      <% end %>
+    </select>
+  </details>
+
+  <input type="hidden" name="<%= field_name %>" id="<%= field_id %>_hidden"
+         value="<%= selected_id %>"
+         data-smart-select-target="hidden">
+</div>

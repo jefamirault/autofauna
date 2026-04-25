@@ -49,7 +49,7 @@ class PlantsController < ApplicationController
     @q = current_project.plants.ransack(params['q'])
 
     @q.sorts = ['date_max_watering asc', 'date_min_watering asc'] if @q.sorts.empty?
-    @plants = @q.result(distinct: true).includes(:location, :recipe, last_watering: [:recipe_batch])
+    @plants = @q.result(distinct: true).includes(:location, :recipe, :plant_recipes, :recipes, last_watering: [:recipe_batch, :recipe_source])
 
     # Build location filter buttons with colors, sorted by count (descending)
     location_counts = @plants.where.not(location_id: nil).reorder(nil).group(:location_id).count
@@ -179,6 +179,7 @@ class PlantsController < ApplicationController
 
     respond_to do |format|
       if @plant.save
+        assign_plant_recipes(@plant)
         format.html { redirect_to plant_url(@plant), notice: t('plants.messages.create_success') }
         format.json { render :show, status: :created, location: @plant }
       else
@@ -192,6 +193,7 @@ class PlantsController < ApplicationController
   def update
     respond_to do |format|
       if @plant.update(plant_params)
+        assign_plant_recipes(@plant)
         format.html { redirect_to plant_url(@plant), notice: t('plants.messages.update_success') }
         format.json { render :show, status: :ok, location: @plant }
       else
@@ -299,5 +301,20 @@ class PlantsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def plant_params
       params.require(:plant).permit(:name, :uid, :project_id, :zone_id, :location_id, :pot, :archived, :min_watering_freq, :max_watering_freq, :manual_watering_frequency, :graphic, :notifications_enabled, :recipe_id)
+    end
+
+    def assign_plant_recipes(plant)
+      recipe_ids = params[:plant][:recipe_ids]
+      return unless recipe_ids
+
+      selected_ids = recipe_ids.reject(&:blank?).map(&:to_i)
+      valid_ids = current_project.recipes.where(id: selected_ids).pluck(:id)
+
+      plant.plant_recipes.where.not(recipe_id: valid_ids).destroy_all
+      existing_ids = plant.plant_recipes.pluck(:recipe_id)
+      (valid_ids - existing_ids).each_with_index do |rid, idx|
+        plant.plant_recipes.create!(recipe_id: rid, position: existing_ids.size + idx)
+      end
+      plant.sync_primary_recipe!
     end
 end

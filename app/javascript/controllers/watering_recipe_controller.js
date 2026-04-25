@@ -1,14 +1,30 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["recipeSelect", "batchSelect", "tdsField", "tdsButton", "tdsContainer"]
+  static targets = ["sourceSelect", "recipeSection", "recipeSelect", "batchSelect",
+                    "tdsField", "tdsButton", "tdsContainer"]
   static values = { url: String }
 
+  sourceChanged() {
+    const sourceId = this.hasSourceSelectTarget ? this.sourceSelectTarget.value : null
+    if (this.hasRecipeSectionTarget) {
+      this.recipeSectionTarget.style.display = sourceId ? "none" : ""
+    }
+    if (sourceId && this.hasRecipeSelectTarget) {
+      this.recipeSelectTarget.value = ""
+      if (this.hasBatchSelectTarget) {
+        this.batchSelectTarget.innerHTML = '<option value="">-- None --</option>'
+      }
+    }
+  }
+
   recipeChanged() {
-    const recipeId = this.recipeSelectTarget.value
+    const recipeId = this.hasRecipeSelectTarget ? this.recipeSelectTarget.value : null
 
     if (!recipeId) {
-      this.batchSelectTarget.innerHTML = '<option value="">-- None --</option>'
+      if (this.hasBatchSelectTarget) {
+        this.batchSelectTarget.innerHTML = '<option value="">-- None --</option>'
+      }
       return
     }
 
@@ -19,11 +35,14 @@ export default class extends Controller {
         batches.forEach(batch => {
           options += `<option value="${batch.id}" data-tds="${batch.tds}">${batch.label}</option>`
         })
-        this.batchSelectTarget.innerHTML = options
+        if (this.hasBatchSelectTarget) {
+          this.batchSelectTarget.innerHTML = options
+        }
       })
   }
 
   batchChanged() {
+    if (!this.hasBatchSelectTarget) return
     const selected = this.batchSelectTarget.selectedOptions[0]
     if (selected && selected.dataset.tds) {
       this.tdsFieldTarget.value = selected.dataset.tds

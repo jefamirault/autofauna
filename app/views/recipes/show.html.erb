@@ -38,6 +38,7 @@
 <% end %>
 
 <div>
+  <%= link_to "🧮 Calculator", calculate_recipe_path(@recipe), class: 'link' %>
   <%= link_to "✏️ Edit this Recipe", edit_recipe_path(@recipe), class: 'link' %>
   <%= link_to "↩️ Back to Recipes", recipes_path, class: 'link' %>
 </div>

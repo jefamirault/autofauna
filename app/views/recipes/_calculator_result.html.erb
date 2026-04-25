@@ -1,0 +1,23 @@
+<% if results.any? %>
+  <div class="calculator-results">
+    <h3>Ingredients Needed</h3>
+    <table class="timeline">
+      <thead>
+        <tr>
+          <th>Ingredient</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% results.each do |r| %>
+          <tr>
+            <td><%= r.source_name %></td>
+            <td><%= sprintf('%g', r.amount.round(3)) %> <%= r.units %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% elsif results.empty? && defined?(show_empty) && show_empty %>
+  <p class="empty-state">This recipe has no ingredients to calculate.</p>
+<% end %>
