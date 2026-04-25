@@ -1,0 +1,15 @@
+<% content_for :title, "Log Maintenance — #{@equipment_item.name}" %>
+
+<h1>
+  <%= link_to t('layouts.application.tanks'), tanks_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @tank, tank_path(@tank), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @equipment_item.name, tank_equipment_path(@tank, @equipment_item), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  Log Maintenance
+</h1>
+
+<div class="settings-card">
+  <%= render 'form' %>
+</div>

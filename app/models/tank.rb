@@ -5,6 +5,9 @@ class Tank < ApplicationRecord
   belongs_to :project
   has_many :water_tests, dependent: :destroy
   has_many :recipe_sources
+  has_many :water_changes, dependent: :destroy
+  has_many :feeding_instructions, dependent: :destroy
+  has_many :equipment, dependent: :destroy
 
   def latest_water_test
     water_tests.recent.first
@@ -67,5 +70,23 @@ class Tank < ApplicationRecord
 
   def last_tds_reading
     # tds_readings.sort{|r| r.datetime}.first
+  end
+
+  def last_water_change
+    water_changes.recent.first
+  end
+
+  def water_change_schedule
+    if water_change_min_days && water_change_max_days
+      if water_change_min_days == water_change_max_days
+        "Every #{water_change_min_days} days"
+      else
+        "Every #{water_change_min_days}–#{water_change_max_days} days"
+      end
+    elsif water_change_min_days
+      "Every #{water_change_min_days}+ days"
+    elsif water_change_max_days
+      "Every #{water_change_max_days} days or less"
+    end
   end
 end

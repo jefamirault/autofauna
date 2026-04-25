@@ -106,7 +106,7 @@ module ApplicationHelper
       section_title = t('layouts.application.waterings')
       title = action.in?(%w[show edit]) && @recipe_source ? @recipe_source.to_s : section_title
       { icon: 'water_icon.png', title: title, section_title: section_title, gradient_class: 'header-waterings', nav_path: recipe_sources_path, plant_graphic: nil }
-    when 'tanks', 'water_tests'
+    when 'tanks', 'water_tests', 'water_changes', 'feeding_instructions', 'equipment', 'maintenance_logs'
       section_title = t('layouts.application.tanks')
       title = action == 'show' && controller == 'tanks' && @tank ? @tank.to_s : section_title
       { icon: 'tank_icon.png', title: title, section_title: section_title, gradient_class: 'header-tanks', nav_path: tanks_path, plant_graphic: nil }

@@ -401,6 +401,10 @@ es:
   log_entries:
     create: '💾 Crear una entrada de registro'
     update: '💾 Actualizar entrada de registro'
+  saved_searches:
+    save: "Guardar búsqueda"
+    delete: "Eliminar búsqueda guardada"
+    name_placeholder: "Nombra esta búsqueda..."
 
   date:
     month_names: [ ~, enero, febrero, marzo, abril, mayo, junio, julio, agosto, septiembre, octubre, noviembre, diciembre ]

@@ -27,6 +27,12 @@
           <span class="value"><%= @tank.description %></span>
         </div>
       <% end %>
+      <% if @tank.water_change_schedule %>
+        <div class="info-row">
+          <span class="label">Water Change</span>
+          <span class="value"><%= @tank.water_change_schedule %></span>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>
@@ -42,4 +48,105 @@
 <% end %>
 <%= render 'water_tests/water_tests', water_tests: @water_tests %>
 
-<%= button_to "🗑️ Destroy this tank", @tank, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('Are you sure you want to permanently delete this Tank?');" %>
+<h2>💧 Water Changes</h2>
+<%= link_to "💧 Log Water Change", new_tank_water_change_path(@tank), class: "link" %>
+<% if @water_changes.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>% Changed</th>
+        <th>Volume</th>
+        <th>Notes</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @water_changes.each do |wc| %>
+        <tr>
+          <td><%= time_or_date wc.changed_at %></td>
+          <td><%= wc.percentage ? "#{wc.percentage.round}%" : "—" %></td>
+          <td><%= wc.print_volume || "—" %></td>
+          <td><%= wc.notes || "—" %></td>
+          <td>
+            <%= link_to "✏️", edit_tank_water_change_path(@tank, wc), class: "link" %>
+            <%= button_to "🗑️", tank_water_change_path(@tank, wc), method: :delete,
+                          class: "buttonLinkDanger",
+                          form: { data: { turbo_confirm: 'Delete this water change?' } } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <%= link_to "View all water changes →", tank_water_changes_path(@tank), class: "link" if @water_changes.length >= 5 %>
+<% else %>
+  <p>No water changes logged yet.</p>
+<% end %>
+
+<h2>🍽️ Feeding Instructions</h2>
+<%= link_to "➕ Add Feeding Instruction", new_tank_feeding_instruction_path(@tank), class: "link" %>
+<% if @feeding_instructions.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Food</th>
+        <th>Amount</th>
+        <th>Frequency</th>
+        <th>Livestock / Notes</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @feeding_instructions.each do |fi| %>
+        <tr>
+          <td><%= fi.food_name %></td>
+          <td><%= [fi.amount, fi.unit].compact_blank.join(' ').presence || "—" %></td>
+          <td><%= fi.frequency || "—" %></td>
+          <td><%= fi.notes || "—" %></td>
+          <td>
+            <%= link_to "✏️", edit_tank_feeding_instruction_path(@tank, fi), class: "link" %>
+            <%= button_to "🗑️", tank_feeding_instruction_path(@tank, fi), method: :delete,
+                          class: "buttonLinkDanger",
+                          form: { data: { turbo_confirm: 'Delete this feeding instruction?' } } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No feeding instructions added yet.</p>
+<% end %>
+
+<h2>🔧 Equipment</h2>
+<%= link_to "➕ Add Equipment", new_tank_equipment_path(@tank), class: "link" %>
+<% if @equipment_items.any? %>
+  <div class="resource-cards">
+    <% @equipment_items.each do |eq| %>
+      <%= link_to tank_equipment_path(@tank, eq), class: 'resource-card' do %>
+        <div class="resource-card-name">
+          <%= eq.name %>
+          <% if eq.maintenance_overdue? %>
+            <span style="color: var(--color-overdue); font-size: 0.85em; margin-left: 0.4rem;">Overdue</span>
+          <% end %>
+        </div>
+        <div class="resource-card-meta">
+          <% if eq.maintenance_interval_days %>
+            <%= eq.maintenance_interval_text %>
+            <% if eq.last_maintenance %> · Last: <%= time_or_date(eq.last_maintenance.performed_at) %><% end %>
+          <% elsif eq.last_maintenance %>
+            Last: <%= time_or_date(eq.last_maintenance.performed_at) %>
+          <% else %>
+            No maintenance logged
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+<% else %>
+  <p>No equipment added yet.</p>
+<% end %>
+
+<div class="settings-card danger" style="margin-top: 2rem;">
+  <%= button_to "🗑️ Destroy this tank", @tank, method: :delete, class: 'buttonLinkDanger',
+                form: { data: { turbo_confirm: 'Are you sure you want to permanently delete this Tank?' } } %>
+</div>

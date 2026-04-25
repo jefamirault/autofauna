@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_many :plants, through: :projects
   has_many :push_subscriptions, dependent: :destroy
   has_many :weather_locations, dependent: :destroy
+  has_many :saved_searches, dependent: :destroy
 
   after_create :create_default_project
 

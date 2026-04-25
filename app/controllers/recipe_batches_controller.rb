@@ -1,12 +1,15 @@
 class RecipeBatchesController < ApplicationController
   before_action :authenticate
   before_action :ensure_project
-  before_action :set_recipe_batch, only: %i[show edit update destroy]
+  before_action :set_recipe_batch, only: %i[show edit update destroy adjust_remaining]
   before_action :authorize_viewer, only: [:index, :show, :for_recipe, :for_project]
   before_action :authorize_editor, except: [:index, :show, :for_recipe, :for_project]
 
   def index
-    @active_batches = current_project.recipe_batches.includes(:recipe).active.order(mixed_on: :desc)
+    urgency_order = { critical: 0, soon: 1, no_usage: 2, ok: 3 }
+    @active_batches = current_project.recipe_batches.includes(:recipe, :waterings).active
+                                     .order(mixed_on: :desc)
+                                     .sort_by { |b| urgency_order[b.replenishment_urgency] }
     @inactive_batches = current_project.recipe_batches.includes(:recipe).where(active: false).order(mixed_on: :desc)
   end
 
@@ -56,6 +59,25 @@ class RecipeBatchesController < ApplicationController
     end
   end
 
+  def adjust_remaining
+    volume = params[:volume].to_f
+    units = params[:units].presence || @recipe_batch.volume_units
+    action = params[:adjust_action]
+
+    if action == "add"
+      @recipe_batch.increment_remaining!(volume, units)
+    elsif action == "subtract"
+      @recipe_batch.decrement_remaining!(volume, units)
+    elsif action == "set"
+      @recipe_batch.update!(remaining_volume: volume, last_adjusted_at: Time.current)
+    end
+
+    respond_to do |format|
+      format.html { redirect_to @recipe_batch, notice: "Remaining volume updated." }
+      format.json { render json: { remaining_volume: @recipe_batch.remaining_volume } }
+    end
+  end
+
   def for_recipe
     batches = current_project.recipe_batches.active.where(recipe_id: params[:recipe_id])
     render json: batches.map { |b| { id: b.id, label: b.label, tds: b.tds } }
@@ -77,6 +99,6 @@ class RecipeBatchesController < ApplicationController
   end
 
   def recipe_batch_params
-    params.require(:recipe_batch).permit(:recipe_id, :tds, :volume, :volume_units, :mixed_on, :notes, :active, :project_id)
+    params.require(:recipe_batch).permit(:recipe_id, :tds, :volume, :volume_units, :mixed_on, :notes, :active, :project_id, :remaining_volume)
   end
 end

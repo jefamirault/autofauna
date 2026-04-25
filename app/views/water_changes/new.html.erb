@@ -1,0 +1,13 @@
+<% content_for :title, "Log Water Change — #{@tank}" %>
+
+<h1>
+  <%= link_to t('layouts.application.tanks'), tanks_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @tank, tank_path(@tank), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  Log Water Change
+</h1>
+
+<div class="settings-card">
+  <%= render 'form' %>
+</div>

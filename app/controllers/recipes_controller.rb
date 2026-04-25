@@ -1,9 +1,9 @@
 class RecipesController < ApplicationController
   before_action :authenticate
   before_action :ensure_project
-  before_action :set_recipe, only: %i[show edit update destroy]
-  before_action :authorize_viewer, only: [:index, :show]
-  before_action :authorize_editor, except: [:index, :show]
+  before_action :set_recipe, only: %i[show edit update destroy calculate]
+  before_action :authorize_viewer, only: [:index, :show, :calculate]
+  before_action :authorize_editor, except: [:index, :show, :calculate]
 
   def index
     @recipes = current_project.recipes.includes(:recipe_sources, :recipe_batches)
@@ -46,6 +46,33 @@ class RecipesController < ApplicationController
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @recipe.errors, status: :unprocessable_entity }
       end
+    end
+  end
+
+  def calculate
+    volume = params[:volume].to_f
+    units = params[:units].presence || 'gal'
+    ref_volume = params[:reference_volume].to_f
+    ref_volume = 1.0 if ref_volume.zero?
+    ref_units = params[:reference_units].presence || 'gal'
+    target_conc = params[:concentration].presence
+    ref_conc = params[:reference_concentration].presence
+
+    calculator = RecipeCalculator.new(
+      @recipe,
+      target_volume: volume,
+      target_units: units,
+      reference_volume: ref_volume,
+      reference_units: ref_units,
+      target_concentration: target_conc,
+      reference_concentration: ref_conc
+    )
+    @results = calculator.calculate
+    @supported_units = RecipeCalculator.supported_units
+
+    respond_to do |format|
+      format.html
+      format.json { render json: { results: @results.map(&:to_h) } }
     end
   end
 

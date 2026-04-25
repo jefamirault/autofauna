@@ -13,6 +13,9 @@ class TanksController < ApplicationController
   # GET /tanks/1 or /tanks/1.json
   def show
     @water_tests = @tank.water_tests.recent
+    @water_changes = @tank.water_changes.recent.limit(5)
+    @feeding_instructions = @tank.feeding_instructions
+    @equipment_items = @tank.equipment.includes(:maintenance_logs)
   end
 
   # GET /tanks/new
@@ -70,6 +73,7 @@ class TanksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def tank_params
-      params.expect(tank: [ :name, :capacity, :capacity_units, :description, :location_id, :project_id ])
+      params.expect(tank: [ :name, :capacity, :capacity_units, :description, :location_id, :project_id,
+                            :water_change_min_days, :water_change_max_days ])
     end
 end

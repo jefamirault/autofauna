@@ -1,0 +1,85 @@
+<% content_for :title, "#{@equipment_item.name} — #{@tank}" %>
+
+<h1>
+  <%= link_to t('layouts.application.tanks'), tanks_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @tank, tank_path(@tank), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= @equipment_item.name %>
+</h1>
+
+<div class="info-card">
+  <div class="info-card-grid">
+    <div class="info-card-section">
+      <div class="info-row">
+        <span class="label">Name</span>
+        <span class="value"><%= @equipment_item.name %></span>
+      </div>
+      <% if @equipment_item.maintenance_interval_days %>
+        <div class="info-row">
+          <span class="label">Interval</span>
+          <span class="value"><%= @equipment_item.maintenance_interval_text %></span>
+        </div>
+      <% end %>
+      <% if @equipment_item.last_maintenance %>
+        <div class="info-row">
+          <span class="label">Last Done</span>
+          <span class="value">
+            <%= time_or_date(@equipment_item.last_maintenance.performed_at) %>
+            <% if @equipment_item.maintenance_overdue? %>
+              <span style="color: var(--color-overdue); margin-left: 0.5rem;">Overdue</span>
+            <% end %>
+          </span>
+        </div>
+        <% if @equipment_item.next_maintenance_due %>
+          <div class="info-row">
+            <span class="label">Next Due</span>
+            <span class="value"><%= @equipment_item.next_maintenance_due.strftime('%B %d, %Y') %></span>
+          </div>
+        <% end %>
+      <% end %>
+      <% if @equipment_item.maintenance_instructions.present? %>
+        <div class="info-row">
+          <span class="label">Instructions</span>
+          <span class="value"><%= @equipment_item.maintenance_instructions %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div>
+  <%= link_to "✏️ Edit Equipment", edit_tank_equipment_path(@tank, @equipment_item), class: 'link' %>
+  <%= link_to "↩️ Back to Tank", tank_path(@tank), class: 'link' %>
+</div>
+
+<h2>Maintenance Log</h2>
+<%= link_to "🔧 Log Maintenance", new_tank_equipment_maintenance_log_path(@tank, @equipment_item), class: "link" %>
+
+<% if @maintenance_logs.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Notes</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @maintenance_logs.each do |log| %>
+        <tr>
+          <td><%= time_or_date log.performed_at %></td>
+          <td><%= log.notes || "—" %></td>
+          <td>
+            <%= link_to "✏️", edit_tank_equipment_maintenance_log_path(@tank, @equipment_item, log), class: "link" %>
+            <%= button_to "🗑️", tank_equipment_maintenance_log_path(@tank, @equipment_item, log),
+                          method: :delete, class: "buttonLinkDanger",
+                          form: { data: { turbo_confirm: 'Delete this maintenance log entry?' } } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No maintenance logged yet.</p>
+<% end %>

@@ -19,15 +19,27 @@ Rails.application.routes.draw do
 
   resources :locations
   resources :recipe_sources
-  resources :recipes
+  resources :recipes do
+    member do
+      get :calculate
+    end
+  end
   resources :recipe_batches do
     collection do
       get :for_recipe
       get :for_project
     end
+    member do
+      patch :adjust_remaining
+    end
   end
   resources :tanks do
     resources :water_tests
+    resources :water_changes, except: [:show]
+    resources :feeding_instructions, except: [:show]
+    resources :equipment do
+      resources :maintenance_logs
+    end
   end
   resources :sensor_types
   resources :sensors
@@ -42,6 +54,8 @@ Rails.application.routes.draw do
   post 'auth/google/callback', to: 'google_auth#callback'
 
   resources :users
+
+  resources :saved_searches, only: [:create, :destroy]
 
   get 'plants/archive', to: 'plants#archive'
   get 'plants/import', to: 'plants#import'

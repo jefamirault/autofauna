@@ -56,6 +56,20 @@
 
 <div id="search-options">
 
+  <%# Saved Searches row — always rendered so Turbo Stream can append chips %>
+  <div class="saved-searches-row">
+    <div id="saved-searches-list">
+      <% @saved_searches.each do |ss| %>
+        <%= render 'saved_searches/saved_search', saved_search: ss %>
+      <% end %>
+    </div>
+    <% if search_term.present? %>
+      <%= render 'saved_searches/save_form', query_term: search_term %>
+    <% else %>
+      <div id="save-search-form-container"></div>
+    <% end %>
+  </div>
+
   <% if @location_filters.size > 1 || @recipe_filters.any? %>
     <div class="sort-row">
       <span class="row-label"><%= t('.sort') %>:</span>

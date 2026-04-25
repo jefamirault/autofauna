@@ -1,0 +1,22 @@
+<% content_for :title, "Edit Maintenance Log — #{@equipment_item.name}" %>
+
+<h1>
+  <%= link_to t('layouts.application.tanks'), tanks_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @tank, tank_path(@tank), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @equipment_item.name, tank_equipment_path(@tank, @equipment_item), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  Edit Maintenance
+</h1>
+
+<div class="settings-card">
+  <%= render 'form' %>
+</div>
+
+<div class="settings-card danger">
+  <%= button_to "🗑️ Delete this Maintenance Entry",
+                tank_equipment_maintenance_log_path(@tank, @equipment_item, @maintenance_log),
+                method: :delete, class: 'buttonLinkDanger',
+                form: { data: { turbo_confirm: 'Delete this maintenance entry?' } } %>
+</div>

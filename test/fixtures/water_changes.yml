@@ -1,0 +1,13 @@
+one:
+  tank: one
+  changed_at: 2026-04-10 10:00:00
+  percentage: 25.0
+  volume: 18.75
+  volume_units: 0
+  notes: Regular weekly change
+
+two:
+  tank: one
+  changed_at: 2026-04-17 10:00:00
+  percentage: 30.0
+  notes: Slightly larger change after water test showed elevated nitrates

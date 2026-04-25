@@ -3,7 +3,9 @@ class Plant < ApplicationRecord
 
   belongs_to :project
   belongs_to :location, optional: true
-  belongs_to :recipe, optional: true
+  belongs_to :recipe, optional: true  # primary recipe (cached for filtering/Ransack)
+  has_many :plant_recipes, -> { order(:position) }, dependent: :destroy
+  has_many :recipes, through: :plant_recipes
   has_one :zone, through: :location
   has_many :waterings, -> { order 'waterings.watered_at' }, dependent: :destroy
   belongs_to :last_watering, class_name: 'Watering', optional: true
@@ -12,6 +14,12 @@ class Plant < ApplicationRecord
 
   before_validation :strip_whitespace
   before_validation :set_default_max_watering_freq, on: :create
+
+  # Keep recipe_id in sync with the first plant_recipe entry
+  def sync_primary_recipe!
+    first_recipe = plant_recipes.order(:position).first&.recipe
+    update_column(:recipe_id, first_recipe&.id)
+  end
 
   validates_uniqueness_of :uid, scope: :project_id
 

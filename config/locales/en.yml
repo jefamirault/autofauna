@@ -400,3 +400,7 @@ en:
   log_entries:
     create: '💾 Create Log Entry'
     update: '💾 Update Log Entry'
+  saved_searches:
+    save: "Save search"
+    delete: "Remove saved search"
+    name_placeholder: "Name this search..."

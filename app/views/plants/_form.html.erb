@@ -39,19 +39,43 @@
     <%= form.hidden_field :uid %>
   <% end %>
 
-  <% locations = current_project.locations %>
+  <% locations = current_project.locations.order(:name) %>
   <% unless locations.empty? %>
     <div class="field">
-      <%= form.label :location_id, "📍 #{t('attributes.location')}" %>
-      <%= form.collection_select :location_id, locations, :id, :name %>
+      <% loc_scorer = SmartSuggestions.location_scorer(current_project) %>
+      <% loc_suggestions_svc = SmartSuggestions.new(locations, scorer: loc_scorer, limit: 3) %>
+      <% loc_top = loc_suggestions_svc.top %>
+      <% if loc_top.any? %>
+        <%= render 'shared/smart_select',
+            field_name: "plant[location_id]",
+            field_id: "plant_location_id",
+            label: "📍 #{t('attributes.location')}",
+            suggestions: loc_top,
+            all_items: locations,
+            selected_id: plant.location_id,
+            prompt: "-- None --" %>
+      <% else %>
+        <%= form.label :location_id, "📍 #{t('attributes.location')}" %>
+        <%= form.collection_select :location_id, locations, :id, :name, include_blank: '-- None --' %>
+      <% end %>
     </div>
   <% end %>
 
-  <% recipes = current_project.recipes %>
+  <% recipes = current_project.recipes.order(:name) %>
   <% unless recipes.empty? %>
     <div class="field">
-      <%= form.label :recipe_id, "🧪 Recipe" %>
-      <%= form.collection_select :recipe_id, recipes.order(:name), :id, :name, include_blank: '-- None --' %>
+      <label>🧪 Recipes</label>
+      <div class="recipe-checkboxes">
+        <% recipes.each do |recipe| %>
+          <label class="checkbox-label">
+            <input type="checkbox" name="plant[recipe_ids][]"
+                   value="<%= recipe.id %>"
+                   <%= 'checked' if plant.recipes.map(&:id).include?(recipe.id) %>>
+            <%= recipe.name %>
+          </label>
+        <% end %>
+      </div>
+      <small>Select zero or more recipes. The first selected recipe is used for filtering.</small>
     </div>
   <% end %>
 

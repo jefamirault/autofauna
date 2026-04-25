@@ -16,6 +16,13 @@
     </div>
   <% end %>
 
+  <% if watering.recipe_source.present? %>
+    <div class="info-row">
+      <strong>Source</strong>
+      <span class="value"><%= link_to watering.recipe_source.name, recipe_source_path(watering.recipe_source) %></span>
+    </div>
+  <% end %>
+
   <% if watering.recipe.present? %>
     <div class="info-row">
       <strong>Recipe</strong>
@@ -26,7 +33,7 @@
   <% if watering.recipe_batch.present? %>
     <div class="info-row">
       <strong>Batch</strong>
-      <span class="value"><%= watering.recipe_batch.label %></span>
+      <span class="value"><%= link_to watering.recipe_batch.label, recipe_batch_path(watering.recipe_batch) %></span>
     </div>
   <% end %>
 

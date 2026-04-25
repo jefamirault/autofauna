@@ -52,53 +52,42 @@
       ➕ Add Volume
     </button>
 
-    <% if current_project.recipes.any? %>
-      <%# Unified Recipe/Batch section %>
-      <div class="field">
-        <label style="display: block;">Recipe / Batch</label>
+    <% has_recipes = current_project.recipes.any? %>
+    <% has_sources = current_project.recipe_sources.any? %>
+    <% if has_recipes || has_sources %>
+      <% if has_sources %>
+        <div style="margin-bottom: 0.5rem;">
+          <%= form.label :recipe_source_id, "Source (water type)", style: "display: block" %>
+          <%= form.collection_select :recipe_source_id, current_project.recipe_sources.order(:name), :id, :name,
+              { prompt: '-- None (use recipe below) --', selected: watering.recipe_source_id },
+              { data: { watering_recipe_target: "sourceSelect", action: "change->watering-recipe#sourceChanged" } } %>
+        </div>
+      <% end %>
 
-        <div data-watering-recipe-target="batchSection">
-          <select name="watering[recipe_batch_id]"
-                  id="watering_recipe_batch_id"
-                  data-watering-recipe-target="unifiedBatchSelect"
-                  data-action="change->watering-recipe#unifiedBatchChanged">
-            <option value="">— No Recipe / Batch —</option>
-            <% current_project.recipes.includes(:recipe_batches).order(:name).each do |recipe| %>
-              <% active_batches = recipe.recipe_batches.select(&:active?) %>
-              <% next if active_batches.empty? %>
-              <optgroup label="<%= recipe.name %>">
-                <% active_batches.each do |batch| %>
-                  <option value="<%= batch.id %>"
-                          data-recipe-id="<%= recipe.id %>"
-                          data-tds="<%= batch.tds %>"
-                          data-recipe-default-tds="<%= recipe.default_tds %>"
-                          <%= 'selected' if watering.recipe_batch_id == batch.id %>>
-                    <%= batch.label %>
-                  </option>
+      <% if has_recipes %>
+        <div class="field-row" data-watering-recipe-target="recipeSection"
+             style="<%= watering.recipe_source_id.present? ? 'display: none;' : '' %>">
+          <div class="field-row-item">
+            <%= form.label :recipe_id, "Recipe", style: "display: block" %>
+            <%= form.collection_select :recipe_id, current_project.recipes.order(:name), :id, :name,
+                { prompt: '-- None --', selected: watering.recipe_id },
+                { data: { watering_recipe_target: "recipeSelect", action: "change->watering-recipe#recipeChanged" } } %>
+          </div>
+          <div class="field-row-item">
+            <%= form.label :recipe_batch_id, "Batch", style: "display: block" %>
+            <select name="watering[recipe_batch_id]" id="watering_recipe_batch_id"
+                    data-watering-recipe-target="batchSelect"
+                    data-action="change->watering-recipe#batchChanged">
+              <option value="">-- None --</option>
+              <% if watering.recipe_id.present? %>
+                <% current_project.recipe_batches.active.where(recipe_id: watering.recipe_id).each do |batch| %>
+                  <option value="<%= batch.id %>" data-tds="<%= batch.tds %>" <%= 'selected' if watering.recipe_batch_id == batch.id %>><%= batch.label %></option>
                 <% end %>
-              </optgroup>
-            <% end %>
-            <%# Recipes with no active batches — selectable for default TDS %>
-            <optgroup label="— Recipe only (no active batch) —">
-              <% current_project.recipes.order(:name).each do |recipe| %>
-                <% next if recipe.recipe_batches.any?(&:active?) %>
-                <option value=""
-                        data-recipe-id="<%= recipe.id %>"
-                        data-recipe-default-tds="<%= recipe.default_tds %>"
-                        data-recipe-only="true"
-                        <%= 'selected' if watering.recipe_id == recipe.id && watering.recipe_batch_id.nil? %>>
-                  <%= recipe.name %>
-                </option>
               <% end %>
-            </optgroup>
-          </select>
-          <%= form.hidden_field :recipe_id, data: { watering_recipe_target: "recipeIdHidden" } %>
+            </select>
+          </div>
         </div>
-
-        <div style="margin-top: 0.5rem;">
-          <%= link_to "➕ New Batch", new_recipe_batch_path, class: 'link', style: 'font-size: 0.85em;' %>
-        </div>
-      </div>
+      <% end %>
 
       <div>
         <button type="button"
