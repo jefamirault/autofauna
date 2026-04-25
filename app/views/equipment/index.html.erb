@@ -1,0 +1,31 @@
+<% content_for :title, "Equipment — #{@tank}" %>
+
+<h1>
+  <%= link_to t('layouts.application.tanks'), tanks_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @tank, tank_path(@tank), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  Equipment
+</h1>
+
+<%= link_to "➕ Add Equipment", new_tank_equipment_path(@tank), class: 'link' %>
+
+<% if @equipment_items.any? %>
+  <div class="resource-cards">
+    <% @equipment_items.each do |eq| %>
+      <%= link_to tank_equipment_path(@tank, eq), class: 'resource-card' do %>
+        <div class="resource-card-name"><%= eq.name %></div>
+        <div class="resource-card-meta">
+          <% if eq.last_maintenance %>
+            Last: <%= time_or_date(eq.last_maintenance.performed_at) %>
+            <% if eq.maintenance_overdue? %> · <span style="color: var(--color-overdue)">Overdue</span><% end %>
+          <% else %>
+            No maintenance logged
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+<% else %>
+  <p>No equipment added yet.</p>
+<% end %>

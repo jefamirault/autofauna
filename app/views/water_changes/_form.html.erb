@@ -1,0 +1,43 @@
+<%= form_with model: [@tank, @water_change], local: true do |form| %>
+  <% if @water_change.errors.any? %>
+    <div class="auth-errors">
+      <h3>Please fix the following errors:</h3>
+      <ul>
+        <% @water_change.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :changed_at, "Date & Time" %>
+    <%= form.datetime_local_field :changed_at,
+                                  value: (@water_change.changed_at&.strftime("%Y-%m-%dT%H:%M") || Time.current.strftime("%Y-%m-%dT%H:%M")) %>
+  </div>
+
+  <div class="field">
+    <%= form.label :percentage, "Water Changed (%)" %>
+    <%= form.number_field :percentage, step: 1, min: 1, max: 100, placeholder: "e.g. 25" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :volume, "Volume Changed" %>
+    <%= form.number_field :volume, step: 'any', min: 0, placeholder: "Optional" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :volume_units, "Volume Units" %>
+    <%= form.select :volume_units, options_for_select(WaterChange.volume_units.map { |k, _| [k, k] }, @water_change.volume_units), include_blank: '— Select —' %>
+  </div>
+
+  <div class="field">
+    <%= form.label :notes %>
+    <%= form.text_area :notes, rows: 3, placeholder: "Optional notes..." %>
+  </div>
+
+  <div class="submit">
+    <%= form.submit "💾 #{@water_change.new_record? ? 'Log' : 'Update'} Water Change", class: "saveButton" %>
+    <%= link_to "❌ Cancel", tank_path(@tank), class: "linkDanger" %>
+  </div>
+<% end %>

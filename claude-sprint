@@ -13,7 +13,7 @@ set -euo pipefail
 REPO_DIR="$HOME/autofauna"
 REPO="jefamirault/autofauna"
 SESSION="claude-sprint"
-NUM_WORKERS=4
+NUM_WORKERS=0  # 0 = auto-detect from label count
 DRY_RUN=false
 CLEANUP=false
 MILESTONE=""
@@ -29,7 +29,7 @@ while [[ $# -gt 0 ]]; do
       echo "       ./claude-sprint --cleanup [<milestone>]"
       echo ""
       echo "  <milestone>   GitHub milestone title (required for launch, optional for cleanup)"
-      echo "  --agents N    Number of worker agents (default: 4)"
+      echo "  --agents N    Number of worker agents (default: auto from label count)"
       echo "  --dry-run     Show plan without launching tmux/claude"
       echo "  --cleanup     Remove worktrees, branches, and databases from a sprint"
       exit 0
@@ -79,11 +79,20 @@ if [ "$CLEANUP" = true ]; then
   fi
 
   if [ -n "$branches" ]; then
-    echo "Removing branches..."
+    echo "Removing local branches..."
     while IFS= read -r branch; do
       [ -z "$branch" ] && continue
-      echo "  Deleting branch: $branch"
+      echo "  Deleting local branch: $branch"
       git -C "$REPO_DIR" branch -D "$branch" 2>/dev/null || true
+    done <<< "$branches"
+
+    echo "Removing remote branches..."
+    while IFS= read -r branch; do
+      [ -z "$branch" ] && continue
+      if git -C "$REPO_DIR" ls-remote --exit-code --heads origin "$branch" &>/dev/null; then
+        echo "  Deleting remote branch: $branch"
+        git -C "$REPO_DIR" push origin --delete "$branch" 2>/dev/null || echo "    WARNING: Failed to delete remote branch $branch"
+      fi
     done <<< "$branches"
   fi
 
@@ -177,6 +186,13 @@ done
 declare -a worker_assignments=()
 declare -a worker_labels=()
 
+# When auto-detecting, allow unlimited groups (one per label); will be finalized later
+AUTO_DETECT=false
+if [ "$NUM_WORKERS" -eq 0 ]; then
+  AUTO_DETECT=true
+  NUM_WORKERS=999
+fi
+
 while IFS= read -r label; do
   [ -z "$label" ] && continue
   if [ ${#worker_assignments[@]} -lt "$NUM_WORKERS" ]; then
@@ -202,9 +218,13 @@ for issue_num in "${unlabeled_issues[@]}"; do
   worker_idx=$(( (worker_idx + 1) % NUM_WORKERS ))
 done
 
-# Cap NUM_WORKERS to actual number of workers with issues (no empty panes)
+# Set NUM_WORKERS: auto-detect from assignments if not explicitly set, otherwise cap to actual count
 actual_workers=${#worker_assignments[@]}
-if [ "$actual_workers" -lt "$NUM_WORKERS" ]; then
+if [ "$AUTO_DETECT" = true ]; then
+  NUM_WORKERS=$actual_workers
+  echo "Auto-detected $NUM_WORKERS worker(s) from label groups."
+elif [ "$actual_workers" -lt "$NUM_WORKERS" ]; then
+  echo "Capping workers from $NUM_WORKERS to $actual_workers (not enough label groups)."
   NUM_WORKERS=$actual_workers
 fi
 
@@ -348,6 +368,12 @@ $manager_issues_summary
 - Use \`gh\` commands to communicate with workers via issue comments
 - If a worker needs to modify a file another worker owns, coordinate via issue comments first
 - Keep the agent_log.md updated with sprint progress
+
+## Direct Worktree Edits (Fallback)
+If a worker has exited or is unresponsive, you can make edits directly in their worktree. Worker worktree paths follow the pattern:
+  \`$REPO_DIR-<branch-with-slashes-as-dashes>\`
+For example, branch \`sprint/0-9-1/plant-management\` → \`$REPO_DIR-sprint-0-9-1-plant-management\`
+You can edit files, commit, and push from these directories. Use this as a fallback when quick revisions are needed and the worker is unavailable.
 PROMPT
 )
 
@@ -416,7 +442,8 @@ $issue_details
 3. **Do not modify** files outside your scope without coordinating (check issue comments for guidance from the manager)
 4. **Read CLAUDE.md** for project conventions before starting
 5. **Run tests** after each significant change
-6. When done with all issues, commit your work and notify by commenting on the issues: \`gh issue comment <number> --repo $REPO --body "Implementation complete on branch ${branch_names[$i]}"\`
+6. When done with all issues, commit and push your work, then notify by commenting on the issues: \`gh issue comment <number> --repo $REPO --body "Implementation complete on branch ${branch_names[$i]}"\`
+7. **Stay alive after completing work** — do NOT exit after finishing. Report completion and then wait for revision requests. The manager or user may request changes via issue comments or direct messages. Periodically check for new comments on your issues: \`gh issue view <number> --repo $REPO --comments\`
 
 ## Getting Started
 1. Read CLAUDE.md for project conventions
@@ -424,6 +451,7 @@ $issue_details
 3. Plan your implementation approach
 4. Implement one issue at a time, committing after each
 5. Run tests to verify nothing is broken
+6. After all issues are done, push your branch and stay available for revisions
 PROMPT
 )
 

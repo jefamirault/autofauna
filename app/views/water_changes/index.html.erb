@@ -1,0 +1,43 @@
+<% content_for :title, "Water Change History — #{@tank}" %>
+
+<h1>
+  <%= link_to t('layouts.application.tanks'), tanks_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @tank, tank_path(@tank), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  Water Changes
+</h1>
+
+<%= link_to "💧 Log Water Change", new_tank_water_change_path(@tank), class: 'link' %>
+
+<% if @water_changes.any? %>
+  <table id="water_changes">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>% Changed</th>
+        <th>Volume</th>
+        <th>Notes</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @water_changes.each do |wc| %>
+        <tr>
+          <td><%= time_or_date wc.changed_at %></td>
+          <td><%= wc.percentage ? "#{wc.percentage.round}%" : "—" %></td>
+          <td><%= wc.print_volume || "—" %></td>
+          <td><%= wc.notes || "—" %></td>
+          <td>
+            <%= link_to "✏️", edit_tank_water_change_path(@tank, wc), class: "link" %>
+            <%= button_to "🗑️", tank_water_change_path(@tank, wc), method: :delete,
+                          class: "buttonLinkDanger",
+                          form: { data: { turbo_confirm: 'Delete this water change?' } } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No water changes logged yet.</p>
+<% end %>

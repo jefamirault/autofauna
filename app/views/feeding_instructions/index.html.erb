@@ -1,0 +1,43 @@
+<% content_for :title, "Feeding Instructions — #{@tank}" %>
+
+<h1>
+  <%= link_to t('layouts.application.tanks'), tanks_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @tank, tank_path(@tank), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  Feeding Instructions
+</h1>
+
+<%= link_to "➕ Add Feeding Instruction", new_tank_feeding_instruction_path(@tank), class: 'link' %>
+
+<% if @feeding_instructions.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Food</th>
+        <th>Amount</th>
+        <th>Frequency</th>
+        <th>Livestock / Notes</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @feeding_instructions.each do |fi| %>
+        <tr>
+          <td><%= fi.food_name %></td>
+          <td><%= [fi.amount, fi.unit].compact_blank.join(' ').presence || "—" %></td>
+          <td><%= fi.frequency || "—" %></td>
+          <td><%= fi.notes || "—" %></td>
+          <td>
+            <%= link_to "✏️", edit_tank_feeding_instruction_path(@tank, fi), class: "link" %>
+            <%= button_to "🗑️", tank_feeding_instruction_path(@tank, fi), method: :delete,
+                          class: "buttonLinkDanger",
+                          form: { data: { turbo_confirm: 'Delete this feeding instruction?' } } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No feeding instructions added yet.</p>
+<% end %>

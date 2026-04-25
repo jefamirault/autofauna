@@ -1,0 +1,19 @@
+<% content_for :title, "Edit Feeding Instruction — #{@tank}" %>
+
+<h1>
+  <%= link_to t('layouts.application.tanks'), tanks_path, class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= link_to @tank, tank_path(@tank), class: 'breadcrumb' %>
+  <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  Edit Feeding Instruction
+</h1>
+
+<div class="settings-card">
+  <%= render 'form' %>
+</div>
+
+<div class="settings-card danger">
+  <%= button_to "🗑️ Delete this Feeding Instruction", tank_feeding_instruction_path(@tank, @feeding_instruction),
+                method: :delete, class: 'buttonLinkDanger',
+                form: { data: { turbo_confirm: 'Delete this feeding instruction?' } } %>
+</div>
