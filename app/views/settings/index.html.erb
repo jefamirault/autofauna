@@ -30,6 +30,28 @@
   </div>
 </div>
 
+<%# === Features Card === %>
+<div class="settings-card">
+  <h2>✨ <%= t 'settings.features.title' %></h2>
+  <p><%= t 'settings.features.intro' %></p>
+  <%= form_with model: current_user, url: settings_path, method: :patch do |f| %>
+    <div class="feature-flags">
+      <% User::FEATURE_FLAGS.each do |flag| %>
+        <div class="feature-flag">
+          <label class="checkbox-label">
+            <%= f.check_box flag %>
+            <span><%= t "settings.features.#{flag}" %></span>
+          </label>
+          <small><%= t "settings.features.#{flag}_hint" %></small>
+        </div>
+      <% end %>
+    </div>
+    <div class="submit">
+      <%= f.submit t('settings.features.save'), class: 'saveButton' %>
+    </div>
+  <% end %>
+</div>
+
 
 <% unless current_user.guest? %>
   <%# === Email Notifications Card === %>

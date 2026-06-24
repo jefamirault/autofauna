@@ -1,0 +1,10 @@
+<%# Updates every rendering of a plant card (triple-rendered) plus its show view. %>
+<%# Locals: plant, watering %>
+<%# The plants/_plant show partial reads @plant, so set it (bulk watering doesn't). %>
+<% @plant = plant %>
+<%= turbo_stream.replace_all "##{dom_id(plant)}" do %>
+  <%= render "plants/plant_row", plant: plant, just_watered: watering %>
+<% end %>
+<%= turbo_stream.replace dom_id(plant, :show) do %>
+  <%= render plant, just_watered: watering %>
+<% end %>

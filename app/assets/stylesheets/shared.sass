@@ -90,7 +90,7 @@ h2
   margin: .5em 0 .5em .65em
 
 main
-  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings, &.weather, &.plants, &.waterings, &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests, &.recipes, &.recipe_sources, &.recipe_batches
+  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings, &.weather, &.plants, &.waterings, &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests, &.recipes, &.recipe_sources, &.recipe_batches, &.onboarding
     label
       display: block
       font-size: 85%
@@ -112,7 +112,7 @@ main
     h1
       padding: 0 0.75rem
 
-  &.sessions, &.registrations, &.passwords, &.password_resets
+  &.sessions, &.registrations, &.passwords, &.password_resets, &.onboarding
     section#primary
       background: transparent
       display: flex
@@ -199,6 +199,68 @@ table
 
 input[type=checkbox]
   transform: scale(1.5)
+
+.feature-flags
+  margin: 1rem 0
+  .feature-flag
+    margin-bottom: 1rem
+    label.checkbox-label
+      display: flex
+      align-items: center
+      gap: 0.75rem
+      font-size: 100%
+      cursor: pointer
+      input[type=checkbox]
+        width: auto
+        flex-shrink: 0
+        margin: 0 0.25rem
+    small
+      display: block
+      margin-left: 2rem
+      opacity: 0.7
+
+.onboarding-skip
+  text-align: center
+  form.button_to
+    display: inline-block
+
+.onboarding-wizard
+  .onboarding-progress
+    text-align: right
+    opacity: 0.5
+    font-size: 90%
+    margin: 0 0 0.5rem
+  .onboarding-nav
+    display: flex
+    justify-content: space-between
+    align-items: center
+    gap: 1rem
+    margin-top: 1.5rem
+    button
+      margin: 0
+  .onboarding-finish-actions
+    display: flex
+    flex-wrap: wrap
+    gap: 1rem
+    margin: 1rem 0
+  .onboarding-fertilizer-options
+    margin: 1rem 0
+  .onboarding-other-toggle
+    margin-top: 0.5rem
+  .onboarding-other-entry
+    margin: 0.5rem 0 0
+  .onboarding-fertilizer-rows
+    margin: 1rem 0
+  .onboarding-fertilizer-row
+    display: flex
+    align-items: center
+    gap: 0.5rem
+    margin-bottom: 0.5rem
+    input
+      flex: 1
+      min-width: 0
+    .onboarding-remove-row
+      flex-shrink: 0
 input
   font-size: 120%
 .saveButton
@@ -1500,3 +1562,30 @@ main.plants
 //  &:hover
 //    background: rgba(14, 72, 123, 0.1)
 //    color: $blue
+
+// Group "Water all" bar under location group headers (plants index)
+.group-watering-bar
+  padding: 0.25rem 0.5rem 0.5rem
+
+.group-water-all-form
+  display: inline-block
+  margin: 0
+
+.group-water-all-btn
+  background: $green
+  color: white
+  border: none
+  border-radius: 6px
+  padding: 6px 14px
+  font-size: 0.9em
+  cursor: pointer
+  &:hover
+    background: $darkgreen
+
+// Plant-group membership checkbox list (group form)
+.plant-group-members
+  display: flex
+  flex-direction: column
+  gap: 0.25rem
+  max-height: 14rem
+  overflow-y: auto

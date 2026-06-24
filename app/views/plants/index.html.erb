@@ -234,6 +234,12 @@
         <%= location_name %>
         <span class="group-count">(<span data-location-filter-target="groupCount"><%= plants.size %></span>)</span>
       </h3>
+      <% if (loc_id = plants.first&.location_id) && can_edit? %>
+        <div class="group-watering-bar">
+          <%= button_to "💧 #{t('.water_all')}", water_all_location_path(loc_id),
+                class: 'group-water-all-btn', form_class: 'group-water-all-form' %>
+        </div>
+      <% end %>
       <div class="plant-cards" data-collapsible-group-target="content">
         <% plants.each do |plant| %>
           <%= render 'plant_row', plant: plant %>

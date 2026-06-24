@@ -1,6 +1,7 @@
 require "net/http"
 
 class GoogleAuthController < ApplicationController
+  skip_before_action :require_onboarding
   skip_forgery_protection only: :callback
 
   def callback

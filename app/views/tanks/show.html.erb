@@ -19,7 +19,7 @@
       </div>
       <div class="info-row">
         <span class="label">Location</span>
-        <span class="value"><%= @tank.location %></span>
+        <span class="value"><%= @tank.location || '—' %></span>
       </div>
       <% if @tank.description.present? %>
         <div class="info-row">

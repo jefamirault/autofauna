@@ -1,0 +1,11 @@
+one_one:
+  plant: one
+  plant_group: one
+
+one_two:
+  plant: two
+  plant_group: one
+
+p2:
+  plant: plant_p2
+  plant_group: group_p2

@@ -14,6 +14,12 @@ class Location < ApplicationRecord
     color.presence || '#0E487B'
   end
 
+  # Locations double as implicit plant groups: water every non-archived plant here,
+  # carrying forward each plant's last watering. Returns the created Watering records.
+  def water_all!(at: Time.current)
+    plants.where(archived: false).map { |plant| plant.quick_water!(at: at) }
+  end
+
   def self.ransackable_attributes(auth_object = nil)
     %w[name zone_id color]
   end

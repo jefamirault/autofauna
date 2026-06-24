@@ -1,0 +1,3 @@
+<% @watered.each do |watering| %>
+  <%= render "plants/watered_streams", plant: watering.plant, watering: watering %>
+<% end %>

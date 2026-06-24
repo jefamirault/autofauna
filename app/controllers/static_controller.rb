@@ -1,4 +1,5 @@
 class StaticController < ApplicationController
+  skip_before_action :require_onboarding
 
   def assetlinks
     render json: [{

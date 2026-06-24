@@ -1,14 +1,15 @@
 class SettingsController < ApplicationController
+  skip_before_action :require_onboarding
   before_action :authenticate
 
   def index
   end
 
   def update
-    if current_user.update(notification_params)
-      redirect_to settings_path, notice: "Notification preferences saved."
+    if current_user.update(settings_params)
+      redirect_to settings_path, notice: t('settings.saved')
     else
-      redirect_to settings_path, alert: "Could not save notification preferences."
+      redirect_to settings_path, alert: t('settings.save_failed')
     end
   end
 
@@ -90,12 +91,13 @@ class SettingsController < ApplicationController
 
   private
 
-  def notification_params
+  def settings_params
     params.require(:user).permit(
       :email_notifications_enabled, :push_notifications_enabled,
       :email_notification_time, :push_notification_time,
       :email_notification_frequency_type, :email_notification_frequency_value,
-      :push_notification_frequency_type, :push_notification_frequency_value
+      :push_notification_frequency_type, :push_notification_frequency_value,
+      *User::FEATURE_FLAGS
     )
   end
 end

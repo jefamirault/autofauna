@@ -1,6 +1,7 @@
 class WateringsController < ApplicationController
   before_action :authenticate
   before_action :ensure_project
+  before_action :require_track_waterings, except: [:create, :new]
   before_action :set_watering, only: %i[ show edit update destroy ]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
@@ -53,6 +54,9 @@ class WateringsController < ApplicationController
 
     respond_to do |format|
       if @watering.save
+        # Logging a detailed watering reveals watering history going forward.
+        current_user.enable_feature!(:track_waterings)
+        enable_features_from_watering_params
         @watering.plant.reload
         format.turbo_stream
         format.html { redirect_to plant_path(@watering.plant), notice: t('waterings.messages.create_success') }
@@ -75,6 +79,7 @@ class WateringsController < ApplicationController
   def update
     respond_to do |format|
       if @watering.update(watering_params)
+        enable_features_from_watering_params
         format.html { redirect_to plant_url(@watering.plant), notice: t('waterings.messages.watering_updated') }
         format.json { render :show, status: :ok, location: @watering }
       else
@@ -116,6 +121,18 @@ class WateringsController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_watering
       @watering = current_project.waterings.find(params[:id])
+    end
+
+    # First-use feature reveal: turn on the relevant flag the first time the
+    # user actually records precise amounts or soil moisture on a watering.
+    def enable_features_from_watering_params
+      wp = params[:watering] || {}
+      if wp[:volume].present? || wp[:tds].present?
+        current_user.enable_feature!(:precise_measurements)
+      end
+      if wp[:pre_moisture].present? || wp[:post_moisture].present?
+        current_user.enable_feature!(:track_soil_moisture)
+      end
     end
 
     # Only allow a list of trusted parameters through.

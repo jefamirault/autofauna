@@ -1,6 +1,7 @@
 class MaintenanceLogsController < ApplicationController
   before_action :authenticate
   before_action :ensure_project
+  before_action :require_has_aquarium
   before_action :set_tank
   before_action :set_equipment_item
   before_action :set_maintenance_log, only: [:show, :edit, :update, :destroy]

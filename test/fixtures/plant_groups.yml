@@ -1,0 +1,13 @@
+# Project one's group (owned by users(:one))
+one:
+  name: Living Room
+  color: "#0E487B"
+  project: one
+  min_watering_freq: 7
+  max_watering_freq: 10
+
+# Project two's group (owned by users(:two)) — for cross-project isolation tests
+group_p2:
+  name: Office
+  color: "#0E487B"
+  project: two

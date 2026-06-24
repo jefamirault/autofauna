@@ -338,4 +338,34 @@ class PlantTest < ActiveSupport::TestCase
     assert_equal recipe, plant.last_watering.recipe
     assert_equal 500, plant.last_watering.tds
   end
+
+  # ─── quick_water! ────────────────────────────────────────────────────────────
+
+  test "quick_water! creates a watering at the given time" do
+    project = Project.create!(name: "QW Project", owner: users(:one))
+    plant = Plant.create!(name: "QW Plant", project: project, uid: 170)
+
+    watering = nil
+    assert_difference("Watering.count", 1) do
+      watering = plant.quick_water!
+    end
+    assert_equal plant, watering.plant
+    assert_in_delta Time.current, watering.watered_at, 5.seconds
+  end
+
+  test "quick_water! carries forward the last watering's details" do
+    project = Project.create!(name: "QW Project", owner: users(:one))
+    recipe = Recipe.create!(name: "QW Recipe", project: project)
+    plant = Plant.create!(name: "QW Plant", project: project, uid: 171)
+    Watering.create!(plant: plant, watered_at: 3.days.ago, volume: 2.0, units: "cups",
+      notes: "carry me", recipe: recipe, tds: 250)
+    plant.reload
+
+    watering = plant.quick_water!
+    assert_equal 2.0, watering.volume
+    assert_equal "cups", watering.units
+    assert_equal "carry me", watering.notes
+    assert_equal recipe, watering.recipe
+    assert_equal 250, watering.tds
+  end
 end

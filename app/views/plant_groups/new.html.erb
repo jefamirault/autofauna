@@ -1,0 +1,15 @@
+<% content_for :title, "New plant group" %>
+
+<div class="settings-card">
+  <h1>
+    <%= link_to "Groups", plant_groups_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    New Group
+  </h1>
+
+  <%= render "form", plant_group: @plant_group %>
+
+  <p>
+    <%= link_to "❌ Cancel", plant_groups_path, class: 'link' %>
+  </p>
+</div>

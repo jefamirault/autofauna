@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  skip_before_action :require_onboarding
+
   def new
     @user = User.new
   end

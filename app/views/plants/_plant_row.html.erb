@@ -22,7 +22,9 @@
       </div>
     <% end %>
     <div class="plant-card-meta">
-      <div class="plant-card-last-watering-volume">💧 <%= last_watering_volume_text(plant) || "–" %></div>
+      <% if feature_enabled?(:precise_measurements) %>
+        <div class="plant-card-last-watering-volume">💧 <%= last_watering_volume_text(plant) || "–" %></div>
+      <% end %>
       <div class="plant-card-last-watering-notes">📝 <%= last_watering_notes_text(plant) || "–" %></div>
       <div class="plant-card-last-watering-time">⌛ <span class="long-text"><%= last_watering_time_text(plant).html_safe %></span><span class="short-text"><%= last_watering_time_short_text(plant).html_safe %></span></div>
       <% if plant.location.present? %>
@@ -39,19 +41,28 @@
         </a>
       <% end %>
       <span class="plant-card-container">🫙 <%= plant.pot.presence || "–" %></span>
-      <% if plant.recipe.present? %>
+      <% if feature_enabled?(:use_fertilizers) && plant.recipe.present? %>
         <span class="plant-card-recipe">🧪 <%= plant.recipe.name %></span>
       <% end %>
     </div>
   </div>
   <% unless archive %>
     <div class="plant-card-water-wrap <%= 'is-watered' if watered_today %>">
-      <%= link_to edit_watering_path(just_watered || plant.last_watering || plant), class: "plant-card-water-col watered", data: { turbo_frame: "_top" } do %>
-        <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
-        </svg>
-        <span class="plant-card-water-helper"><%= t('plants.water_button.watered') %></span>
-        <span class="plant-card-edit-watering"><%= t('plants.water_button.edit') %></span>
+      <% if feature_enabled?(:track_waterings) %>
+        <%= link_to edit_watering_path(just_watered || plant.last_watering || plant), class: "plant-card-water-col watered", data: { turbo_frame: "_top" } do %>
+          <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
+          </svg>
+          <span class="plant-card-water-helper"><%= t('plants.water_button.watered') %></span>
+          <span class="plant-card-edit-watering"><%= t('plants.water_button.edit') %></span>
+        <% end %>
+      <% else %>
+        <div class="plant-card-water-col watered">
+          <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
+          </svg>
+          <span class="plant-card-water-helper"><%= t('plants.water_button.watered') %></span>
+        </div>
       <% end %>
       <div class="plant-card-water-col water-icon-link <%= urgency %>" data-inline-watering-target="waterCol">
         <%# Quick water form - one click POST %>

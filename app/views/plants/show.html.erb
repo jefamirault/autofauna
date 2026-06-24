@@ -19,6 +19,7 @@
 <div class="timeline-header">
   <h3><%= t '.timeline' %></h3>
   <div class="plant-actions">
+    <%# Always shown: first detailed watering / first moisture reading enables the feature (first-use) %>
     <%= link_to "💧 #{t('.new_watering')}", plant_water_path(@plant,
       volume: @plant.last_watering&.volume,
       units: @plant.last_watering&.units,

@@ -1,0 +1,7 @@
+<%= link_to plant_group, class: 'resource-card', style: "background: color-mix(in srgb, #{plant_group.hex_color} 12%, transparent); border-left: 3px solid color-mix(in srgb, #{plant_group.hex_color} 80%, black);" do %>
+  <div class="resource-card-name"><%= plant_group.name %></div>
+  <div class="resource-card-meta">
+    <%= pluralize(plant_group.plants.count, 'plant') %>
+    <% if plant_group.watering_frequency_text.present? %> · <%= plant_group.watering_frequency_text %><% end %>
+  </div>
+<% end %>

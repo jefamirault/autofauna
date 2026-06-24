@@ -1,4 +1,5 @@
 class SensorReadingsController < ApplicationController
+  skip_before_action :require_onboarding, only: [:transmit]
   before_action :authorize_viewer, only: [:readings]
   before_action :set_project
 

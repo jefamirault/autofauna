@@ -9,3 +9,9 @@ two:
   owner: two
   name: Second Project
   active: true
+
+# Default project for the non-onboarded user (every real user gets one on create)
+project_fresh:
+  owner: fresh
+  name: Fresh Project
+  active: true

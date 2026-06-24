@@ -49,4 +49,13 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to locations_url
   end
+
+  test "water_all waters every non-archived plant in the location" do
+    members = @location.plants.where(archived: false).count
+    assert members > 0
+    assert_difference("Watering.count", members) do
+      post water_all_location_url(@location)
+    end
+    assert_redirected_to plants_path
+  end
 end

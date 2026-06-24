@@ -25,43 +25,51 @@
 
     <div class="inline-watering-fields">
       <div class="inline-watering-row">
-        <div class="inline-field">
-          <label><%= Watering.human_attribute_name(:volume) %></label>
-          <%= form.number_field :volume, step: 'any', placeholder: "e.g. 2.0", class: "inline-input" %>
-        </div>
-        <div class="inline-field inline-field-units">
-          <label><%= t('attributes.units') %></label>
-          <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units), {}, class: "inline-input" %>
-        </div>
+        <% if feature_enabled?(:precise_measurements) %>
+          <div class="inline-field">
+            <label><%= Watering.human_attribute_name(:volume) %></label>
+            <%= form.number_field :volume, step: 'any', placeholder: "e.g. 2.0", class: "inline-input" %>
+          </div>
+          <div class="inline-field inline-field-units">
+            <label><%= t('attributes.units') %></label>
+            <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units), {}, class: "inline-input" %>
+          </div>
+        <% end %>
         <div class="inline-field inline-field-notes">
           <label><%= Watering.human_attribute_name(:notes) %></label>
           <%= form.text_field :notes, placeholder: "e.g. Tap water", class: "inline-input" %>
         </div>
       </div>
 
-      <% if current_project.recipes.any? %>
+      <% show_recipes = feature_enabled?(:use_fertilizers) && current_project.recipes.any? %>
+      <% show_tds_without_recipes = !feature_enabled?(:use_fertilizers) && feature_enabled?(:precise_measurements) %>
+      <% if show_recipes || show_tds_without_recipes %>
         <div class="inline-watering-row">
-          <div class="inline-field">
-            <label>Recipe</label>
-            <%= form.collection_select :recipe_id, current_project.recipes.order(:name), :id, :name,
-                { prompt: '-- None --', selected: watering.recipe_id },
-                { class: "inline-input", data: { watering_recipe_target: "recipeSelect", action: "change->watering-recipe#recipeChanged" } } %>
-          </div>
-          <div class="inline-field">
-            <label>Batch</label>
-            <select name="watering[recipe_batch_id]" class="inline-input" data-watering-recipe-target="batchSelect" data-action="change->watering-recipe#batchChanged">
-              <option value="">-- None --</option>
-              <% if watering.recipe_id.present? %>
-                <% current_project.recipe_batches.active.where(recipe_id: watering.recipe_id).each do |batch| %>
-                  <option value="<%= batch.id %>" data-tds="<%= batch.tds %>" <%= 'selected' if watering.recipe_batch_id == batch.id %>><%= batch.label %></option>
+          <% if show_recipes %>
+            <div class="inline-field">
+              <label>Recipe</label>
+              <%= form.collection_select :recipe_id, current_project.recipes.order(:name), :id, :name,
+                  { prompt: '-- None --', selected: watering.recipe_id },
+                  { class: "inline-input", data: { watering_recipe_target: "recipeSelect", action: "change->watering-recipe#recipeChanged" } } %>
+            </div>
+            <div class="inline-field">
+              <label>Batch</label>
+              <select name="watering[recipe_batch_id]" class="inline-input" data-watering-recipe-target="batchSelect" data-action="change->watering-recipe#batchChanged">
+                <option value="">-- None --</option>
+                <% if watering.recipe_id.present? %>
+                  <% current_project.recipe_batches.active.where(recipe_id: watering.recipe_id).each do |batch| %>
+                    <option value="<%= batch.id %>" data-tds="<%= batch.tds %>" <%= 'selected' if watering.recipe_batch_id == batch.id %>><%= batch.label %></option>
+                  <% end %>
                 <% end %>
-              <% end %>
-            </select>
-          </div>
-          <div class="inline-field inline-field-tds">
-            <label>TDS</label>
-            <%= form.number_field :tds, placeholder: "ppm", class: "inline-input", data: { watering_recipe_target: "tdsField" } %>
-          </div>
+              </select>
+            </div>
+          <% end %>
+          <% if feature_enabled?(:precise_measurements) %>
+            <div class="inline-field inline-field-tds">
+              <label>TDS</label>
+              <%= form.number_field :tds, placeholder: "ppm", class: "inline-input", data: { watering_recipe_target: "tdsField" } %>
+            </div>
+          <% end %>
         </div>
       <% end %>
     </div>

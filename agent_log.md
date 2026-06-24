@@ -140,3 +140,123 @@ Current session log. Previous logs archived in `agent_log/`.
 - **Plants index** — saved searches row at top of `#search-options`: chips for each saved search (click to apply, ✕ to delete) + inline save form when a search term is active
 - **CSS** in `plants.sass` — pill-style chips, inline save form, auto-hide empty row via CSS `:has()`
 - **Note:** Migration must be run: `bin/rails db:migrate`
+
+---
+
+## 2026-06-12: User Onboarding Flow + Feature Preference Flags
+
+### Plan (approved)
+
+Add five user-level boolean feature flags (`track_waterings`, `use_fertilizers`, `precise_measurements`, `track_soil_moisture`, `has_aquarium`), all defaulting to true, plus `onboarding_completed_at` timestamp on users. A one-time onboarding questionnaire (shown to everyone, including existing users, on next login) sets the flags via friendly questions; flags are editable any time from a new "Features" card on the Settings page. Flags hide/show advanced UI per-user (nav items, recipe/TDS/volume/moisture fields and displays, tanks section); data is never deleted. Quick-water always works regardless of flags (`waterings#create` stays ungated).
+
+Key pieces:
+- Migration: 5 boolean flags (default true, null false) + `onboarding_completed_at` datetime
+- `User::FEATURE_FLAGS`, `onboarding_completed?`, `complete_onboarding!`
+- `ApplicationController`: `feature_enabled?` helper, `require_onboarding` global before_action (skip-listed on onboarding/sessions/settings/auth/shared/transmit controllers), `require_*` gating filters
+- New `OnboardingController` (show/update/skip) + routes + view
+- Controller gating: waterings (except create), recipes/sources/batches, tanks + water_tests/water_changes/feeding_instructions/equipment/maintenance_logs, soil_moisture_readings
+- View conditionals across layout nav, plants index/cards/forms/timeline, watering forms/show
+- Nav gap fix: when waterings hidden but fertilizers on, show a Recipes nav item
+- TDS block hoisted out of recipes conditional in waterings/_form so fertilizers-off + measurements-on keeps TDS
+- Fixtures: backfill `onboarding_completed_at` on users one/two (prevents breaking all controller tests); new `fresh` fixture
+- Tests: onboarding_controller_test.rb + feature_flags_test.rb
+- i18n: en + es keys for onboarding and settings features card
+
+### Implementation (complete)
+
+- **Migration** `20260612000001_add_feature_flags_and_onboarding_to_users.rb` — 5 boolean flags (default true, null false) + `onboarding_completed_at` datetime. **User must run `bin/rails db:migrate`.**
+- **User model** — `FEATURE_FLAGS` constant, `onboarding_completed?`, `complete_onboarding!`
+- **ApplicationController** — `feature_enabled?(flag)` helper (true when signed out), global `before_action :require_onboarding`, four `require_*` gating filters
+- **Skip list** (`skip_before_action :require_onboarding`): onboarding, sessions, settings, push_subscriptions, registrations, guests, guest_conversions, google_auth, passwords, password_resets, shared_plants, sensor_readings (transmit only), static, errors
+- **OnboardingController** (show/update/skip) + routes (`GET/PATCH /onboarding`, `POST /onboarding/skip`) + `onboarding/show.html.erb` (settings-card, 5 friendly questions, Skip button); `header_config` case added
+- **Controller gating**: waterings (`except: [:create]` — quick water keeps working), recipes/recipe_sources/recipe_batches (`require_use_fertilizers`), tanks/water_tests/water_changes/feeding_instructions/equipment/maintenance_logs (`require_has_aquarium`), soil_moisture_readings (`require_track_soil_moisture`; also fixed its missing authenticate/ensure_project)
+- **View conditionals**: layout nav (recipes sub-nav, Water item — replaced by Recipes item when waterings off but fertilizers on, Tanks item), plants index (recipe filters/groups skipped server-side, display mode forced off "recipe"), plant cards/show/timeline/form, inline + full watering forms (TDS hoisted out of the recipes block so fertilizers-off + precise-on keeps TDS), watering show partial
+- **Settings** — new "Features" card; `notification_params` → `settings_params` (+flags); generic save notices
+- **i18n** — `onboarding.*` and `settings.*` keys in en.yml + es.yml
+- **Fixtures** — users one/two get `onboarding_completed_at` (prevents global test breakage); new `fresh` user
+- **Tests** — `onboarding_controller_test.rb` (8 tests), `feature_flags_test.rb` (9 tests)
+- Note: guest merge keeps the target account's flags/onboarding state; a guest's onboarding answers are discarded when merging into an existing account
+
+---
+
+## 2026-06-18: Onboarding Redesign — Multi-Step Wizard + Enable-on-First-Use Flags
+
+**Why:** The original onboarding asked five raw yes/no questions, one per feature flag, exposing internal feature names and demanding too much up front. Replace it with a friendlier wizard that asks only what the user *has* and *uses*, seeds real water-source/recipe data, and defers granular tracking preferences until those features are actually used.
+
+**Plan (approved):**
+- **Wizard flow (single client-side multi-step form):**
+  1. "Which do you have?" — plants / fish-aquarium
+  2. "How do you water?" — tap/hose / fertilizer / distilled-RO (tap-only ⇒ no sources, recipe features hidden)
+  3. Fertilizer detail (only if checked) — name fertilizers → each becomes a RecipeSource + starter Recipe; distilled/RO ⇒ a source
+  4. Final — add a first plant or tank
+- **Flags:** `has_aquarium` ← page 1; `use_fertilizers` ← fertilizer OR distilled. `track_waterings`/`precise_measurements`/`track_soil_moisture` dropped from onboarding, default off, auto-enable on first use via new idempotent `User#enable_feature!`. No new flag for "has plants" (plants always visible; checkbox only drives final add-plant-vs-tank redirect).
+- **Enable-on-first-use:** relax `require_track_waterings` (except create+new) and `require_track_soil_moisture` (except new+create) so entry affordances are reachable while off; flip flags in waterings/soil-moisture create/update when the user enters volume/TDS, logs moisture, or logs a detailed watering. Quick-water stays ungated and does NOT opt in. Always-visible disclosures in `waterings/_form` + plant show.
+- **No migration** — columns already exist; defaults stay true so existing users/fixtures unaffected; wizard writes the three deferred flags false explicitly.
+- **Files:** user.rb, onboarding_controller.rb, waterings_controller.rb, soil_moisture_readings_controller.rb, onboarding/show.html.erb, new onboarding_controller.js, waterings/_form.html.erb, plants/show.html.erb, en.yml/es.yml, onboarding/feature-flags/user tests, CLAUDE.md.
+
+### Implementation (complete)
+
+- **User model** — `enable_feature!(flag)` (idempotent `update_column`, raises on unknown flag)
+- **OnboardingController** — rewritten: reads `has_aquarium` + water-method checkboxes + `fertilizers[]` + `next`; sets flags (`use_fertilizers = fertilizer || distilled`; three tracking flags false); `seed_water_sources!` creates a "Distilled / RO Water" source and a source+starter-recipe per fertilizer (`find_or_create_by`); redirects to new plant/tank/plants. `ensure_project` added. `skip` now writes all flags false.
+- **Wizard view** `onboarding/show.html.erb` — single multi-step form (have / how-water / fertilizer-names / finish), `check_box_tag`/`text_field_tag`, final submit buttons carry `name="next"`. New `onboarding_controller.js` (step nav, conditional fertilizer step, dynamic fertilizer rows, tank-option visibility). Wizard styles in `shared.sass`.
+- **First-use triggers** — waterings: gate `except: [:create, :new]`, `create` enables `track_waterings` + `enable_features_from_watering_params` (volume/tds→precise, moisture→soil), `update` runs the same helper. soil_moisture: gate `except: [:new, :create]`, `create` enables `track_soil_moisture`. Form/show affordances always render (removed `feature_enabled?` wrappers around volume/TDS/moisture and the detailed-watering/soil-moisture links).
+- **i18n** — `onboarding.*` rewritten (have/water/fertilizers/finish + next/back) in en.yml + es.yml; obsolete `question_*`/`hint_*` removed.
+- **Fixtures** — `projects(:project_fresh)` owned by `fresh` (onboarding needs a project to seed into).
+- **Tests** — `onboarding_controller_test.rb` rewritten (tap-only / fertilizer / distilled / aquarium-tank / plant / skip / guards); `feature_flags_test.rb` updated for relaxed gates + 3 first-use enable tests; `user_test.rb` covers `enable_feature!`.
+- **Docs** — CLAUDE.md "Feature Flags & Onboarding" rewritten.
+- **User action:** no migration needed (flag columns already exist). Run: `bin/rails test test/controllers/onboarding_controller_test.rb test/controllers/feature_flags_test.rb test/models/user_test.rb`
+
+- **Verification fix:** `boolean_param` coerces with `!!` — `ActiveModel::Type::Boolean#cast(nil)` returns nil, which violated the NOT NULL flag columns. All 28 tests (onboarding + feature flags + user) pass.
+
+## Onboarding fertilizer step — selectable list instead of free-text only
+
+- **View** (`app/views/onboarding/show.html.erb`): step 2b now shows a checklist of common fertilizers (Miracle-Gro and "General Hydroponics (Flora series)" checked by default; Fox Farm, Osmocote, Jack's / J.R. Peters, Dyna-Gro, Espoma, Schultz). Checkboxes submit `fertilizers[]` by name. A collapsible "Other" disclosure (`onboarding-other-entry`) holds the original manual text-input rows + "Add another" — hidden by default, not required to proceed.
+- **JS** (`onboarding_controller.js`): added `otherEntry`/`otherToggle` targets and `toggleOther()` action (reveals manual rows, sets `aria-expanded`, focuses first input). `addFertilizer`/`removeFertilizer` unchanged (rows container untouched).
+- **Backend unchanged**: `seed_water_sources!` already strips/rejects-blank/uniqs `fertilizers[]`, so checkbox names + manual entries merge cleanly.
+- **i18n**: added `onboarding.fertilizers.other` (en/es); reworded `intro` to "Pick the fertilizers you use…".
+- **CSS** (`shared.sass`): spacing for `.onboarding-fertilizer-options`, `.onboarding-other-toggle`, `.onboarding-other-entry`.
+
+## Tanks — location now optional
+
+- **Model** (`app/models/tank.rb`): `belongs_to :location, optional: true`. Onboarding can create a tank before any locations exist.
+- **DB**: no migration needed — `tanks.location_id` was already nullable.
+- **Views**: `tanks/show.html.erb` Location row now renders `@tank.location || '—'`. `_tank.html.erb` already guarded with `if tank.location`. Form already used a blank `prompt:` so no change.
+- **Docs**: CLAUDE.md "Required associations" + create/update test notes updated (location no longer required for tanks).
+
+## Onboarding: "Don't water with fertilizer" option (2026-06-20)
+
+Added a mutually-exclusive first option to the "Which fertilizers do you use?" step (step 2b).
+
+- **Locale** (`config/locales/en.yml`, `es.yml`): new `onboarding.fertilizers.none` string.
+- **View** (`app/views/onboarding/show.html.erb`): new `no_fertilizer` checkbox as the first option in `.onboarding-fertilizer-options` (target `noFertilizer`, action `noFertilizerToggled`). Each common-fertilizer checkbox gets target `fertilizerOption` + action `fertilizerSelected`; the manual "Other" text input gets `input->onboarding#fertilizerSelected`.
+- **JS** (`app/javascript/controllers/onboarding_controller.js`): `noFertilizerToggled` clears all fertilizer checkboxes and manual-entry inputs when "none" is checked; `fertilizerSelected` unchecks "none" when any real fertilizer is selected (checkbox or non-empty text). The `no_fertilizer` param is ignored by the controller, so seeding logic is unaffected.
+
+## Plant Groups + Group Watering (Phase 1 of tracking-level vision) — 2026-06-24
+
+**Why:** Tracking effort should scale with time/season and vary per-plant and per-group (water all Living-Room plants with one click; reserve detail for overwatering-prone succulents). Full vision is a 0/1/2 tracking-level continuum (later phase). This phase builds **groups + group watering first**.
+
+**Plan (approved):**
+- **Groups = both:** Locations act as implicit groups (group-water a location's plants, no new object) AND a dedicated `PlantGroup` model for custom/cross-location collections, seedable from a location. Eventual default tracking level will live on Project (per-project) — schema groundwork only, not built this phase.
+- **Data:** new `plant_groups` (name, color hex-validated, project_id, optional min/max_watering_freq) + `plant_group_memberships` join (plant ↔ plant_group many-to-many, unique index).
+- **Models:** `PlantGroup` (`water_all!`, `apply_schedule_to_members!`, color validation/`hex_color` copied from Location); extract `Plant#quick_water!(at:)` (carry-forward attrs + `waterings.create!`) from `PlantsController#quick_water`; `Location#water_all!`.
+- **Controllers/routes:** `resources :plant_groups` + `member { post :water }` + `collection { post :seed_from_location }`; `member { post :water_all }` on `resources :locations`. `PlantGroupsController` (auth checklist like LocationsController). `quick_water` delegates to `Plant#quick_water!`.
+- **Turbo Stream DRY:** extract `plants/_watered_streams.turbo_stream.erb` (replace_all card + replace show); reuse in quick_water, plant_groups/water, locations/water_all (loop over `@watered`).
+- **UI:** plant_groups management pages; "Groups" checkbox on plant form; new "Groups" display mode + filters + "💧 Water all" buttons on plants index (location & group headers, inside turbo-frame); "Water all"/"Create group from these plants" on locations; "Groups" nav item.
+- **i18n:** `plant_groups.*` + `plants.index.display.group` (en + es).
+- **Tests:** plant_group model, `quick_water!`, plant_groups controller (CRUD/water/seed/authorization), locations#water_all; fixtures `plant_groups.yml` + `plant_group_memberships.yml` (+ p2 variant).
+- **Docs:** CLAUDE.md domain model + Plant Groups subsection.
+
+### Implementation (complete — pending user migrate + test run)
+
+- **Migration** `20260624000001_create_plant_groups.rb`: `plant_groups` (name, color, project ref, min/max_watering_freq) + `plant_group_memberships` (plant/plant_group refs, unique index).
+- **Models:** `PlantGroup` (associations, color validation/`hex_color`/`watering_frequency_text`, `water_all!`, `apply_schedule_to_members!`), `PlantGroupMembership`; `Plant#quick_water!(at:)` extracted from controller + `has_many :plant_groups`; `Location#water_all!`; `Project has_many :plant_groups`.
+- **Controllers/routes:** `resources :plant_groups` (+ member `water`, collection `seed_from_location`), `member :water_all` on locations. New `PlantGroupsController`. `PlantsController#quick_water` delegates to `quick_water!`; `assign_plant_groups` (scoped) added to create/update; `plant[plant_group_ids]` synced. `LocationsController#water_all`. New `can_edit?` helper in ApplicationController.
+- **Views:** `plant_groups/` index/new/edit/show/_form/_plant_group; `_watered_streams.turbo_stream.erb` partial reused by quick_water + plant_groups/water + locations/water_all; "💧 Water all" button on plants-index location headers; "Water all" + "Create group from these plants" on location show; "👪 Groups" checkboxes on plant form; "Groups" nav item (sub-nav + main).
+- **CSS:** `.group-watering-bar`, `.group-water-all-btn`, `.plant-group-members` in shared.sass.
+- **i18n:** `plant_groups.*` + `plants.index.water_all` (en + es).
+- **Tests:** `plant_group_test.rb` (8), `plant_groups_controller_test.rb` (CRUD/water/turbo/seed/apply_schedule), `plant_test.rb` (+2 quick_water!), `authorization_test.rb` (+6 plant_group/location isolation), `locations_controller_test.rb` (+1 water_all). Fixtures `plant_groups.yml` + `plant_group_memberships.yml` (+ p2 variant).
+- **Scope refinement (flagged):** deferred the separate plants-index "Groups display mode" — many-to-many membership would duplicate `dom_id`s in one container and break the 796-line `location_filter_controller.js` pagination/count logic. Location-header water-all (the headline "all Living-Room plants watered" UX) + group show-page watering deliver the value now.
+- Verified: `ruby -c` on all changed .rb, YAML parse on locales/fixtures, ERB compile on all new/changed templates — all pass.
+- **User action:** run `bin/rails db:migrate`, then `bin/rails test test/models/plant_group_test.rb test/models/plant_test.rb test/controllers/plant_groups_controller_test.rb test/controllers/locations_controller_test.rb test/controllers/authorization_test.rb`.
+
+**Verified (migration + 54 tests green).** Post-test fix: `plants/_plant.html.erb` (show card) reads the `@plant` ivar, which bulk watering doesn't set — `_watered_streams.turbo_stream.erb` now sets `@plant = plant` before the show render so group/location watering renders without error (the show-view replace is a harmless no-op on the index). Also switched a no-op-schedule assertion to `assert_nil`.

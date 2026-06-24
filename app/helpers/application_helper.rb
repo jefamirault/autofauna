@@ -133,6 +133,9 @@ module ApplicationHelper
     when 'settings'
       section_title = t('layouts.application.account_settings')
       { icon: 'settings_icon.png', title: section_title, section_title: section_title, gradient_class: 'header-settings', nav_path: settings_path, plant_graphic: nil }
+    when 'onboarding'
+      section_title = t('onboarding.title')
+      { icon: 'autofauna_icon.png', title: section_title, section_title: section_title, gradient_class: 'header-plants', nav_path: onboarding_path, plant_graphic: nil }
     when 'projects'
       section_title = t('layouts.application.project_settings')
       { icon: 'project_icon.png', title: section_title, section_title: section_title, gradient_class: 'header-settings', nav_path: projects_path, plant_graphic: nil }

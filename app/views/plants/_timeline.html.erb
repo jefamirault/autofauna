@@ -23,13 +23,17 @@
         data-action="click->clickable-row#click">
         <td class='whenColumn'>
           <span class='timeline-icon'>💧</span>
-          <% if watering.volume.present? %><strong><%= watering.print_volume %></strong><% else %><span class='no-volume'>—</span><% end %>
+          <% if feature_enabled?(:precise_measurements) %>
+            <% if watering.volume.present? %><strong><%= watering.print_volume %></strong><% else %><span class='no-volume'>—</span><% end %>
+          <% end %>
           <% if watering.notes.present? %><span class='watering-notes'><%= watering.notes %></span><% end %>
-          <% if watering.tds.present? %><span class='watering-tds'>📊 <%= watering.tds %>ppm</span><% end %>
-          <% if watering.recipe_source.present? %><span class='watering-recipe'>💧 <%= watering.recipe_source.name %></span><% end %>
-          <% if watering.recipe.present? %><span class='watering-recipe'>🧪 <%= watering.recipe.name %></span><% end %>
-          <% if watering.recipe_batch.present? %><span class='watering-batch'>🪣 <%= watering.recipe_batch.to_s %></span><% end %>
-          <% if watering.soil_moisture_readings.any? %>
+          <% if feature_enabled?(:precise_measurements) && watering.tds.present? %><span class='watering-tds'>📊 <%= watering.tds %>ppm</span><% end %>
+          <% if feature_enabled?(:use_fertilizers) %>
+            <% if watering.recipe_source.present? %><span class='watering-recipe'>💧 <%= watering.recipe_source.name %></span><% end %>
+            <% if watering.recipe.present? %><span class='watering-recipe'>🧪 <%= watering.recipe.name %></span><% end %>
+            <% if watering.recipe_batch.present? %><span class='watering-batch'>🪣 <%= watering.recipe_batch.to_s %></span><% end %>
+          <% end %>
+          <% if feature_enabled?(:track_soil_moisture) && watering.soil_moisture_readings.any? %>
             <% watering.soil_moisture_readings.order(:timing).each do |reading| %>
               <span class='watering-moisture'>🌱 <%= reading.timing.titleize %>: <%= reading.display_value %></span>
             <% end %>

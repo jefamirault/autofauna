@@ -1,6 +1,7 @@
 class EquipmentController < ApplicationController
   before_action :authenticate
   before_action :ensure_project
+  before_action :require_has_aquarium
   before_action :set_tank
   before_action :set_equipment_item, only: [:show, :edit, :update, :destroy]
   before_action :authorize_viewer, only: [:index, :show]

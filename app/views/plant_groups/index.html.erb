@@ -1,0 +1,25 @@
+<% content_for :title, "Groups" %>
+
+<h1>Groups</h1>
+
+<p>Group plants to water them all with one click, or put them on a shared schedule.</p>
+
+<div class="resource-cards">
+  <% @plant_groups.each do |plant_group| %>
+    <%= render plant_group %>
+  <% end %>
+</div>
+
+<%= link_to "➕ New Group", new_plant_group_path, class: 'link' %>
+
+<% if current_project.locations.any? %>
+  <div class="settings-card">
+    <h2>Create a group from a location</h2>
+    <%= form_with url: seed_from_location_plant_groups_path, method: :post, data: { turbo: false } do %>
+      <%= select_tag :location_id,
+            options_from_collection_for_select(current_project.locations.order(:name), :id, :name),
+            prompt: '-- Select a location --' %>
+      <%= submit_tag "Create group", class: 'saveButton' %>
+    <% end %>
+  </div>
+<% end %>

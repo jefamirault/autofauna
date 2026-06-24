@@ -1,6 +1,7 @@
 class RecipeSourcesController < ApplicationController
   before_action :authenticate
   before_action :ensure_project
+  before_action :require_use_fertilizers
   before_action :set_recipe_source, only: %i[show edit update destroy]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]

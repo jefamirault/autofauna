@@ -10,6 +10,7 @@ class Project < ApplicationRecord
 
   has_many :zones, dependent: :destroy
   has_many :locations, dependent: :destroy
+  has_many :plant_groups, dependent: :destroy
   has_many :sensors, dependent: :destroy
   has_many :hygro_sensor_readings, dependent: :destroy
   has_many :sensor_types, dependent: :destroy

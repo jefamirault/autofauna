@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   around_action :switch_locale
+  before_action :require_onboarding
 
   rescue_from ActiveRecord::RecordNotFound do |exception|
     redirect_to plants_path, alert: t('errors.not_found', default: 'Record not found.')
@@ -100,6 +101,38 @@ class ApplicationController < ActionController::Base
     current_user&.advanced_mode?
   end
   helper_method :show_project_ui?
+
+  def feature_enabled?(flag)
+    current_user ? current_user.public_send("#{flag}?") : true
+  end
+  helper_method :feature_enabled?
+
+  def can_edit?(project = current_project)
+    authorized?(current_user, :editor, project)
+  end
+  helper_method :can_edit?
+
+  def require_onboarding
+    return unless user_signed_in?
+    return if current_user.onboarding_completed?
+    redirect_to onboarding_path
+  end
+
+  def require_track_waterings
+    redirect_to plants_path unless feature_enabled?(:track_waterings)
+  end
+
+  def require_use_fertilizers
+    redirect_to plants_path unless feature_enabled?(:use_fertilizers)
+  end
+
+  def require_track_soil_moisture
+    redirect_to plants_path unless feature_enabled?(:track_soil_moisture)
+  end
+
+  def require_has_aquarium
+    redirect_to plants_path unless feature_enabled?(:has_aquarium)
+  end
   def login(user)
     Current.user = user
     reset_session

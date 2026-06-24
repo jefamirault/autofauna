@@ -1,9 +1,19 @@
 class LocationsController < ApplicationController
   before_action :authenticate
   before_action :ensure_project
-  before_action :set_location, only: %i[ show edit update destroy ]
+  before_action :set_location, only: %i[ show edit update destroy water_all ]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
+
+  # POST /locations/1/water_all
+  def water_all
+    @watered = @location.water_all!
+
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plants_path, notice: t('plant_groups.watered', count: @watered.size) }
+    end
+  end
 
   # GET /locations or /locations.json
   def index

@@ -1,4 +1,5 @@
 class PushSubscriptionsController < ApplicationController
+  skip_before_action :require_onboarding
   before_action :authenticate
 
   def create

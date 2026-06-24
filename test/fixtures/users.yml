@@ -3,7 +3,14 @@
 one:
   email: test@example.com
   password_digest: <%= BCrypt::Password.create('password') %>
+  onboarding_completed_at: <%= Time.current %>
 
 two:
   email: test2@example.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+  onboarding_completed_at: <%= Time.current %>
+
+# Not yet onboarded — used by onboarding flow tests
+fresh:
+  email: fresh@example.com
   password_digest: <%= BCrypt::Password.create('password') %>

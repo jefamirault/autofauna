@@ -1,0 +1,125 @@
+<% content_for :title, t('onboarding.title') %>
+
+<div class="settings-card onboarding-wizard" data-controller="onboarding">
+  <%= form_with url: onboarding_path, method: :patch, data: { onboarding_target: "form", action: "keydown->onboarding#keydown" } do %>
+
+    <p class="onboarding-progress" data-onboarding-target="progress"></p>
+
+    <%# Step 1 — what do you have? %>
+    <section class="onboarding-step" data-onboarding-target="step">
+      <h2><%= t('onboarding.have.title') %></h2>
+      <p><%= t('onboarding.have.intro') %></p>
+      <div class="feature-flags">
+        <div class="feature-flag">
+          <label class="checkbox-label">
+            <%= check_box_tag "has_plants", "1", true, data: { onboarding_target: "plantsCheckbox" } %>
+            <span><%= t('onboarding.have.plants') %></span>
+          </label>
+        </div>
+        <div class="feature-flag">
+          <label class="checkbox-label">
+            <%= check_box_tag "has_aquarium", "1", false, data: { onboarding_target: "aquariumCheckbox" } %>
+            <span><%= t('onboarding.have.aquarium') %></span>
+          </label>
+        </div>
+      </div>
+      <div class="onboarding-nav">
+        <%= button_tag t('onboarding.next'), type: "button", class: "saveButton", data: { action: "onboarding#next" } %>
+      </div>
+    </section>
+
+    <%# Step 2 — how do you water? %>
+    <section class="onboarding-step" data-onboarding-target="step" hidden>
+      <h2><%= t('onboarding.water.title') %></h2>
+      <p><%= t('onboarding.water.intro') %></p>
+      <div class="feature-flags">
+        <div class="feature-flag">
+          <label class="checkbox-label">
+            <%= check_box_tag "water_tap", "1", true %>
+            <span><%= t('onboarding.water.tap') %></span>
+          </label>
+        </div>
+        <div class="feature-flag">
+          <label class="checkbox-label">
+            <%= check_box_tag "water_fertilizer", "1", false, data: { onboarding_target: "fertilizerCheckbox", action: "onboarding#fertilizerToggled" } %>
+            <span><%= t('onboarding.water.fertilizer') %></span>
+          </label>
+        </div>
+        <div class="feature-flag">
+          <label class="checkbox-label">
+            <%= check_box_tag "water_distilled", "1", false %>
+            <span><%= t('onboarding.water.distilled') %></span>
+          </label>
+        </div>
+      </div>
+      <div class="onboarding-nav">
+        <%= button_tag t('onboarding.back'), type: "button", class: "buttonLinkSmall", data: { action: "onboarding#back" } %>
+        <%= button_tag t('onboarding.next'), type: "button", class: "saveButton", data: { action: "onboarding#next" } %>
+      </div>
+    </section>
+
+    <%# Step 2b — fertilizer names (only when fertilizer is checked) %>
+    <% common_fertilizers = [
+         "Miracle-Gro",
+         "General Hydroponics (Flora series)",
+         "Fox Farm",
+         "Osmocote",
+         "Jack's / J.R. Peters",
+         "Dyna-Gro",
+         "Espoma",
+         "Schultz"
+       ] %>
+    <section class="onboarding-step" data-onboarding-target="step" data-onboarding-optional="fertilizer" hidden>
+      <h2><%= t('onboarding.fertilizers.title') %></h2>
+      <p><%= t('onboarding.fertilizers.intro') %></p>
+      <div class="feature-flags onboarding-fertilizer-options">
+        <div class="feature-flag">
+          <label class="checkbox-label">
+            <%= check_box_tag "no_fertilizer", "1", false, id: "no_fertilizer", data: { onboarding_target: "noFertilizer", action: "onboarding#noFertilizerToggled" } %>
+            <span><%= t('onboarding.fertilizers.none') %></span>
+          </label>
+        </div>
+        <% common_fertilizers.each_with_index do |name, i| %>
+          <div class="feature-flag">
+            <label class="checkbox-label">
+              <%= check_box_tag "fertilizers[]", name, i < 2, id: "fertilizer_#{i}", data: { onboarding_target: "fertilizerOption", action: "onboarding#fertilizerSelected" } %>
+              <span><%= name %></span>
+            </label>
+          </div>
+        <% end %>
+      </div>
+
+      <button type="button" class="buttonLinkSmall onboarding-other-toggle" data-action="onboarding#toggleOther" data-onboarding-target="otherToggle" aria-expanded="false">＋ <%= t('onboarding.fertilizers.other') %></button>
+      <div class="onboarding-other-entry" data-onboarding-target="otherEntry" hidden>
+        <div class="onboarding-fertilizer-rows" data-onboarding-target="fertilizerRows">
+          <div class="onboarding-fertilizer-row">
+            <%= text_field_tag "fertilizers[]", nil, placeholder: t('onboarding.fertilizers.placeholder'), data: { action: "input->onboarding#fertilizerSelected" } %>
+            <button type="button" class="buttonLinkSmall onboarding-remove-row" data-action="onboarding#removeFertilizer" aria-label="Remove">✕</button>
+          </div>
+        </div>
+        <button type="button" class="buttonLinkSmall" data-action="onboarding#addFertilizer">＋ <%= t('onboarding.fertilizers.add') %></button>
+      </div>
+
+      <div class="onboarding-nav">
+        <%= button_tag t('onboarding.back'), type: "button", class: "buttonLinkSmall", data: { action: "onboarding#back" } %>
+        <%= button_tag t('onboarding.next'), type: "button", class: "saveButton", data: { action: "onboarding#next" } %>
+      </div>
+    </section>
+
+    <%# Step 3 — add your first plant / tank %>
+    <section class="onboarding-step" data-onboarding-target="step" hidden>
+      <h2><%= t('onboarding.finish.title') %></h2>
+      <p><%= t('onboarding.finish.intro') %></p>
+      <div class="onboarding-finish-actions">
+        <%= button_tag "🌱 #{t('onboarding.finish.add_plant')}", type: "submit", name: "next", value: "plant", class: "saveButton" %>
+        <span data-onboarding-target="tankOption" hidden>
+          <%= button_tag "🐠 #{t('onboarding.finish.add_tank')}", type: "submit", name: "next", value: "tank", class: "saveButton" %>
+        </span>
+      </div>
+      <div class="onboarding-nav">
+        <%= button_tag t('onboarding.back'), type: "button", class: "buttonLinkSmall", data: { action: "onboarding#back" } %>
+        <%= button_tag t('onboarding.finish.skip'), type: "submit", name: "next", value: "skip", class: "buttonLinkSmall" %>
+      </div>
+    </section>
+  <% end %>
+</div>

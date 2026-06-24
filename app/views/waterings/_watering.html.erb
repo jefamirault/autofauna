@@ -9,13 +9,14 @@
     </div>
   </div>
 
-  <% if watering.volume.present? %>
+  <% if feature_enabled?(:precise_measurements) && watering.volume.present? %>
     <div class="info-row">
       <strong><%= t 'attributes.volume' %></strong>
       <span class="value"><%= watering.print_volume %></span>
     </div>
   <% end %>
 
+  <% if feature_enabled?(:use_fertilizers) %>
   <% if watering.recipe_source.present? %>
     <div class="info-row">
       <strong>Source</strong>
@@ -36,8 +37,9 @@
       <span class="value"><%= link_to watering.recipe_batch.label, recipe_batch_path(watering.recipe_batch) %></span>
     </div>
   <% end %>
+  <% end %>
 
-  <% if watering.tds.present? %>
+  <% if feature_enabled?(:precise_measurements) && watering.tds.present? %>
     <div class="info-row">
       <strong>TDS (ppm)</strong>
       <span class="value"><%= watering.tds %></span>
@@ -51,6 +53,7 @@
     </div>
   <% end %>
 
+  <% if feature_enabled?(:track_soil_moisture) %>
   <% pre = watering.soil_moisture_readings.find_by(timing: :pre_watering) %>
   <% post = watering.soil_moisture_readings.find_by(timing: :post_watering) %>
   <% if pre || post %>
@@ -66,6 +69,7 @@
         <span class="value"><%= post.display_value %></span>
       </div>
     <% end %>
+  <% end %>
   <% end %>
 
   <div class="info-row">

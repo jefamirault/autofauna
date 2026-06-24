@@ -11,6 +11,8 @@ class Plant < ApplicationRecord
   belongs_to :last_watering, class_name: 'Watering', optional: true
   has_many :log_entries, as: :loggable, dependent: :destroy
   has_many :soil_moisture_readings, dependent: :destroy
+  has_many :plant_group_memberships, dependent: :destroy
+  has_many :plant_groups, through: :plant_group_memberships
 
   before_validation :strip_whitespace
   before_validation :set_default_max_watering_freq, on: :create
@@ -59,6 +61,23 @@ class Plant < ApplicationRecord
 
   def shared?
     share_token.present? && share_enabled?
+  end
+
+  # One-click watering: carry forward the last watering's details and create a new one.
+  # Shared by PlantsController#quick_water and group/location bulk watering.
+  def quick_water!(at: Time.current)
+    attrs = { watered_at: at }
+    if (last = last_watering)
+      attrs.merge!(
+        volume: last.volume,
+        units: last.units,
+        notes: last.notes,
+        recipe_id: last.recipe_id,
+        recipe_batch_id: last.recipe_batch_id,
+        tds: last.tds
+      )
+    end
+    waterings.create!(attrs)
   end
 
   def first_watering

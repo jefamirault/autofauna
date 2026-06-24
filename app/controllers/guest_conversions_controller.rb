@@ -1,4 +1,5 @@
 class GuestConversionsController < ApplicationController
+  skip_before_action :require_onboarding
   before_action :authenticate
   before_action :require_guest
 

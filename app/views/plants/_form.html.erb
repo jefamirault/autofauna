@@ -61,7 +61,26 @@
     </div>
   <% end %>
 
-  <% recipes = current_project.recipes.order(:name) %>
+  <% groups = current_project.plant_groups.order(:name) %>
+  <% unless groups.empty? %>
+    <div class="field">
+      <label>👪 Groups</label>
+      <div class="recipe-checkboxes">
+        <input type="hidden" name="plant[plant_group_ids][]" value="">
+        <% groups.each do |group| %>
+          <label class="checkbox-label">
+            <input type="checkbox" name="plant[plant_group_ids][]"
+                   value="<%= group.id %>"
+                   <%= 'checked' if plant.plant_group_ids.include?(group.id) %>>
+            <%= group.name %>
+          </label>
+        <% end %>
+      </div>
+      <small>Group plants to water them together or share a schedule.</small>
+    </div>
+  <% end %>
+
+  <% recipes = feature_enabled?(:use_fertilizers) ? current_project.recipes.order(:name) : [] %>
   <% unless recipes.empty? %>
     <div class="field">
       <label>🧪 Recipes</label>

@@ -71,6 +71,7 @@ en:
       display_by: "Sort"
       watering: "Watering"
       location: "Location"
+      water_all: "Water all"
       no_location: "No Location"
       filter_by_location: "Filter Location"
       filter_by_recipe: "Filter Recipe"
@@ -231,6 +232,14 @@ en:
       new_location: "New Location"
     messages:
       confirm_delete: "Are you sure you want to delete this Location?"
+  plant_groups:
+    created: "Group created."
+    updated: "Group updated."
+    destroyed: "Group deleted."
+    seeded: "Created a group from %{name}."
+    watered:
+      one: "Watered 1 plant."
+      other: "Watered %{count} plants."
   zones:
     index:
       locations: "Locations"
@@ -276,6 +285,52 @@ en:
   forgot_password: "🔑 Forgot Your Password?"
   reset_your_password: "🔑 Reset Your Password"
   reset_password: "🔑 Reset Password"
+  onboarding:
+    title: "Welcome to Autofauna! 🌱"
+    next: "Next"
+    back: "Back"
+    completed: "You're all set! You can adjust these any time in Account Settings."
+    have:
+      title: "Which of these do you have?"
+      intro: "We'll tailor Autofauna to what you're caring for."
+      plants: "🌿 I have plants"
+      aquarium: "🐠 I have fish or an aquarium"
+    water:
+      title: "How do you water your plants?"
+      intro: "Pick everything that applies."
+      tap: "🚰 Tap water from the sink or hose"
+      fertilizer: "🧪 I water with fertilizer"
+      distilled: "💧 Distilled or reverse-osmosis water"
+    fertilizers:
+      title: "Which fertilizers do you use?"
+      intro: "Pick the fertilizers you use. We'll set each up as a source and a starter recipe. You can add your own or skip any you're unsure about."
+      none: "🚫 Don't water with fertilizer"
+      placeholder: "e.g. Miracle-Gro"
+      other: "Add another not listed"
+      add: "Add another fertilizer"
+    finish:
+      title: "You're ready to go! 🎉"
+      intro: "Add your first one to get started — or skip and explore."
+      add_plant: "Add a plant"
+      add_tank: "Add a tank"
+      skip: "Skip for now"
+  settings:
+    saved: "Preferences saved."
+    save_failed: "Could not save preferences."
+    features:
+      title: "Features"
+      intro: "Choose which features Autofauna shows you."
+      save: "Save Features"
+      track_waterings: "💧 Watering history"
+      track_waterings_hint: "Log and browse individual waterings. The quick water button always works."
+      use_fertilizers: "🧪 Fertilizers & recipes"
+      use_fertilizers_hint: "Recipes, ingredients, batches, and recipe fields on forms."
+      precise_measurements: "📏 Precise measurements"
+      precise_measurements_hint: "Volume, units, and TDS fields."
+      track_soil_moisture: "🌱 Soil moisture"
+      track_soil_moisture_hint: "Moisture readings and logging."
+      has_aquarium: "🐠 Aquarium"
+      has_aquarium_hint: "Tanks, water tests, and maintenance."
   account:
     sign_in_success: "Signed in successfully."
     log_out_success: "You have been logged out."

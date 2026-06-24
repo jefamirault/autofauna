@@ -31,6 +31,11 @@
   </div>
 </div>
 
+<% if @location.plants.where(archived: false).any? %>
+  <%= button_to "💧 Water all plants here", water_all_location_path(@location), class: 'link', data: { turbo: false } %>
+  <%= button_to "➕ Create a group from these plants", seed_from_location_plant_groups_path(location_id: @location.id), class: 'link', data: { turbo: false } %>
+<% end %>
+
 <div>
   <%= link_to "✏️ Edit this Location", edit_location_path(@location), class: 'link' %>
   <%= link_to "↩️ Back to Locations", locations_path, class: 'link' %>

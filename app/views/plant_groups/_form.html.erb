@@ -1,0 +1,57 @@
+<%= form_with(model: plant_group, data: { turbo: false }) do |form| %>
+  <% if plant_group.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(plant_group.errors.count, "error") %> prohibited this group from being saved:</h2>
+      <ul>
+        <% plant_group.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name, placeholder: "e.g. Living Room 📺" %>
+  </div>
+
+  <div>
+    <%= form.label :color, "Color", style: "display: block" %>
+    <%= form.color_field :color, value: plant_group.hex_color %>
+    <small>Used for filter buttons and group headers</small>
+  </div>
+
+  <div class="field">
+    <label style="display: block">Shared watering schedule (optional)</label>
+    <div class="rangeInputContainer">
+      <%= form.number_field :min_watering_freq, in: 1..999, class: 'range-field', placeholder: 'min' %>
+      <span class="range-dash">–</span>
+      <%= form.number_field :max_watering_freq, in: 1..999, class: 'range-field', placeholder: 'max' %>
+      <span class="range-label">days</span>
+    </div>
+    <label class="checkbox-label">
+      <%= check_box_tag :apply_schedule, "1", false %>
+      <span>Apply this schedule to every plant in the group now</span>
+    </label>
+  </div>
+
+  <div class="field">
+    <label style="display: block">Plants in this group</label>
+    <% if current_project.plants.where(archived: false).any? %>
+      <div class="plant-group-members">
+        <%= form.collection_check_boxes :plant_ids, current_project.plants.where(archived: false).order(:name), :id, :label do |b| %>
+          <label class="checkbox-label">
+            <%= b.check_box %>
+            <span><%= b.text %></span>
+          </label>
+        <% end %>
+      </div>
+    <% else %>
+      <p><em>No plants yet.</em></p>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.submit "💾 #{plant_group.new_record? ? 'Create' : 'Update'} Group", class: 'saveButton' %>
+  </div>
+<% end %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_25_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_24_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -95,6 +95,27 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_25_000001) do
     t.string "push_body_template", default: "{{plant_label}} is due for watering", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "plant_group_memberships", force: :cascade do |t|
+    t.bigint "plant_id", null: false
+    t.bigint "plant_group_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plant_group_id"], name: "index_plant_group_memberships_on_plant_group_id"
+    t.index ["plant_id", "plant_group_id"], name: "index_plant_group_memberships_on_plant_and_group", unique: true
+    t.index ["plant_id"], name: "index_plant_group_memberships_on_plant_id"
+  end
+
+  create_table "plant_groups", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "color", default: "#0E487B"
+    t.bigint "project_id", null: false
+    t.integer "min_watering_freq"
+    t.integer "max_watering_freq"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_plant_groups_on_project_id"
   end
 
   create_table "plant_recipes", force: :cascade do |t|
@@ -306,6 +327,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_25_000001) do
     t.integer "push_notification_frequency_value", default: 1
     t.datetime "last_email_notification_sent_at"
     t.datetime "last_push_notification_sent_at"
+    t.boolean "track_waterings", default: true, null: false
+    t.boolean "use_fertilizers", default: true, null: false
+    t.boolean "precise_measurements", default: true, null: false
+    t.boolean "track_soil_moisture", default: true, null: false
+    t.boolean "has_aquarium", default: true, null: false
+    t.datetime "onboarding_completed_at"
     t.index ["google_uid"], name: "index_users_on_google_uid", unique: true
   end
 
@@ -378,6 +405,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_25_000001) do
   add_foreign_key "feeding_instructions", "tanks"
   add_foreign_key "log_entries", "users", on_delete: :nullify
   add_foreign_key "maintenance_logs", "equipment"
+  add_foreign_key "plant_group_memberships", "plant_groups"
+  add_foreign_key "plant_group_memberships", "plants"
+  add_foreign_key "plant_groups", "projects"
   add_foreign_key "plant_recipes", "plants"
   add_foreign_key "plant_recipes", "recipes"
   add_foreign_key "plants", "locations"

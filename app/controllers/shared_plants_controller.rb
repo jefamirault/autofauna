@@ -1,4 +1,5 @@
 class SharedPlantsController < ApplicationController
+  skip_before_action :require_onboarding
   before_action :set_plant
 
   def show

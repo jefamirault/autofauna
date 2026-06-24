@@ -1,4 +1,7 @@
 class SoilMoistureReadingsController < ApplicationController
+  before_action :authenticate
+  before_action :ensure_project
+  before_action :require_track_soil_moisture, except: [:new, :create]
   before_action :authorize_viewer, only: [:index]
   before_action :authorize_editor, only: [:new, :create, :edit, :update, :destroy]
   before_action :set_plant
@@ -17,6 +20,7 @@ class SoilMoistureReadingsController < ApplicationController
     @soil_moisture_reading.timing = :standalone
 
     if @soil_moisture_reading.save
+      current_user.enable_feature!(:track_soil_moisture)
       redirect_to plant_path(@plant), notice: t('soil_moisture_readings.create_success')
     else
       render :new, status: :unprocessable_entity

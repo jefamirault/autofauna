@@ -1,4 +1,5 @@
 class PasswordResetsController < ApplicationController
+  skip_before_action :require_onboarding
   before_action :set_user_by_token, only: [:edit, :update]
   def new
 

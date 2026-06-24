@@ -1,5 +1,5 @@
 class Tank < ApplicationRecord
-  belongs_to :location
+  belongs_to :location, optional: true
   has_one :zone, through: :location
   has_many :log_entries, as: :loggable, dependent: :destroy
   belongs_to :project

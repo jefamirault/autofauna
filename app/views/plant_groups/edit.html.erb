@@ -1,0 +1,20 @@
+<% content_for :title, "Edit Group: #{@plant_group}" %>
+
+<div class="settings-card">
+  <h1>
+    <%= link_to "Groups", plant_groups_path, class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    <%= link_to @plant_group, plant_group_path(@plant_group), class: 'breadcrumb' %>
+    <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+    Edit
+  </h1>
+
+  <%= render "form", plant_group: @plant_group %>
+
+  <p>
+    <%= link_to "❌ Discard changes", @plant_group, class: 'link' %>
+  </p>
+  <p>
+    <%= button_to "🗑️ Destroy this Group", @plant_group, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('Delete this group? Plants are not deleted.');" %>
+  </p>
+</div>

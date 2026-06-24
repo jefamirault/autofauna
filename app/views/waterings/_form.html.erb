@@ -26,34 +26,34 @@
                  Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
     </div>
 
-    <%# Volume section: optional, toggled by button %>
-    <div data-watering-recipe-target="volumeSection"
-         style="<%= watering.volume.present? ? '' : 'display: none;' %>">
-      <div class="field-row">
-        <div class="field-row-item">
-          <%= form.label :volume, style: "display: block" %>
-          <%= form.number_field :volume, step: 'any', placeholder: "e.g. 2.0", data: { watering_recipe_target: "volumeField" } %>
+    <%# Volume section: always available; submitting a value enables precise_measurements (first-use) %>
+      <div data-watering-recipe-target="volumeSection"
+           style="<%= watering.volume.present? ? '' : 'display: none;' %>">
+        <div class="field-row">
+          <div class="field-row-item">
+            <%= form.label :volume, style: "display: block" %>
+            <%= form.number_field :volume, step: 'any', placeholder: "e.g. 2.0", data: { watering_recipe_target: "volumeField" } %>
+          </div>
+          <div class="field-row-item">
+            <%= form.label :units, t('attributes.units'), style: "display: block" %>
+            <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units || watering.plant.suggested_watering_unit), {}, { data: { watering_recipe_target: "unitsSelect" } } %>
+          </div>
         </div>
-        <div class="field-row-item">
-          <%= form.label :units, t('attributes.units'), style: "display: block" %>
-          <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units || watering.plant.suggested_watering_unit), {}, { data: { watering_recipe_target: "unitsSelect" } } %>
-        </div>
+        <button type="button"
+                data-action="click->watering-recipe#hideVolume"
+                class="buttonLinkSmall">✕ Remove Volume</button>
       </div>
+
       <button type="button"
-              data-action="click->watering-recipe#hideVolume"
-              class="buttonLinkSmall">✕ Remove Volume</button>
-    </div>
+              data-action="click->watering-recipe#showVolume"
+              data-watering-recipe-target="volumeButton"
+              class="buttonLink"
+              style="<%= watering.volume.present? ? 'display: none;' : '' %>">
+        ➕ Add Volume
+      </button>
 
-    <button type="button"
-            data-action="click->watering-recipe#showVolume"
-            data-watering-recipe-target="volumeButton"
-            class="buttonLink"
-            style="<%= watering.volume.present? ? 'display: none;' : '' %>">
-      ➕ Add Volume
-    </button>
-
-    <% has_recipes = current_project.recipes.any? %>
-    <% has_sources = current_project.recipe_sources.any? %>
+    <% has_recipes = feature_enabled?(:use_fertilizers) && current_project.recipes.any? %>
+    <% has_sources = feature_enabled?(:use_fertilizers) && current_project.recipe_sources.any? %>
     <% if has_recipes || has_sources %>
       <% if has_sources %>
         <div style="margin-bottom: 0.5rem;">
@@ -89,6 +89,9 @@
         </div>
       <% end %>
 
+    <% end %>
+
+      <%# TDS: always available; submitting a value enables precise_measurements (first-use) %>
       <div>
         <button type="button"
                 data-action="click->watering-recipe#toggleTds"
@@ -109,13 +112,13 @@
           </div>
         </div>
       </div>
-    <% end %>
 
     <div class="field">
       <%= form.label :notes, style: "display: block" %>
       <%= form.text_area :notes, autofocus: watering.notes.nil? || watering.notes == '', placeholder: "e.g. Tap water" %>
     </div>
 
+    <%# Soil moisture: always available; submitting a value enables track_soil_moisture (first-use) %>
     <div class="moisture-section">
       <!-- Pre-watering moisture -->
       <div>

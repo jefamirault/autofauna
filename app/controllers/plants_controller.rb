@@ -13,20 +13,7 @@ class PlantsController < ApplicationController
 
   def quick_water
     @plant = current_project.plants.find(params[:plant_id])
-    watering_attrs = { watered_at: Time.current }
-
-    if (last = @plant.last_watering)
-      watering_attrs.merge!(
-        volume: last.volume,
-        units: last.units,
-        notes: last.notes,
-        recipe_id: last.recipe_id,
-        recipe_batch_id: last.recipe_batch_id,
-        tds: last.tds
-      )
-    end
-
-    @watering = @plant.waterings.create!(watering_attrs)
+    @watering = @plant.quick_water!
 
     respond_to do |format|
       format.turbo_stream
@@ -78,25 +65,29 @@ class PlantsController < ApplicationController
     } if no_location_count > 0
 
     # Build recipe filter buttons with colors, sorted by count (descending)
-    recipe_counts = @plants.where.not(recipe_id: nil).reorder(nil).group(:recipe_id).count
-    no_recipe_count = @plants.where(recipe_id: nil).count
-    recipes_with_plants = Recipe.where(id: recipe_counts.keys).order(:name)
+    if feature_enabled?(:use_fertilizers)
+      recipe_counts = @plants.where.not(recipe_id: nil).reorder(nil).group(:recipe_id).count
+      no_recipe_count = @plants.where(recipe_id: nil).count
+      recipes_with_plants = Recipe.where(id: recipe_counts.keys).order(:name)
 
-    @recipe_filters = recipes_with_plants.map { |recipe|
-      {
-        name: "#{recipe.name} (#{recipe_counts[recipe.id]})",
-        id: recipe.id,
-        count: recipe_counts[recipe.id],
-        color: recipe.hex_color
-      }
-    }.sort_by { |f| -f[:count] }
+      @recipe_filters = recipes_with_plants.map { |recipe|
+        {
+          name: "#{recipe.name} (#{recipe_counts[recipe.id]})",
+          id: recipe.id,
+          count: recipe_counts[recipe.id],
+          color: recipe.hex_color
+        }
+      }.sort_by { |f| -f[:count] }
 
-    @recipe_filters << {
-      name: "#{I18n.t('plants.index.no_recipe')} (#{no_recipe_count})",
-      id: nil,
-      count: no_recipe_count,
-      color: '#999999'
-    } if no_recipe_count > 0
+      @recipe_filters << {
+        name: "#{I18n.t('plants.index.no_recipe')} (#{no_recipe_count})",
+        id: nil,
+        count: no_recipe_count,
+        color: '#999999'
+      } if no_recipe_count > 0
+    else
+      @recipe_filters = []
+    end
 
     @needs_watering_count = plants_scope.where("date_max_watering IS NOT NULL AND date_max_watering <= ?", Date.today).count
     @snoozed_count = current_project.plants.where(archived: false)
@@ -105,6 +96,7 @@ class PlantsController < ApplicationController
     @saved_searches = current_project.saved_searches.where(user_id: current_user.id).order(:name)
 
     @display_mode = params[:display] || "watering"
+    @display_mode = "watering" if @display_mode == "recipe" && !feature_enabled?(:use_fertilizers)
 
     # Always build location groups (needed for client-side display mode switching)
     grouped = @plants.group_by { |p| [p.location&.name, p.location&.hex_color || '#999999'] }
@@ -113,10 +105,14 @@ class PlantsController < ApplicationController
     @plants_by_location[[I18n.t('plants.index.no_location'), '#999999']] = no_location if no_location.any?
 
     # Always build recipe groups (needed for client-side display mode switching)
-    grouped = @plants.group_by { |p| [p.recipe&.name, p.recipe&.hex_color || '#999999'] }
-    no_recipe = grouped.delete([nil, '#999999']) || []
-    @plants_by_recipe = grouped.sort_by { |(name, _color), _plants| (name || '').downcase }.to_h
-    @plants_by_recipe[[I18n.t('plants.index.no_recipe'), '#999999']] = no_recipe if no_recipe.any?
+    if feature_enabled?(:use_fertilizers)
+      grouped = @plants.group_by { |p| [p.recipe&.name, p.recipe&.hex_color || '#999999'] }
+      no_recipe = grouped.delete([nil, '#999999']) || []
+      @plants_by_recipe = grouped.sort_by { |(name, _color), _plants| (name || '').downcase }.to_h
+      @plants_by_recipe[[I18n.t('plants.index.no_recipe'), '#999999']] = no_recipe if no_recipe.any?
+    else
+      @plants_by_recipe = {}
+    end
 
     respond_to do |format|
       format.json { @plants = current_project.plants }
@@ -155,8 +151,8 @@ class PlantsController < ApplicationController
 
     # Combine log entries, waterings, and standalone moisture readings into a single timeline
     log_items = @log_entries.map { |entry| { type: :log_entry, date: entry.timestamp, object: entry } }
-    watering_items = @plant.waterings.map { |watering| { type: :watering, date: watering.watered_at, object: watering } }
-    moisture_items = @plant.soil_moisture_readings.where(timing: :standalone).map { |reading| { type: :moisture_reading, date: reading.measured_at, object: reading } }
+    watering_items = feature_enabled?(:track_waterings) ? @plant.waterings.map { |watering| { type: :watering, date: watering.watered_at, object: watering } } : []
+    moisture_items = feature_enabled?(:track_soil_moisture) ? @plant.soil_moisture_readings.where(timing: :standalone).map { |reading| { type: :moisture_reading, date: reading.measured_at, object: reading } } : []
 
     @timeline = (log_items + watering_items + moisture_items).sort_by { |item| item[:date] }.reverse
   end
@@ -177,6 +173,7 @@ class PlantsController < ApplicationController
     respond_to do |format|
       if @plant.save
         assign_plant_recipes(@plant)
+        assign_plant_groups(@plant)
         format.html { redirect_to plant_url(@plant), notice: t('plants.messages.create_success') }
         format.json { render :show, status: :created, location: @plant }
       else
@@ -191,6 +188,7 @@ class PlantsController < ApplicationController
     respond_to do |format|
       if @plant.update(plant_params)
         assign_plant_recipes(@plant)
+        assign_plant_groups(@plant)
         format.html { redirect_to plant_url(@plant), notice: t('plants.messages.update_success') }
         format.json { render :show, status: :ok, location: @plant }
       else
@@ -331,5 +329,15 @@ class PlantsController < ApplicationController
         plant.plant_recipes.create!(recipe_id: rid, position: existing_ids.size + idx)
       end
       plant.sync_primary_recipe!
+    end
+
+    # Sync group membership from the form, scoped to current_project (prevents IDOR).
+    def assign_plant_groups(plant)
+      group_ids = params[:plant][:plant_group_ids]
+      return unless group_ids
+
+      selected_ids = group_ids.reject(&:blank?).map(&:to_i)
+      valid_ids = current_project.plant_groups.where(id: selected_ids).pluck(:id)
+      plant.plant_group_ids = valid_ids
     end
 end

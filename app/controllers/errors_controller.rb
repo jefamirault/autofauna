@@ -1,4 +1,6 @@
 class ErrorsController < ApplicationController
+  skip_before_action :require_onboarding
+
   def internal_server_error
     render(:status => 500)
   end

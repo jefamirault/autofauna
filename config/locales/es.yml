@@ -71,6 +71,7 @@ es:
       display_by: "Ordenar"
       watering: "Riego"
       location: "Ubicación"
+      water_all: "Regar todo"
       no_location: "Sin ubicación"
       filter_by_location: "Filtrar ubicación"
       filter_by_recipe: "Filtrar receta"
@@ -232,6 +233,14 @@ es:
       new_location: "Nueva ubicación"
     messages:
       confirm_delete: "¿Está seguro de que desea eliminar esta ubicación?"
+  plant_groups:
+    created: "Grupo creado."
+    updated: "Grupo actualizado."
+    destroyed: "Grupo eliminado."
+    seeded: "Se creó un grupo a partir de %{name}."
+    watered:
+      one: "Se regó 1 planta."
+      other: "Se regaron %{count} plantas."
   zones:
     index:
       locations: "Ubicaciones"
@@ -277,6 +286,52 @@ es:
   forgot_password: "🔑 ¿Olvidaste tu contraseña?"
   reset_your_password: "🔑 Restablecer su contraseña"
   reset_password: "🔑 Restablecer contraseña"
+  onboarding:
+    title: "¡Bienvenido a Autofauna! 🌱"
+    next: "Siguiente"
+    back: "Atrás"
+    completed: "¡Todo listo! Puedes ajustar esto en cualquier momento en Configuración de cuenta."
+    have:
+      title: "¿Qué tienes?"
+      intro: "Adaptaremos Autofauna a lo que estás cuidando."
+      plants: "🌿 Tengo plantas"
+      aquarium: "🐠 Tengo peces o un acuario"
+    water:
+      title: "¿Cómo riegas tus plantas?"
+      intro: "Elige todo lo que corresponda."
+      tap: "🚰 Agua del grifo o de la manguera"
+      fertilizer: "🧪 Riego con fertilizante"
+      distilled: "💧 Agua destilada u ósmosis inversa"
+    fertilizers:
+      title: "¿Qué fertilizantes usas?"
+      intro: "Elige los fertilizantes que usas. Crearemos cada uno como una fuente y una receta inicial. Puedes agregar el tuyo u omitir los que no estés seguro."
+      none: "🚫 No riego con fertilizante"
+      placeholder: "ej. Miracle-Gro"
+      other: "Agregar otro no listado"
+      add: "Agregar otro fertilizante"
+    finish:
+      title: "¡Listo para empezar! 🎉"
+      intro: "Agrega el primero para comenzar, o omite y explora."
+      add_plant: "Agregar una planta"
+      add_tank: "Agregar un tanque"
+      skip: "Omitir por ahora"
+  settings:
+    saved: "Preferencias guardadas."
+    save_failed: "No se pudieron guardar las preferencias."
+    features:
+      title: "Funciones"
+      intro: "Elige qué funciones te muestra Autofauna."
+      save: "Guardar funciones"
+      track_waterings: "💧 Historial de riegos"
+      track_waterings_hint: "Registra y consulta riegos individuales. El botón de riego rápido siempre funciona."
+      use_fertilizers: "🧪 Fertilizantes y recetas"
+      use_fertilizers_hint: "Recetas, ingredientes, lotes y campos de receta en formularios."
+      precise_measurements: "📏 Mediciones precisas"
+      precise_measurements_hint: "Campos de volumen, unidades y TDS."
+      track_soil_moisture: "🌱 Humedad del suelo"
+      track_soil_moisture_hint: "Lecturas y registro de humedad."
+      has_aquarium: "🐠 Acuario"
+      has_aquarium_hint: "Tanques, pruebas de agua y mantenimiento."
   account:
     sign_in_success: "Has iniciado sesión correctamente."
     log_out_success: "Se ha cerrado la sesión."

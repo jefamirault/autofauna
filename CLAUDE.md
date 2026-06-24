@@ -40,6 +40,8 @@ User (has_secure_password, guest?, advanced_mode?, google_uid, login_enabled)
                                 │              └── SoilMoistureReading (numeric/categorical, timing enum)
                                 ├── Sensor (sensor_type)
                                 │    └── HygroSensorReading
+                                ├── PlantGroup (color, shared min/max watering freq)
+                                │    └── PlantGroupMembership ──► Plant (many-to-many)
                                 ├── Tank
                                 │    └── WaterTest (jsonb parameters)
                                 ├── RecipeSource (name, tank_id)
@@ -60,6 +62,18 @@ User (has_secure_password, guest?, advanced_mode?, google_uid, login_enabled)
 - LogEntries are polymorphic (loggable)
 - Plants support two share links: watering (share_token) and view-only (view_share_token)
 - Locations and Recipes have user-assignable colors for UI filter buttons
+- Plants can belong to many **PlantGroups** (`plant_group_memberships` join). Groups are project-scoped, colored, with an optional shared watering schedule (min/max freq). See "Plant Groups & Group Watering".
+
+## Plant Groups & Group Watering
+
+Plants can be watered one-at-a-time or in bulk. Bulk watering reuses **`Plant#quick_water!(at:)`** (the carry-forward logic — copies the last watering's volume/units/notes/recipe/batch/tds — extracted from `PlantsController#quick_water` so single and group watering share it).
+
+- **Two grouping mechanisms (both supported):**
+  - **Locations as implicit groups** — `Location#water_all!` waters every non-archived plant in the location. The plants index renders a "💧 Water all" `button_to` (`water_all_location_path`) in each location group header (gated by `can_edit?`, a new ApplicationController helper); it lives inside `turbo_frame#plants-results` so the Turbo Stream response updates every card. Location show page also has "Water all" + "Create a group from these plants".
+  - **`PlantGroup` model** — custom, possibly cross-location collections. `PlantGroupsController` is standard CRUD (auth checklist like LocationsController) + `member post :water` (`water_all!`) + `collection post :seed_from_location` (creates a group named after a location, attaching its plants). `PlantGroup#apply_schedule_to_members!` pushes the group's min/max freq onto members (opt-in `apply_schedule` checkbox on the form). Reachable via a "👪 Groups" nav item.
+- **Turbo Stream DRY:** `plants/_watered_streams.turbo_stream.erb` (locals `plant`, `watering`) holds the `replace_all "##{dom_id(plant)}"` (triple-rendered cards) + `replace dom_id(plant, :show)` pair. `quick_water`, `plant_groups/water`, and `locations/water_all` all render it (the bulk ones loop over `@watered`).
+- **Plant form:** group membership is a checkbox block (`plant[plant_group_ids][]` with a leading hidden blank to allow clearing); `PlantsController#assign_plant_groups` filters ids to `current_project.plant_groups` (prevents IDOR), mirroring `assign_plant_recipes`.
+- **Deferred (Phase B):** a dedicated "Groups" *display mode* on the plants index (parallel to location/recipe) was NOT built — a plant in multiple groups would render duplicate cards with the same `dom_id` in one visible container, breaking the `location_filter_controller.js` pagination/count logic. Manual-group watering is currently reached via the group show page. Also future: the 0/1/2 per-plant/per-group **tracking-level continuum** (default on Project, override on plant/group).
 
 ## Key Files
 
@@ -83,6 +97,23 @@ User (has_secure_password, guest?, advanced_mode?, google_uid, login_enabled)
 - Ransack for search/filtering
 - SASS for styles (sassc-rails)
 - System tests with Capybara + Selenium
+
+## Feature Flags & Onboarding
+
+Five user-level boolean flags (`User::FEATURE_FLAGS`, columns default true) hide/show advanced UI per-user: `track_waterings` (watering history), `use_fertilizers` (recipes/sources/batches), `precise_measurements` (volume/units/TDS), `track_soil_moisture`, `has_aquarium` (Tanks section). Key facts:
+
+- **One-time onboarding wizard** at `/onboarding` (OnboardingController, multi-step view driven by `onboarding_controller.js`); enforced by a global `before_action :require_onboarding` in ApplicationController that redirects any signed-in user with `onboarding_completed_at: nil`. Controllers that must work pre-onboarding (sessions, settings, auth flows, shared plants, transmit, etc.) use `skip_before_action :require_onboarding`. OnboardingController itself has `ensure_project` so it can seed sources/recipes into `current_project`.
+- **Wizard steps:** (1) "Which do you have?" → `has_aquarium`; (2) "How do you water?" tap / fertilizer / distilled-RO → `use_fertilizers` enabled when fertilizer **or** distilled is chosen (it gates the whole sources/recipes feature, so distilled-only still needs it on); (2b) name fertilizers → each becomes a `RecipeSource` + a starter `Recipe`, distilled adds a "Distilled / RO Water" source (all via `find_or_create_by`); (3) add a first plant or tank (`next` param → `new_plant_path`/`new_tank_path`). `skip` completes onboarding with all five flags off.
+- **`track_waterings` / `precise_measurements` / `track_soil_moisture` are NOT asked in onboarding** — the wizard writes them `false` and they **auto-enable on first use** via `User#enable_feature!(flag)` (idempotent `update_column`, raises on unknown flag):
+  - `track_waterings` ← logging a detailed watering (`waterings#create`). Quick-water (`plants#quick_water`) stays ungated and does NOT opt in.
+  - `precise_measurements` ← submitting a `volume` or `tds` on a watering (`waterings#create`/`#update`).
+  - `track_soil_moisture` ← creating a soil moisture reading (`soil_moisture_readings#create`), or submitting pre/post moisture on a watering.
+  - For these affordances to be reachable while off: `WateringsController` gate is `except: [:create, :new]`, `SoilMoistureReadingsController` gate is `except: [:new, :create]`, and the volume/TDS/moisture disclosures in `waterings/_form.html.erb` plus the detailed-watering / "Log Soil Moisture" links in `plants/show.html.erb` always render (no longer wrapped in `feature_enabled?`).
+- **Flags editable any time** from the Settings page "Features" card (settings#update permits `*User::FEATURE_FLAGS`).
+- **Views** check `feature_enabled?(:flag)` (ApplicationController helper; returns true when signed out). **Controllers** are gated with `require_track_waterings` / `require_use_fertilizers` / `require_has_aquarium` / `require_track_soil_moisture` filters (redirect to plants_path).
+- The TDS block in `waterings/_form.html.erb` is outside the recipes conditional — fertilizers-off + precise-on users still get TDS.
+- When `track_waterings` is off but `use_fertilizers` is on, the sidebar shows a Recipes nav item in place of Water (otherwise recipe pages would be unreachable).
+- **Test fixtures**: users `one`/`two` have `onboarding_completed_at` set (required — otherwise every authenticated controller test redirects to onboarding); user `fresh` is non-onboarded for onboarding tests and owns `projects(:project_fresh)` (onboarding needs a project to seed into).
 
 ## Authorization & Resource Scoping
 
@@ -221,6 +252,8 @@ Projects have `api_key` for sensor data ingestion.
 - `/recipe_batches` - Specific recipe mixes (with `for_recipe` JSON endpoint)
 - `/projects` - Multi-tenant containers (redirects to plants for non-advanced users)
 - `/zones` → `/locations` - Spatial hierarchy
+- `/locations/:id/water_all` - Bulk-water every non-archived plant in a location (Turbo Stream)
+- `/plant_groups` - Manual plant groups (CRUD); `:id/water` bulk-waters members, `seed_from_location` creates a group from a location's plants
 - `/tanks/:tank_id/water_tests` - Nested water quality tests
 - `/settings` - User preferences + test notification buttons
 - `/guest` - Create anonymous guest account
@@ -262,7 +295,7 @@ end
 - **Use fixture references, not hardcoded IDs:** Write `project: one` not `project_id: 1`. Rails resolves fixture labels to deterministic IDs via hashing.
 - **Fixture users** must have real BCrypt password digests and unique emails
 - **Fixture plants** must have unique `uid` values (per project, validated by `validates_uniqueness_of :uid, scope: :project_id`)
-- **Required associations:** Sensors require `zone` and `sensor_type`, Tanks require `location`, Plants require `project`
+- **Required associations:** Sensors require `zone` and `sensor_type`, Plants require `project`. Tanks require only `project` — `location` is optional (`belongs_to :location, optional: true`), since onboarding can create a tank before any locations exist
 - **Fixtures skip callbacks:** `after_save_commit` callbacks (like `update_watering_dates`, `update_last_watering`) do NOT fire when fixtures are loaded. Computed fields like `date_last_watering`, `date_min_watering`, `last_watering_id` will be nil unless explicitly set in the fixture or computed manually in the test.
 
 ### Writing Controller Tests
@@ -280,7 +313,7 @@ end
 **Common pitfalls:**
 - **Waterings new/edit forms** require `plant_id` param: `get new_watering_url(plant_id: @watering.plant_id)`
 - **Destroy tests** may fail if the fixture record has dependent associations with FK constraints. Either use a fixture without dependents (e.g., `zones(:two)`) or nil out the FK first (e.g., `@location.plants.update_all(location_id: nil)`)
-- **Create/update tests** must include all required association params (e.g., `location_id` for tanks, `sensor_type_id` for sensors)
+- **Create/update tests** must include all required association params (e.g., `sensor_type_id` for sensors). `location_id` is optional for tanks
 - **Redirect assertions** must match actual controller behavior — waterings redirect to `plant_url(@watering.plant)`, not `watering_url`
 - **Transmit endpoint** is unauthenticated (uses API key param) — set `api_key` on the project in test setup
 
@@ -380,3 +413,5 @@ Config in `config/deploy.rb` and `config/deploy/production.rb`
 - **`aria-busy` loading state on `plants-results`:** Setting `aria-busy="true"` on `turbo-frame#plants-results` (manually before `requestSubmit`, then managed by Turbo during the request) triggers CSS that dims `.plant-cards` and `.pagination-controls`. The `_resetInstantly()` method on `location_filter_controller` performs immediate client-side reset (clear inputs, deactivate filter buttons, remove clear-search links) before the server round-trip.
 - **CSS transition direction:** The `transition` property of the **destination** state determines animation duration. Placing `transition: opacity 0.4s` on the base element and `transition: opacity 0.1s` inside an `[aria-busy]` rule gives a fast fade-out (0.1s, destination is the busy state) and a slow fade-in (0.4s, destination is the normal state).
 - **Nested route param names:** Routes nested inside `resources :plants do` (like `get 'water'`, `post 'quick_water'`) use `params[:plant_id]`, not `params[:id]`. The `set_plant` before_action uses `params[:id]`, so these actions must find the plant manually via `current_project.plants.find(params[:plant_id])` — same pattern as the existing `water` action.
+- **`plants/_plant.html.erb` reads the `@plant` ivar, not a `plant` local:** the plant *show* card partial references `@plant` throughout (unlike `_plant_row.html.erb`, which uses the `plant` local). `render @plant` only works when `@plant` is set. Bulk watering (group/location) has no `@plant`, so `plants/_watered_streams.turbo_stream.erb` sets `@plant = plant` before the show-view `replace`. Any new context that renders the `_plant` show partial must set `@plant`.
+- **Bulk/group watering shares `Plant#quick_water!(at:)`:** the carry-forward watering logic (copies last watering's volume/units/notes/recipe/batch/tds) lives on the model. `PlantsController#quick_water`, `PlantGroup#water_all!`, and `Location#water_all!` all call it. Group/location bulk-water Turbo Stream templates loop `@watered` and render `plants/_watered_streams` per plant (`replace_all` for the triple-rendered cards, `replace` for the show view — the latter a no-op on the index).

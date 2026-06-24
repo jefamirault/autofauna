@@ -1,6 +1,7 @@
 class RecipeBatchesController < ApplicationController
   before_action :authenticate
   before_action :ensure_project
+  before_action :require_use_fertilizers
   before_action :set_recipe_batch, only: %i[show edit update destroy adjust_remaining]
   before_action :authorize_viewer, only: [:index, :show, :for_recipe, :for_project]
   before_action :authorize_editor, except: [:index, :show, :for_recipe, :for_project]

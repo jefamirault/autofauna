@@ -174,4 +174,40 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
     delete sensor_type_url(sensor_types(:one))
     assert_redirected_to plants_path
   end
+
+  # Plant Groups
+
+  test "user cannot show another project's plant group" do
+    get plant_group_url(plant_groups(:one))
+    assert_redirected_to plants_path
+  end
+
+  test "user cannot edit another project's plant group" do
+    get edit_plant_group_url(plant_groups(:one))
+    assert_redirected_to plants_path
+  end
+
+  test "user cannot update another project's plant group" do
+    patch plant_group_url(plant_groups(:one)), params: { plant_group: { name: "Hacked" } }
+    assert_redirected_to plants_path
+  end
+
+  test "user cannot destroy another project's plant group" do
+    delete plant_group_url(plant_groups(:one))
+    assert_redirected_to plants_path
+  end
+
+  test "user cannot water another project's plant group" do
+    assert_no_difference("Watering.count") do
+      post water_plant_group_url(plant_groups(:one))
+    end
+    assert_redirected_to plants_path
+  end
+
+  test "user cannot water_all another project's location" do
+    assert_no_difference("Watering.count") do
+      post water_all_location_url(locations(:one))
+    end
+    assert_redirected_to plants_path
+  end
 end

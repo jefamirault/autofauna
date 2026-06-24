@@ -17,7 +17,19 @@ Rails.application.routes.draw do
     patch 'notifications/update_user/:id', to: 'notifications#update_user', as: :notifications_update_user
   end
 
-  resources :locations
+  resources :locations do
+    member do
+      post :water_all
+    end
+  end
+  resources :plant_groups do
+    member do
+      post :water
+    end
+    collection do
+      post :seed_from_location
+    end
+  end
   resources :recipe_sources
   resources :recipes do
     member do
@@ -93,6 +105,10 @@ Rails.application.routes.draw do
       patch :set_primary
     end
   end
+
+  get 'onboarding', to: 'onboarding#show'
+  patch 'onboarding', to: 'onboarding#update'
+  post 'onboarding/skip', to: 'onboarding#skip', as: :skip_onboarding
 
   get 'settings', to: 'settings#index'
   patch 'settings', to: 'settings#update'

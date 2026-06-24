@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  FEATURE_FLAGS = %i[track_waterings use_fertilizers precise_measurements track_soil_moisture has_aquarium].freeze
+
   has_secure_password validations: false
 
   has_many :collaborations, dependent: :destroy
@@ -71,6 +73,22 @@ class User < ApplicationRecord
       LogEntry.where(user_id: guest_user.id).update_all(user_id: id)
       guest_user.reload.destroy!
     end
+  end
+
+  def onboarding_completed?
+    onboarding_completed_at.present?
+  end
+
+  def complete_onboarding!
+    update!(onboarding_completed_at: Time.current) unless onboarding_completed?
+  end
+
+  # Turn a feature flag on the first time the user actually uses the feature.
+  # Idempotent: a no-op when already enabled. Skips validations/callbacks.
+  def enable_feature!(flag)
+    flag = flag.to_sym
+    raise ArgumentError, "unknown feature flag: #{flag}" unless FEATURE_FLAGS.include?(flag)
+    update_column(flag, true) unless public_send("#{flag}?")
   end
 
   def plants_needing_water

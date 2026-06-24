@@ -4,7 +4,7 @@
 <div id="<%= dom_id plant, :show %>" class="info-card">
   <div class="info-card-grid">
     <div class="info-card-section watering-section <%= urgency %>">
-      <% if watered_today %>
+      <% if watered_today && feature_enabled?(:track_waterings) %>
         <%= link_to edit_watering_path(just_watered || @plant.last_watering),
             class: "water-icon-link watered",
             aria: { label: t('plants.water_button.edit') } do %>
@@ -14,6 +14,13 @@
           <span class="water-helper-text"><%= t('plants.water_button.watered') %></span>
           <span class="water-helper-text edit-text"><%= t('plants.water_button.edit') %></span>
         <% end %>
+      <% elsif watered_today %>
+        <div class="water-icon-link watered">
+          <svg class="water-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"/>
+          </svg>
+          <span class="water-helper-text"><%= t('plants.water_button.watered') %></span>
+        </div>
       <% else %>
         <%= button_to plant_quick_water_path(@plant),
             form_class: "water-icon-link #{urgency}",
@@ -43,18 +50,22 @@
           ⌛ <%= t('attributes.last_watered') %> <%= time_ago(@plant.date_last_watering) || t('time.never') %>
         </div>
         <div class="watering-details">
-          <strong class="watering-volume">💧 <%= @plant.last_watering&.print_volume || '—' %></strong>
-          <br>
+          <% if feature_enabled?(:precise_measurements) %>
+            <strong class="watering-volume">💧 <%= @plant.last_watering&.print_volume || '—' %></strong>
+            <br>
+          <% end %>
           <% if @plant.last_watering&.notes.present? %>
             <span class="watering-notes-text">📝 <%= @plant.last_watering.notes %></span>
           <% end %>
-          <% if @plant.last_watering&.recipe_source.present? %>
-            <span class="watering-recipe-text">💧 <%= @plant.last_watering.recipe_source.name %></span>
-          <% elsif @plant.last_watering&.recipe.present? %>
-            <span class="watering-recipe-text">🧪 <%= @plant.last_watering.recipe.name %></span>
-          <% end %>
-          <% if @plant.last_watering&.recipe_batch.present? %>
-            <span class="watering-batch-text">🪣 Batch: <%= @plant.last_watering.recipe_batch.to_s %></span>
+          <% if feature_enabled?(:use_fertilizers) %>
+            <% if @plant.last_watering&.recipe_source.present? %>
+              <span class="watering-recipe-text">💧 <%= @plant.last_watering.recipe_source.name %></span>
+            <% elsif @plant.last_watering&.recipe.present? %>
+              <span class="watering-recipe-text">🧪 <%= @plant.last_watering.recipe.name %></span>
+            <% end %>
+            <% if @plant.last_watering&.recipe_batch.present? %>
+              <span class="watering-batch-text">🪣 Batch: <%= @plant.last_watering.recipe_batch.to_s %></span>
+            <% end %>
           <% end %>
         </div>
       </div>
@@ -63,19 +74,27 @@
     <div class="info-card-section details-section" data-controller="sharing-toggle" data-sharing-toggle-plant-id-value="<%= @plant.id %>">
       <div class="info-row">
         <span class="label">📍 <%= t('attributes.location') %>:</span>
-        <span class="value"><%= plant.location %></span>
+        <span class="value">
+          <% if plant.location.present? %>
+            <%= plant.location %>
+          <% else %>
+            <%= link_to "➕ Add Location", edit_plant_path(@plant), class: 'link' %>
+          <% end %>
+        </span>
       </div>
-      <div class="info-row">
-        <span class="label">🌎 <%= t 'attributes.zone' %>:</span>
-        <span class="value"><%= plant.zone %></span>
-      </div>
+      <% if plant.zone.present? %>
+        <div class="info-row">
+          <span class="label">🌎 <%= t 'attributes.zone' %>:</span>
+          <span class="value"><%= plant.zone %></span>
+        </div>
+      <% end %>
       <% if @plant.watering_frequency_text.present? %>
         <div class="info-row">
           <span class="label">⏳ <%= t 'attributes.frequency' %>:</span>
           <span class="value"><%= plant.watering_frequency_text %></span>
         </div>
       <% end %>
-      <% if @plant.latest_moisture_reading %>
+      <% if feature_enabled?(:track_soil_moisture) && @plant.latest_moisture_reading %>
         <div class="info-row">
           <span class="label">🌱 Latest Soil Moisture:</span>
           <span class="value">
@@ -90,7 +109,7 @@
           <span class="value"><%= plant.pot %></span>
         </div>
       <% end %>
-      <% plant_recipe_list = plant.plant_recipes.includes(:recipe).map(&:recipe) %>
+      <% plant_recipe_list = feature_enabled?(:use_fertilizers) ? plant.plant_recipes.includes(:recipe).map(&:recipe) : [] %>
       <% if plant_recipe_list.any? %>
         <div class="info-row">
           <span class="label">🧪 <%= plant_recipe_list.size == 1 ? 'Recipe' : 'Recipes' %>:</span>
