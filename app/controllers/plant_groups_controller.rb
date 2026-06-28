@@ -1,7 +1,7 @@
 class PlantGroupsController < ApplicationController
   before_action :authenticate
   before_action :ensure_project
-  before_action :set_plant_group, only: %i[ show edit update destroy water ]
+  before_action :set_plant_group, only: %i[ show edit update destroy water add_plants ]
   before_action :authorize_viewer, only: [:index, :show]
   before_action :authorize_editor, except: [:index, :show]
 
@@ -76,9 +76,27 @@ class PlantGroupsController < ApplicationController
     redirect_to edit_plant_group_path(@plant_group), notice: t('plant_groups.seeded', name: location.name)
   end
 
+  # POST /plant_groups/create_from_selection — new group from bulk-selected plants.
+  def create_from_selection
+    ids = current_project.plants.where(id: bulk_ids).pluck(:id)
+    @plant_group = current_project.plant_groups.create!(name: t('plant_groups.default_name'), plant_ids: ids)
+    redirect_to edit_plant_group_path(@plant_group), notice: t('plant_groups.created_from_selection', count: ids.size)
+  end
+
+  # POST /plant_groups/:id/add_plants — add bulk-selected plants to this group.
+  def add_plants
+    ids = current_project.plants.where(id: bulk_ids).pluck(:id)
+    @plant_group.plant_ids = (@plant_group.plant_ids + ids).uniq
+    redirect_to plants_path, notice: t('plant_groups.plants_added', count: ids.size, name: @plant_group.name)
+  end
+
   private
     def set_plant_group
       @plant_group = current_project.plant_groups.find(params[:id])
+    end
+
+    def bulk_ids
+      Array(params[:plant_ids]).reject(&:blank?).map(&:to_i)
     end
 
     def plant_group_params

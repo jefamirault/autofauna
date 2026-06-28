@@ -65,7 +65,7 @@ class Plant < ApplicationRecord
 
   # One-click watering: carry forward the last watering's details and create a new one.
   # Shared by PlantsController#quick_water and group/location bulk watering.
-  def quick_water!(at: Time.current)
+  def quick_water!(at: Time.current, overrides: {})
     attrs = { watered_at: at }
     if (last = last_watering)
       attrs.merge!(
@@ -77,6 +77,7 @@ class Plant < ApplicationRecord
         tds: last.tds
       )
     end
+    attrs.merge!(overrides.compact_blank) # explicit values win; blanks keep carry-forward
     waterings.create!(attrs)
   end
 

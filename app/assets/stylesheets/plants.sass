@@ -6,11 +6,11 @@ $lightblue: rgba(14, 72, 123, 0.1)
 $yellow: #8C6800
 $lightyellow: rgba(206, 154, 0, 0.2)
 
-// Hide watered plants switch in header
+// Hide watered plants checkbox in header
 .hide-scheduled-switch
   display: flex
   align-items: center
-  gap: 0.5rem
+  gap: 0.45rem
   flex-shrink: 0
   cursor: pointer
   color: rgba(255,255,255,0.85)
@@ -19,16 +19,14 @@ $lightyellow: rgba(206, 154, 0, 0.2)
   user-select: none
   &:hover
     color: white
+  input[type="checkbox"]
+    width: 1.1rem
+    height: 1.1rem
+    cursor: pointer
+    accent-color: #fff
+    flex-shrink: 0
   .hide-scheduled-label
-    display: inline-block
-    white-space: pre-line
     line-height: 1.2
-    text-align: center
-    opacity: 0.75
-    transition: opacity 200ms ease
-    &.fading
-      opacity: 0
-      transition: none
 
 .switch.switch-light
   width: 46px
@@ -65,6 +63,38 @@ h1
     h2
       font-size: 1.1em
       padding-left: 0.1em
+
+// Toolbar above the plant cards: counts, then the multi-select button — both left-aligned
+.plants-toolbar
+  display: flex
+  justify-content: flex-start
+  align-items: center
+  gap: 0.75rem
+  padding: 0.25rem 0.75rem 0.5rem
+  flex-wrap: wrap
+  // Counts are secondary info — keep them small and muted
+  .plants-count-headers
+    padding: 0
+    min-width: 0
+    h1
+      font-size: 1.5rem
+      font-weight: 400
+      color: #666
+      margin: 0
+      a
+        color: $blue
+        font-size: 1.25rem
+        opacity: .71
+        &:hover
+          opacity: 1
+
+  // Bigger multi-select button
+  .select-row
+    margin: 0
+    flex-shrink: 0
+    .display-toggle-btn
+      font-size: 1rem
+      padding: 0.5rem 1.25rem
 
 // Display Toggle
 .display-toggle-btn
@@ -108,6 +138,16 @@ h1
   gap: 0.5rem
   margin: 0 0 .5em .5em
 
+// Sort buttons + "show watered" toggle share one line below the filter buttons
+.sort-toggle-row
+  display: flex
+  align-items: center
+  gap: 2rem
+  flex-wrap: wrap
+  padding: 0.5rem 0
+  .sort-row
+    margin: 0
+
 // Sort row
 .sort-row
   display: flex
@@ -122,16 +162,6 @@ h1
 
   .display-toggle-btn
     padding: .75em  1.5em .75em 1em
-
-// Filter row with label + content
-.filter-row
-  display: flex
-  gap: 0.5rem
-  overflow: hidden
-  transition: height 0.3s ease
-
-  @media (max-width: 500px)
-    flex-direction: column
 
 .row-label
   color: #666
@@ -641,21 +671,21 @@ h1
     grid-area: 1 / 1
 
   // Default: show water button, hide watered link
-  > a.plant-card-water-col
+  > .plant-card-water-col.watered
     visibility: hidden
-  > div.plant-card-water-col
+  > .plant-card-water-col.water-icon-link
     visibility: visible
 
   // Watered: show link, hide water button
-  &.is-watered > a.plant-card-water-col
+  &.is-watered > .plant-card-water-col.watered
     visibility: visible
-  &.is-watered > div.plant-card-water-col
+  &.is-watered > .plant-card-water-col.water-icon-link
     visibility: hidden
 
   // Optimistic: water button still visible but with watered styling
-  &:has(form[aria-busy="true"]) > a.plant-card-water-col
+  &:has(form[aria-busy="true"]) > .plant-card-water-col.watered
     visibility: hidden
-  &:has(form[aria-busy="true"]) > div.plant-card-water-col
+  &:has(form[aria-busy="true"]) > .plant-card-water-col.water-icon-link
     visibility: visible
 
 .plant-card-water-col
@@ -685,7 +715,7 @@ h1
     &:hover
       background: $lightyellow
 
-div.plant-card-water-col
+.plant-card-water-col.water-icon-link
   padding: 0
 
 .plant-card-water-col
@@ -1126,3 +1156,109 @@ turbo-frame#plants-results[aria-busy]
     opacity: 0.4
     pointer-events: none
     transition: opacity 0.1s ease
+
+// --- Multi-select / bulk actions ---
+
+.select-row
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  margin-top: 0.5rem
+
+.select-toggle-btn.active
+  background: $blue
+  color: white
+
+// Per-card checkbox: hidden until selection mode is enabled
+.plant-card-select
+  display: none
+
+.selection-mode .plant-card-select
+  display: flex
+  align-items: center
+  justify-content: center
+  flex: 0 0 2.5rem
+  padding-left: 0.5rem
+
+  input[type="checkbox"]
+    width: 1.3rem
+    height: 1.3rem
+    cursor: pointer
+    accent-color: $blue
+
+.plant-card.selected
+  outline: 2px solid $blue
+  outline-offset: -2px
+
+// In selection mode the whole card (minus the watering column) toggles selection, so
+// disable the plant-show and location links and show a pointer cursor on the card.
+.selection-mode .plant-card
+  cursor: pointer
+.selection-mode .plant-card-graphic-col a,
+.selection-mode .plant-card-location
+  pointer-events: none
+
+.plant-select-bar
+  position: sticky
+  bottom: 0
+  z-index: 5
+  display: flex
+  flex-direction: column
+  gap: 0.5rem
+  margin-top: 0.75rem
+  padding: 0.75rem
+  border-radius: 8px
+  background: #fff
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12)
+  border: 1px solid $lightblue
+
+.plant-select-bar-row
+  display: flex
+  align-items: center
+  flex-wrap: wrap
+  gap: 0.5rem
+
+.plant-select-count
+  font-weight: 600
+  color: $blue
+  margin-right: 0.25rem
+
+.plant-select-dropdown
+  padding: 0.25rem 0.5rem
+  border-radius: 999px
+  border: 1px solid $lightblue
+  background: $lightblue
+  color: $blue
+  font-size: 0.9em
+  font-family: inherit
+  cursor: pointer
+
+.plant-select-archive
+  margin-left: auto
+  background: $lightyellow
+  color: $yellow
+  &:hover
+    background: rgba(206, 154, 0, 0.35)
+
+.plant-select-water-options
+  display: flex
+  flex-wrap: wrap
+  gap: 0.75rem
+  padding-top: 0.5rem
+  border-top: 1px solid $lightblue
+
+  .inline-field
+    display: flex
+    flex-direction: column
+    gap: 0.2rem
+    min-width: 0
+
+    label
+      font-size: 0.75em
+      color: $blue
+
+  .inline-input
+    padding: 0.25rem 0.4rem
+    border-radius: 4px
+    border: 1px solid $lightblue
+    font-family: inherit

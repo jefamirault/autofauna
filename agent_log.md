@@ -4,6 +4,60 @@ Current session log. Previous logs archived in `agent_log/`.
 
 ---
 
+## Plants Index: Multi-Select & Bulk Actions (planned)
+
+Adding a selection mode to the plants index: a "Select" toggle reveals a checkbox on each
+card + a bulk-action bar. Actions: **Water selected** (with optional fertilizer/amount
+panel), **Create group**, **Add to existing group**, **Set location**, **Archive selected**.
+
+Plan:
+1. **Routes** — `plants` collection: `bulk_water`, `bulk_archive`, `bulk_set_location`.
+   `plant_groups`: member `add_plants`, collection `create_from_selection`.
+2. **`Plant#quick_water!`** gains `overrides:` keyword (present overrides win via
+   `compact_blank`; carry-forward for blanks). Location/PlantGroup callers unaffected.
+3. **`PlantsController`** — `bulk_water` (turbo_stream, in-place via `_watered_streams`),
+   `bulk_archive`/`bulk_set_location` (POST→redirect, carry q/filters in `forward_params`).
+   `watering_overrides` scopes recipe/batch to project (IDOR). `@all_locations`/`@all_groups`
+   added to `index` for the action-bar dropdowns.
+4. **`PlantGroupsController`** — `create_from_selection` (new group→edit), `add_plants`
+   (member, add to existing). Mirrors `seed_from_location`.
+5. **Views** — `bulk_water.turbo_stream.erb`; checkbox in `_plant_row`; Select toggle +
+   sticky action bar + watering-details panel (reuses `watering-recipe` controller) in
+   `index.html.erb`.
+6. **Stimulus** — new `plant_select_controller.js` (selection state keyed by plant id,
+   syncs triple-rendered checkboxes, select-all over filtered set, dynamic-form submit).
+7. **Styles** (`plants.sass`) + **i18n** (`en.yml`: `plants.bulk.*`, `plant_groups.*`).
+
+Constraints honored: triple-rendered cards (key off plant id, sync 3 copies), client-side
+filter/pagination (select-all spans all pages of filtered set), dual `location-filter`
+instances (new controller on inner frame element only). Editor-gated via `can_edit?`.
+
+**Implemented.** Files changed: `config/routes.rb`, `app/models/plant.rb`,
+`app/controllers/plants_controller.rb`, `app/controllers/plant_groups_controller.rb`,
+`app/views/plants/{index.html.erb,_plant_row.html.erb,bulk_water.turbo_stream.erb}`,
+`app/javascript/controllers/plant_select_controller.js`,
+`app/assets/stylesheets/plants.sass`, `config/locales/en.yml`. Tests added to
+`plants_controller_test.rb` (bulk_water turbo/override/carry-forward/recipe-IDOR/archive/
+set_location/cross-project/empty) and `plant_groups_controller_test.rb`
+(create_from_selection + add_plants, each with IDOR case).
+
+Notes:
+- The Stimulus controller submits a detached `<form>` via `requestSubmit()` so Turbo handles
+  it (stream for water, redirect for the rest). CSRF token from `form_authenticity_token`.
+- `units` select gets a leading blank "— keep —" option so an untouched units field doesn't
+  override carry-forward (everything else is blank by default).
+- TDS field is rendered hidden when fertilizers-on + precise-off so `watering-recipe`'s
+  `batchChanged` auto-fill target always exists (avoids a JS error in that flag combo).
+- No migration required.
+
+Verified: `ruby -c` (all changed .rb), `YAML.load_file` (en.yml), ERB compile (all changed
+templates), `node --check` (new JS) — all pass.
+
+**User action:** run `bin/rails test test/controllers/plants_controller_test.rb test/controllers/plant_groups_controller_test.rb`
+(and ideally the full suite), then smoke-test `/plants` per the plan's verification section.
+
+---
+
 ## 2026-03-20: 1-Click Watering on Plants Index
 
 **What:** Converted the water button on plant cards from a navigation link (GET → new watering form) to an inline POST action that creates a watering immediately and updates the card via Turbo Stream.
@@ -260,3 +314,70 @@ Added a mutually-exclusive first option to the "Which fertilizers do you use?" s
 - **User action:** run `bin/rails db:migrate`, then `bin/rails test test/models/plant_group_test.rb test/models/plant_test.rb test/controllers/plant_groups_controller_test.rb test/controllers/locations_controller_test.rb test/controllers/authorization_test.rb`.
 
 **Verified (migration + 54 tests green).** Post-test fix: `plants/_plant.html.erb` (show card) reads the `@plant` ivar, which bulk watering doesn't set — `_watered_streams.turbo_stream.erb` now sets `@plant = plant` before the show render so group/location watering renders without error (the show-view replace is a harmless no-op on the index). Also switched a no-op-schedule assertion to `assert_nil`.
+
+---
+
+## Plants Index — move counts + search options into the header
+
+**Goal:** Consolidate the plants-index search/sort UI into the dark-green header. The `header.header-plants` now grows vertically to hold the plant counts plus the search options (saved searches, sort, select) and the location/recipe filter buttons. Per user decision: the **counts stay visible**; saved searches + sort + select + filter buttons collapse together (▲ toggle, default collapsed, via `filter-collapse` controller).
+
+**Views (`app/views/plants/index.html.erb`):**
+- Moved `.plants-count-headers` and `#search-options` (saved-searches row, sort row, select row) out of `turbo-frame#plants-results` and into the `content_for :header_extra` block, inside the existing outer `location-filter` wrapper.
+- Added `data-location-filter-display-mode-value` / `-search-term-value` to the outer wrapper so the header instance has correct state for sort + save-form logic.
+- New collapsible wrapper `.header-collapse-panel` (`data-filter-collapse-target="filterRow"`) wraps `#search-options` + `.filter-row-content`. The old `.filter-row` div is gone. The ▲ toggle is now always rendered.
+- Select button: `data-action` changed from `plant-select#toggleMode` to `location-filter#toggleSelectMode` (it's now outside the plant-select element); dropped its `modeBtn` target.
+
+**JS — dual-instance coordination (header = outer, frame = inner):**
+- `location_filter_controller.js`: `_dispatchApply` now carries `displayMode`; the inner `location-filter:apply` listener applies display-mode switches (`updateDisplayMode`). `switchDisplayMode` dispatches to the inner instance (sort row lives in the header, cards live in the frame). `updateResultsCount` is guarded to the card-owning (inner) instance and writes counts via `_crossTarget` to the header's count elements. Added `toggleSelectMode()` (relays a `plant-select:toggle-mode` document event) and `_syncSaveForm()` (keeps the header save form's hidden `query_term` fresh after a frame reload, called from `connect`).
+- `plant_select_controller.js`: listens for `plant-select:toggle-mode` (added `disconnect` to remove it); `_modeBtn()` helper finds the header's `.select-toggle-btn` cross-instance; resets the button to inactive on (re)connect.
+
+**CSS:**
+- `layout.sass` (`body:has(main.plants.index) header`): header grid is now 3 rows; `.plants-count-headers` (row 2) and `.header-collapse-panel` (row 3) span full width. Added dark-header overrides (white text/pills) for counts, sort/select `.display-toggle-btn` (active = white bg + `--section-color-start` text), saved-search chips, and the save-search input/button.
+- `plants.sass`: removed the now-unused `.filter-row` rule (replaced by `.header-collapse-panel`, whose collapse styling lives in the header scope).
+
+**Checks:** ERB block balance 0; layout/plants SASS compile; both JS controllers `node --check` clean. **Not yet run in a browser** — needs visual verification on the dark-green background (desktop + mobile), and a functional pass on sort switching, filtering, counts, saved-search save/load, clear-search, and select mode.
+
+### Header layout refinement — counts/saved-searches up top, toggle to the bottom
+
+- **"Show watered plants" toggle** moved out of the search form to a new bottom row of the header (grid-row 3, always visible, below the collapse panel / filter buttons). It now lives outside the search `<form>`, so it's associated via the HTML `form="plantSearchForm"` attribute (the search form got an explicit id via `search_form_for ... html: { id:, data: }`). `toggleHideScheduled` now uses `checkbox.form` instead of `closest('form')`.
+- **Counts** + **saved searches** moved into a new `.header-top-row` flex container alongside `#headerSearch` (grid-row 1). Search bar grows (capped at `--card-max-width`); counts sit next to it; saved searches follow and wrap to the next line when the row runs out of width (`flex-wrap`). Counts restyled compact (stacked h1/h2, smaller fonts).
+- Collapse panel is now grid-row 2; `#search-options` no longer contains the saved-searches row (just sort + select).
+- Checks: ERB depth 0, layout/plants SASS compile, both controllers `node --check` clean. Still needs browser verification.
+
+### Fix: collapse toggle didn't expand the panel
+
+The `▲` handle fired `toggle()` (aria-expanded flipped) but the panel never visually expanded. Root cause: `filter_collapse_controller` animated the panel by reading `scrollHeight` and setting an explicit `height` — unreliable for a grid item promoted via a `display:contents` wrapper. Replaced it with a robust CSS-only collapse:
+- Controller now just toggles an `.expanded` class (+ `aria-expanded`); no height measurement. Auto-collapse-on-scroll behavior preserved.
+- `.header-collapse-panel` uses `display:grid; grid-template-rows: 0fr` → `1fr` (on `.expanded`), animated via `transition: grid-template-rows`. Content wrapped in `.header-collapse-inner` (`overflow:hidden; min-height:0`) so it clips cleanly to zero (also removes any padding "strip"). Collapsed by default in pure CSS, so no FOUC.
+
+Checks: ERB depth 0, div balance 0, layout.sass compiles, controller `node --check` clean. Needs a browser confirm (no headless browser available here).
+
+### Fix (follow-up): make collapse work regardless of cached controller build
+
+Panel still wasn't expanding — most likely the browser was running the previous controller build (which set an inline pixel `height` that fights the new grid collapse). Made the CSS robust to that:
+- Expansion is now driven by `header:has(.filter-collapse-btn[aria-expanded="true"]) .header-collapse-panel` (aria-expanded is set by every controller build), in addition to the `.expanded` class.
+- Added `height: auto !important` on the panel to neutralize any stale inline height, so visible height is controlled solely by the `grid-template-rows: 0fr↔1fr` toggle.
+
+### Root cause found: stray </div> hoisted the toggle out of controller scope
+
+The collapse toggle never worked because clicks weren't reaching `filter-collapse#toggle` (aria-expanded never changed; the button's nearest controller was `sidebar`/`<body>`). Diagnosed via console: the `[data-controller~="filter-collapse"]` wrapper only contained `.header-top-row` and `.header-collapse-panel` — the `<label>` and `<button>` had been hoisted out.
+
+Cause: a pre-existing extra `</div>` in the recipe-filter block (`.header-collapse-panel` was net -1 on divs). Previously harmless (filter row was the last child), but after moving the counts/options into the header and placing the toggle label+button after the panel, the stray tag closed the wrapper early, pushing those trailing elements outside the controller's element so the action couldn't bind. Removed the stray `</div>`; panel now 12/12, header block 19/19, ERB depth 0.
+
+Note: also fixes the "Show watered plants" toggle (was hoisted out too). Collapse is currently an instant display toggle — smooth animation can be re-added now that scope is correct.
+
+### Counts: single "Showing N Plants - Show All" line + multi-select count
+
+Replaced the two-line counts (needs-water + filtered total) with one line:
+- Normal: "Showing %{total} Plants" with a " - Show All" link (clearSearch functionality, label changed from "Clear Search" to "Show All") shown when a search/filter/non-default-display/hide-scheduled is active.
+- Multi-select mode: "Selected %{selected} out of %{total} plants" (no Show All link).
+
+N = number of plants currently shown by the active search/filters (the visible/filtered total), computed client-side by location-filter#updateResultsCount.
+
+Implementation:
+- ERB: single `<h1 data-location-filter-target="totalCount">` in `.plants-toolbar`; server renders "Showing N Plants" + Show All when `filters_active`. Dropped the wateringCount line.
+- location_filter_controller: rewrote `updateResultsCount` — computes visible `total`; if `selection-mode` class present and a `plant-select` controller is on the same element, renders the "Selected X out of N" template (reading `selected.size` via `application.getControllerForElementAndIdentifier`); else "Showing N" + optional Show All link. Removed `wateringCount` target and the 4 old result templates; added `countTemplate`/`selectedTemplate` values; `clearSearchLabel` default now "Show All".
+- plant_select_controller: `_refreshCount()` calls the sibling location-filter's `updateResultsCount`; invoked from `toggleMode` and `_updateCount` so the header line updates on mode toggle and every selection change.
+- i18n: added `showing_count`, `show_all`, `selected_count` (en + es).
+
+Note: used the shown/filtered total for N (the user's example said "8 of ~50" but wrote "7"; "Showing"/"out of" both use the currently-shown count). Easy to switch to needs-water if that was intended.

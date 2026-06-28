@@ -422,12 +422,15 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
       opacity: 0.9
   input[type="search"]
     flex: 1
-    padding: 0.35rem 2.5rem 0.35rem 2.75rem
+    // Taller input + larger text. #headerSearch keeps its min-height, so growing the
+    // input here doesn't change the container's height. Left padding clears the icon
+    // (icon spans 0.75rem–2.75rem) plus a gap before the typed text.
+    padding: 0.65rem 2.5rem 0.65rem 3.3rem
     border: 1px solid rgba(255,255,255,0.3)
     border-radius: 4px
     background: rgba(255,255,255,0.15)
     color: white
-    font-size: 1.1rem
+    font-size: 1.35rem
     outline: none
     &::placeholder
       color: rgba(255,255,255,0.6)
@@ -459,10 +462,14 @@ body:has(main.plants.index)
       aside#sidebar
         visibility: hidden
         pointer-events: none
+  // Reserve space at the bottom for the floating collapse handle (half overlaps here)
+  section#primary
+    padding-top: 1.25rem
   header
     grid-template-columns: minmax(0, 1fr) auto
     grid-template-rows: auto auto
     align-items: start
+    padding-bottom: 1rem
     > *
       grid-row: auto
       grid-column: auto
@@ -506,42 +513,121 @@ body:has(main.plants.index)
         color: #dddc
   #headerTitle
     display: none !important
-  #headerSearch
+  // Top row: search bar, then counts and saved searches in the area to its right.
+  .header-top-row
     grid-column: 1
     grid-row: 1
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: 0.35rem 1rem
+    padding: 0.3rem 0 0.3rem 1rem
+    min-width: 0
+  #headerSearch
+    flex: 1 1 16rem
     max-width: var(--card-max-width)
-    margin-left: 1rem
+    margin: 0
+    min-width: 0
   #headerRight
     grid-column: 2
     grid-row: 1
     align-self: center
-  .filter-row
+  .saved-searches-row
+    flex: 1 1 auto
+    min-width: 0
+  // Smooth collapse via grid-template-rows 0fr↔1fr; the inner clips its overflow so the
+  // content slides in/out. Driven by the toggle's aria-expanded (set by the controller)
+  // plus the `.expanded` class.
+  .header-collapse-panel
     grid-column: 1 / -1
     grid-row: 2
-    padding: 0 1rem
+    display: grid
+    grid-template-rows: 0fr
+    transition: grid-template-rows 0.3s ease
+    .header-collapse-inner
+      overflow: hidden
+      min-height: 0
+      // Horizontal padding only — vertical padding on the collapsing element doesn't
+      // shrink with the 0fr row and would leave a visible strip when minimized. Bottom
+      // spacing comes from the content inside (#search-options / .filter-row-content).
+      padding: 0 1rem
+  header:has(.filter-collapse-btn[aria-expanded="true"]) .header-collapse-panel,
+  .header-collapse-panel.expanded
+    grid-template-rows: 1fr
+  // "Show watered plants" toggle — sits at the bottom of the collapsible panel
+  .hide-scheduled-switch
+    padding: 0.3rem 0 0.4rem
+  #search-options
+    margin: 0
+    padding-bottom: 0.4rem
   .filter-row-content
     padding-bottom: 0.4rem
+  // Sort pill buttons on the dark header
+  .sort-row .display-toggle-btn
+    background: rgba(255, 255, 255, 0.18)
+    color: white
+    &:hover
+      background: rgba(255, 255, 255, 0.28)
+    &.active
+      background: white
+      color: var(--section-color-start)
+  // Saved-search chips on the dark header
+  .saved-search-chip
+    background: rgba(255, 255, 255, 0.15)
+    border-color: rgba(255, 255, 255, 0.3)
+    .saved-search-link
+      color: white
+      &:hover
+        background: rgba(255, 255, 255, 0.18)
+    .saved-search-delete-btn
+      color: rgba(255, 255, 255, 0.65)
+      border-left-color: rgba(255, 255, 255, 0.25)
+      &:hover
+        color: white
+        background: rgba(255, 255, 255, 0.22)
+  .save-search-input
+    border-color: rgba(255, 255, 255, 0.4)
+    color: white
+    &::placeholder
+      color: rgba(255, 255, 255, 0.6)
+    &:focus
+      border-color: rgba(255, 255, 255, 0.7)
+  .save-search-btn
+    background: rgba(255, 255, 255, 0.2)
+    color: white
+    &:hover
+      background: rgba(255, 255, 255, 0.3)
+  // Floating collapse handle — centered on the header's bottom border, half over the
+  // header and half over the content below.
   .filter-collapse-btn
-    background: none
-    border: none
-    color: rgba(255, 255, 255, 0.7)
-    cursor: pointer
-    padding: 0.35rem 0.6rem
-    border-radius: 4px
-    font-size: 0.9rem
+    position: absolute
+    bottom: 0
+    left: 50%
+    transform: translate(-50%, 50%)
+    z-index: 12
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 4rem
+    height: 1.6rem
+    padding: 0
+    border-radius: 0.5rem
+    border: 1px solid rgba(255, 255, 255, 0.3)
+    background: var(--section-color-start)
+    color: white
+    font-size: 0.85rem
     line-height: 1
-    flex-shrink: 0
-    transition: color 0.15s ease, background 0.15s ease
+    cursor: pointer
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25)
+    transition: background 0.15s ease, transform 0.15s ease
     &[aria-expanded="false"]
       .filter-collapse-icon
-        display: inline-block
         transform: rotate(180deg)
     .filter-collapse-icon
       display: inline-block
       transition: transform 0.3s ease
     &:hover
-      color: white
-      background: rgba(255, 255, 255, 0.12)
+      background: color-mix(in srgb, var(--section-color-start) 85%, white)
   @media (max-width: 600px)
     #headerSearch
       max-width: none

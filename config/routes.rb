@@ -25,9 +25,11 @@ Rails.application.routes.draw do
   resources :plant_groups do
     member do
       post :water
+      post :add_plants
     end
     collection do
       post :seed_from_location
+      post :create_from_selection
     end
   end
   resources :recipe_sources
@@ -79,6 +81,9 @@ Rails.application.routes.draw do
     resources :soil_moisture_readings
     collection do
       get :suggest_graphic
+      post :bulk_water
+      post :bulk_archive
+      post :bulk_set_location
     end
     member do
       post 'share', to: 'plants#create_share', as: 'create_share'

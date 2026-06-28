@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "filterButton", "recipeFilterButton", "buttonContainer", "recipeButtonContainer",
-    "locationGroup", "recipeGroup", "resultsCount", "wateringCount", "totalCount",
+    "locationGroup", "recipeGroup", "resultsCount", "totalCount",
     "searchInput", "clearSearchBtn",
     "wateringGroup", "groupCount",
     "locationGroupsContainer", "recipeGroupsContainer", "wateringGroupsContainer",
@@ -12,16 +12,13 @@ export default class extends Controller {
   ]
   static values = {
     displayMode: String,
-    wateringTemplate: String,
-    resultsTemplate: String,
-    resultsSearchTemplate: String,
-    resultsFilteredTemplate: String,
-    resultsFilteredSearchTemplate: String,
+    countTemplate: String,
+    selectedTemplate: String,
     searchTerm: String,
     perPage: { type: Number, default: 20 },
     currentPage: { type: Number, default: 1 },
     showingTemplate: String,
-    clearSearchLabel: { type: String, default: "Clear Search" }
+    clearSearchLabel: { type: String, default: "Show All" }
   }
 
   connect() {
@@ -47,16 +44,26 @@ export default class extends Controller {
       }
     })
 
-    // Inner controller: receive filter state dispatched by the outer (header) controller
+    // Inner controller: receive filter/display state dispatched by the outer (header) controller
     document.addEventListener('location-filter:apply', this._handleApply = (e) => {
       if (!this.hasWateringGroupsContainerTarget && !this.hasLocationGroupsContainerTarget) return
       this.selectedLocations = new Set(e.detail.locations)
       this.selectedRecipes = new Set(e.detail.recipes)
       if (e.detail.currentPage !== undefined) this.currentPageValue = e.detail.currentPage
-      this.filterPlants()
-      this.updateResultsCount()
+      if (e.detail.displayMode && e.detail.displayMode !== this.displayModeValue) {
+        // Display mode switched from the header — updateDisplayMode re-filters and recounts.
+        this.displayModeValue = e.detail.displayMode
+        this.updateDisplayMode()
+      } else {
+        this.filterPlants()
+        this.updateResultsCount()
+      }
       if (this.displayModeValue === "watering") this.paginateVisibleCards()
     })
+
+    // Inner controller: keep the header's counts and save form fresh after a frame reload
+    this.updateResultsCount()
+    this._syncSaveForm()
   }
 
   disconnect() {
@@ -102,9 +109,18 @@ export default class extends Controller {
       detail: {
         locations: [...this.selectedLocations],
         recipes: [...this.selectedRecipes],
-        currentPage: this.currentPageValue
+        currentPage: this.currentPageValue,
+        displayMode: this.displayModeValue
       }
     }))
+  }
+
+  // Keep the header save form's hidden query_term in sync with the current search
+  // (the form lives outside the results frame, so it isn't re-rendered on search).
+  _syncSaveForm() {
+    if (!this.hasWateringGroupsContainerTarget && !this.hasLocationGroupsContainerTarget) return
+    const queryInput = document.getElementById('saved_search_query_term')
+    if (queryInput) queryInput.value = this.searchTermValue || ""
   }
 
   updateButtonStates() {
@@ -344,7 +360,10 @@ export default class extends Controller {
   }
 
   updateResultsCount() {
-    if (!this.hasWateringCountTarget || !this.hasTotalCountTarget) return
+    // Only the instance that owns the plant cards computes counts.
+    if (!this.hasWateringGroupsContainerTarget && !this.hasLocationGroupsContainerTarget && !this.hasRecipeGroupsContainerTarget) return
+    const totalCountEl = this._crossTarget('totalCount')
+    if (!totalCountEl) return
     const showAllLocations = this.selectedLocations.size === 0
     const showAllRecipes = this.selectedRecipes.size === 0
 
@@ -362,77 +381,43 @@ export default class extends Controller {
     const cards = container.querySelectorAll(".plant-card[data-location-id]")
 
     let total = 0
-    let needsWatering = 0
-
     cards.forEach(card => {
-      // In watering mode, use data-filter-hidden; in other modes, check filter match
       let visible
       if (this.displayModeValue === "watering") {
         visible = !card.hasAttribute("data-filter-hidden")
       } else {
-        const locationId = card.dataset.locationId
-        const recipeId = card.dataset.recipeId
-        const locationMatch = showAllLocations || this.selectedLocations.has(locationId)
-        const recipeMatch = showAllRecipes || this.selectedRecipes.has(recipeId)
+        const locationMatch = showAllLocations || this.selectedLocations.has(card.dataset.locationId)
+        const recipeMatch = showAllRecipes || this.selectedRecipes.has(card.dataset.recipeId)
         visible = locationMatch && recipeMatch
       }
-
-      if (visible) {
-        total++
-        if (card.dataset.needsWatering === "true") {
-          needsWatering++
-        }
-      }
+      if (visible) total++
     })
 
-    // Update watering count (first line)
-    const wateringText = this.wateringTemplateValue
-      .replace("__NEEDS_WATERING__", needsWatering)
-    this.wateringCountTarget.textContent = wateringText
-
-    // Update total count (second line)
-    let totalText
-    const hasActiveFilters = !showAllLocations || !showAllRecipes
-
-    if (hasActiveFilters && this.searchTermValue) {
-      // Filters + search active
-      totalText = this.resultsFilteredSearchTemplateValue
+    // Multi-select mode: "Selected X out of N plants" (no Show All link).
+    const selectController = this.application.getControllerForElementAndIdentifier(this.element, "plant-select")
+    if (selectController && this.element.classList.contains("selection-mode")) {
+      const selected = selectController.selected ? selectController.selected.size : 0
+      totalCountEl.textContent = this.selectedTemplateValue
+        .replace("__SELECTED__", selected)
         .replace("__TOTAL__", total)
-        .replace("__SEARCH_TERM__", this.searchTermValue)
-    } else if (hasActiveFilters) {
-      // Only filters active
-      totalText = this.resultsFilteredTemplateValue
-        .replace("__TOTAL__", total)
-    } else if (this.searchTermValue) {
-      // Only search active
-      totalText = this.resultsSearchTemplateValue
-        .replace("__TOTAL__", total)
-        .replace("__SEARCH_TERM__", this.searchTermValue)
-    } else {
-      // No filters or search
-      totalText = this.resultsTemplateValue
-        .replace("__TOTAL__", total)
+      this.updateGroupCounts()
+      return
     }
 
-    // Update the text content
-    this.totalCountTarget.textContent = totalText
-
-    // Show/hide "Clear Search" link based on any active state
-    const shouldShowClear = hasActiveFilters || !!this.searchTermValue || this.displayModeValue !== "watering"
-    const existingLink = this.totalCountTarget.querySelector("a")
-    if (shouldShowClear && !existingLink) {
+    // Normal: "Showing N Plants" with a "Show All" link when filtered/searched.
+    totalCountEl.textContent = this.countTemplateValue.replace("__TOTAL__", total)
+    const hasActiveFilters = !showAllLocations || !showAllRecipes
+    const hideScheduled = new URLSearchParams(window.location.search).get("hide_scheduled") === "true"
+    const shouldShowClear = hasActiveFilters || !!this.searchTermValue || this.displayModeValue !== "watering" || hideScheduled
+    if (shouldShowClear) {
       const link = document.createElement("a")
       link.href = "#"
       link.textContent = this.clearSearchLabelValue
       link.dataset.action = "click->location-filter#clearSearch"
-      this.totalCountTarget.appendChild(document.createTextNode(" - "))
-      this.totalCountTarget.appendChild(link)
-    } else if (!shouldShowClear && existingLink) {
-      existingLink.previousSibling?.remove()
-      existingLink.remove()
+      totalCountEl.appendChild(document.createTextNode(" - "))
+      totalCountEl.appendChild(link)
     }
 
-    // Update group counts
     this.updateGroupCounts()
   }
 
@@ -547,9 +532,13 @@ export default class extends Controller {
     })
 
     this.currentPageValue = 1
+    // The sort row lives in the header; the plant cards live in the results frame.
+    // Dispatch so the inner controller switches containers, re-filters, and recounts.
+    this._dispatchApply()
     this.updateDisplayMode()
     this.updateSaveFormVisibility()
-    if (this.hasFilterParamsInputTarget) this.filterParamsInputTarget.value = url.search
+    const filterParamsInput = this._crossTarget('filterParamsInput')
+    if (filterParamsInput) filterParamsInput.value = url.search
     this.updateSearchClearButton()
   }
 
@@ -637,37 +626,15 @@ export default class extends Controller {
 
   toggleHideScheduled(event) {
     const checkbox = event.currentTarget
-    const isActive = checkbox.checked
-    const label = checkbox.closest('.hide-scheduled-switch')?.querySelector('.hide-scheduled-label')
-    if (label) {
-      this._fadeLabel(label, isActive
-        ? (checkbox.dataset.showWateredLabel || 'Watered Plants\nHidden')
-        : (checkbox.dataset.hideWateredLabel || 'Showing\nWatered Plants'))
-    }
-    const form = checkbox.closest('form')
+    // The checkbox lives outside the search form (linked via form=""), so use its
+    // associated form rather than the nearest ancestor.
+    const form = checkbox.form || checkbox.closest('form')
     if (form) form.requestSubmit()
   }
 
   _syncHideScheduledSwitch(isActive) {
     const checkbox = document.querySelector('input[name="hide_scheduled"]')
-    if (!checkbox) return
-    checkbox.checked = isActive
-    const label = checkbox.closest('.hide-scheduled-switch')?.querySelector('.hide-scheduled-label')
-    if (label) {
-      label.textContent = isActive
-        ? (checkbox.dataset.showWateredLabel || 'Watered Plants\nHidden')
-        : (checkbox.dataset.hideWateredLabel || 'Showing\nWatered Plants')
-    }
-  }
-
-  _fadeLabel(label, text) {
-    label.classList.add('fading')
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        label.textContent = text
-        label.classList.remove('fading')
-      })
-    })
+    if (checkbox) checkbox.checked = isActive
   }
 
   loadSavedSearch(event) {

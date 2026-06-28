@@ -87,6 +87,9 @@ en:
       results_count_with_search: "%{total} results match '%{search_term}'"
       results_filtered: "%{total} plants match selected filter(s)"
       results_filtered_search: "%{total} filtered results match '%{search_term}'"
+      showing_count: "Showing %{total} Plants"
+      show_all: "Show All"
+      selected_count: "Selected %{selected} out of %{total} plants"
       filter_by_status: "Filter by Status"
       needs_water: "Needs Water"
       scheduled: "Scheduled"
@@ -97,6 +100,7 @@ en:
       filter: "Filter"
       hide_watered_plants: "Showing\nWatered Plants"
       show_watered_plants: "Watered Plants\nHidden"
+      hide_watered_label: "Hide watered plants"
       recipe_label: "Recipe"
       location_label: "Location"
       show_per_page: "Show"
@@ -141,6 +145,31 @@ en:
       tap: "Tap to Water"
       watered: "Watered!"
       edit: "Edit"
+    bulk:
+      select: "Select"
+      selected:
+        one: "%{count} selected"
+        other: "%{count} selected"
+      select_one: "Select at least one plant first."
+      select_all: "Select all"
+      clear: "Clear"
+      keep: "keep"
+      water: "Water"
+      options: "Options"
+      new_group: "New group"
+      add_to_group: "Add to group"
+      set_location: "Set location"
+      archive: "Archive"
+      confirm_archive: "Archive the selected plants?"
+      watered:
+        one: "Watered 1 plant."
+        other: "Watered %{count} plants."
+      archived:
+        one: "Archived 1 plant."
+        other: "Archived %{count} plants."
+      relocated:
+        one: "Moved 1 plant to %{name}."
+        other: "Moved %{count} plants to %{name}."
     watering_status:
       late:
         one: "Watering <strong>%{days} day late</strong>"
@@ -237,6 +266,13 @@ en:
     updated: "Group updated."
     destroyed: "Group deleted."
     seeded: "Created a group from %{name}."
+    default_name: "New group"
+    created_from_selection:
+      one: "Created a group with 1 plant. Give it a name."
+      other: "Created a group with %{count} plants. Give it a name."
+    plants_added:
+      one: "Added 1 plant to %{name}."
+      other: "Added %{count} plants to %{name}."
     watered:
       one: "Watered 1 plant."
       other: "Watered %{count} plants."

@@ -21,6 +21,30 @@ class PlantsController < ApplicationController
     end
   end
 
+  # POST /plants/bulk_water — water every selected plant, optionally with shared details.
+  def bulk_water
+    @watered = current_project.plants.where(id: bulk_ids).map { |p| p.quick_water!(overrides: watering_overrides) }
+
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to plants_path, notice: t('plants.bulk.watered', count: @watered.size) }
+    end
+  end
+
+  # POST /plants/bulk_archive
+  def bulk_archive
+    count = current_project.plants.where(id: bulk_ids).update_all(archived: true)
+    redirect_to plants_path(forward_params), notice: t('plants.bulk.archived', count: count)
+  end
+
+  # POST /plants/bulk_set_location
+  def bulk_set_location
+    location = current_project.locations.find_by(id: params[:location_id])
+    count = current_project.plants.where(id: bulk_ids).update_all(location_id: location&.id)
+    redirect_to plants_path(forward_params),
+      notice: t('plants.bulk.relocated', count: count, name: location&.name || t('plants.index.no_location'))
+  end
+
   # GET /plants or /plants.json
   def index
     default_search_params = {
@@ -94,6 +118,10 @@ class PlantsController < ApplicationController
                                     .where("snoozed_until > ?", Time.current).count
 
     @saved_searches = current_project.saved_searches.where(user_id: current_user.id).order(:name)
+
+    # Bulk-action bar dropdowns (all project locations/groups, not just those in results)
+    @all_locations = current_project.locations.order(Arel.sql("LOWER(name)"))
+    @all_groups = current_project.plant_groups.order(Arel.sql("LOWER(name)"))
 
     @display_mode = params[:display] || "watering"
     @display_mode = "watering" if @display_mode == "recipe" && !feature_enabled?(:use_fertilizers)
@@ -339,5 +367,24 @@ class PlantsController < ApplicationController
       selected_ids = group_ids.reject(&:blank?).map(&:to_i)
       valid_ids = current_project.plant_groups.where(id: selected_ids).pluck(:id)
       plant.plant_group_ids = valid_ids
+    end
+
+    # Selected plant ids from a bulk-action form.
+    def bulk_ids
+      Array(params[:plant_ids]).reject(&:blank?).map(&:to_i)
+    end
+
+    # Optional watering details applied to every selected plant. Recipe/batch are scoped
+    # to the current project to prevent IDOR; blanks are dropped so carry-forward applies.
+    def watering_overrides
+      o = params.fetch(:watering, {}).permit(:volume, :units, :notes, :recipe_id, :recipe_batch_id, :tds).to_h
+      o.delete("recipe_id")       if o["recipe_id"].present?       && !current_project.recipes.exists?(o["recipe_id"])
+      o.delete("recipe_batch_id") if o["recipe_batch_id"].present? && !current_project.recipe_batches.exists?(o["recipe_batch_id"])
+      o
+    end
+
+    # Carry search/filter context through bulk redirects so the reloaded index keeps state.
+    def forward_params
+      params.permit(:display, :hide_scheduled, :show_snoozed, locations: [], recipes: [], q: {}).to_h
     end
 end

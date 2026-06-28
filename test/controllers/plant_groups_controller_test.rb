@@ -84,4 +84,31 @@ class PlantGroupsControllerTest < ActionDispatch::IntegrationTest
     assert_equal location.plants.pluck(:id).sort, group.plants.pluck(:id).sort
     assert_redirected_to edit_plant_group_url(group)
   end
+
+  test "create_from_selection builds a group from selected plants and redirects to edit" do
+    assert_difference("PlantGroup.count") do
+      post create_from_selection_plant_groups_url, params: { plant_ids: [plants(:one).id, plants(:two).id] }
+    end
+    group = PlantGroup.last
+    assert_includes group.plants, plants(:one)
+    assert_includes group.plants, plants(:two)
+    assert_redirected_to edit_plant_group_url(group)
+  end
+
+  test "create_from_selection ignores plants from another project" do
+    post create_from_selection_plant_groups_url, params: { plant_ids: [plants(:plant_p2).id] }
+    assert_empty PlantGroup.last.plants
+  end
+
+  test "add_plants adds selected plants to an existing group without duplicates" do
+    @group.plant_ids = [plants(:one).id]
+    post add_plants_plant_group_url(@group), params: { plant_ids: [plants(:one).id, plants(:two).id] }
+    assert_redirected_to plants_path
+    assert_equal [plants(:one).id, plants(:two).id].sort, @group.reload.plant_ids.sort
+  end
+
+  test "add_plants will not add another project's plants" do
+    post add_plants_plant_group_url(@group), params: { plant_ids: [plants(:plant_p2).id] }
+    refute_includes @group.reload.plants, plants(:plant_p2)
+  end
 end

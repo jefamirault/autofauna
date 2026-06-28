@@ -2,7 +2,15 @@
 <% just_watered ||= nil %>
 <% watered_today = just_watered || plant.date_last_watering == Time.zone.now.to_date %>
 <% urgency = watered_today ? :normal : plant.watering_urgency %>
-<div id="<%= dom_id plant %>" class="plant-card <%= urgency %>" data-location-id="<%= plant.location_id&.to_s || 'none' %>" data-recipe-id="<%= plant.recipe_id&.to_s || 'none' %>" data-needs-watering="<%= urgency == :needs_water %>" data-watering-status="<%= urgency == :needs_water ? 'needs_water' : 'scheduled' %>" <%= 'data-controller=inline-watering' unless archive %>>
+<div id="<%= dom_id plant %>" class="plant-card <%= urgency %>" data-location-id="<%= plant.location_id&.to_s || 'none' %>" data-recipe-id="<%= plant.recipe_id&.to_s || 'none' %>" data-needs-watering="<%= urgency == :needs_water %>" data-watering-status="<%= urgency == :needs_water ? 'needs_water' : 'scheduled' %>" <%= 'data-controller=inline-watering' unless archive %> <%= 'data-action="click->plant-select#cardClick"'.html_safe unless archive %>>
+  <% unless archive %>
+    <label class="plant-card-select" data-plant-select-target="checkboxWrap" style="display: none;">
+      <input type="checkbox" value="<%= plant.id %>"
+             data-plant-id="<%= plant.id %>"
+             data-plant-select-target="checkbox"
+             data-action="change->plant-select#toggle">
+    </label>
+  <% end %>
   <div class="plant-card-graphic-col">
     <div class="plant-card-name">
       <%= link_to plant.label, plant_path(plant.id), data: { turbo_frame: "_top" } %>
