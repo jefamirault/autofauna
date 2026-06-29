@@ -381,3 +381,16 @@ Implementation:
 - i18n: added `showing_count`, `show_all`, `selected_count` (en + es).
 
 Note: used the shown/filtered total for N (the user's example said "8 of ~50" but wrote "7"; "Showing"/"out of" both use the currently-shown count). Easy to switch to needs-water if that was intended.
+
+## Custom plant image uploads (Active Storage)
+
+Added the ability for users to upload their own plant image instead of only choosing from the predetermined library.
+
+- **Active Storage installed** — `active_storage:install` failed with "Invalid DATABASE provided" because Rails' `railties:install:migrations` reads `ENV["DATABASE"]` as a multi-db config name, but the app repurposes `DATABASE` as the literal db name (`.env`/`database.yml`). Worked around by copying the gem's single migration directly into `db/migrate/` (`*_create_active_storage_tables.active_storage.rb`); user migrated. `image_processing` + `ruby-vips` already bundled; libvips installed locally.
+- **Model** (`concerns/plant_graphics.rb`): `has_one_attached :custom_image`; `display_graphic` returns a resized AS variant (`resize_to_limit: [600,600]`) when an upload is attached, else the library asset-path string (custom always wins); `has_graphic?`; content-type (png/jpeg/webp/gif) + 10MB validations. Kept `graphic_path` (library-only) for back-compat.
+- **Controller**: permit `:custom_image`; `purge_custom_image_if_requested` purges on `remove_custom_image=1` when no replacement uploaded; called after successful update.
+- **Form** (`plants/_form.html.erb` + `plant_graphic_controller.js`): library/upload radio toggle, file input with client-side FileReader preview, current-image thumbnail, hidden `remove_custom_image` flag flipped by the controller (library→"1", upload→"0").
+- **Views**: swapped `graphic_path`/`graphic.present?` → `display_graphic`/`has_graphic?` in plants show/edit, `_plant_row` (placeholder fallback), waterings show/new/edit, shared_plants/show, and `application_helper#header_config` (sidebar_graphic).
+- **Deploy**: added `storage` to Capistrano `linked_dirs` so uploads survive releases. **Reminder: install libvips on the production server before deploying.**
+- **CSS**: `.graphic-source-toggle` / `.graphic-upload-container` in plants.sass.
+- **Tests**: model tests (precedence, has_graphic?, content-type validation) + controller tests (attach, remove flag, replacement beats remove); added `test/fixtures/files/plant.png` (1×1 PNG).

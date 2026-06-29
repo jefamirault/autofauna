@@ -3,8 +3,8 @@
 <% end %>
 
 <h1 class="plant-header">
-  <% if @plant.graphic.present? %>
-    <%= image_tag @plant.graphic_path, class: "plant-header-graphic", alt: "#{@plant.name}" %>
+  <% if @plant.has_graphic? %>
+    <%= image_tag @plant.display_graphic, class: "plant-header-graphic", alt: "#{@plant.name}" %>
   <% end %>
   <%= @plant %>
 </h1>

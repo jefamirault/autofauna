@@ -119,10 +119,30 @@
   </div>
 
 
+  <% uploaded = @plant.custom_image.attached? %>
   <div class="plant-graphic-selector">
-    <div class="graphic-select-container">
+    <%= form.label :graphic, t('attributes.graphic') %>
+
+    <%# When "library" is active we want any existing upload removed on save; the controller flips this. %>
+    <%= hidden_field_tag "plant[remove_custom_image]", uploaded ? "0" : "1", data: { plant_graphic_target: "removeFlag" } %>
+
+    <div class="graphic-source-toggle">
+      <label class="checkbox-label">
+        <input type="radio" name="graphic_source" value="library" <%= 'checked' unless uploaded %>
+               data-plant-graphic-target="sourceLibrary"
+               data-action="change->plant-graphic#sourceChanged">
+        🎨 Choose from library
+      </label>
+      <label class="checkbox-label">
+        <input type="radio" name="graphic_source" value="upload" <%= 'checked' if uploaded %>
+               data-plant-graphic-target="sourceUpload"
+               data-action="change->plant-graphic#sourceChanged">
+        📷 Upload your own
+      </label>
+    </div>
+
+    <div class="graphic-select-container" data-plant-graphic-target="libraryPanel">
       <div>
-        <%= form.label :graphic, t('attributes.graphic') %>
         <%= form.select :graphic,
           [[t('plants.form.select_graphic'), ""]] + Plant.graphics_for_select,
           {},
@@ -135,6 +155,21 @@
         %>
       </div>
       <%= image_tag "", alt: "Plant graphic preview", class: "plant-graphic-preview-image", data: { plant_graphic_target: "preview" }, style: "display: none;" %>
+    </div>
+
+    <div class="graphic-upload-container" data-plant-graphic-target="uploadPanel">
+      <% if uploaded %>
+        <%= image_tag @plant.custom_image.variant(resize_to_limit: [300, 300]), alt: "Current image", class: "plant-graphic-preview-image", data: { plant_graphic_target: "currentImage" } %>
+      <% end %>
+      <%= form.file_field :custom_image,
+        accept: "image/png,image/jpeg,image/webp,image/gif",
+        data: {
+          plant_graphic_target: "fileInput",
+          action: "change->plant-graphic#filePreview"
+        }
+      %>
+      <%= image_tag "", alt: "Upload preview", class: "plant-graphic-preview-image", data: { plant_graphic_target: "filePreview" }, style: "display: none;" %>
+      <small>PNG, JPEG, WEBP, or GIF — up to 10MB.</small>
     </div>
   </div>
 

@@ -368,4 +368,63 @@ class PlantTest < ActiveSupport::TestCase
     assert_equal recipe, watering.recipe
     assert_equal 250, watering.tds
   end
+
+  # ─── custom image / graphics ─────────────────────────────────────────────────
+
+  def attach_test_image(plant, content_type: "image/png", identify: true)
+    plant.custom_image.attach(
+      io: File.open(Rails.root.join("test/fixtures/files/plant.png")),
+      filename: "plant.png",
+      content_type: content_type,
+      identify: identify
+    )
+  end
+
+  test "has_graphic? is true with a library graphic and no upload" do
+    plant = plants(:one)
+    plant.update_column(:graphic, Plant.available_graphics.first)
+    assert plant.has_graphic?
+  end
+
+  test "has_graphic? is true when a custom image is attached even without a library graphic" do
+    plant = plants(:one)
+    plant.update_column(:graphic, nil)
+    attach_test_image(plant)
+    assert plant.has_graphic?
+  end
+
+  test "has_graphic? is false with neither a library graphic nor an upload" do
+    plant = plants(:one)
+    plant.update_column(:graphic, nil)
+    assert_not plant.has_graphic?
+  end
+
+  test "display_graphic prefers the custom image over the library graphic" do
+    plant = plants(:one)
+    plant.update_column(:graphic, Plant.available_graphics.first)
+    attach_test_image(plant)
+    # Rails 8 tracks variants, so this is a VariantWithRecord — just assert it isn't the library path string.
+    assert_not_kind_of String, plant.display_graphic
+    assert plant.custom_image.attached?
+  end
+
+  test "display_graphic falls back to the library asset path when no upload" do
+    plant = plants(:one)
+    name = Plant.available_graphics.first
+    plant.update_column(:graphic, name)
+    assert_equal "plant_graphics/#{name}.png", plant.display_graphic
+  end
+
+  test "custom image rejects an unsupported content type" do
+    plant = plants(:one)
+    attach_test_image(plant, content_type: "application/pdf", identify: false)
+    assert_not plant.valid?
+    assert plant.errors[:custom_image].any?
+  end
+
+  test "custom image accepts a supported image type" do
+    plant = plants(:one)
+    attach_test_image(plant)
+    assert plant.valid?
+  end
 end

@@ -40,6 +40,29 @@ class PlantsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to plant_url(@plant)
   end
 
+  test "should attach a custom image on update" do
+    image = fixture_file_upload("plant.png", "image/png")
+    patch plant_url(@plant), params: { plant: { name: @plant.name, custom_image: image } }
+    assert_redirected_to plant_url(@plant)
+    assert @plant.reload.custom_image.attached?
+  end
+
+  test "should remove a custom image when the remove flag is set" do
+    @plant.custom_image.attach(io: File.open(Rails.root.join("test/fixtures/files/plant.png")), filename: "plant.png", content_type: "image/png")
+    assert @plant.custom_image.attached?
+
+    patch plant_url(@plant), params: { plant: { name: @plant.name, remove_custom_image: "1" } }
+    assert_redirected_to plant_url(@plant)
+    assert_not @plant.reload.custom_image.attached?
+  end
+
+  test "uploaded image is not removed when the remove flag is set but a replacement is provided" do
+    image = fixture_file_upload("plant.png", "image/png")
+    patch plant_url(@plant), params: { plant: { name: @plant.name, remove_custom_image: "1", custom_image: image } }
+    assert_redirected_to plant_url(@plant)
+    assert @plant.reload.custom_image.attached?
+  end
+
   test "should destroy plant" do
     assert_difference("Plant.count", -1) do
       delete plant_url(@plant)

@@ -1,9 +1,9 @@
 <% content_for :title, "Water #{@watering.plant}" %>
 
-<% if @watering.plant&.graphic_path %>
+<% if @watering.plant&.has_graphic? %>
   <% content_for :header_extra do %>
     <div class="header-plant-graphic">
-      <%= image_tag @watering.plant.graphic_path, class: 'plant-graphic-image' %>
+      <%= image_tag @watering.plant.display_graphic, class: 'plant-graphic-image' %>
       <div class="header-plant-name">
         <span class="plant-number">#<%= @watering.plant.uid %></span>
         <span class="plant-name-text"><%= @watering.plant.name %></span>

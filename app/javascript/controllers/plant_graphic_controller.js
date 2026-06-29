@@ -1,7 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["nameInput", "graphicSelect", "preview", "suggestions"]
+  static targets = [
+    "nameInput", "graphicSelect", "preview", "suggestions",
+    "sourceLibrary", "sourceUpload", "libraryPanel", "uploadPanel",
+    "fileInput", "filePreview", "removeFlag"
+  ]
   static values = {
     suggestUrl: String,
     paths: Object
@@ -12,6 +16,7 @@ export default class extends Controller {
     this.manuallySelected = false
     this.activeIndex = -1
     this.updatePreview()
+    this.sourceChanged()
 
     this.graphicNames = Object.keys(this.pathsValue)
 
@@ -19,6 +24,49 @@ export default class extends Controller {
       if (!this.element.contains(e.target)) this.closeSuggestions()
     }
     document.addEventListener("click", this._onDocumentClick)
+  }
+
+  // Toggle the library vs. upload panels and keep the remove-flag/file state coherent.
+  sourceChanged() {
+    if (!this.hasSourceUploadTarget) return
+    const uploading = this.sourceUploadTarget.checked
+
+    if (this.hasLibraryPanelTarget) this.libraryPanelTarget.style.display = uploading ? "none" : ""
+    if (this.hasUploadPanelTarget) this.uploadPanelTarget.style.display = uploading ? "" : "none"
+
+    // "library" selected => drop any stored upload on save; "upload" => keep/replace it.
+    if (this.hasRemoveFlagTarget) this.removeFlagTarget.value = uploading ? "0" : "1"
+
+    // Clear a staged file if the user switched back to the library.
+    if (!uploading && this.hasFileInputTarget) {
+      this.fileInputTarget.value = ""
+      if (this.hasFilePreviewTarget) {
+        this.filePreviewTarget.style.display = "none"
+        this.filePreviewTarget.removeAttribute("src")
+      }
+    }
+  }
+
+  // Show a client-side preview of the chosen file before upload.
+  filePreview() {
+    if (!this.hasFileInputTarget || !this.hasFilePreviewTarget) return
+    const file = this.fileInputTarget.files && this.fileInputTarget.files[0]
+    if (!file) {
+      this.filePreviewTarget.style.display = "none"
+      return
+    }
+
+    if (this.hasSourceUploadTarget && !this.sourceUploadTarget.checked) {
+      this.sourceUploadTarget.checked = true
+      this.sourceChanged()
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      this.filePreviewTarget.src = e.target.result
+      this.filePreviewTarget.style.display = "block"
+    }
+    reader.readAsDataURL(file)
   }
 
   disconnect() {

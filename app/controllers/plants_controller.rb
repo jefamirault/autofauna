@@ -215,6 +215,7 @@ class PlantsController < ApplicationController
   def update
     respond_to do |format|
       if @plant.update(plant_params)
+        purge_custom_image_if_requested(@plant)
         assign_plant_recipes(@plant)
         assign_plant_groups(@plant)
         format.html { redirect_to plant_url(@plant), notice: t('plants.messages.update_success') }
@@ -341,7 +342,15 @@ class PlantsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:name, :uid, :project_id, :zone_id, :location_id, :pot, :archived, :min_watering_freq, :max_watering_freq, :manual_watering_frequency, :graphic, :notifications_enabled, :recipe_id)
+      params.require(:plant).permit(:name, :uid, :project_id, :zone_id, :location_id, :pot, :archived, :min_watering_freq, :max_watering_freq, :manual_watering_frequency, :graphic, :custom_image, :notifications_enabled, :recipe_id)
+    end
+
+    # Purge the uploaded image when the form asked to remove it and no replacement was uploaded.
+    def purge_custom_image_if_requested(plant)
+      return unless params.dig(:plant, :remove_custom_image) == "1"
+      return if plant_params[:custom_image].present?
+
+      plant.custom_image.purge
     end
 
     def assign_plant_recipes(plant)
