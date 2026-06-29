@@ -394,3 +394,11 @@ Added the ability for users to upload their own plant image instead of only choo
 - **Deploy**: added `storage` to Capistrano `linked_dirs` so uploads survive releases. **Reminder: install libvips on the production server before deploying.**
 - **CSS**: `.graphic-source-toggle` / `.graphic-upload-container` in plants.sass.
 - **Tests**: model tests (precedence, has_graphic?, content-type validation) + controller tests (attach, remove flag, replacement beats remove); added `test/fixtures/files/plant.png` (1×1 PNG).
+
+## Mobile "Take a photo" option for plant image upload
+
+When uploading a plant image, mobile users can now explicitly choose between taking a photo on the spot and picking an existing one.
+
+- **Form** (`plants/_form.html.erb`): hid the raw `file_field` (`.graphic-file-input`), added a `.graphic-upload-buttons` row with two buttons — "📁 Choose a photo" (`plant-graphic#chooseFile`) and "📷 Take a photo" (`plant-graphic#takePhoto`, `cameraButton` target). Both drive the same hidden input (avoids duplicate-name submission issues).
+- **Controller** (`plant_graphic_controller.js`): added `cameraButton` target + `chooseFile()` (removes `capture`, clicks input) and `takePhoto()` (sets `capture="environment"`, clicks input). Camera button is hidden on non-coarse-pointer (desktop) devices since `capture` is ignored there.
+- **CSS** (`plants.sass`): `.graphic-file-input { display: none }`, `.graphic-upload-buttons`, `.graphic-upload-btn`.

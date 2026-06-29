@@ -530,6 +530,27 @@ h1
   small
     color: #777
 
+  .graphic-file-input
+    // Driven by the buttons below; the native control is hidden so we can offer
+    // an explicit "Take a photo" vs "Choose a photo" choice.
+    display: none
+
+.graphic-upload-buttons
+  display: flex
+  flex-wrap: wrap
+  gap: 0.5rem
+
+.graphic-upload-btn
+  padding: 0.5rem 0.9rem
+  border: 1px solid #ccc
+  border-radius: 8px
+  background: #f7f7f7
+  cursor: pointer
+  font-size: 0.95rem
+
+  &:hover
+    background: #eee
+
 .plant-graphic-preview-image
   width: 64px
   height: 64px

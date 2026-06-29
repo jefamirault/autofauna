@@ -163,11 +163,19 @@
       <% end %>
       <%= form.file_field :custom_image,
         accept: "image/png,image/jpeg,image/webp,image/gif",
+        class: "graphic-file-input",
         data: {
           plant_graphic_target: "fileInput",
           action: "change->plant-graphic#filePreview"
         }
       %>
+      <div class="graphic-upload-buttons">
+        <button type="button" class="graphic-upload-btn"
+                data-action="plant-graphic#chooseFile">📁 Choose a photo</button>
+        <button type="button" class="graphic-upload-btn"
+                data-plant-graphic-target="cameraButton"
+                data-action="plant-graphic#takePhoto">📷 Take a photo</button>
+      </div>
       <%= image_tag "", alt: "Upload preview", class: "plant-graphic-preview-image", data: { plant_graphic_target: "filePreview" }, style: "display: none;" %>
       <small>PNG, JPEG, WEBP, or GIF — up to 20MB.</small>
     </div>

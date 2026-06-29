@@ -4,7 +4,7 @@ export default class extends Controller {
   static targets = [
     "nameInput", "graphicSelect", "preview", "suggestions",
     "sourceLibrary", "sourceUpload", "libraryPanel", "uploadPanel",
-    "fileInput", "filePreview", "removeFlag"
+    "fileInput", "filePreview", "removeFlag", "cameraButton"
   ]
   static values = {
     suggestUrl: String,
@@ -24,6 +24,26 @@ export default class extends Controller {
       if (!this.element.contains(e.target)) this.closeSuggestions()
     }
     document.addEventListener("click", this._onDocumentClick)
+
+    // "Take a photo" only makes sense on devices with a camera (touch/mobile);
+    // on desktop the capture attribute is ignored, so hide the redundant button.
+    if (this.hasCameraButtonTarget && !window.matchMedia("(pointer: coarse)").matches) {
+      this.cameraButtonTarget.style.display = "none"
+    }
+  }
+
+  // Open the regular file picker (gallery / file browser).
+  chooseFile() {
+    if (!this.hasFileInputTarget) return
+    this.fileInputTarget.removeAttribute("capture")
+    this.fileInputTarget.click()
+  }
+
+  // Open the device camera directly to take a new photo.
+  takePhoto() {
+    if (!this.hasFileInputTarget) return
+    this.fileInputTarget.setAttribute("capture", "environment")
+    this.fileInputTarget.click()
   }
 
   // Toggle the library vs. upload panels and keep the remove-flag/file state coherent.
