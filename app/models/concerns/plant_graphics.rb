@@ -7,7 +7,7 @@ module PlantGraphics
   GRAPHIC_VARIANT = { resize_to_limit: [600, 600] }.freeze
 
   ACCEPTED_IMAGE_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
-  MAX_IMAGE_SIZE = 10.megabytes
+  MAX_IMAGE_SIZE = 20.megabytes
 
   included do
     has_one_attached :custom_image
@@ -41,16 +41,24 @@ module PlantGraphics
     end
   end
 
+  # True only when a *persisted* upload exists. After a failed save the new attachment is
+  # staged in memory with an unpersisted blob, which can't generate a variant URL
+  # ("Cannot get a signed_id for a new record") — treat that as "no custom image" so the
+  # form/show can re-render the validation errors instead of 500ing.
+  def custom_image_attached?
+    custom_image.attached? && custom_image.blob&.persisted?
+  end
+
   # True when the plant has any displayable graphic — an uploaded image or a library graphic.
   def has_graphic?
-    custom_image.attached? || library_graphic_path.present?
+    custom_image_attached? || library_graphic_path.present?
   end
 
   # Something `image_tag` can render: a resized Active Storage variant when the user has
   # uploaded a custom image, otherwise the library asset-path string, otherwise nil.
   # A custom upload always takes precedence over the library selection.
   def display_graphic
-    if custom_image.attached?
+    if custom_image_attached?
       custom_image.variant(GRAPHIC_VARIANT)
     else
       library_graphic_path
@@ -82,7 +90,7 @@ module PlantGraphics
     end
 
     if custom_image.byte_size.to_i > MAX_IMAGE_SIZE
-      errors.add(:custom_image, "is too large (maximum 10MB)")
+      errors.add(:custom_image, "is too large (maximum 20MB)")
     end
   end
 end

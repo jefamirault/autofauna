@@ -63,6 +63,14 @@ class PlantsControllerTest < ActionDispatch::IntegrationTest
     assert @plant.reload.custom_image.attached?
   end
 
+  test "a failed save with a staged image re-renders the form instead of 500ing on an unpersisted variant" do
+    other = plants(:two) # same project as @plant -> uid collision fails validation
+    image = fixture_file_upload("plant.png", "image/png")
+    patch plant_url(@plant), params: { plant: { uid: other.uid, custom_image: image } }
+    assert_response :unprocessable_entity
+    assert_not @plant.reload.custom_image.attached?
+  end
+
   test "should destroy plant" do
     assert_difference("Plant.count", -1) do
       delete plant_url(@plant)

@@ -119,7 +119,7 @@
   </div>
 
 
-  <% uploaded = @plant.custom_image.attached? %>
+  <% uploaded = @plant.custom_image_attached? %>
   <div class="plant-graphic-selector">
     <%= form.label :graphic, t('attributes.graphic') %>
 
@@ -169,7 +169,7 @@
         }
       %>
       <%= image_tag "", alt: "Upload preview", class: "plant-graphic-preview-image", data: { plant_graphic_target: "filePreview" }, style: "display: none;" %>
-      <small>PNG, JPEG, WEBP, or GIF — up to 10MB.</small>
+      <small>PNG, JPEG, WEBP, or GIF — up to 20MB.</small>
     </div>
   </div>
 
