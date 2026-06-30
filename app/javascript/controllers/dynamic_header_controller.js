@@ -20,6 +20,7 @@ export default class extends Controller {
 
     this._active = true
     this._delta = 0 // accumulated collapse progress in px
+    this._overscroll = 0 // accumulated up-scroll past full expansion (opens fullscreen)
 
     this._wheelHandler = this._onWheel.bind(this)
     this._touchStartHandler = this._onTouchStart.bind(this)
@@ -31,6 +32,18 @@ export default class extends Controller {
     this.element.addEventListener("touchmove", this._touchMoveHandler, { passive: false })
     this.element.addEventListener("touchend", this._touchEndHandler, { passive: true })
 
+    // The header is a separate grid area, not inside the scrolling <main>, so
+    // wheel/touch over it never reaches <main>. Listen there too and forward
+    // the gesture (collapse the header, then scroll the content) — see the
+    // currentTarget === this._header forwarding in the handlers.
+    this._header = document.querySelector("header")
+    if (this._header) {
+      this._header.addEventListener("wheel", this._wheelHandler, { passive: false })
+      this._header.addEventListener("touchstart", this._touchStartHandler, { passive: true })
+      this._header.addEventListener("touchmove", this._touchMoveHandler, { passive: false })
+      this._header.addEventListener("touchend", this._touchEndHandler, { passive: true })
+    }
+
     this._update()
   }
 
@@ -41,6 +54,17 @@ export default class extends Controller {
     this.element.removeEventListener("touchstart", this._touchStartHandler)
     this.element.removeEventListener("touchmove", this._touchMoveHandler)
     this.element.removeEventListener("touchend", this._touchEndHandler)
+    if (this._header) {
+      this._header.removeEventListener("wheel", this._wheelHandler)
+      this._header.removeEventListener("touchstart", this._touchStartHandler)
+      this._header.removeEventListener("touchmove", this._touchMoveHandler)
+      this._header.removeEventListener("touchend", this._touchEndHandler)
+    }
+    if (this._clickSuppressor) {
+      document.removeEventListener("click", this._clickSuppressor, true)
+      clearTimeout(this._clickSuppressorTimer)
+      this._clickSuppressor = null
+    }
     document.body.style.removeProperty("--header-height")
     document.body.style.removeProperty("--graphic-opacity")
     document.body.style.removeProperty("--title-opacity")
@@ -69,16 +93,33 @@ export default class extends Controller {
       e.preventDefault()
       this._delta = Math.min(this._scrollRange, this._delta + e.deltaY)
       this._update()
+      this._overscroll = 0
     } else if (e.deltaY < 0 && this._delta > 0 && this.element.scrollTop <= 0) {
       // Scrolling up at top of content — expand header
       e.preventDefault()
       this._delta = Math.max(0, this._delta + e.deltaY)
       this._update()
+      this._overscroll = 0
+    } else if (e.deltaY < 0 && this._delta <= 0 && this.element.scrollTop <= 0) {
+      // Fully expanded and still scrolling up at the top — open the fullscreen image
+      e.preventDefault()
+      this._accumulateOverscroll(-e.deltaY, false)
+    } else if (e.deltaY > 0) {
+      this._overscroll = 0
+    }
+
+    // Gesture over the header (outside <main>): if the collapse logic didn't
+    // absorb it, forward the scroll to the content so it still moves.
+    if (!e.defaultPrevented && e.currentTarget === this._header) {
+      this.element.scrollTop += e.deltaY
+      e.preventDefault()
     }
   }
 
   _onTouchStart(e) {
     this._cancelMomentum()
+    this._overscroll = 0
+    this._openedLightboxThisGesture = false
     if (e.touches.length === 1) {
       this._touchY = e.touches[0].clientY
       this._touchVelocity = 0
@@ -102,14 +143,35 @@ export default class extends Controller {
       e.preventDefault()
       this._delta = Math.min(this._scrollRange, this._delta + deltaY)
       this._update()
+      this._overscroll = 0
     } else if (deltaY < 0 && this._delta > 0 && this.element.scrollTop <= 0) {
       e.preventDefault()
       this._delta = Math.max(0, this._delta + deltaY)
       this._update()
+      this._overscroll = 0
+    } else if (deltaY < 0 && this._delta <= 0 && this.element.scrollTop <= 0) {
+      // Fully expanded and still pulling down at the top — open the fullscreen image
+      this._accumulateOverscroll(-deltaY, true)
+    } else if (deltaY > 0) {
+      this._overscroll = 0
+    }
+
+    // Swipe over the header (outside <main>): if the collapse logic didn't
+    // absorb it, forward the scroll to the content so it still moves.
+    if (!e.defaultPrevented && e.currentTarget === this._header) {
+      this.element.scrollTop += deltaY
+      e.preventDefault()
     }
   }
 
   _onTouchEnd(_e) {
+    // If this gesture opened the fullscreen view, swallow the trailing click the
+    // finger-lift is about to fire (it would otherwise instantly close it).
+    if (this._openedLightboxThisGesture) {
+      this._openedLightboxThisGesture = false
+      this._suppressNextClick()
+    }
+
     // If the header is mid-transition, use touch velocity to animate to completion
     if (this._delta <= 0 || this._delta >= this._scrollRange) return
     if (!this._touchVelocity) return
@@ -162,6 +224,45 @@ export default class extends Controller {
       cancelAnimationFrame(this._momentumRaf)
       this._momentumRaf = null
     }
+  }
+
+  // Once the header is fully expanded, continued up-scrolling at the top
+  // accumulates here; past the threshold it opens the fullscreen image view.
+  _accumulateOverscroll(px, isTouch) {
+    if (px <= 0) return
+    this._overscroll += px
+    if (this._overscroll >= this._overscrollThreshold) {
+      this._overscroll = 0
+      this._openLightbox(isTouch)
+    }
+  }
+
+  get _overscrollThreshold() {
+    return 90 // px of up-scroll past full expansion before opening fullscreen
+  }
+
+  _openLightbox(isTouch) {
+    const img = document.querySelector(".header-plant-graphic .plant-graphic-image")
+    if (!img) return
+    img.click() // triggers image-lightbox#open via its click action
+    // When the open came from a touch pull, the finger-lift will fire a trailing
+    // click on the freshly-added overlay that would instantly close it. Remember
+    // to swallow that one click when this gesture ends (see _onTouchEnd).
+    if (isTouch) this._openedLightboxThisGesture = true
+  }
+
+  // Capture and discard exactly the next click (the synthetic one from the
+  // finger-lift that opened the lightbox), so it can't immediately dismiss it.
+  _suppressNextClick() {
+    if (this._clickSuppressor) return
+    const cleanup = () => {
+      document.removeEventListener("click", this._clickSuppressor, true)
+      clearTimeout(this._clickSuppressorTimer)
+      this._clickSuppressor = null
+    }
+    this._clickSuppressor = (e) => { e.stopPropagation(); cleanup() }
+    document.addEventListener("click", this._clickSuppressor, true)
+    this._clickSuppressorTimer = setTimeout(cleanup, 500)
   }
 
   _update() {

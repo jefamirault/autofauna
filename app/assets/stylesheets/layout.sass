@@ -234,6 +234,11 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
   .header-plant-graphic
     opacity: var(--graphic-opacity, 1)
     overflow: hidden
+  main
+    // Stop pull-down overscroll from chaining to the viewport (mobile
+    // pull-to-refresh) — here, pulling down at the top is the open-fullscreen
+    // gesture. Scoped to this page only so other pages keep pull-to-refresh.
+    overscroll-behavior-y: contain
   @media (max-width: 600px)
     --header-expanded: 14.5rem
     --header-collapsed: 4rem

@@ -45,7 +45,7 @@ export default class extends Controller {
     if (this.srcValue) fullImg.src = this.srcValue
 
     overlay.addEventListener("click", this.boundClose)
-    overlay.addEventListener("wheel", this.boundClose, { passive: true })
+    overlay.addEventListener("wheel", this.boundWheel, { passive: true })
     overlay.addEventListener("touchstart", this.boundTouchStart, { passive: true })
     overlay.addEventListener("touchmove", this.boundTouchMove, { passive: true })
     document.addEventListener("keydown", this.boundKeydown)
@@ -87,6 +87,9 @@ export default class extends Controller {
 
   // Stable references so add/removeEventListener pair up and timers/transitionend share one handler.
   boundClose = () => this.close()
+  // Only a downward scroll dismisses — scrolling up is what opened the view
+  // (via dynamic_header_controller), so it must not immediately close it.
+  boundWheel = (event) => { if (event.deltaY > 0) this.close() }
   boundKeydown = (event) => this.keydown(event)
   boundTeardown = () => this._teardown()
 
@@ -98,9 +101,10 @@ export default class extends Controller {
   boundTouchMove = (event) => {
     if (!this.touchStart) return
     const touch = event.changedTouches[0]
-    const dx = touch.clientX - this.touchStart.x
     const dy = touch.clientY - this.touchStart.y
-    if (Math.hypot(dx, dy) > 40) this.close()
+    // Only a deliberate upward swipe dismisses. Swiping down / scrolling up
+    // (the same direction that opened it) and small moves do nothing.
+    if (dy < -90) this.close()
   }
 
   _teardown() {
