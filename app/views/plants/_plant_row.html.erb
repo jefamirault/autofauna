@@ -12,14 +12,14 @@
     </label>
   <% end %>
   <div class="plant-card-graphic-col">
-    <div class="plant-card-name">
-      <%= link_to plant.label, plant_path(plant.id), data: { turbo_frame: "_top" } %>
-    </div>
     <%= link_to plant_path(plant.id), class: "plant-card-graphic", data: { turbo_frame: "_top" } do %>
       <%= image_tag plant.display_graphic || "plant_graphics/placeholder.png", alt: "" %>
     <% end %>
   </div>
   <div class="plant-card-details">
+    <div class="plant-card-name">
+      <%= link_to plant.label, plant_path(plant.id), data: { turbo_frame: "_top" } %>
+    </div>
     <% unless archive %>
       <div class="plant-card-watering">
         <% if plant.snoozed? %>

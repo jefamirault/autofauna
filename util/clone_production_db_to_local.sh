@@ -31,5 +31,25 @@ rails db:environment:set RAILS_ENV=development
 rails db:migrate
 
 echo "Local database updated with latest backup"
+
+# Production stores uploads on the Disk service in shared/storage (a Capistrano
+# linked_dir). The DB clone brings over the blob records (with their keys) but not
+# the files, so rsync the storage tree to match. Keys line up, so attachments resolve.
+REMOTE_STORAGE="$AUTOFAUNA_USER@$AUTOFAUNA_SERVER:/home/deploy/autofauna/shared/storage/"
+if [ -n "$AUTOFAUNA_SYNC_USER_EMAIL" ]; then
+  # Bandwidth-saving mode: sync only the target user's plant images. We compute the
+  # relative disk paths from the just-restored local DB (no extra load on production)
+  # and hand them to rsync --files-from, which transfers exactly those files.
+  echo "Syncing Active Storage files for $AUTOFAUNA_SYNC_USER_EMAIL..."
+  STORAGE_LIST=$(mktemp)
+  rails runner util/list_user_storage_paths.rb "$AUTOFAUNA_SYNC_USER_EMAIL" > "$STORAGE_LIST"
+  rsync -avz --files-from="$STORAGE_LIST" "$REMOTE_STORAGE" /home/jef/autofauna/storage/
+  rm -f "$STORAGE_LIST"
+else
+  echo "Syncing all Active Storage files from production..."
+  rsync -avz "$REMOTE_STORAGE" /home/jef/autofauna/storage/
+fi
+echo "Active Storage files synced"
+
 # Start rails development server if argument "start_server" is present
 [ "$1" = "-s" ] && echo "Starting development server..." && rails s

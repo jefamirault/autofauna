@@ -402,3 +402,10 @@ When uploading a plant image, mobile users can now explicitly choose between tak
 - **Form** (`plants/_form.html.erb`): hid the raw `file_field` (`.graphic-file-input`), added a `.graphic-upload-buttons` row with two buttons — "📁 Choose a photo" (`plant-graphic#chooseFile`) and "📷 Take a photo" (`plant-graphic#takePhoto`, `cameraButton` target). Both drive the same hidden input (avoids duplicate-name submission issues).
 - **Controller** (`plant_graphic_controller.js`): added `cameraButton` target + `chooseFile()` (removes `capture`, clicks input) and `takePhoto()` (sets `capture="environment"`, clicks input). Camera button is hidden on non-coarse-pointer (desktop) devices since `capture` is ignored there.
 - **CSS** (`plants.sass`): `.graphic-file-input { display: none }`, `.graphic-upload-buttons`, `.graphic-upload-btn`.
+
+## Highlight user/plant images — fuller height (portrait-first)
+
+Gave plant graphics more vertical room and made portrait the default orientation while still accommodating landscape (via `object-fit: contain`), in the two places the image appears.
+
+- **Plant cards (index)** — `plants/_plant_row.html.erb`: moved `.plant-card-name` out of `.plant-card-graphic-col` and into the top of `.plant-card-details`. `plants.sass`: `.plant-card-graphic-col` lost its vertical padding (`padding: 0`) and is now `align-items: stretch` (no longer a column stacking name+graphic); `.plant-card-graphic` stretches (`align-self: stretch; width: 100%`) and its `img` fills the card height (`width/height: 100%`, `object-fit: contain`) instead of a fixed 120×120. `.plant-card-name` re-styled for the details column (left-aligned, was centered). Added `.plant-card-name a` to the `.selection-mode … pointer-events: none` rule since the show link moved columns.
+- **Plant Show header** — `layout.sass` `.header-plant-graphic .plant-graphic-image`: was `max-height: 9rem`, now `height: 100%; max-height: 100%; max-width: 100%` so it fills the full expanded-header height; container vertical padding trimmed to `0.25rem 0`. Applies to desktop + mobile (both 14.5rem expanded header).

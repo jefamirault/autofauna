@@ -371,6 +371,10 @@ cap production deploy
 
 Config in `config/deploy.rb` and `config/deploy/production.rb`
 
+**Cloning production data locally:** `util/clone_production_db_to_local.sh` (env vars `AUTOFAUNA_SERVER`, `AUTOFAUNA_USER`; pass `-s` to also boot the dev server) dumps + restores the production DB, then `rsync`s the Active Storage files. Uploads use the **Disk** service rooted at `Rails.root.join("storage")` (a Capistrano `linked_dir` → `shared/storage/` on prod). The DB clone copies the `active_storage_blobs` rows (with their keys) but **not** the files, so the script rsyncs `shared/storage/` → local `storage/` to match. Variants regenerate on demand locally (needs libvips).
+
+- **Targeted image sync (bandwidth saver):** set `AUTOFAUNA_SYNC_USER_EMAIL=<email>` to sync only that user's plant images instead of the whole storage tree. The script runs `util/list_user_storage_paths.rb` against the just-restored local DB to compute the Disk paths (`key[0..1]/key[2..3]/key`) for blobs attached to `user.plants` (originals only — variants regenerate locally), then passes them to `rsync --files-from`. No extra load on production. Unset → full sync (default).
+
 **Server environment variables** are managed via rbenv-vars:
 - Location: `/home/deploy/autofauna/.rbenv-vars`
 - Contains: `RAILS_MASTER_KEY`, `REDIS_URL`, `MAILGUN_SMTP_USERNAME`, `MAILGUN_SMTP_PASSWORD`
