@@ -409,3 +409,25 @@ Gave plant graphics more vertical room and made portrait the default orientation
 
 - **Plant cards (index)** — `plants/_plant_row.html.erb`: moved `.plant-card-name` out of `.plant-card-graphic-col` and into the top of `.plant-card-details`. `plants.sass`: `.plant-card-graphic-col` lost its vertical padding (`padding: 0`) and is now `align-items: stretch` (no longer a column stacking name+graphic); `.plant-card-graphic` stretches (`align-self: stretch; width: 100%`) and its `img` fills the card height (`width/height: 100%`, `object-fit: contain`) instead of a fixed 120×120. `.plant-card-name` re-styled for the details column (left-aligned, was centered). Added `.plant-card-name a` to the `.selection-mode … pointer-events: none` rule since the show link moved columns.
 - **Plant Show header** — `layout.sass` `.header-plant-graphic .plant-graphic-image`: was `max-height: 9rem`, now `height: 100%; max-height: 100%; max-width: 100%` so it fills the full expanded-header height; container vertical padding trimmed to `0.25rem 0`. Applies to desktop + mobile (both 14.5rem expanded header).
+
+## Plant Show: click image to view fullscreen (lightbox)
+
+The plant graphic in the Plant Show header is now clickable to open a fullscreen, dimmed-backdrop view; a single click/tap anywhere (or Escape) closes it.
+
+- **Controller** `image_lightbox_controller.js` (auto-registered via importmap glob): `open` builds a `.image-lightbox-overlay` appended to `<body>` (escapes the header's `overflow`/stacking), shows the image, locks body scroll, fades in next frame; clicking the overlay or pressing Escape closes and cleans up listeners. Stable arrow-fn fields (`boundClose`/`boundKeydown`) so add/removeEventListener pair up. `disconnect` closes any open overlay.
+- **View** `plants/show.html.erb`: `.header-plant-graphic` gets `data-controller="image-lightbox"`; for uploads, `data-image-lightbox-src-value` carries a larger `resize_to_limit: [1600,1600]` variant so fullscreen is crisp (falls back to the displayed src for library graphics / when empty). Image gets `click->image-lightbox#open`, `role="button"`, `tabindex=0`, `title`.
+- **CSS** `layout.sass`: `.plant-graphic-image { cursor: zoom-in }`; `.image-lightbox-overlay` (fixed, `z-index: 2000`, `rgba(0,0,0,0.85)`, fade via `.visible`, `cursor: zoom-out`) + `.image-lightbox-image` (contained, max viewport); `body.image-lightbox-open { overflow: hidden }`.
+
+## Plant Show lightbox: FLIP open/close animation
+
+The image now appears to transform from its header thumbnail into the fullscreen view and back, via a FLIP (First-Last-Invert-Play) shared-element transition in `image_lightbox_controller.js`.
+
+- **Open:** render the fullscreen img with the already-loaded thumbnail src (so dimensions are known immediately), measure the thumbnail rect (First) and the centered rect (Last), set an inverting `translate()+scale()` (transform-origin top-left) onto the thumbnail's box, force a reflow, then transition the transform to identity (300ms ease). The source thumbnail is set `visibility: hidden` so it reads as the element itself moving. Hi-res 1600px variant is swapped in after (same aspect ratio → no jump). Backdrop fade bumped to 0.3s to match.
+- **Close:** reverse FLIP — transition the transform back onto the (re-measured) thumbnail rect while fading the backdrop, teardown on `transitionend` (with a `duration+80ms` setTimeout fallback), restoring thumbnail visibility.
+- **Guards:** `prefers-reduced-motion` skips the FLIP (plain fade); `_applyTransformFrom` bails if the fullscreen img isn't measurable yet (avoids divide-by-zero scale); `closing` flag prevents double-close. `will-change: transform` on `.image-lightbox-image`.
+
+## Plant Show lightbox: dismiss by scroll / swipe
+
+Added two more dismiss gestures to `image_lightbox_controller.js`, both routed through the existing reverse-FLIP `close()`:
+- **Desktop:** a `wheel` event on the overlay closes (passive listener; body scroll already locked via `body.image-lightbox-open`).
+- **Mobile:** `touchstart` records the origin, `touchmove` closes once the drag exceeds 40px in any direction (`Math.hypot`). 40px threshold avoids closing on a tap's jitter; the existing `closing` flag dedupes against the tap-click close. Listeners live on the overlay (auto-removed when it's torn down); `touchStart` reset in `_teardown`.

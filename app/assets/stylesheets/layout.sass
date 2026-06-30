@@ -262,14 +262,45 @@ body:has(main.waterings):has(.header-plant-graphic), body:has(main.plants):has(.
   min-height: 0
   // Portrait is the default orientation, landscape accommodated via contain.
   // The image fills the full height of the expanded header.
+  // Sized off --header-height (an absolute rem value) rather than height: 100%,
+  // since the flex item sits in a 1fr grid track (indefinite height → a percentage
+  // height would be ignored and a portrait image would overflow the header). The
+  // calc fills the expanded header and shrinks with it during scroll-collapse.
   .plant-graphic-image
-    height: 100%
-    max-height: 100%
+    max-height: calc(var(--header-height) - 1rem)
     max-width: 100%
     object-fit: contain
     filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2))
     flex-shrink: 1
     min-height: 0
+    cursor: zoom-in
+
+// Fullscreen image viewer (image-lightbox controller). A single click/tap anywhere
+// (or Escape) closes it.
+body.image-lightbox-open
+  overflow: hidden
+
+.image-lightbox-overlay
+  position: fixed
+  inset: 0
+  z-index: 2000
+  display: flex
+  align-items: center
+  justify-content: center
+  padding: 0.5rem
+  background: rgba(0, 0, 0, 0.85)
+  cursor: zoom-out
+  opacity: 0
+  transition: opacity 0.3s ease
+  &.visible
+    opacity: 1
+  .image-lightbox-image
+    max-width: 100%
+    max-height: 100%
+    object-fit: contain
+    border-radius: 4px
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5)
+    will-change: transform
   .header-plant-name
     display: flex
     flex-direction: column
