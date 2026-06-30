@@ -505,6 +505,12 @@ body:has(main.plants.index)
     grid-template-rows: auto auto
     align-items: start
     padding-bottom: 1rem
+    // The fixed hamburger button only overlaps the first header row. Drop the
+    // global per-header padding-left (which reserved hamburger space across
+    // every row) so the collapsible filter panel on row 2 spans the full width.
+    // Row 1 reserves the hamburger space itself (see .header-top-row).
+    @media (max-width: 600px)
+      padding-left: 0
     > *
       grid-row: auto
       grid-column: auto
@@ -558,6 +564,9 @@ body:has(main.plants.index)
     gap: 0.35rem 1rem
     padding: 0.3rem 0 0 1rem
     min-width: 0
+    // Reserve space for the fixed hamburger button on the first row only
+    @media (max-width: 600px)
+      padding-left: var(--header-height)
   #headerSearch
     flex: 1 1 16rem
     max-width: var(--card-max-width)
@@ -567,9 +576,12 @@ body:has(main.plants.index)
     grid-column: 2
     grid-row: 1
     align-self: center
+  // Saved searches now live inside the collapsible panel, so the panel's collapse
+  // hides them — no separate display toggle needed. Give the row bottom spacing to
+  // separate it from the filter rows below.
   .saved-searches-row
-    flex: 1 1 auto
     min-width: 0
+    padding-bottom: 0.4rem
   // Smooth collapse via grid-template-rows 0fr↔1fr; the inner clips its overflow so the
   // content slides in/out. Driven by the toggle's aria-expanded (set by the controller)
   // plus the `.expanded` class.
@@ -579,10 +591,16 @@ body:has(main.plants.index)
     display: grid
     grid-template-rows: 0fr
     transition: grid-template-rows 0.3s ease
-    padding-top: .5rem
     .header-collapse-inner
       overflow: hidden
       min-height: 0
+      // Grid item: without min-width:0 it defaults to min-content, so a wide child
+      // (sort row, saved searches, the widest filter row) can force the inner past the
+      // viewport — clipped by body overflow-x:hidden. That stretches each row's scroll
+      // container beyond the screen, so a row whose content fits the over-wide width
+      // never registers internal overflow (no fade / no "more"), yet its trailing
+      // buttons get cut off by the viewport edge. Constrain it to the panel width.
+      min-width: 0
       // Horizontal padding only — vertical padding on the collapsing element doesn't
       // shrink with the 0fr row and would leave a visible strip when minimized. Bottom
       // spacing comes from the content inside (#search-options / .filter-row-content).

@@ -14,6 +14,22 @@ export default class extends Controller {
     this.resizeObserver = new ResizeObserver(() => this.checkOverflow())
     this.resizeObserver.observe(this.containerTarget)
 
+    // The ResizeObserver only fires on the scroll container's own box-size changes,
+    // not when the buttons finish settling their widths (font/layout) or when the
+    // collapsed panel is first expanded into view — both change scrollWidth without
+    // changing clientWidth. Re-measure after a frame, on full load, and whenever the
+    // enclosing collapse panel toggles expanded, so the widest row's "show more"
+    // toggle isn't left hidden from a stale initial measurement.
+    requestAnimationFrame(() => this.checkOverflow())
+    this._onLoad = () => this.checkOverflow()
+    window.addEventListener('load', this._onLoad)
+
+    const panel = this.element.closest('.header-collapse-panel')
+    if (panel) {
+      this.panelObserver = new MutationObserver(() => this.checkOverflow())
+      this.panelObserver.observe(panel, { attributes: true, attributeFilter: ['class'] })
+    }
+
     this.narrowMQ = window.matchMedia('(max-width: 500px)')
     this.narrowMQ.addEventListener('change', this._onNarrowChange = () => this.updateUI())
   }
@@ -21,6 +37,12 @@ export default class extends Controller {
   disconnect() {
     if (this.resizeObserver) {
       this.resizeObserver.disconnect()
+    }
+    if (this.panelObserver) {
+      this.panelObserver.disconnect()
+    }
+    if (this._onLoad) {
+      window.removeEventListener('load', this._onLoad)
     }
     if (this.narrowMQ) {
       this.narrowMQ.removeEventListener('change', this._onNarrowChange)

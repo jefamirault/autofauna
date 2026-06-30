@@ -30,8 +30,13 @@
           </div>
         <% end %>
       </div>
+    </div>
 
-      <%# Saved Searches — wrap to next line when the top row runs out of width.
+    <%# Collapsible search options: saved searches, filters, sort, and select %>
+    <div class="header-collapse-panel" data-filter-collapse-target="filterRow">
+      <div class="header-collapse-inner">
+
+      <%# Saved Searches — live in the collapsible panel so they get its full width.
           Always rendered so Turbo Stream can append chips. %>
       <div class="saved-searches-row">
         <div id="saved-searches-list">
@@ -41,11 +46,6 @@
         </div>
         <%= render 'saved_searches/save_form', query_term: search_term, hidden: !search_term.present? %>
       </div>
-    </div>
-
-    <%# Collapsible search options: sort, select, and filter buttons %>
-    <div class="header-collapse-panel" data-filter-collapse-target="filterRow">
-      <div class="header-collapse-inner">
 
       <% if @location_filters.size > 1 || @recipe_filters.any? %>
         <div class="filter-row-content">
@@ -72,18 +72,19 @@
                   <% end %>
                 </div>
                 <span class="filter-actions">
-                  <% if @location_filters.size > 4 %>
-                    <button type="button"
-                            class="filter-toggle-btn"
-                            data-collapsible-filters-target="toggleButton"
-                            data-action="click->collapsible-filters#toggle"
-                            data-more-text="<%= t('.show_more') %>"
-                            data-less-text="<%= t('.show_less') %>"
-                            data-more-text-short="<%= t('.more') %>"
-                            data-less-text-short="<%= t('.less') %>">
-                      <%= t('.show_more') %>
-                    </button>
-                  <% end %>
+                  <%# Always render the toggle; collapsible-filters hides it via JS when
+                      the row isn't actually overflowing (overflow can occur with fewer
+                      than 5 wide buttons on narrow screens, so a fixed count gate misses it). %>
+                  <button type="button"
+                          class="filter-toggle-btn"
+                          data-collapsible-filters-target="toggleButton"
+                          data-action="click->collapsible-filters#toggle"
+                          data-more-text="<%= t('.show_more') %>"
+                          data-less-text="<%= t('.show_less') %>"
+                          data-more-text-short="<%= t('.more') %>"
+                          data-less-text-short="<%= t('.less') %>">
+                    <%= t('.show_more') %>
+                  </button>
                   <button type="button"
                           class="remove-filter-btn"
                           data-action="click->location-filter#clearLocationFilter">
@@ -116,18 +117,19 @@
                   <% end %>
                 </div>
                 <span class="filter-actions">
-                  <% if @recipe_filters.size > 4 %>
-                    <button type="button"
-                            class="filter-toggle-btn"
-                            data-collapsible-filters-target="toggleButton"
-                            data-action="click->collapsible-filters#toggle"
-                            data-more-text="<%= t('.show_more') %>"
-                            data-less-text="<%= t('.show_less') %>"
-                            data-more-text-short="<%= t('.more') %>"
-                            data-less-text-short="<%= t('.less') %>">
-                      <%= t('.show_more') %>
-                    </button>
-                  <% end %>
+                  <%# Always render the toggle; collapsible-filters hides it via JS when
+                      the row isn't actually overflowing (overflow can occur with fewer
+                      than 5 wide buttons on narrow screens, so a fixed count gate misses it). %>
+                  <button type="button"
+                          class="filter-toggle-btn"
+                          data-collapsible-filters-target="toggleButton"
+                          data-action="click->collapsible-filters#toggle"
+                          data-more-text="<%= t('.show_more') %>"
+                          data-less-text="<%= t('.show_less') %>"
+                          data-more-text-short="<%= t('.more') %>"
+                          data-less-text-short="<%= t('.less') %>">
+                    <%= t('.show_more') %>
+                  </button>
                   <button type="button"
                           class="remove-filter-btn"
                           data-action="click->location-filter#clearRecipeFilter">
