@@ -96,6 +96,197 @@ h1
       font-size: 1rem
       padding: 0.5rem 1.25rem
 
+// Cog menu (card fields) — floats in the header's bottom-right corner on the
+// plants index, straddling the bottom edge like the filter-collapse handle.
+// Opens a floating two-column panel (draggable preview + show/hide checklist).
+.card-fields-menu
+  position: absolute
+  right: 0.5rem
+  bottom: 0
+  transform: translateY(50%)
+  z-index: 12
+  .card-fields-btn
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 2rem
+    height: 2rem
+    padding: 0
+    font-size: 1rem
+    line-height: 1
+    border-radius: 50%
+    border: 1px solid rgba(255, 255, 255, 0.3)
+    background: var(--section-color-start)
+    color: white
+    cursor: pointer
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25)
+    transition: background 0.15s ease
+    &:hover
+      background: color-mix(in srgb, var(--section-color-start) 85%, white)
+  .card-fields-dropdown
+    position: absolute
+    top: 100%
+    right: 0
+    margin-top: 0.5rem
+    display: flex
+    align-items: stretch
+    background: white
+    border: 1px solid $lightgreen
+    border-radius: 10px
+    box-shadow: 0 6px 20px rgba(0, 54, 45, 0.10)
+    width: max-content
+    max-width: 92vw
+    overflow: hidden
+    z-index: 20
+    animation: cardFieldsReveal 0.16s ease-out
+    &.hidden
+      display: none
+
+    // Left column: draggable example card
+    .card-fields-preview
+      flex-shrink: 0
+      width: 210px
+      padding: 0.7rem
+      background: rgba(0, 77, 64, 0.03)
+      display: flex
+      flex-direction: column
+      gap: 0.5rem
+    .cfp-caption
+      font-size: 0.68rem
+      font-weight: 700
+      text-transform: uppercase
+      letter-spacing: 0.07em
+      color: #9aa5a1
+    .cfp-card
+      background: white
+      border: 1px solid rgba(0, 0, 0, 0.08)
+      border-radius: 8px
+      padding: 0.6rem
+      display: flex
+      flex-direction: column
+      gap: 0.4rem
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06)
+    .cfp-head
+      display: flex
+      align-items: center
+      gap: 0.4rem
+      .cfp-graphic
+        font-size: 1.4rem
+      .cfp-name
+        font-weight: 600
+        color: #333
+    .cfp-watering
+      color: $blue
+      font-size: 0.92rem
+      &.cfp-hidden
+        display: none
+    .cfp-rows
+      display: flex
+      flex-direction: column
+      gap: 0.25rem
+    .cfp-row
+      display: flex
+      align-items: center
+      gap: 0.4rem
+      padding: 0.32rem 0.35rem
+      border-radius: 6px
+      background: rgba(0, 77, 64, 0.05)
+      font-size: 0.9rem
+      color: #555
+      cursor: grab
+      touch-action: none
+      user-select: none
+      transition: background 0.12s ease, box-shadow 0.12s ease
+      &:hover
+        background: rgba(0, 77, 64, 0.1)
+      &.cfp-hidden
+        display: none
+      &.dragging
+        background: white
+        box-shadow: 0 4px 12px rgba(0, 54, 45, 0.2)
+        cursor: grabbing
+      .cfp-handle
+        flex-shrink: 0
+        color: #c2ccc8
+        letter-spacing: -2px
+      .cfp-icon
+        flex-shrink: 0
+        width: 1.2rem
+        text-align: center
+      .cfp-val
+        flex: 1
+        min-width: 0
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+    // Right column: show/hide checklist
+    .card-fields-list
+      border-left: 1px solid $lightgreen
+      padding: 0.3rem 0 0.45rem
+      .card-fields-heading
+        padding: 0.5rem 1rem 0.55rem
+        margin-bottom: 0.2rem
+        font-size: 0.72rem
+        font-weight: 700
+        text-transform: uppercase
+        letter-spacing: 0.09em
+        color: $green
+        border-bottom: 1px solid $lightgreen
+      label
+        display: flex
+        align-items: center
+        gap: 0.7rem
+        padding: 0.45rem 1rem
+        font-size: 1rem
+        color: #333
+        cursor: pointer
+        white-space: nowrap
+        transition: background 0.12s ease
+        &:hover
+          background: rgba(0, 77, 64, 0.06)
+        // Live legend: a row that's hidden from the card reads as dimmed here
+        &:has(input:not(:checked)) .card-field-icon,
+        &:has(input:not(:checked)) .card-field-label
+          opacity: 0.38
+        .card-field-icon
+          flex-shrink: 0
+          width: 1.4rem
+          text-align: center
+          transition: opacity 0.12s ease
+        .card-field-label
+          flex: 1
+          transition: opacity 0.12s ease
+        input
+          cursor: pointer
+          flex-shrink: 0
+          margin: 0
+          width: 1.05rem
+          height: 1.05rem
+          accent-color: $green
+
+@keyframes cardFieldsReveal
+  from
+    opacity: 0
+    transform: translateY(-0.35rem)
+  to
+    opacity: 1
+    transform: translateY(0)
+
+@media (prefers-reduced-motion: reduce)
+  .card-fields-dropdown
+    animation: none
+
+// Stack the preview above the checklist on narrow screens
+@media (max-width: 600px)
+  .card-fields-menu .card-fields-dropdown
+    flex-direction: column
+  .card-fields-menu .card-fields-preview
+    width: auto
+  .card-fields-menu .card-fields-list
+    border-left: none
+    border-top: 1px solid rgba(0, 77, 64, 0.15)
+
 // Display Toggle
 .display-toggle-btn
   display: inline-block
@@ -595,23 +786,31 @@ h1
   display: flex
   align-items: stretch
   flex-wrap: wrap
+  box-sizing: border-box
   border-radius: 4px
   background: $lightblue
+  // Watering-status spine: a saturated left edge encoding urgency, read as a
+  // scannable column down the card grid. Pairs with the right-edge water button
+  // (left = status, right = action). Default = normal/just-watered.
+  border-left: 4px solid $blue
 
   &:active
     filter: brightness(0.95)
 
-  // Urgency-based colors
+  // Urgency-based colors (surface tint + spine share each state's hue)
   &.normal
     background: $lightblue
+    border-left-color: $blue
 
   &.scheduled
     background: $lightgreen
+    border-left-color: $green
     .plant-card-watering
       color: $green
 
   &.needs_water
     background: $lightyellow
+    border-left-color: $yellow
     .plant-card-watering
       color: $yellow
 
@@ -644,11 +843,20 @@ h1
     display: block
 
 // Column 3: Details (now also holds the plant name)
-.plant-card-details
+// Middle column: title stacked over the details box (desktop). On narrow
+// viewports this wrapper becomes display:contents so title and details each
+// take their own row (see the ≤500px block).
+.plant-card-body
   flex: 1
   min-width: 0
   padding: 0.5rem 0.75rem
   overflow: hidden
+  display: flex
+  flex-direction: column
+
+.plant-card-details
+  flex: 1
+  min-width: 0
   display: flex
   flex-direction: column
   justify-content: space-between
@@ -666,6 +874,21 @@ h1
     opacity: 0.9
     &:hover
       text-decoration: underline
+    &:focus-visible
+      outline: 2px solid $blue
+      outline-offset: 2px
+      border-radius: 2px
+
+// Accession number (plant.uid) styled as a specimen catalog tag — a mono,
+// tracked, muted ID that reads distinctly from the plant's common name and
+// disambiguates repeated names.
+.plant-card-accession
+  font-family: monospace
+  font-size: 0.82em
+  font-weight: 600
+  letter-spacing: 0.02em
+  color: #6b6b6b
+  margin-right: 0.45em
 
 .plant-card-watering
   color: $blue
@@ -674,11 +897,12 @@ h1
   text-overflow: ellipsis
   white-space: nowrap
   font-size: 1.1em
+  font-weight: 600
 
 .plant-card-meta
   display: grid
-  grid-template-columns: minmax(0, 220px) minmax(0, 1fr)
-  gap: 0.15rem 1rem
+  grid-template-columns: 1fr
+  gap: 0.15rem
   font-size: 1.05em
   color: #666
   overflow: hidden
@@ -966,14 +1190,20 @@ h1
 .long-text
   display: inline
 
-@media (min-width: 1550px)
+// Cards use single-column attributes, so they're narrow enough to pack more
+// side by side: two columns at medium widths, three on wide screens (where the
+// layout previously showed two).
+@media (min-width: 1200px)
   .plant-cards
     display: grid
-    grid-template-columns: 1fr 1fr
+    grid-template-columns: repeat(2, 1fr)
+
+@media (min-width: 1550px)
+  .plant-cards
+    grid-template-columns: repeat(3, 1fr)
 
 @media (max-width: 768px)
   .plant-card-meta
-    grid-template-columns: 1fr
     font-size: 0.85em
 
 @media (max-width: 500px)
@@ -983,36 +1213,66 @@ h1
     display: inline
 
 
+  // Narrow viewports: stack the card into four full-width rows —
+  // 1. number + title, 2. photo, 3. details box, 4. water button.
   .plant-card
-    display: grid
-    grid-template-columns: auto 1fr
-    grid-template-rows: 1fr auto auto
+    display: flex
+    flex-direction: column
 
+  // Dissolve the middle-column wrapper so the title leads its own row above the
+  // photo while .plant-card-details stays intact as the third row.
+  .plant-card-body
+    display: contents
+
+  // Scale text up to match the enlarged photo hero
+  .plant-card-name
+    order: 1
+    margin-bottom: 0
+    padding: 0.6rem 0.9rem 0
+    font-size: 1.5em
+
+  // Photo becomes a full-width hero at the narrowest breakpoint
   .plant-card-graphic-col
-    grid-row: 1
-    flex: 0 0 120px
-    max-width: 120px
+    order: 2
+    flex: 0 0 auto
+    max-width: none
+
+  .plant-card-graphic img
+    height: auto
+    max-height: 70vh
+    object-fit: contain
 
   .plant-card-details
-    grid-column: 2
-    grid-row: 1
+    order: 3
+    flex: 0 0 auto
+    padding: 0.7rem 0.9rem 0.7rem
+    border-top: 1px solid rgba(0, 0, 0, 0.07)
+
+  .plant-card-watering
+    font-size: 1.3em
+
+  .plant-card-meta
+    font-size: 1.15em
+    gap: 0.3rem
 
   .plant-card-water-wrap
-    grid-column: 1 / -1
-    grid-row: 2
+    order: 4
     border-radius: 0 0 4px 4px
 
   .plant-card-water-col
     flex-direction: row
     border-radius: 0
-    padding: 0.5rem
+    padding: 0.85rem
     button[type="submit"]
       flex-direction: row
-      padding: 0.5rem
+      padding: 0.85rem
+
+  .plant-card-water-helper
+    font-size: 1.1em
+    margin-top: 0
+    margin-left: 0.6rem
 
   .plant-card-inline-form
-    grid-column: 1 / -1
-    grid-row: 3
     border-radius: 0 0 4px 4px
 
   .inline-watering-row

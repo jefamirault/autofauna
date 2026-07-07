@@ -186,6 +186,110 @@
       </div>
     </div>
 
+    <div class="card-fields-menu" data-controller="card-fields">
+      <button type="button" class="card-fields-btn"
+              data-action="click->card-fields#toggle"
+              title="<%= t('.fields_menu_title') %>"
+              aria-label="<%= t('.fields_menu_title') %>">⚙️</button>
+      <div class="card-fields-dropdown hidden" data-card-fields-target="menu">
+        <div class="card-fields-preview">
+          <div class="cfp-caption">↕ <%= t('.fields_reorder_hint') %></div>
+          <div class="cfp-card">
+            <div class="cfp-head">
+              <span class="cfp-graphic">🪴</span>
+              <span class="cfp-name"><%= t('.fields_preview_name') %></span>
+            </div>
+            <div class="cfp-watering" data-line-class="plant-card-watering"
+                 data-card-fields-target="previewLine">🕐 <%= t('.fields_preview_next') %></div>
+            <div class="cfp-rows" data-card-fields-target="rows">
+              <% if feature_enabled?(:precise_measurements) %>
+                <div class="cfp-row" data-line-class="plant-card-last-watering-volume"
+                     data-card-fields-target="previewRow"
+                     data-action="pointerdown->card-fields#dragStart">
+                  <span class="cfp-handle">⠿</span><span class="cfp-icon">💧</span><span class="cfp-val"><%= t('.fields_preview_volume') %></span>
+                </div>
+              <% end %>
+              <div class="cfp-row" data-line-class="plant-card-last-watering-notes"
+                   data-card-fields-target="previewRow"
+                   data-action="pointerdown->card-fields#dragStart">
+                <span class="cfp-handle">⠿</span><span class="cfp-icon">📝</span><span class="cfp-val"><%= t('.fields_preview_notes') %></span>
+              </div>
+              <div class="cfp-row" data-line-class="plant-card-last-watering-time"
+                   data-card-fields-target="previewRow"
+                   data-action="pointerdown->card-fields#dragStart">
+                <span class="cfp-handle">⠿</span><span class="cfp-icon">⌛</span><span class="cfp-val"><%= t('.fields_preview_last') %></span>
+              </div>
+              <div class="cfp-row" data-line-class="plant-card-location"
+                   data-card-fields-target="previewRow"
+                   data-action="pointerdown->card-fields#dragStart">
+                <span class="cfp-handle">⠿</span><span class="cfp-icon">📍</span><span class="cfp-val"><%= t('.fields_preview_location') %></span>
+              </div>
+              <div class="cfp-row" data-line-class="plant-card-container"
+                   data-card-fields-target="previewRow"
+                   data-action="pointerdown->card-fields#dragStart">
+                <span class="cfp-handle">⠿</span><span class="cfp-icon">🫙</span><span class="cfp-val"><%= t('.fields_preview_container') %></span>
+              </div>
+              <% if feature_enabled?(:use_fertilizers) %>
+                <div class="cfp-row" data-line-class="plant-card-recipe"
+                     data-card-fields-target="previewRow"
+                     data-action="pointerdown->card-fields#dragStart">
+                  <span class="cfp-handle">⠿</span><span class="cfp-icon">🧪</span><span class="cfp-val"><%= t('.fields_preview_fertilizer') %></span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        <div class="card-fields-list">
+        <div class="card-fields-heading"><%= t('.fields_menu_title') %></div>
+        <label>
+          <span class="card-field-icon">🕐</span>
+          <span class="card-field-label"><%= t('.field_next_watering') %></span>
+          <input type="checkbox" data-line-class="plant-card-watering"
+                 data-card-fields-target="checkbox" data-action="change->card-fields#change">
+        </label>
+        <% if feature_enabled?(:precise_measurements) %>
+          <label>
+            <span class="card-field-icon">💧</span>
+            <span class="card-field-label"><%= t('.field_volume') %></span>
+            <input type="checkbox" data-line-class="plant-card-last-watering-volume"
+                   data-card-fields-target="checkbox" data-action="change->card-fields#change">
+          </label>
+        <% end %>
+        <label>
+          <span class="card-field-icon">📝</span>
+          <span class="card-field-label"><%= t('.field_notes') %></span>
+          <input type="checkbox" data-line-class="plant-card-last-watering-notes"
+                 data-card-fields-target="checkbox" data-action="change->card-fields#change">
+        </label>
+        <label>
+          <span class="card-field-icon">⌛</span>
+          <span class="card-field-label"><%= t('.field_last_watered') %></span>
+          <input type="checkbox" data-line-class="plant-card-last-watering-time"
+                 data-card-fields-target="checkbox" data-action="change->card-fields#change">
+        </label>
+        <label>
+          <span class="card-field-icon">📍</span>
+          <span class="card-field-label"><%= t('.field_location') %></span>
+          <input type="checkbox" data-line-class="plant-card-location"
+                 data-card-fields-target="checkbox" data-action="change->card-fields#change">
+        </label>
+        <label>
+          <span class="card-field-icon">🫙</span>
+          <span class="card-field-label"><%= t('.field_container') %></span>
+          <input type="checkbox" data-line-class="plant-card-container"
+                 data-card-fields-target="checkbox" data-action="change->card-fields#change">
+        </label>
+        <% if feature_enabled?(:use_fertilizers) %>
+          <label>
+            <span class="card-field-icon">🧪</span>
+            <span class="card-field-label"><%= t('.field_fertilizer') %></span>
+            <input type="checkbox" data-line-class="plant-card-recipe"
+                   data-card-fields-target="checkbox" data-action="change->card-fields#change">
+          </label>
+        <% end %>
+        </div>
+      </div>
+    </div>
     <%# Collapse toggle — floats centered on the header's bottom edge %>
     <button type="button"
             class="filter-collapse-btn"

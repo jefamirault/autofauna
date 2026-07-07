@@ -431,3 +431,62 @@ The image now appears to transform from its header thumbnail into the fullscreen
 Added two more dismiss gestures to `image_lightbox_controller.js`, both routed through the existing reverse-FLIP `close()`:
 - **Desktop:** a `wheel` event on the overlay closes (passive listener; body scroll already locked via `body.image-lightbox-open`).
 - **Mobile:** `touchstart` records the origin, `touchmove` closes once the drag exceeds 40px in any direction (`Math.hypot`). 40px threshold avoids closing on a tap's jitter; the existing `closing` flag dedupes against the tap-click close. Listeners live on the overlay (auto-removed when it's torn down); `touchStart` reset in `_teardown`.
+
+## Cog menu: show/hide plant-card attribute lines
+
+Added a ⚙️ button at the right end of `.plants-toolbar` (plants index) that opens a checkbox menu controlling which attribute lines appear in plant cards.
+
+- **New** `app/javascript/controllers/card_fields_controller.js`: toggles the dropdown (mirrors `dropdown_controller` outside-click pattern) and applies show/hide by maintaining a single injected `<style id="plant-card-line-toggles">` in `<head>` with global rules (`.plant-card .<class>{display:none !important}`). The global CSS rule covers all three display-mode containers, paginated reveals, and Turbo-Stream-replaced cards with no per-event hooks. Preference persists in `localStorage` key `plant-card-hidden-lines`.
+- `app/views/plants/index.html.erb`: cog markup added after the `.select-row` block, rendered unconditionally (view preference, not edit-gated). Volume/Fertilizer checkboxes are wrapped in `feature_enabled?(:precise_measurements)` / `feature_enabled?(:use_fertilizers)` so the menu only lists lines the user actually sees.
+- `config/locales/en.yml`: added `fields_menu_title` + per-line label keys under `plants.index`.
+- `app/assets/stylesheets/plants.sass`: `.card-fields-menu` (right-aligned via `margin-left: auto`), `.card-fields-btn`, `.card-fields-dropdown` (styled after `.header-dropdown`).
+
+## Cog menu: inline expand, botanical restyle, drag-reorder with live preview
+
+Evolved the ⚙️ card-fields menu from a floating dropdown into an inline, two-column panel.
+
+- **Icons + right-aligned checkboxes:** each option row in the checklist now shows the same emoji the card uses (🕐 💧 📝 ⌛ 📍 🫙 🧪) via `.card-field-icon` (fixed width, left) + `.card-field-label` (`flex: 1`) so all checkboxes align in a right-hand column.
+- **Inline expansion:** dropped `position: absolute`; `.card-fields-menu:has(.card-fields-dropdown:not(.hidden))` claims a full toolbar row (`flex-basis: 100%`) so the panel opens in-flow and pushes the cards below down instead of overlaying them.
+- **Botanical restyle (frontend-design pass):** `accent-color: $green` on checkboxes (killed the default browser-blue), green-tinted hairline border + shadow + hover wash, sentence-case heading. Unchecked checklist rows dim their icon/label (`:has(input:not(:checked))`) so the checklist reads as a live legend. 160ms `cardFieldsReveal` animation, `prefers-reduced-motion` guarded. Heading copy "Card fields" → "Show on cards" (`fields_menu_title`).
+- **Example preview + drag-reorder (new):** left column `.card-fields-preview` renders a mini example plant card (`.cfp-card`) with a pinned "Next watering" headline and draggable `.cfp-row`s for the 6 meta detail fields. Dragging (pointer events → mouse + touch; `touch-action: none`) reorders the rows; order persists in `localStorage` key `plant-card-line-order` and is applied to every real card by extending the injected `<style>` with `.plant-card .<class>{order:N}` rules (the `.plant-card-meta` grid honors `order`). "Next watering" stays the fixed headline (separate container). Hidden fields drop out of the drag set and hide in the preview (`.cfp-hidden`). New i18n keys `fields_reorder_hint` + `fields_preview_*` under `plants.index`. Panel stacks vertically ≤600px.
+
+## Cog menu: moved into the header's bottom-right corner
+
+Relocated the entire `.card-fields-menu` (⚙️ button + floating panel + `data-controller="card-fields"`) out of `.plants-toolbar` and into the plants-index `header_extra` wrapper, as a sibling of the `.filter-collapse-btn` handle.
+
+- **Position:** `.card-fields-menu` is now `position: absolute; right: 0.5rem; bottom: 0; transform: translateY(50%)` relative to `<header>` (which is `position: relative; overflow: visible`), so it straddles the header's bottom edge at the right — mirroring the centered collapse handle. `z-index: 12`.
+- **Button restyle:** dropped `.display-toggle-btn` (blue toolbar pill) from the ⚙️ button; `.card-fields-btn` is now a 2rem circular header control styled like `.filter-collapse-btn` (`var(--section-color-start)` bg, white, `color-mix` hover).
+- **Dropdown:** reverted to floating — `position: absolute; top: 100%; right: 0` under the cog, opening down over the content (header `overflow: visible` lets it spill below), `z-index: 20`, `max-width: 92vw`, explicit `&.hidden { display: none }`. The two-column preview+checklist internals are unchanged.
+- CSS block moved from under `.plants-toolbar` to top level; mobile-stack + reduced-motion media queries re-scoped from `.plants-toolbar .card-fields-*` to `.card-fields-menu .card-fields-*` / `.card-fields-dropdown`. Since the menu now lives outside `turbo-frame#plants-results`, the controller no longer re-inits on search (the injected global `<style>` keeps applying to re-rendered cards).
+
+## Plant cards: single-column attributes, up to 3-column card grid
+
+Traded per-card attribute width for more cards side by side.
+
+- **`.plant-card-meta`** is now always a single column (`grid-template-columns: 1fr`, `gap: 0.15rem`) — dropped the `minmax(0, 220px) minmax(0, 1fr)` 2-column grid. Attribute lines (next-watering/volume/notes/location/etc.) now stack vertically in every card at all widths, so each card is narrower. The drag-reorder `order` injection still works (pure vertical order now). Removed the now-redundant `grid-template-columns: 1fr` from the ≤768px override (kept the font-size bump).
+- **`.plant-cards`** grid gains a tier: `repeat(2, 1fr)` at ≥1200px and `repeat(3, 1fr)` at ≥1550px (was a single `1fr 1fr` at ≥1550px). Below 1200px it stays the default single-column flex list. So the wide breakpoint that previously showed 2 columns now shows 3, with a 2-column step in between. Applies across all three display modes (each renders `.plant-cards`).
+
+## Plant card: watering-status spine + narrow-viewport row stack
+
+**Design pass (frontend-design).** Gave the plant card a signature: a saturated **watering-status spine** — `border-left: 4px solid` on `.plant-card` colored by urgency (blue = just watered / normal, green = scheduled, amber = needs water), sharing each state's existing hue with its surface tint. It pairs with the right-edge water button so the card reads left = status, right = action, and the 3-up grid scans down the left edges. Added `box-sizing: border-box` on the card so the border stays inside the grid track. Countdown line (`.plant-card-watering`) bumped to `font-weight: 600` so status reads at a glance. No hover lift / no radius change (kept the design system).
+
+**Narrow-viewport layout (≤500px).** Replaced the old `[graphic | details] / water` grid with a full vertical stack of separate rows: **title → photo → details → water button**. `.plant-card` becomes `flex-direction: column`; `.plant-card-details` is set to `display: contents` at this breakpoint so the title (`.plant-card-name`) lifts out and leads its own row above a full-width photo row (`.plant-card-graphic-col` → `height: 7.5rem`, full width), with the watering line + attributes below as the details section and the water button as the bottom row. Ordering via flex `order` (1–5); no HTML change, so desktop/tablet layouts are untouched. The injected card-fields `order` rules (which live on `.plant-card-meta`'s children) are unaffected — different flex context.
+
+## Plant card narrow layout: title / image / details box / water (revised)
+
+Reworked the ≤500px stack so `.plant-card-details` stays a real box row (previous version used `display:contents` on it, splitting watering + attributes into separate rows). Introduced a `.plant-card-body` wrapper (in `_plant_row.html.erb`) around `.plant-card-name` + `.plant-card-details`:
+
+- **Desktop unchanged:** `.plant-card-body` takes over the old middle-column role (`flex:1; min-width:0; padding; flex-column`), holding the title above the `.plant-card-details` box (which keeps `flex:1; column; space-between` for watering + meta). Purely a wrapper move — no visual change.
+- **≤500px:** `.plant-card-body` → `display:contents`, so title and details promote to card rows. Card is `flex-direction:column` with four ordered rows: `.plant-card-name` (1, shows `plant.label` = "#90 Monstera"), `.plant-card-graphic-col` (2, full-width 7.5rem photo), `.plant-card-details` (3, intact box with its own padding), `.plant-card-water-wrap` (4). Matches the requested 1–4 row spec.
+
+## Narrow plant card: full-width photo hero
+
+At ≤500px the photo row was a 7.5rem-tall letterboxed thumbnail. Removed the fixed height so `.plant-card-graphic-col` sizes to the image, and set the image to `width:100%` (inherited) + `height:auto` so it fills the full card width at natural aspect (library graphics are ~1:1, so it renders as a big square hero). Capped with `max-height:70vh` + `object-fit:contain` so tall custom photo uploads stay bounded. Cards already go edge-to-edge at this breakpoint (`section#primary` padding is 0), so the image is effectively full screen width.
+
+## Plant card (frontend-design): accession-number tag
+
+Split the title so `plant.uid` renders as a specimen catalog tag distinct from the common name (`_plant_row.html.erb`: `link_to` block with `.plant-card-accession` "#90" + `.plant-card-common-name` "Monstera", instead of the combined `plant.label`). `.plant-card-accession` = `monospace`, 0.82em, weight 600, tracked, muted `#6b6b6b` — mono is the app's existing utility face, so sans name + mono ID is a deliberate pairing; the number disambiguates repeated plant names. Applies to all cards (shared partial). Added `:focus-visible` ring on the name link (quality floor) and, at ≤500px, a hairline `border-top` on `.plant-card-details` separating the full-width photo "plate" from the details "label".
+
+## Mobile plant card: scale up text to match the photo hero
+
+At ≤500px the text was dwarfed by the full-width photo. Bumped in the ≤500 block: `.plant-card-name` → 1.5em (with more padding), `.plant-card-watering` → 1.3em, `.plant-card-meta` → 1.15em (overrides the ≤768 0.85em, later source wins) with a larger 0.3rem gap, and the water button: `.plant-card-water-col` padding 0.5rem→0.85rem, `.plant-card-water-helper` 0.7em→1.1em (margin adjusted for the horizontal row layout). Desktop/tablet untouched.

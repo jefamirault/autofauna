@@ -16,10 +16,13 @@
       <%= image_tag plant.display_graphic || "plant_graphics/placeholder.png", alt: "" %>
     <% end %>
   </div>
-  <div class="plant-card-details">
+  <div class="plant-card-body">
     <div class="plant-card-name">
-      <%= link_to plant.label, plant_path(plant.id), data: { turbo_frame: "_top" } %>
+      <%= link_to plant_path(plant.id), data: { turbo_frame: "_top" } do %>
+        <span class="plant-card-accession">#<%= plant.uid %></span><span class="plant-card-common-name"><%= plant.name %></span>
+      <% end %>
     </div>
+    <div class="plant-card-details">
     <% unless archive %>
       <div class="plant-card-watering">
         <% if plant.snoozed? %>
@@ -52,6 +55,7 @@
       <% if feature_enabled?(:use_fertilizers) && plant.recipe.present? %>
         <span class="plant-card-recipe">🧪 <%= plant.recipe.name %></span>
       <% end %>
+    </div>
     </div>
   </div>
   <% unless archive %>
