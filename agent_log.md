@@ -87,3 +87,28 @@ on cards. Pruned card-only CSS (`.expand-watering-btn`, `.plant-card-inline-form
 `.inline-watering-*`, `.inline-water-*`, `.inline-snooze-*`); kept `.inline-field*`/`.inline-input`
 (bulk-water bar) and show-page snooze styles. Files: `_plant_row.html.erb`,
 `inline_watering_controller.js`, `waterings_controller.rb`, `plants.sass`.
+
+## 2026-07-08 — Group "Water all" → "Select all" (plants index)
+
+Replaced the per-location "💧 Water all" `button_to` in location group headers with a
+"☑ Select all" button, and added the same button to recipe group headers (which had no bulk
+action before). New `plant_select#selectGroup` action: enters selection mode if needed, then
+toggle-selects the group's visible (non-`data-filter-hidden`) cards; re-click deselects just that
+group. Bulk "Water selected" is now the index's water-all pathway (location show page keeps its
+direct "Water all"). Removed now-unused `plants.index.water_all` locale key (en/es) and the
+`.group-water-all-*` styles (`.group-watering-bar` → `.group-select-bar`); added es
+`plants.bulk.select_all`. Files: `plants/index.html.erb`, `plant_select_controller.js`,
+`shared.sass`, locale files, docs.
+
+**Follow-up (design pass):** the group "Select all" moved from a generic pill in its own bar
+into the group header itself — a stateful chip on the header's right edge (the app's action
+edge). Colors derive from the group's color via inline `--group-color(-soft/-tint)` vars on the
+`<h3>`: idle = white ghost pill with a soft group-color hairline; active (whole group selected) =
+group-tint fill + solid border + "✓ Selected", ink always `$blue` since free-form group colors
+can be too light to read. `plant_select#selectGroup` gained `stopPropagation` (header click
+collapses the group) and `_refreshGroupButtons()` keeps every chip's state live from
+`_updateCount`; `aria-pressed` + `:focus-visible` outline included. ≤600px the header flex-wraps
+(count hugs the name, chip owns the right edge). Removed the `.group-select-bar`; added
+`plants.bulk.group_selected` (en/es). Verified via compiled-CSS harness screenshots at
+900/390px incl. a light-yellow worst-case group color. Files: `plants/index.html.erb`,
+`plant_select_controller.js`, `plants.sass`, `shared.sass`, locales, docs.

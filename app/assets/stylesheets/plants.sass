@@ -668,11 +668,49 @@ h1
     border-radius: 4px
     &:hover
       opacity: 0.9
+    // Long names: let the select chip drop to its own right-aligned line instead
+    // of crushing the name to one word per line. The count hugs the name here
+    // ("Greenhouse Shelf (12)") so the chip owns the right edge.
+    @media (max-width: 600px)
+      flex-wrap: wrap
+      .group-count
+        margin-left: 0
+      .group-select-all-btn
+        margin-left: auto
 
 .group-count
   margin-left: auto
   font-size: 0.9em
   opacity: 0.8
+
+// "Select all" chip in the group header (location/recipe display modes).
+// Colors derive from the group's own color via --group-color / --group-color-soft
+// (inline on the h3). Active = whole group selected — same state language as the
+// header's color-aware filter pills (white fill, group-color ink + border).
+.group-select-all-btn
+  flex-shrink: 0
+  font-family: inherit
+  font-size: 0.75em
+  font-weight: 600
+  line-height: 1.4
+  color: $blue
+  background: rgba(255, 255, 255, 0.45)
+  border: 1px solid var(--group-color-soft, rgba(0, 0, 0, 0.25))
+  border-radius: 999px
+  padding: 0.2rem 0.7rem
+  white-space: nowrap
+  cursor: pointer
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease
+  &:hover
+    background: rgba(255, 255, 255, 0.85)
+  // Active = whole group selected. Ink stays $blue (group colors are free-form and
+  // can be too light to read); the state is carried by the tinted fill + solid border.
+  &.active
+    background: var(--group-color-tint, rgba(0, 0, 0, 0.08))
+    border-color: var(--group-color, $blue)
+  &:focus-visible
+    outline: 2px solid var(--group-color, $blue)
+    outline-offset: 2px
 
 // Plants > Show
 .wateringNotesColumn

@@ -126,6 +126,16 @@ watering column (`.plant-card-water-wrap`) and the checkbox; plant-show and loca
 disabled via `.selection-mode { pointer-events: none }` so their clicks fall through to the card.
 Selection is keyed by plant id and synced across the triple-rendered cards.
 
+In location/recipe display modes, each group header carries a **"Select all" chip** on its right
+edge (`plant_select#selectGroup`, `stopPropagation` so it doesn't toggle collapse) that enters
+selection mode and toggle-selects that group's visible cards — this replaced the per-location
+"💧 Water all" button. The chip is **stateful**: `_refreshGroupButtons()` (called from
+`_updateCount`) flips it to "✓ Selected" (`.active` + `aria-pressed`) whenever every visible plant
+in its group is selected, reverting live as cards toggle. Its colors derive from the group's color
+via inline `--group-color` / `--group-color-soft` / `--group-color-tint` custom properties on the
+`<h3>`; the active fill is the tint (ink stays `$blue` — free-form group colors can be too light
+to read as ink). At ≤600px the header flex-wraps: count hugs the name, chip owns the right edge.
+
 The per-card checkbox (`label.plant-card-select`) is **hidden by default via an inline
 `style="display: none;"`** (NOT a CSS class or the `hidden` attribute), toggled by
 `_showCheckboxes`. See the "inline style vs stale CSS" gotcha below. Every selection/mode change
@@ -152,10 +162,12 @@ extracted from `PlantsController#quick_water` so single and group watering share
 
 **Two grouping mechanisms (both supported):**
 - **Locations as implicit groups** — `Location#water_all!` waters every non-archived plant in the
-  location. The plants index renders a "💧 Water all" `button_to` (`water_all_location_path`) in
-  each location group header (gated by `can_edit?`, an ApplicationController helper); it lives
-  inside `turbo_frame#plants-results` so the Turbo Stream response updates every card. Location
-  show page also has "Water all" + "Create a group from these plants".
+  location; reachable from the location show page ("Water all" + "Create a group from these
+  plants"). On the plants index, location **and** recipe group headers instead carry a stateful
+  "Select all" chip (`plant_select#selectGroup`, gated by `can_edit?`): it enters selection
+  mode if needed and toggle-selects the group's visible (non-`data-filter-hidden`) cards — bulk
+  "Water selected" is the index's water-all pathway. See the multi-select section for chip
+  state/styling details.
 - **`PlantGroup` model** — custom, possibly cross-location collections. `PlantGroupsController` is
   standard CRUD (auth checklist like LocationsController) + `member post :water` (`water_all!`) +
   `collection post :seed_from_location`. `PlantGroup#apply_schedule_to_members!` pushes the group's

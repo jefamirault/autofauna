@@ -387,19 +387,23 @@
          data-controller="collapsible-group"
          data-collapsible-group-storage-key-value="location-group-<%= plants.first&.location_id || 'none' %>">
       <h3 class="location-group-header clickable"
-          style="background-color: <%= location_color %>22; border-left: 4px solid <%= location_color %>;"
+          style="background-color: <%= location_color %>22; border-left: 4px solid <%= location_color %>; --group-color: <%= location_color %>; --group-color-soft: <%= location_color %>88; --group-color-tint: <%= location_color %>33;"
           data-action="click->collapsible-group#toggle"
           data-collapsible-group-target="header">
         <span data-collapsible-group-target="icon">▼</span>
         <%= location_name %>
         <span class="group-count">(<span data-location-filter-target="groupCount"><%= plants.size %></span>)</span>
+        <% if can_edit? %>
+          <button type="button" class="group-select-all-btn"
+                  aria-pressed="false"
+                  data-plant-select-target="groupBtn"
+                  data-action="click->plant-select#selectGroup"
+                  data-select-label="<%= t('plants.bulk.select_all') %>"
+                  data-selected-label="✓ <%= t('plants.bulk.group_selected') %>">
+            <%= t('plants.bulk.select_all') %>
+          </button>
+        <% end %>
       </h3>
-      <% if (loc_id = plants.first&.location_id) && can_edit? %>
-        <div class="group-watering-bar">
-          <%= button_to "💧 #{t('.water_all')}", water_all_location_path(loc_id),
-                class: 'group-water-all-btn', form_class: 'group-water-all-form' %>
-        </div>
-      <% end %>
       <div class="plant-cards" data-collapsible-group-target="content">
         <% plants.each do |plant| %>
           <%= render 'plant_row', plant: plant %>
@@ -417,12 +421,22 @@
          data-controller="collapsible-group"
          data-collapsible-group-storage-key-value="recipe-group-<%= plants.first&.recipe_id || 'none' %>">
       <h3 class="location-group-header clickable"
-          style="background-color: <%= recipe_color %>22; border-left: 4px solid <%= recipe_color %>;"
+          style="background-color: <%= recipe_color %>22; border-left: 4px solid <%= recipe_color %>; --group-color: <%= recipe_color %>; --group-color-soft: <%= recipe_color %>88; --group-color-tint: <%= recipe_color %>33;"
           data-action="click->collapsible-group#toggle"
           data-collapsible-group-target="header">
         <span data-collapsible-group-target="icon">▼</span>
         <%= recipe_name %>
         <span class="group-count">(<span data-location-filter-target="groupCount"><%= plants.size %></span>)</span>
+        <% if can_edit? %>
+          <button type="button" class="group-select-all-btn"
+                  aria-pressed="false"
+                  data-plant-select-target="groupBtn"
+                  data-action="click->plant-select#selectGroup"
+                  data-select-label="<%= t('plants.bulk.select_all') %>"
+                  data-selected-label="✓ <%= t('plants.bulk.group_selected') %>">
+            <%= t('plants.bulk.select_all') %>
+          </button>
+        <% end %>
       </h3>
       <div class="plant-cards" data-collapsible-group-target="content">
         <% plants.each do |plant| %>

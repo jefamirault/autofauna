@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Plants index: multi-select mode + bulk actions (water / group / location / archive).
 // Selection is keyed by plant id and synced across the triple-rendered cards.
 export default class extends Controller {
-  static targets = ["checkbox", "count", "actionBar", "waterOptions", "modeBtn"]
+  static targets = ["checkbox", "count", "actionBar", "waterOptions", "modeBtn", "groupBtn"]
   static values = {
     csrf: String,
     bulkWaterUrl: String,
@@ -100,6 +100,29 @@ export default class extends Controller {
     this._updateCount()
   }
 
+  // "Select all" chip in a location/recipe group header: enters selection mode if
+  // needed, then selects every visible plant in that group (bulk water is the
+  // water-all pathway). Re-click when the whole group is selected deselects it.
+  selectGroup(event) {
+    event.stopPropagation() // the header's own click toggles group collapse
+    const group = event.currentTarget.closest('[data-location-filter-target="locationGroup"], [data-location-filter-target="recipeGroup"]')
+    if (!group) return
+    if (!this.element.classList.contains("selection-mode")) this.toggleMode()
+
+    const ids = this._groupPlantIds(group)
+    const allSelected = ids.length > 0 && ids.every(id => this.selected.has(id))
+
+    ids.forEach(id => {
+      if (allSelected) {
+        this.selected.delete(id)
+      } else {
+        this.selected.add(id)
+      }
+      this._syncCard(id)
+    })
+    this._updateCount()
+  }
+
   clear() {
     const ids = [...this.selected]
     this.selected.clear()
@@ -175,6 +198,25 @@ export default class extends Controller {
     })
   }
 
+  _groupPlantIds(group) {
+    const cards = group.querySelectorAll(".plant-card:not([data-filter-hidden])")
+    return [...new Set(Array.from(cards).map(c => c.id?.replace(/^plant_/, "")).filter(Boolean))]
+  }
+
+  // Each group-header chip reflects its group's state: "✓ Selected" (active) when
+  // every visible plant in the group is selected, reverting live as cards toggle.
+  _refreshGroupButtons() {
+    this.groupBtnTargets.forEach(btn => {
+      const group = btn.closest('[data-location-filter-target="locationGroup"], [data-location-filter-target="recipeGroup"]')
+      if (!group) return
+      const ids = this._groupPlantIds(group)
+      const all = ids.length > 0 && ids.every(id => this.selected.has(id))
+      btn.classList.toggle("active", all)
+      btn.setAttribute("aria-pressed", all ? "true" : "false")
+      btn.textContent = all ? btn.dataset.selectedLabel : btn.dataset.selectLabel
+    })
+  }
+
   _updateCount() {
     if (this.hasCountTarget) {
       const tmpl = this.countTarget.dataset.template
@@ -182,6 +224,7 @@ export default class extends Controller {
         ? tmpl.replace("__COUNT__", this.selected.size)
         : `${this.selected.size} selected`
     }
+    this._refreshGroupButtons()
     // Keep the header count line ("Selected X out of N") in sync.
     this._refreshCount()
   }

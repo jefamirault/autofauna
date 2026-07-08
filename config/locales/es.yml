@@ -71,7 +71,6 @@ es:
       display_by: "Ordenar"
       watering: "Riego"
       location: "Ubicación"
-      water_all: "Regar todo"
       no_location: "Sin ubicación"
       filter_by_location: "Filtrar ubicación"
       filter_by_recipe: "Filtrar receta"
@@ -114,6 +113,9 @@ es:
       layout_img_toggle: "Tamaño de foto"
       layout_img_compact: "Fotos más pequeñas"
       layout_img_full: "Fotos a tamaño completo"
+    bulk:
+      select_all: "Seleccionar todo"
+      group_selected: "Todo seleccionado"
     show:
       edit_this_plant: "Editar esta planta"
       water_this_plant: "Regar esta planta"
