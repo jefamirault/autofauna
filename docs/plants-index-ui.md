@@ -20,7 +20,9 @@ groups / bulk watering, and the many Turbo/Rails gotchas that live here.
   (single id via `target:`), or only the first DOM instance updates.
 - **Filters:** Status (Overdue / Needs Water / Scheduled), Recipe, Location — client-side, AND
   logic, toggleable visibility.
-- **Pagination:** client-side, configurable per-page count.
+- **Pagination:** client-side, fixed 50 per page; a "Load More..." button reveals the next 50
+  without hiding earlier cards (watering mode only). A "Back to Top" button below the results
+  (all display modes) appears when `<main>` overflows and smooth-scrolls it to 0.
 - **Search:** debounced auto-submit via the header search bar, with a clear button.
 
 ## Plant cards (`_plant_row.html.erb`)

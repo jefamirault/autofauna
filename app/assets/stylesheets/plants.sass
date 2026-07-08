@@ -1405,62 +1405,32 @@ a.plant-card-location:hover .mv
 // Pagination
 .pagination-controls
   display: flex
+  flex-direction: column
   align-items: center
   justify-content: center
-  gap: 1rem
+  gap: 0.5rem
   padding: 1rem 0.5rem
-  flex-wrap: wrap
   transition: opacity 0.4s ease
 
-.pagination-per-page
+.back-to-top
   display: flex
-  align-items: center
-  gap: 0.5rem
+  justify-content: center
+  padding: 0 0.5rem 1.5rem
+
+.load-more-btn, .back-to-top-btn
+  padding: 0.4rem 1.5rem
+  border-radius: 999px
   font-size: 0.9em
-  color: #666
+  border: 1px solid rgba(14, 72, 123, 0.3)
+  background: transparent
+  color: $blue
+  cursor: pointer
+  font-family: inherit
+  transition: all 0.2s ease
+  white-space: nowrap
 
-  select
-    padding: 0.25rem 0.5rem
-    border-radius: 999px
-    border: 1px solid rgba(14, 72, 123, 0.3)
-    background: white
-    color: $blue
-    font-family: inherit
-    font-size: 0.9em
-    cursor: pointer
-
-.pagination-nav
-  display: flex
-  align-items: center
-  gap: 0.25rem
-
-  button
-    display: inline-block
-    padding: 0.25rem 0.6rem
-    border-radius: 999px
-    font-size: 0.85em
-    border: 1px solid rgba(14, 72, 123, 0.3)
-    background: transparent
-    color: $blue
-    cursor: pointer
-    font-family: inherit
-    transition: all 0.2s ease
-    white-space: nowrap
-    min-width: 2rem
-    text-align: center
-
-    &:hover:not(:disabled)
-      background: $lightblue
-      border-style: solid
-
-    &:disabled
-      opacity: 0.4
-      cursor: default
-
-    &.active
-      background: $blue
-      color: white
-      border-color: $blue
+  &:hover
+    background: $lightblue
 
 .pagination-info
   font-size: 0.85em

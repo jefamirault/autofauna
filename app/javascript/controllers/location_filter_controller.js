@@ -1,5 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
+const PER_PAGE = 50
+
 export default class extends Controller {
   static targets = [
     "filterButton", "recipeFilterButton", "buttonContainer", "recipeButtonContainer",
@@ -7,7 +9,7 @@ export default class extends Controller {
     "searchInput", "clearSearchBtn",
     "wateringGroup", "groupCount",
     "locationGroupsContainer", "recipeGroupsContainer", "wateringGroupsContainer",
-    "paginationControls", "paginationNav", "paginationInfo",
+    "paginationControls", "loadMoreBtn", "paginationInfo", "backToTop",
     "saveSearchContainer", "filterParamsInput"
   ]
   static values = {
@@ -15,7 +17,6 @@ export default class extends Controller {
     countTemplate: String,
     selectedTemplate: String,
     searchTerm: String,
-    perPage: { type: Number, default: 20 },
     currentPage: { type: Number, default: 1 },
     showingTemplate: String,
     clearSearchLabel: { type: String, default: "Show All" }
@@ -225,6 +226,7 @@ export default class extends Controller {
     }
   }
 
+  // Load-more reveal: currentPage counts how many batches of PER_PAGE are shown.
   paginateVisibleCards() {
     if (this.displayModeValue !== "watering") return
     if (!this.hasWateringGroupsContainerTarget) return
@@ -236,127 +238,55 @@ export default class extends Controller {
     // Collect cards not hidden by filters
     const visibleCards = allCards.filter(card => !card.hasAttribute("data-filter-hidden"))
     const total = visibleCards.length
-    const perPage = this.perPageValue
 
-    // If perPage is 0 (All), show everything
-    if (perPage === 0) {
-      visibleCards.forEach(card => card.style.display = "")
-      allCards.filter(card => card.hasAttribute("data-filter-hidden")).forEach(card => card.style.display = "none")
-      this.renderPaginationControls(total, total, 0)
-      return
-    }
-
-    const totalPages = Math.max(1, Math.ceil(total / perPage))
+    const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
     if (this.currentPageValue > totalPages) this.currentPageValue = totalPages
 
-    const start = (this.currentPageValue - 1) * perPage
-    const end = Math.min(start + perPage, total)
+    const shown = Math.min(this.currentPageValue * PER_PAGE, total)
 
     visibleCards.forEach((card, index) => {
-      if (index >= start && index < end) {
-        card.style.display = ""
-      } else {
-        card.style.display = "none"
-      }
+      card.style.display = index < shown ? "" : "none"
     })
 
     // Ensure filter-hidden cards stay hidden
     allCards.filter(card => card.hasAttribute("data-filter-hidden")).forEach(card => card.style.display = "none")
 
-    this.renderPaginationControls(total, totalPages, start)
+    this.renderPaginationControls(total, shown)
+    this.updateBackToTop()
   }
 
-  renderPaginationControls(total, totalPages, start) {
-    if (!this.hasPaginationNavTarget || !this.hasPaginationInfoTarget) return
-
-    const perPage = this.perPageValue
-    const currentPage = this.currentPageValue
-
-    // Info text
-    if (perPage === 0 || total === 0) {
-      this.paginationInfoTarget.textContent = ""
-    } else {
-      const from = total === 0 ? 0 : start + 1
-      const to = Math.min(start + perPage, total)
-      if (this.hasShowingTemplateValue && this.showingTemplateValue) {
+  renderPaginationControls(total, shown) {
+    if (this.hasPaginationInfoTarget) {
+      if (shown < total && this.hasShowingTemplateValue && this.showingTemplateValue) {
         this.paginationInfoTarget.textContent = this.showingTemplateValue
-          .replace("__FROM__", from)
-          .replace("__TO__", to)
+          .replace("__SHOWN__", shown)
           .replace("__TOTAL__", total)
       } else {
-        this.paginationInfoTarget.textContent = `${from}-${to} of ${total}`
+        this.paginationInfoTarget.textContent = ""
       }
     }
 
-    // Nav buttons
-    this.paginationNavTarget.innerHTML = ""
-
-    if (perPage === 0 || totalPages <= 1) return
-
-    // Prev button
-    const prevBtn = document.createElement("button")
-    prevBtn.textContent = "‹"
-    prevBtn.disabled = currentPage <= 1
-    prevBtn.addEventListener("click", () => this.goToPage(currentPage - 1))
-    this.paginationNavTarget.appendChild(prevBtn)
-
-    // Page buttons - show up to 5 pages around current
-    const maxButtons = 5
-    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2))
-    let endPage = Math.min(totalPages, startPage + maxButtons - 1)
-    if (endPage - startPage < maxButtons - 1) {
-      startPage = Math.max(1, endPage - maxButtons + 1)
+    if (this.hasLoadMoreBtnTarget) {
+      this.loadMoreBtnTarget.style.display = shown < total ? "" : "none"
     }
-
-    if (startPage > 1) {
-      this.paginationNavTarget.appendChild(this.createPageButton(1, currentPage))
-      if (startPage > 2) {
-        const dots = document.createElement("span")
-        dots.textContent = "…"
-        dots.style.padding = "0 0.25rem"
-        this.paginationNavTarget.appendChild(dots)
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      this.paginationNavTarget.appendChild(this.createPageButton(i, currentPage))
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        const dots = document.createElement("span")
-        dots.textContent = "…"
-        dots.style.padding = "0 0.25rem"
-        this.paginationNavTarget.appendChild(dots)
-      }
-      this.paginationNavTarget.appendChild(this.createPageButton(totalPages, currentPage))
-    }
-
-    // Next button
-    const nextBtn = document.createElement("button")
-    nextBtn.textContent = "›"
-    nextBtn.disabled = currentPage >= totalPages
-    nextBtn.addEventListener("click", () => this.goToPage(currentPage + 1))
-    this.paginationNavTarget.appendChild(nextBtn)
   }
 
-  createPageButton(page, currentPage) {
-    const btn = document.createElement("button")
-    btn.textContent = page
-    if (page === currentPage) btn.classList.add("active")
-    btn.addEventListener("click", () => this.goToPage(page))
-    return btn
-  }
-
-  goToPage(page) {
-    this.currentPageValue = page
+  loadMore() {
+    this.currentPageValue += 1
     this.paginateVisibleCards()
   }
 
-  changePerPage(event) {
-    this.perPageValue = parseInt(event.target.value)
-    this.currentPageValue = 1
-    this.paginateVisibleCards()
+  scrollToTop() {
+    const main = document.querySelector('main')
+    if (main) main.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Show "Back to Top" only when the results actually overflow the scroll container.
+  updateBackToTop() {
+    if (!this.hasBackToTopTarget) return
+    const main = document.querySelector('main')
+    const scrollable = main && main.scrollHeight > main.clientHeight + 50
+    this.backToTopTarget.style.display = scrollable ? "" : "none"
   }
 
   updateResultsCount() {
@@ -419,6 +349,7 @@ export default class extends Controller {
     }
 
     this.updateGroupCounts()
+    this.updateBackToTop()
   }
 
   toggleRecipeFilter(event) {

@@ -32,3 +32,16 @@ snoozed cards desaturate (`.snoozed`); water button copy shortened to "Water"/"R
 tests added (`test/helpers/plants_helper_test.rb`). Docs: plant-cards section of
 `docs/plants-index-ui.md` rewritten. Files: `plants.sass`, `_plant_row.html.erb`,
 `plants_helper.rb`, `card_fields_controller.js`, `en.yml`/`es.yml`.
+
+## 2026-07-08 — Plants index: Load More pagination + Back to Top
+
+Replaced the watering-mode page-number pagination (per-page select 10/20/50/All, prev/next +
+numbered buttons) with a fixed 50-per-page **"Load More..."** reveal: clicking shows the next 50
+cards without hiding earlier ones (`currentPage` now counts revealed batches; `PER_PAGE = 50`
+module const, `perPage` Stimulus value removed along with `changePerPage`/`goToPage`/
+`createPageButton`). `showing_info` locale changed to "Showing %{shown} of %{total}" and only
+renders while truncated. Also added a **"Back to Top"** button below the results (own container,
+all display modes — pagination-controls stays watering-only): shown only when `<main>` (the
+scroll container) overflows, smooth-scrolls it to 0; visibility refreshed in
+`paginateVisibleCards` and `updateResultsCount`. Files: `location_filter_controller.js`,
+`plants/index.html.erb`, `plants.sass`, `en.yml`/`es.yml`, `docs/plants-index-ui.md`.

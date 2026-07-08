@@ -104,9 +104,9 @@ es:
       hide_watered_label: "Ocultar plantas regadas"
       recipe_label: "Receta"
       location_label: "Ubicación"
-      show_per_page: "Mostrar"
-      all: "Todos"
-      showing_info: "Mostrando %{from}-%{to} de %{total}"
+      showing_info: "Mostrando %{shown} de %{total}"
+      load_more: "Cargar más..."
+      back_to_top: "Volver arriba"
       toggle_filters: "Mostrar/ocultar filtros"
     show:
       edit_this_plant: "Editar esta planta"

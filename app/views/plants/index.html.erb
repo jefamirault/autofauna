@@ -317,9 +317,8 @@
      data-location-filter-count-template-value="<%= t('.showing_count', total: '__TOTAL__') %>"
      data-location-filter-selected-template-value="<%= t('.selected_count', selected: '__SELECTED__', total: '__TOTAL__') %>"
      data-location-filter-search-term-value="<%= params.dig('q', 'name_or_location_name_cont') || '' %>"
-     data-location-filter-per-page-value="20"
      data-location-filter-current-page-value="1"
-     data-location-filter-showing-template-value="<%= t('.showing_info', from: '__FROM__', to: '__TO__', total: '__TOTAL__') %>"
+     data-location-filter-showing-template-value="<%= t('.showing_info', shown: '__SHOWN__', total: '__TOTAL__') %>"
      data-location-filter-clear-search-label-value="<%= t('.show_all') %>">
 
 <% search_term = params.dig('q', 'name_or_location_name_cont') %>
@@ -404,17 +403,14 @@
 </div>
 
 <div class="pagination-controls" data-location-filter-target="paginationControls" style="display: <%= @display_mode == 'watering' ? '' : 'none' %>;">
-  <div class="pagination-per-page">
-    <label><%= t('.show_per_page') %>:</label>
-    <select data-action="change->location-filter#changePerPage">
-      <option value="10">10</option>
-      <option value="20" selected>20</option>
-      <option value="50">50</option>
-      <option value="0"><%= t('.all') %></option>
-    </select>
-  </div>
-  <div class="pagination-nav" data-location-filter-target="paginationNav"></div>
   <div class="pagination-info" data-location-filter-target="paginationInfo"></div>
+  <button type="button" class="load-more-btn" data-location-filter-target="loadMoreBtn"
+          data-action="click->location-filter#loadMore" style="display: none;"><%= t('.load_more') %></button>
+</div>
+
+<div class="back-to-top" data-location-filter-target="backToTop" style="display: none;">
+  <button type="button" class="back-to-top-btn"
+          data-action="click->location-filter#scrollToTop">↑ <%= t('.back_to_top') %></button>
 </div>
 
 <% if can_edit? %>
