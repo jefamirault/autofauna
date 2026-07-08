@@ -158,7 +158,7 @@ en:
       archive: "Archive"
       search_plants_archive: "Search Plants Archive"
     water_button:
-      click: "Click to Water"
+      click: "Water"
       tap: "Tap to Water"
       watered: "Watered!"
       edit: "Edit"

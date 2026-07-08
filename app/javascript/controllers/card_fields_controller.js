@@ -168,6 +168,10 @@ export default class extends Controller {
     this._hidden.forEach((cls) => {
       rules.push(`.plant-card .${cls}{display:none !important}`)
     })
+    // The watering-window gauge belongs to the "Next watering" line — hide them together.
+    if (this._hidden.has("plant-card-watering")) {
+      rules.push(`.plant-card .plant-card-gauge{display:none !important}`)
+    }
     this._order.forEach((cls, i) => {
       rules.push(`.plant-card .${cls}{order:${i}}`)
     })

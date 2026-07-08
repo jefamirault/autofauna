@@ -2,7 +2,7 @@
 <% just_watered ||= nil %>
 <% watered_today = just_watered || plant.date_last_watering == Time.zone.now.to_date %>
 <% urgency = watered_today ? :normal : plant.watering_urgency %>
-<div id="<%= dom_id plant %>" class="plant-card <%= urgency %>" data-location-id="<%= plant.location_id&.to_s || 'none' %>" data-recipe-id="<%= plant.recipe_id&.to_s || 'none' %>" data-needs-watering="<%= urgency == :needs_water %>" data-watering-status="<%= urgency == :needs_water ? 'needs_water' : 'scheduled' %>" <%= 'data-controller=inline-watering' unless archive %> <%= 'data-action="click->plant-select#cardClick"'.html_safe unless archive %>>
+<div id="<%= dom_id plant %>" class="plant-card <%= urgency %><%= ' snoozed' if !archive && plant.snoozed? %>" data-location-id="<%= plant.location_id&.to_s || 'none' %>" data-recipe-id="<%= plant.recipe_id&.to_s || 'none' %>" data-needs-watering="<%= urgency == :needs_water %>" data-watering-status="<%= urgency == :needs_water ? 'needs_water' : 'scheduled' %>" <%= 'data-controller=inline-watering' unless archive %> <%= 'data-action="click->plant-select#cardClick"'.html_safe unless archive %>>
   <% unless archive %>
     <label class="plant-card-select" data-plant-select-target="checkboxWrap" style="display: none;">
       <input type="checkbox" value="<%= plant.id %>"
@@ -31,29 +31,32 @@
           🕐 <span class="long-text"><%= plant.time_until_watering_text.html_safe %></span><span class="short-text"><%= plant.time_until_watering_short_text.html_safe %></span>
         <% end %>
       </div>
+      <% if !plant.snoozed? && (gauge_style = watering_gauge_style(plant)) %>
+        <div class="plant-card-gauge" style="<%= gauge_style %>"></div>
+      <% end %>
     <% end %>
     <div class="plant-card-meta">
       <% if feature_enabled?(:precise_measurements) %>
-        <div class="plant-card-last-watering-volume">💧 <%= last_watering_volume_text(plant) || "–" %></div>
+        <div class="plant-card-last-watering-volume"><span class="mi">💧</span><span class="mv"><%= last_watering_volume_text(plant) || "–" %></span></div>
       <% end %>
-      <div class="plant-card-last-watering-notes">📝 <%= last_watering_notes_text(plant) || "–" %></div>
-      <div class="plant-card-last-watering-time">⌛ <span class="long-text"><%= last_watering_time_text(plant).html_safe %></span><span class="short-text"><%= last_watering_time_short_text(plant).html_safe %></span></div>
+      <div class="plant-card-last-watering-notes"><span class="mi">📝</span><span class="mv"><%= last_watering_notes_text(plant) || "–" %></span></div>
+      <div class="plant-card-last-watering-time"><span class="mi">⌛</span><span class="mv"><span class="long-text"><%= last_watering_time_text(plant).html_safe %></span><span class="short-text"><%= last_watering_time_short_text(plant).html_safe %></span></span></div>
       <% if plant.location.present? %>
         <a href="#" class="plant-card-location"
            data-action="click->location-filter#selectSingleLocation:prevent"
            data-location-id="<%= plant.location.id %>">
-          📍 <%= plant.location.name %>
+          <span class="mi">📍</span><span class="mv"><%= plant.location.name %></span>
         </a>
       <% else %>
         <a href="#" class="plant-card-location"
            data-action="click->location-filter#selectSingleLocation:prevent"
            data-location-id="none">
-          📍 –
+          <span class="mi">📍</span><span class="mv">–</span>
         </a>
       <% end %>
-      <span class="plant-card-container">🫙 <%= plant.pot.presence || "–" %></span>
+      <span class="plant-card-container"><span class="mi">🫙</span><span class="mv"><%= plant.pot.presence || "–" %></span></span>
       <% if feature_enabled?(:use_fertilizers) && plant.recipe.present? %>
-        <span class="plant-card-recipe">🧪 <%= plant.recipe.name %></span>
+        <span class="plant-card-recipe"><span class="mi">🧪</span><span class="mv"><%= plant.recipe.name %></span></span>
       <% end %>
     </div>
     </div>

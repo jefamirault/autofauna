@@ -57,4 +57,22 @@ module PlantsHelper
     return nil if watering.nil? || watering.notes.blank?
     watering.notes
   end
+
+  # Inline custom properties for the plant card's watering-window gauge.
+  # The track runs from the last watering to the max due date — or to today when
+  # overdue, so the fill visibly overshoots the min→max window band.
+  def watering_gauge_style(plant)
+    return nil unless plant.date_last_watering && plant.min_watering_freq.present? && plant.max_watering_freq.present?
+    return nil unless plant.max_watering_freq.positive?
+
+    elapsed = (Time.zone.now.to_date - plant.date_last_watering.to_date).to_i
+    return nil if elapsed.negative?
+
+    total = [elapsed, plant.max_watering_freq].max.to_f
+    window_start = (plant.min_watering_freq / total * 100).clamp(0, 94)
+    window_end = (plant.max_watering_freq / total * 100).clamp(window_start + 4, 100)
+    fill = (elapsed / total * 100).clamp(3, 100)
+
+    format("--window-start: %.1f%%; --window-end: %.1f%%; --fill: %.1f%%", window_start, window_end, fill)
+  end
 end

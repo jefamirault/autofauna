@@ -25,17 +25,34 @@ groups / bulk watering, and the many Turbo/Rails gotchas that live here.
 
 ## Plant cards (`_plant_row.html.erb`)
 
-Urgency-tinted cards (`normal` / `scheduled` / `needs_water`) with a **watering-status spine** —
-a saturated `border-left` in the urgency hue (blue / green / amber): **left = status, right =
-the full-height water button**. Structure:
+Near-white cards on a **"moisture bloom"**: the urgency tint (blue `normal` / green `scheduled` /
+amber `needs_water`) soaks in from the saturated `border-left` **status spine** and fades across
+the card, so status reads at the left edge while text sits on near-white. **Left = status, right =
+the full-height water button.** All hue-derived surfaces (spine, bloom, gauge, accession chip,
+water column) come from CSS custom properties `--hue` / `--hue-ink` / `--hue-soft` / `--hue-wash`
+set per urgency class on `.plant-card` — restyle states by overriding the vars, not per-element
+rules. During a quick-water submit, `.plant-card:has(.plant-card-water-wrap form[aria-busy])`
+flips the vars to blue for optimistic "card drinks" feedback. `plant.snoozed?` adds a `snoozed`
+class → `filter: saturate(.35)` mutes the whole card. Structure:
 `.plant-card-graphic-col` (photo) | `.plant-card-body` (wraps `.plant-card-name` over
 `.plant-card-details`) | `.plant-card-water-wrap`.
 
-- The title splits `plant.uid` into a monospaced `.plant-card-accession` tag ("#90") +
-  `.plant-card-common-name` (rendered separately, **not** via `plant.label`).
-- `.plant-card-details` holds the semibold watering-countdown line + `.plant-card-meta`
-  (attribute lines in a **single-column** grid — each show/hide-able and drag-reorderable via
-  the card-fields menu).
+- The title splits `plant.uid` into a `.plant-card-accession` nursery-tag chip ("#90", mono with
+  hairline hue border) + `.plant-card-common-name` (rendered separately, **not** via `plant.label`).
+- `.plant-card-details` holds the semibold watering-countdown line, the **watering-window gauge**,
+  and `.plant-card-meta` (attribute lines in a **single-column** grid — each show/hide-able and
+  drag-reorderable via the card-fields menu). Meta lines are `grid: 1.5em 1fr` with the emoji in
+  `<span class="mi">` and the value in `<span class="mv">` so values align vertically.
+
+### Watering-window gauge (`.plant-card-gauge`)
+A 5px track under the countdown showing where the plant sits in its schedule: track = last
+watering → max due date (or → today when overdue), translucent band = the min→max watering
+window, fill = elapsed time. Overdue fills overshoot the band, showing *how late* visually.
+Percentages come from `PlantsHelper#watering_gauge_style` as inline `--window-start` /
+`--window-end` / `--fill` custom properties (nil → no gauge: unscheduled, never watered, or
+snoozed). **Coupling:** the gauge belongs to the "Next watering" line in the card-fields menu —
+`card_fields_controller#_applyStyles` hides `.plant-card-gauge` whenever `plant-card-watering`
+is hidden; keep that rule if the gauge ever moves.
 
 ### Responsive layout
 - `.plant-cards` is single-column by default, 2-col ≥1200px, 3-col ≥1550px (cards are narrow

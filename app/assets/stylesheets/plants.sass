@@ -782,37 +782,55 @@ h1
   gap: 0.5rem
   transition: opacity 0.4s ease
 
+// The card's urgency hues are CSS custom properties so every sub-element
+// (spine, bloom, gauge, chip, water button) derives from one place.
+// --hue paints surfaces; --hue-ink is a darker variant for text contrast.
 .plant-card
+  --hue: #{$blue}
+  --hue-ink: #{$blue}
+  --hue-soft: rgba(14, 72, 123, 0.16)
+  --hue-wash: rgba(14, 72, 123, 0.045)
   display: flex
   align-items: stretch
   flex-wrap: wrap
   box-sizing: border-box
-  border-radius: 4px
-  background: $lightblue
+  border-radius: 10px
+  border: 1px solid color-mix(in srgb, var(--hue) 16%, transparent)
   // Watering-status spine: a saturated left edge encoding urgency, read as a
   // scannable column down the card grid. Pairs with the right-edge water button
   // (left = status, right = action). Default = normal/just-watered.
-  border-left: 4px solid $blue
+  border-left: 4px solid var(--hue)
+  // Moisture bloom: the urgency tint soaks in from the spine and fades out
+  // across the card, so status reads at the left edge while text sits on
+  // near-white.
+  background: linear-gradient(105deg, var(--hue-soft) 0%, var(--hue-wash) 34%, rgba(255, 255, 255, 0) 62%), #fdfdfc
+  box-shadow: 0 1px 2px rgba(20, 45, 35, 0.07)
+  overflow: hidden
 
   &:active
-    filter: brightness(0.95)
-
-  // Urgency-based colors (surface tint + spine share each state's hue)
-  &.normal
-    background: $lightblue
-    border-left-color: $blue
+    filter: brightness(0.96)
 
   &.scheduled
-    background: $lightgreen
-    border-left-color: $green
-    .plant-card-watering
-      color: $green
+    --hue: #{$green}
+    --hue-ink: #{$green}
+    --hue-soft: rgba(0, 77, 64, 0.17)
+    --hue-wash: rgba(0, 77, 64, 0.05)
 
   &.needs_water
-    background: $lightyellow
-    border-left-color: $yellow
-    .plant-card-watering
-      color: $yellow
+    --hue: #B07C00
+    --hue-ink: #{$yellow}
+    --hue-soft: rgba(206, 154, 0, 0.22)
+    --hue-wash: rgba(206, 154, 0, 0.06)
+
+  &.scheduled .plant-card-watering,
+  &.needs_water .plant-card-watering
+    color: var(--hue-ink)
+
+  // Snoozed plants stop shouting: desaturate the whole card
+  &.snoozed
+    filter: saturate(0.35)
+    &:active
+      filter: saturate(0.35) brightness(0.96)
 
 // Column 2: Graphic (image fills the full card height; portrait is the
 // default orientation, landscape is accommodated via object-fit: contain)
@@ -834,6 +852,7 @@ h1
   width: 100%
   min-height: 0
   overflow: hidden
+  padding: 0.4rem 0 0.4rem 0.25rem
 
   img
     width: 100%
@@ -841,6 +860,7 @@ h1
     max-height: 100%
     object-fit: contain
     display: block
+    filter: drop-shadow(0 2px 3px rgba(20, 45, 35, 0.14))
 
 // Column 3: Details (now also holds the plant name)
 // Middle column: title stacked over the details box (desktop). On narrow
@@ -862,75 +882,125 @@ h1
   justify-content: space-between
 
 .plant-card-name
-  font-size: 1.1em
-  font-weight: 500
-  margin-bottom: 0.25rem
+  font-size: 1.12em
+  font-weight: 600
+  letter-spacing: -0.01em
+  color: #22323c
+  margin-bottom: 0.3rem
   max-width: 100%
   overflow-wrap: break-word
   word-break: break-word
   a
     color: inherit
     text-decoration: none
-    opacity: 0.9
-    &:hover
+    &:hover .plant-card-common-name
       text-decoration: underline
     &:focus-visible
       outline: 2px solid $blue
       outline-offset: 2px
       border-radius: 2px
 
-// Accession number (plant.uid) styled as a specimen catalog tag — a mono,
-// tracked, muted ID that reads distinctly from the plant's common name and
-// disambiguates repeated names.
+// Accession number (plant.uid) styled as a nursery tag — a mono chip with a
+// hairline border in the card's urgency hue. Reads distinctly from the plant's
+// common name and disambiguates repeated names.
 .plant-card-accession
-  font-family: monospace
-  font-size: 0.82em
+  display: inline-block
+  font-family: ui-monospace, monospace
+  font-size: 0.72em
   font-weight: 600
-  letter-spacing: 0.02em
-  color: #6b6b6b
-  margin-right: 0.45em
+  letter-spacing: 0.04em
+  color: color-mix(in srgb, var(--hue-ink) 72%, #444)
+  background: color-mix(in srgb, var(--hue) 9%, transparent)
+  border: 1px solid color-mix(in srgb, var(--hue) 22%, transparent)
+  border-radius: 5px
+  padding: 0.1em 0.38em 0.12em
+  margin-right: 0.5em
+  vertical-align: 8%
 
 .plant-card-watering
   color: $blue
-  margin-bottom: 0.75rem
+  margin-bottom: 0.5rem
   overflow: hidden
   text-overflow: ellipsis
   white-space: nowrap
-  font-size: 1.1em
+  font-size: 1.02em
   font-weight: 600
+  // The gauge carries the spacing when present
+  &:has(+ .plant-card-gauge)
+    margin-bottom: 0.15rem
+
+// Watering-window gauge: the track runs from the last watering to the max due
+// date (or to today when overdue); the translucent band is the min→max
+// watering window; the fill is elapsed time. An overdue fill overshoots the
+// band, showing how late the plant is. Percentages arrive as inline custom
+// properties from `watering_gauge_style` (PlantsHelper).
+.plant-card-gauge
+  position: relative
+  height: 5px
+  border-radius: 3px
+  margin: 0.2rem 0 0.65rem
+  background: color-mix(in srgb, var(--hue) 10%, transparent)
+  overflow: hidden
+
+  // elapsed fill (under the band)
+  &::before
+    content: ""
+    position: absolute
+    top: 0
+    bottom: 0
+    left: 0
+    width: var(--fill, 0%)
+    background: color-mix(in srgb, var(--hue) 78%, white)
+    border-radius: 3px
+
+  // watering window band (translucent, visible over the fill)
+  &::after
+    content: ""
+    position: absolute
+    top: 0
+    bottom: 0
+    left: var(--window-start, 60%)
+    right: calc(100% - var(--window-end, 100%))
+    background: color-mix(in srgb, var(--hue) 42%, transparent)
+    border-radius: 3px
 
 .plant-card-meta
   display: grid
   grid-template-columns: 1fr
-  gap: 0.15rem
-  font-size: 1.05em
-  color: #666
+  gap: 0.28rem
+  font-size: 0.98em
+  color: #5b6a66
   overflow: hidden
   flex: 1
 
-.plant-card-last-watering-time
-  overflow: hidden
-  text-overflow: ellipsis
-  white-space: nowrap
+  // Each line: fixed emoji slot + value column, so values align vertically
+  > *
+    display: grid
+    grid-template-columns: 1.5em 1fr
+    align-items: baseline
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+    color: inherit
+    text-decoration: none
 
-.plant-card-last-watering-volume,
-.plant-card-last-watering-notes
-  overflow: hidden
-  text-overflow: ellipsis
-  white-space: nowrap
-  padding-left: 0
+    > .mi
+      text-align: center
+      font-size: 0.92em
 
-.plant-card-location,
-.plant-card-container
-  white-space: nowrap
-  overflow: hidden
-  text-overflow: ellipsis
+    > .mv
+      overflow: hidden
+      text-overflow: ellipsis
+
+a.plant-card-location:hover .mv
+  text-decoration: underline
+  color: var(--hue-ink)
 
 // Column 4: Water button wrapper + states
+// The card's overflow:hidden + radius clips this column's corners
 .plant-card-water-wrap
   display: grid
   flex-shrink: 0
-  border-radius: 0 4px 4px 0
   overflow: hidden
 
   // Both children stack in the same grid cell
@@ -960,27 +1030,16 @@ h1
   flex-direction: column
   align-items: center
   justify-content: center
-  padding: 0.5rem 1.5rem
-  border-radius: 0 4px 4px 0
+  padding: 0.5rem 1.4rem
   text-decoration: none
-  color: $blue
+  color: var(--hue-ink)
+  background: color-mix(in srgb, var(--hue) 6%, transparent)
+  border-left: 1px dashed color-mix(in srgb, var(--hue) 25%, transparent)
+  min-width: 6.5rem
   position: relative
 
-  &.normal
-    color: $blue
-    background: rgba(14, 72, 123, 0.05)
-
-  &.scheduled
-    color: $green
-    background: rgba(0, 77, 64, 0.05)
-    &:hover
-      background: $lightgreen
-
-  &.needs_water
-    color: $yellow
-    background: rgba(206, 154, 0, 0.07)
-    &:hover
-      background: $lightyellow
+  &:hover
+    background: color-mix(in srgb, var(--hue) 12%, transparent)
 
 .plant-card-water-col.water-icon-link
   padding: 0
@@ -996,15 +1055,16 @@ h1
     color: inherit
     background: none
     border: none
-    padding: 0.5rem 1.5rem
+    padding: 0.5rem 1.4rem
     font: inherit
 
   &.watered
     color: $green
-    background: $lightgreen
+    background: rgba(0, 77, 64, 0.13)
+    border-left-color: rgba(0, 77, 64, 0.25)
     text-decoration: none
     &:hover
-      background: $lightgreen
+      background: rgba(0, 77, 64, 0.13)
       text-decoration: none
 
   // Optimistic state: Turbo sets aria-busy during form submission
@@ -1017,8 +1077,14 @@ h1
     .plant-card-watered-text
       display: inline
 
-.plant-card:has(.plant-card-water-col[aria-busy="true"])
-  background: $lightblue
+// Optimistic feedback: the moment the quick-water form submits (Turbo sets
+// aria-busy on the form), the whole card "drinks" — every hue-derived surface
+// flips to the watered blue.
+.plant-card:has(.plant-card-water-wrap form[aria-busy="true"])
+  --hue: #{$blue}
+  --hue-ink: #{$blue}
+  --hue-soft: rgba(14, 72, 123, 0.16)
+  --hue-wash: rgba(14, 72, 123, 0.045)
 
 .plant-card-watered-text
   display: none
@@ -1028,22 +1094,29 @@ h1
   white-space: nowrap
 
 .plant-card-edit-watering
-  font-size: 0.8em
-  color: $blue
-  text-decoration: none
-  margin-top: 0.75rem
+  font-size: 0.78em
+  color: $green
+  text-decoration: underline
+  text-underline-offset: 2px
+  margin-top: 0.6rem
   &:hover
     text-decoration: underline
 
 .water-icon
-  width: 3em
-  height: 3em
+  width: 2.6em
+  height: 2.6em
 
 .plant-card-water-helper
-  font-size: 0.7em
-  color: #999
-  margin-top: 0.25rem
+  font-size: 0.68em
+  font-weight: 600
+  letter-spacing: 0.08em
+  text-transform: uppercase
+  color: color-mix(in srgb, var(--hue-ink) 60%, #666)
+  margin-top: 0.35rem
   white-space: nowrap
+
+.plant-card-water-col.watered .plant-card-water-helper
+  color: rgba(0, 77, 64, 0.75)
 
 // Quick water form - remove all form styling, fill the water column
 .quick-water-form
@@ -1237,6 +1310,9 @@ h1
     flex: 0 0 auto
     max-width: none
 
+  .plant-card-graphic
+    padding: 0.4rem
+
   .plant-card-graphic img
     height: auto
     max-height: 70vh
@@ -1257,23 +1333,25 @@ h1
 
   .plant-card-water-wrap
     order: 4
-    border-radius: 0 0 4px 4px
 
+  // The action column becomes a full-width bottom row: dashed divider moves
+  // from the left edge to the top
   .plant-card-water-col
     flex-direction: row
-    border-radius: 0
+    border-left: none
+    border-top: 1px dashed color-mix(in srgb, var(--hue) 25%, transparent)
     padding: 0.85rem
     button[type="submit"]
       flex-direction: row
       padding: 0.85rem
 
+  .plant-card-water-col.watered
+    border-top-color: rgba(0, 77, 64, 0.25)
+
   .plant-card-water-helper
-    font-size: 1.1em
+    font-size: 0.95em
     margin-top: 0
     margin-left: 0.6rem
-
-  .plant-card-inline-form
-    border-radius: 0 0 4px 4px
 
   .inline-watering-row
     flex-direction: column

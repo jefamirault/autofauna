@@ -142,7 +142,7 @@ es:
       archive: "Archivo"
       search_plants_archive: "Buscar archivo de plantas"
     water_button:
-      click: "Clic para regar"
+      click: "Regar"
       tap: "Toca para regar"
       watered: "Regada!"
       edit: "Editar"
