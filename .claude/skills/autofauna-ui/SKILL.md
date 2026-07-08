@@ -290,11 +290,10 @@ For optional form fields revealed by a button click, group each toggle button wi
 
 | Breakpoint | What changes |
 |------------|-------------|
-| `1550px` | Plants index switches from 1-column to 2-column grid |
+| `1200px / 1550px / 1900px` | Plants index grid: 2 / 3 / 4 columns; grid-mode cards become an internal grid (`min-height: 19rem`, photo track = min-height × 3/4 so portrait 4:3 images fill the card height, water button as bottom row of the text column) |
 | `900px` landscape + `500px` height | Compact sidebar logo |
 | `750px` | `--card-max-width` disabled; `.info-card-grid` goes single column |
-| `600px` | Mobile layout: sidebar hidden, hamburger fixed, header shrinks to 4rem |
-| `500px` | Plant cards switch to stacked mobile layout |
+| `600px` | Mobile layout: sidebar hidden, hamburger fixed, header shrinks to 4rem; plant cards stack (toolbar toggles: 1↔2 columns + photo size, `card_layout_controller`) |
 
 ## CSS Architecture Files
 

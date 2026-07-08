@@ -15,6 +15,7 @@ Hotwire + Importmap (no Node/Webpack). Controllers register conventionally.
 | `locale_popup_controller` | Sidebar locale switcher popup |
 | `header_search_controller` | Debounced auto-submit for search |
 | `card_fields_controller` | Plants index cog menu (⚙️): show/hide plant-card attribute lines + drag-reorder on an example preview card (pointer → mouse+touch). Enforces prefs on every card via one injected `<style>`; persists to localStorage (`plant-card-hidden-lines`, `plant-card-line-order`) |
+| `card_layout_controller` | Plants index toolbar (mobile-only, ≤600px): 1↔2 column toggle + photo-size toggle (1-col only). Stamps `plant-cols-2`/`plant-img-compact` on `<html>` (survives frame reloads; CSS scopes them to ≤600px); persists to localStorage (`plant-mobile-columns`, `plant-mobile-image`) |
 | `plant_select_controller` | Plants index multi-select: mode toggle, whole-card click-to-select (`cardClick`, skips the watering column), per-card checkbox reveal (inline `display`), selection keyed by plant id (synced across triple-rendered cards), select-all over filtered set, bulk water/archive/set-location/create-group/add-to-group via a dynamically-built POST form. Calls sibling `location-filter#updateResultsCount` (`_refreshCount`) |
 | `plant_graphic_controller` | Graphic selection with live preview and auto-matching by name |
 | `watering_recipe_controller` | Dynamic batch dropdown on recipe change, auto-fill TDS |

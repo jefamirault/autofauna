@@ -79,7 +79,7 @@
           <span class="plant-card-water-helper"><%= t('plants.water_button.watered') %></span>
         </div>
       <% end %>
-      <div class="plant-card-water-col water-icon-link <%= urgency %>" data-inline-watering-target="waterCol">
+      <div class="plant-card-water-col water-icon-link <%= urgency %>">
         <%# Quick water form - one click POST %>
         <%= form_with url: waterings_path, method: :post, class: "quick-water-form", data: {
           action: "turbo:submit-start->inline-watering#submitStart turbo:submit-end->inline-watering#submitEnd"
@@ -102,29 +102,6 @@
             <span class="plant-card-water-helper mobile-only"><%= t('plants.water_button.tap') %></span>
           </button>
         <% end %>
-        <button type="button" class="expand-watering-btn" data-action="click->inline-watering#expand" data-inline-watering-target="expandToggle" title="More options">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M7 10l5 5 5-5z"/></svg>
-        </button>
-      </div>
-      <div class="plant-card-inline-form" data-inline-watering-target="inlineForm" style="display: none;">
-        <%= render 'plants/inline_watering_form', plant: plant %>
-        <div class="inline-snooze-section" data-controller="snooze-plant">
-          <% if plant.snoozed? %>
-            <%= button_to unsnooze_plant_path(plant), method: :delete, class: "inline-snooze-btn", data: { turbo_frame: "_top" } do %>
-              ☀️ Remove Snooze
-            <% end %>
-          <% else %>
-            <button type="button" class="inline-snooze-btn" data-action="click->snooze-plant#toggle" data-snooze-plant-target="toggleBtn">
-              😴 Snooze
-            </button>
-            <div class="snooze-duration-picker" data-snooze-plant-target="picker" style="display: none;">
-              <span class="snooze-label">Snooze for:</span>
-              <%= button_to "1 day", snooze_plant_path(plant), params: { days: 1 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
-              <%= button_to "3 days", snooze_plant_path(plant), params: { days: 3 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
-              <%= button_to "1 week", snooze_plant_path(plant), params: { days: 7 }, class: "snooze-duration-btn", data: { turbo_frame: "_top" } %>
-            </div>
-          <% end %>
-        </div>
       </div>
     </div>
   <% end %>

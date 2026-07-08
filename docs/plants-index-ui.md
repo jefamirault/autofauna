@@ -33,7 +33,8 @@ the card, so status reads at the left edge while text sits on near-white. **Left
 the full-height water button.** All hue-derived surfaces (spine, bloom, gauge, accession chip,
 water column) come from CSS custom properties `--hue` / `--hue-ink` / `--hue-soft` / `--hue-wash`
 set per urgency class on `.plant-card` — restyle states by overriding the vars, not per-element
-rules. During a quick-water submit, `.plant-card:has(.plant-card-water-wrap form[aria-busy])`
+rules. (The right-edge water column applies below 1200px; in grid modes and on mobile the water
+button is a bottom row — see Responsive layout.) During a quick-water submit, `.plant-card:has(.plant-card-water-wrap form[aria-busy])`
 flips the vars to blue for optimistic "card drinks" feedback. `plant.snoozed?` adds a `snoozed`
 class → `filter: saturate(.35)` mutes the whole card. Structure:
 `.plant-card-graphic-col` (photo) | `.plant-card-body` (wraps `.plant-card-name` over
@@ -57,12 +58,29 @@ snoozed). **Coupling:** the gauge belongs to the "Next watering" line in the car
 is hidden; keep that rule if the gauge ever moves.
 
 ### Responsive layout
-- `.plant-cards` is single-column by default, 2-col ≥1200px, 3-col ≥1550px (cards are narrow
-  since attributes are single-column).
-- At **≤500px** the card stacks into four full-width rows — title / full-width photo hero /
-  details box / water button — via `.plant-card-body { display: contents }` (lifts the title out
-  of the middle column) + flex `order`. The photo goes `height:auto` full-width
-  (`max-height:70vh`); title/details/button font sizes scale up to match.
+- `.plant-cards` is single-column by default, 2-col ≥1200px, 3-col ≥1550px, 4-col ≥1900px (cards
+  are narrow since attributes are single-column). In grid modes (≥1200px) the card becomes an
+  internal CSS grid (`min-height: 19rem`; 17.5rem at 4-up): columns `[select] [photo] [text]`,
+  rows `1fr auto`. The photo track is sized to **min-height × 3/4** (14.25rem; 13.125rem at
+  4-up) with zero inset, so a portrait 4:3 image fills the full card height as an edge-to-edge
+  plate (other ratios letterbox via `object-fit: contain`); it spans both rows while the water
+  button leaves the right edge and becomes a horizontal bottom row of the text column (dashed
+  divider on top, like the mobile stacked layout). If you change grid-mode `min-height`, change
+  the photo track with it. Below 1200px the base flex layout keeps the classic right-edge
+  full-height water column.
+- At **≤600px** (the site mobile breakpoint) the card stacks into four full-width rows — title /
+  full-width photo hero / details box / water button — via `.plant-card-body { display: contents }`
+  (lifts the title out of the middle column) + flex `order`. The photo goes `height:auto`
+  full-width (`max-height:70vh`); title/details/button font sizes scale up to match.
+- **Mobile layout toggles** (`.card-layout-toggles`, right-aligned in `.plants-toolbar`, shown
+  only ≤600px; `card_layout_controller`): a 1-col/2-col segmented control plus a photo-size
+  button. State = classes on `<html>` (`plant-cols-2`, `plant-img-compact`) so it survives
+  turbo-frame reloads; prefs persist in localStorage (`plant-mobile-columns`,
+  `plant-mobile-image`). Default = 1-col + full-width hero. `plant-cols-2` renders a 2-up gallery
+  (portrait `aspect-ratio: 3/4` photo box, compact type, details `flex: 1` pins the water row to
+  the bottom of equal-height grid rows) and hides the photo-size button; `plant-img-compact`
+  (1-col only) caps the hero at 10rem. All rules are scoped inside the ≤600px media block, so the
+  `<html>` classes are inert on desktop.
 
 ### Quick water
 Water button is a `button_to` (POST) creating a watering inline via Turbo Stream. Card updates

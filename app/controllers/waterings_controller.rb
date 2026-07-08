@@ -62,13 +62,9 @@ class WateringsController < ApplicationController
         format.html { redirect_to plant_path(@watering.plant), notice: t('waterings.messages.create_success') }
         format.json { render :show, status: :created, location: @watering }
       else
-        format.turbo_stream {
-          render turbo_stream: turbo_stream.replace(
-            "inline-watering-form-#{@watering.plant_id}",
-            partial: "plants/inline_watering_form",
-            locals: { plant: @watering.plant, watering: @watering }
-          ), status: :unprocessable_entity
-        }
+        # Quick-water carries valid data, so a save failure is exceptional;
+        # respond with an empty stream (no DOM change, button re-enables).
+        format.turbo_stream { render turbo_stream: [], status: :unprocessable_entity }
         format.html { render :new, status: :unprocessable_entity }
         format.json { render json: @watering.errors, status: :unprocessable_entity }
       end

@@ -337,6 +337,46 @@
       </button>
     </div>
   <% end %>
+  <%# Mobile-only layout toggles (CSS hides them >600px): column count + photo size %>
+  <div class="card-layout-toggles" data-controller="card-layout">
+    <div class="layout-seg" role="group" aria-label="<%= t('.layout_columns_label') %>">
+      <button type="button" class="layout-seg-btn"
+              data-card-layout-target="oneColBtn"
+              data-action="click->card-layout#useOneCol"
+              aria-pressed="true"
+              title="<%= t('.layout_one_col') %>" aria-label="<%= t('.layout_one_col') %>">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <rect x="1.5" y="2" width="13" height="5" rx="1.2"/>
+          <rect x="1.5" y="9" width="13" height="5" rx="1.2"/>
+        </svg>
+      </button>
+      <button type="button" class="layout-seg-btn"
+              data-card-layout-target="twoColBtn"
+              data-action="click->card-layout#useTwoCol"
+              aria-pressed="false"
+              title="<%= t('.layout_two_col') %>" aria-label="<%= t('.layout_two_col') %>">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <rect x="1.5" y="2" width="5.75" height="5" rx="1.2"/>
+          <rect x="8.75" y="2" width="5.75" height="5" rx="1.2"/>
+          <rect x="1.5" y="9" width="5.75" height="5" rx="1.2"/>
+          <rect x="8.75" y="9" width="5.75" height="5" rx="1.2"/>
+        </svg>
+      </button>
+    </div>
+    <button type="button" class="layout-seg-btn img-size-btn"
+            data-card-layout-target="imgBtn"
+            data-action="click->card-layout#toggleImage"
+            data-compact-title="<%= t('.layout_img_compact') %>"
+            data-full-title="<%= t('.layout_img_full') %>"
+            aria-pressed="false"
+            title="<%= t('.layout_img_compact') %>" aria-label="<%= t('.layout_img_toggle') %>">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+        <rect x="1.7" y="2.7" width="12.6" height="10.6" rx="1.5"/>
+        <circle cx="5.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/>
+        <path d="M3 12l3.6-3.6 2.4 2.4 2.6-2.6 2.7 2.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
 </div>
 
 <!-- Location Groups (always rendered, visibility controlled by JavaScript) -->

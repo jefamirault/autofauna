@@ -124,6 +124,12 @@ en:
       fields_preview_location: "Kitchen"
       fields_preview_container: "6\" pot"
       fields_preview_fertilizer: "Balanced"
+      layout_columns_label: "Card columns"
+      layout_one_col: "1 column"
+      layout_two_col: "2 columns"
+      layout_img_toggle: "Photo size"
+      layout_img_compact: "Smaller photos"
+      layout_img_full: "Full-size photos"
     show:
       edit_this_plant: "Edit this plant"
       water_this_plant: "Water this Plant"

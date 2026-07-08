@@ -45,3 +45,45 @@ all display modes — pagination-controls stays watering-only): shown only when 
 scroll container) overflows, smooth-scrolls it to 0; visibility refreshed in
 `paginateVisibleCards` and `updateResultsCount`. Files: `location_filter_controller.js`,
 `plants/index.html.erb`, `plants.sass`, `en.yml`/`es.yml`, `docs/plants-index-ui.md`.
+
+## 2026-07-08 — Plant card column ladder + mobile layout toggles
+
+Widened the plants-index grid ladder to **2 / 3 / 4 columns at ≥1200 / ≥1550 / ≥1900px**; in grid
+modes cards get `min-height: 15.5rem` and a wider photo column (170px, 150px at 4-up where the
+water column also slims) so the full-height image reads as a **portrait plate**. Unified the
+stacked-card breakpoint with the site mobile breakpoint (**500px → 600px**) and added mobile-only
+**layout toggles** to `.plants-toolbar`: a 1↔2 column segmented control + a photo-size button
+(visible in 1-col only; compact caps the hero at 10rem — default stays the full-width hero).
+2-col is a portrait gallery (aspect-ratio 3/4 photo box, compact type, water row pinned to the
+bottom of equal-height rows). New `card_layout_controller` stamps `plant-cols-2` /
+`plant-img-compact` on `<html>` (survives turbo-frame reloads), persists to localStorage
+(`plant-mobile-columns`, `plant-mobile-image`); all rules scoped inside the ≤600px media block so
+the classes are inert on desktop. Verified via compiled-CSS static harness + headless screenshots
+at 1950/1300/390px in all toggle states. Files: `plants.sass`, `plants/index.html.erb`,
+`card_layout_controller.js`, `en.yml`/`es.yml`, docs (`plants-index-ui.md`, controllers
+`CLAUDE.md`, autofauna-ui skill).
+
+**Follow-up (same day):** grid-mode (≥1200px) cards restructured into an internal CSS grid —
+columns `[select] [photo] [text]`, rows `1fr auto`. Photo spans the full card height; the water
+button leaves the right edge and becomes a horizontal bottom row of the text column (dashed top
+divider, mirroring the mobile stacked layout — the expanded inline watering form now gets that
+full-width row too). `min-height` bumped 15.5rem → 19rem. Below 1200px the classic right-edge
+water column remains. Re-verified via harness screenshots at 1950/1300px. Files: `plants.sass`,
+docs.
+
+**Follow-up 2:** grid-mode photo track resized from fixed 170px to **min-height × 3/4**
+(14.25rem; 4-up: min-height 17.5rem → 13.125rem track) with zero graphic inset, so a portrait
+4:3 image fills the full card height as an edge-to-edge plate (other ratios letterbox via
+`object-fit: contain`). Verified with a generated 600×800 test photo in the harness at
+1950/1300px. Files: `plants.sass`, docs.
+
+**Follow-up 3:** removed the card's expand-watering caret and the in-place watering form (it
+broke the new grid-mode formatting; the watering edit view covers the use case). Deleted
+`plants/_inline_watering_form.html.erb`; `inline_watering_controller` slimmed to just the
+quick-water double-submit guard; `WateringsController#create` turbo_stream failure branch now
+returns an empty 422 stream (quick-water data is valid by construction). The card's quick snooze
+went with the panel — snooze/unsnooze remains on the plant show page; snoozed state still shows
+on cards. Pruned card-only CSS (`.expand-watering-btn`, `.plant-card-inline-form`,
+`.inline-watering-*`, `.inline-water-*`, `.inline-snooze-*`); kept `.inline-field*`/`.inline-input`
+(bulk-water bar) and show-page snooze styles. Files: `_plant_row.html.erb`,
+`inline_watering_controller.js`, `waterings_controller.rb`, `plants.sass`.

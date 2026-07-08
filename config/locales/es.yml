@@ -108,6 +108,12 @@ es:
       load_more: "Cargar más..."
       back_to_top: "Volver arriba"
       toggle_filters: "Mostrar/ocultar filtros"
+      layout_columns_label: "Columnas de tarjetas"
+      layout_one_col: "1 columna"
+      layout_two_col: "2 columnas"
+      layout_img_toggle: "Tamaño de foto"
+      layout_img_compact: "Fotos más pequeñas"
+      layout_img_full: "Fotos a tamaño completo"
     show:
       edit_this_plant: "Editar esta planta"
       water_this_plant: "Regar esta planta"

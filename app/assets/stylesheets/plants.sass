@@ -96,6 +96,45 @@ h1
       font-size: 1rem
       padding: 0.5rem 1.25rem
 
+// Mobile layout toggles (column count + photo size). Hidden above 600px —
+// the ≤600px block reveals them. State classes land on <html> (plant-cols-2 /
+// plant-img-compact) via card_layout_controller.
+.card-layout-toggles
+  display: none
+  align-items: center
+  gap: 0.4rem
+  margin-left: auto
+
+.layout-seg
+  display: inline-flex
+  border-radius: 999px
+  background: $lightblue
+  overflow: hidden
+
+.layout-seg-btn
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  padding: 0.45rem 0.7rem
+  border: none
+  background: transparent
+  color: $blue
+  cursor: pointer
+  line-height: 0
+  font-family: inherit
+  svg
+    width: 1.05rem
+    height: 1.05rem
+  &:hover
+    background: rgba(14, 72, 123, 0.2)
+  &.active
+    background: $blue
+    color: white
+
+.img-size-btn
+  border-radius: 999px
+  background: $lightblue
+
 // Cog menu (card fields) — floats in the header's bottom-right corner on the
 // plants index, straddling the bottom edge like the filter-collapse handle.
 // Opens a floating two-column panel (draggable preview + show/hide checklist).
@@ -1147,47 +1186,7 @@ a.plant-card-location:hover .mv
   50%
     opacity: 0.4
 
-// Expand toggle for inline watering form
-.expand-watering-btn
-  display: flex
-  align-items: center
-  justify-content: center
-  background: none
-  border: none
-  color: inherit
-  cursor: pointer
-  padding: 0.15rem 0.5rem
-  opacity: 0.4
-  border-radius: 4px
-  &:hover
-    opacity: 0.8
-    background: rgba(0, 0, 0, 0.05)
-
-// Inline watering form (expanded card state)
-.plant-card-inline-form
-  width: 100%
-  border-top: 1px solid rgba(0, 0, 0, 0.08)
-  padding: 0.75rem
-  background: rgba(255, 255, 255, 0.4)
-
-.inline-watering-errors
-  color: #c0392b
-  font-size: 0.85em
-  margin-bottom: 0.5rem
-  padding: 0.25rem 0.5rem
-  background: rgba(192, 57, 43, 0.08)
-  border-radius: 4px
-
-.inline-watering-fields
-  display: flex
-  flex-direction: column
-  gap: 0.5rem
-
-.inline-watering-row
-  display: flex
-  gap: 0.5rem
-  flex-wrap: wrap
-
+// Inline fields — used by the bulk-water options bar
 .inline-field
   display: flex
   flex-direction: column
@@ -1221,35 +1220,6 @@ a.plant-card-location:hover .mv
   box-sizing: border-box
   background: white
 
-.inline-watering-actions
-  display: flex
-  gap: 0.5rem
-  align-items: center
-  margin-top: 0.5rem
-
-.inline-water-submit
-  padding: 0.4rem 1.2rem
-  border: none
-  border-radius: 4px
-  background: $blue
-  color: white
-  font-family: inherit
-  font-size: 0.9em
-  cursor: pointer
-  &:hover
-    opacity: 0.9
-
-.inline-water-cancel
-  padding: 0.4rem 0.8rem
-  border: none
-  background: none
-  color: #666
-  font-family: inherit
-  font-size: 0.9em
-  cursor: pointer
-  &:hover
-    color: #333
-
 // Responsive visibility
 .desktop-only
   display: inline
@@ -1264,27 +1234,91 @@ a.plant-card-location:hover .mv
   display: inline
 
 // Cards use single-column attributes, so they're narrow enough to pack more
-// side by side: two columns at medium widths, three on wide screens (where the
-// layout previously showed two).
+// side by side: two columns at medium widths, three on wide screens, four on
+// very wide screens. Grid-mode cards restructure into an internal grid —
+// photo spans the full card height on the left (a tall portrait plate) while
+// the text column stacks name/details over a bottom water-button row:
+//   [select] [photo] [ body    ]
+//   [select] [photo] [ water   ]
 @media (min-width: 1200px)
   .plant-cards
     display: grid
     grid-template-columns: repeat(2, 1fr)
+  // Photo track = min-height × 3/4, so a portrait 4:3 image fills the full
+  // card height (object-fit: contain letterboxes other ratios)
+  .plant-card
+    min-height: 19rem
+    display: grid
+    grid-template-columns: auto 14.25rem minmax(0, 1fr)
+    grid-template-rows: minmax(0, 1fr) auto
+  .plant-card-select
+    grid-row: 1 / -1
+    grid-column: 1
+  .plant-card-graphic-col
+    grid-row: 1 / -1
+    grid-column: 2
+    max-width: none
+  // Full-bleed photo plate: drop the inset so a portrait image fills the
+  // card height exactly (the card's overflow:hidden clips the corners)
+  .plant-card-graphic
+    padding: 0
+  .plant-card-body
+    grid-row: 1
+    grid-column: 3
+  .plant-card-water-wrap
+    grid-row: 2
+    grid-column: 3
+  // The water action becomes a horizontal bottom row of the text column:
+  // dashed divider moves from the left edge to the top
+  .plant-card-water-col
+    flex-direction: row
+    min-width: 0
+    padding: 0.5rem 1rem
+    border-left: none
+    border-top: 1px dashed color-mix(in srgb, var(--hue) 25%, transparent)
+    button[type="submit"]
+      flex-direction: row
+      padding: 0.5rem 1rem
+  .plant-card-water-col.watered
+    border-top-color: rgba(0, 77, 64, 0.25)
+  .water-icon
+    width: 2em
+    height: 2em
+  .plant-card-water-helper
+    margin-top: 0
+    margin-left: 0.6rem
+  .plant-card-edit-watering
+    margin-top: 0
+    margin-left: 0.9rem
 
 @media (min-width: 1550px)
   .plant-cards
     grid-template-columns: repeat(3, 1fr)
 
+@media (min-width: 1900px)
+  .plant-cards
+    grid-template-columns: repeat(4, 1fr)
+  // Four-up: slightly shorter cards (photo track stays min-height × 3/4) so
+  // the text column keeps room at ~400px card widths
+  .plant-card
+    min-height: 17.5rem
+    grid-template-columns: auto 13.125rem minmax(0, 1fr)
+
 @media (max-width: 768px)
   .plant-card-meta
     font-size: 0.85em
 
-@media (max-width: 500px)
+// Mobile card domain (matches the site's 600px mobile breakpoint). Default is
+// a single column of stacked cards with a full-width photo hero; the toolbar
+// toggles switch to a 2-column gallery or a compact photo via classes on <html>.
+@media (max-width: 600px)
   .desktop-only
     display: none
   .mobile-only
     display: inline
 
+  .card-layout-toggles
+    display: inline-flex
 
   // Narrow viewports: stack the card into four full-width rows —
   // 1. number + title, 2. photo, 3. details box, 4. water button.
@@ -1353,9 +1387,6 @@ a.plant-card-location:hover .mv
     margin-top: 0
     margin-left: 0.6rem
 
-  .inline-watering-row
-    flex-direction: column
-
   .inline-field-units,
   .inline-field-tds
     flex: 1
@@ -1368,6 +1399,49 @@ a.plant-card-location:hover .mv
   .plant-actions
     margin-left: 16px
     margin-right: 16px
+
+  // Photo-size toggle (1-column only): cap the full-width hero so more cards
+  // fit per screen. The 2-column mode sizes photos itself, so it wins below.
+  html.plant-img-compact:not(.plant-cols-2)
+    .plant-card-graphic img
+      max-height: 10rem
+
+  // 2-column gallery mode: compact stacked cards with a portrait photo box.
+  // The details box grows so the water row pins to the bottom of equal-height
+  // grid rows.
+  html.plant-cols-2
+    .img-size-btn
+      display: none
+    .plant-cards
+      display: grid
+      grid-template-columns: repeat(2, 1fr)
+    .plant-card-name
+      font-size: 1.02em
+      padding: 0.5rem 0.6rem 0
+    .plant-card-graphic
+      aspect-ratio: 3 / 4
+      padding: 0.3rem
+      img
+        height: 100%
+        max-height: 100%
+    .plant-card-details
+      flex: 1 0 auto
+      padding: 0.5rem 0.6rem
+    .plant-card-watering
+      font-size: 0.95em
+    .plant-card-meta
+      font-size: 0.85em
+      gap: 0.25rem
+      flex: 0 0 auto
+    .plant-card-water-col
+      padding: 0.5rem
+      button[type="submit"]
+        padding: 0.5rem
+    .water-icon
+      width: 2em
+      height: 2em
+    .plant-card-water-helper
+      font-size: 0.8em
 
 
 .timeline-header
@@ -1437,28 +1511,7 @@ a.plant-card-location:hover .mv
   color: #666
   white-space: nowrap
 
-// Snooze UI
-.inline-snooze-section
-  display: flex
-  align-items: center
-  flex-wrap: wrap
-  gap: 0.5rem
-  margin-top: 0.5rem
-  padding-top: 0.5rem
-  border-top: 1px solid rgba(0, 0, 0, 0.06)
-
-.inline-snooze-btn
-  padding: 0.3rem 0.75rem
-  border: none
-  border-radius: 4px
-  background: rgba(0, 0, 0, 0.06)
-  color: #555
-  font-family: inherit
-  font-size: 0.85em
-  cursor: pointer
-  &:hover
-    background: rgba(0, 0, 0, 0.12)
-
+// Snooze UI (plant show page)
 .snooze-duration-picker
   display: flex
   align-items: center
