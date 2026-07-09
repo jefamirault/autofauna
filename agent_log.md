@@ -165,3 +165,19 @@ form switched over; dropped `waterings.form.now`). Added `log_entries.edit`,
 `soil_moisture_readings.save/select_prompt` (en/es). No eyebrow sections — 2–3-field forms don't
 need them. Verified via compiled-CSS harness screenshots at 1280/390px. Files:
 `soil_moisture_readings/*`, `log_entries/_form|edit|new.html.erb`, `shared.sass`, locales, skill.
+
+## 2026-07-08 — Uploadable pictures for Tanks
+
+Added a single uploadable photo per Tank (`has_one_attached :picture`, no migration — Active
+Storage already in place from plant custom images). Model validates content type (PNG/JPEG/WEBP/GIF)
+and 20MB cap; `picture_attached?` guards against unpersisted blobs after a failed save (same
+pattern as `PlantGraphics#custom_image_attached?`). Controller permits `:picture`, purges on
+`remove_picture=1` (skipped when a replacement is uploaded), and index eager-loads via
+`with_attached_picture`. New generic `image_upload_controller.js` Stimulus controller (choose/take
+photo buttons, client preview, remove flag) — plant_graphic_controller stays coupled to the
+graphics library. Form reuses the global `.graphic-upload-*` classes. Tank cards
+(`_tank.html.erb`) show a 3.5rem thumbnail (`.resource-card.with-photo` flex layout in
+`shared.sass`); tank show renders the photo above the info card with the existing `image-lightbox`
+controller (hi-res 1600px variant). Six new controller tests mirror the plants image tests.
+Files: `tank.rb`, `tanks_controller.rb`, `tanks/_form|_tank|show.html.erb`,
+`image_upload_controller.js`, `shared.sass`, `tanks_controller_test.rb`.

@@ -1,4 +1,13 @@
 class Tank < ApplicationRecord
+  ACCEPTED_PICTURE_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
+  MAX_PICTURE_SIZE = 20.megabytes
+
+  # Cap displayed size; the original upload is kept in storage.
+  PICTURE_VARIANT = { resize_to_limit: [800, 800] }.freeze
+  PICTURE_THUMB_VARIANT = { resize_to_fill: [128, 128] }.freeze
+
+  has_one_attached :picture
+
   belongs_to :location, optional: true
   has_one :zone, through: :location
   has_many :log_entries, as: :loggable, dependent: :destroy
@@ -8,6 +17,15 @@ class Tank < ApplicationRecord
   has_many :water_changes, dependent: :destroy
   has_many :feeding_instructions, dependent: :destroy
   has_many :equipment, dependent: :destroy
+
+  validate :picture_must_be_valid, if: -> { picture.attached? }
+
+  # True only when a *persisted* upload exists. After a failed save the new attachment is
+  # staged with an unpersisted blob, which can't generate a variant URL — treat that as
+  # "no picture" so the form/show can re-render validation errors instead of 500ing.
+  def picture_attached?
+    picture.attached? && picture.blob&.persisted?
+  end
 
   def latest_water_test
     water_tests.recent.first
@@ -87,6 +105,18 @@ class Tank < ApplicationRecord
       "Every #{water_change_min_days}+ days"
     elsif water_change_max_days
       "Every #{water_change_max_days} days or less"
+    end
+  end
+
+  private
+
+  def picture_must_be_valid
+    unless picture.content_type.in?(ACCEPTED_PICTURE_TYPES)
+      errors.add(:picture, "must be a PNG, JPEG, WEBP, or GIF image")
+    end
+
+    if picture.byte_size.to_i > MAX_PICTURE_SIZE
+      errors.add(:picture, "is too large (maximum 20MB)")
     end
   end
 end

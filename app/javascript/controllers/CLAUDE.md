@@ -18,6 +18,7 @@ Hotwire + Importmap (no Node/Webpack). Controllers register conventionally.
 | `card_layout_controller` | Plants index toolbar (mobile-only, ≤600px): 1↔2 column toggle + photo-size toggle (1-col only). Stamps `plant-cols-2`/`plant-img-compact` on `<html>` (survives frame reloads; CSS scopes them to ≤600px); persists to localStorage (`plant-mobile-columns`, `plant-mobile-image`) |
 | `plant_select_controller` | Plants index multi-select: mode toggle, whole-card click-to-select (`cardClick`, skips the watering column), per-card checkbox reveal (inline `display`), selection keyed by plant id (synced across triple-rendered cards), select-all over filtered set, per-group select-all (`selectGroup`, buttons in location/recipe group headers), bulk water/archive/set-location/create-group/add-to-group via a dynamically-built POST form. Calls sibling `location-filter#updateResultsCount` (`_refreshCount`) |
 | `plant_graphic_controller` | Graphic selection with live preview and auto-matching by name |
+| `image_upload_controller` | Generic single-image upload widget (tank photos): hidden file input driven by choose/take-photo buttons, client preview, remove flag |
 | `watering_recipe_controller` | Dynamic batch dropdown on recipe change, auto-fill TDS |
 | `watering_moisture_controller` | Progressive disclosure of pre/post moisture fields |
 | `nested_form_controller` | Add/remove rows for nested attributes (recipes) |

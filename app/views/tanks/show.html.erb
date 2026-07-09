@@ -6,6 +6,15 @@
   <%= @tank %>
 </h1>
 
+<% if @tank.picture_attached? %>
+  <div class="tank-photo" data-controller="image-lightbox"
+       data-image-lightbox-src-value="<%= url_for(@tank.picture.variant(resize_to_limit: [1600, 1600])) %>">
+    <%= image_tag @tank.picture.variant(Tank::PICTURE_VARIANT), alt: @tank.name, class: 'tank-photo-image',
+                  role: 'button', tabindex: 0, title: 'View fullscreen',
+                  data: { action: 'click->image-lightbox#open' } %>
+  </div>
+<% end %>
+
 <div class="info-card">
   <div class="info-card-grid">
     <div class="info-card-section">

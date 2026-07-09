@@ -8,7 +8,7 @@ class TanksController < ApplicationController
 
   # GET /tanks or /tanks.json
   def index
-    @tanks = current_project.tanks
+    @tanks = current_project.tanks.with_attached_picture
   end
 
   # GET /tanks/1 or /tanks/1.json
@@ -47,6 +47,7 @@ class TanksController < ApplicationController
   def update
     respond_to do |format|
       if @tank.update(tank_params)
+        purge_picture_if_requested
         format.html { redirect_to @tank, notice: "Tank was successfully updated." }
         format.json { render :show, status: :ok, location: @tank }
       else
@@ -75,6 +76,13 @@ class TanksController < ApplicationController
     # Only allow a list of trusted parameters through.
     def tank_params
       params.expect(tank: [ :name, :capacity, :capacity_units, :description, :location_id, :project_id,
-                            :water_change_min_days, :water_change_max_days ])
+                            :water_change_min_days, :water_change_max_days, :picture ])
+    end
+
+    def purge_picture_if_requested
+      return unless params.dig(:tank, :remove_picture) == "1"
+      return if tank_params[:picture].present?
+
+      @tank.picture.purge
     end
 end
