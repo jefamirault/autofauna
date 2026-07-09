@@ -112,3 +112,56 @@ collapses the group) and `_refreshGroupButtons()` keeps every chip's state live 
 `plants.bulk.group_selected` (en/es). Verified via compiled-CSS harness screenshots at
 900/390px incl. a light-yellow worst-case group color. Files: `plants/index.html.erb`,
 `plant_select_controller.js`, `plants.sass`, `shared.sass`, locales, docs.
+
+## 2026-07-08 — Watering edit/new form redesign (sectioned form + chip rail)
+
+Restructured the bare waterings `_form` into labeled sections — eyebrow labels (When / Mix /
+Measurements / Notes) with hairline rules, colored by `var(--section-color-start)` so they pick up
+the waterings blue (reusable on any section). Optional fields (volume, TDS, pre/post moisture) now
+toggle via dashed `.chipButton` pills in one `.chip-row` at the end of Measurements; hidden field
+containers sit directly above the row in fixed order (Stimulus targets/actions unchanged). Added a
+"Now" quick-set next to the datetime field (inline onclick). New shared classes: `.card-title-row`
+(h2 + plant pill replaces the redundant Plant field), `.card-footer-actions` (quiet
+discard/delete row), `.form-errors`. **Styled the previously-unstyled `.buttonLinkSmall`**
+(neutral outline pill; placed before `.buttonLink`/`.buttonLinkDanger` so the weather page's
+`buttonLinkSmall buttonLinkDanger` combo keeps danger colors) — also improves onboarding/weather.
+`.field-row` gained `margin-bottom`, `min-width: 0` (mobile shrink) and a trailing-small-button
+slot. Copy: prompts de-dashed ("None — use recipe below"), i18n'd new strings (en/es incl.
+missing `waterings.new_watering`). Verified via compiled-CSS harness screenshots at 1280/390px
+(state: volume+TDS+recipe present). Files: `waterings/_form|edit|new.html.erb`, `shared.sass`,
+`en.yml`/`es.yml`, autofauna-ui skill.
+
+## 2026-07-08 — Plant edit/new form gets the sectioned-form pattern
+
+Extended the watering-form redesign to the plants form: eyebrow sections **Basics** (name,
+number, container — pot moved up), **Where** (location smart-select, groups), **Care** (watering
+frequency, recipes — recipes moved after freq), **Photo** (graphic selector; its old label line
+replaced by the eyebrow). Eyebrows/card border pick up plants green (#2E7D32) via
+`--section-color-start`. Edit page: `.card-title-row` ("Edit Plant" + plant pill, new
+`plants.edit_plant` key) + `.card-footer-actions` (quiet discard/delete). New page: **removed the
+h1 breadcrumb** (violated the no-breadcrumbs rule) in favor of a card h2. Errors box switched
+`auth-errors` → `form-errors`. Fixed two more never-styled classes: `.recipe-checkboxes`
+(checkboxes were full-width via global `input {width:100%}`, floating away from labels — now a
+flex list) and `.smart-select`/`.suggestion-chip` (suggested-location pills, `.selected` fills
+with section color); also `input[type=radio] width:auto` in `.graphic-source-toggle`. Prompts
+"-- None --" → "None" (i18n'd, en/es). Stimulus `plant-graphic` targets untouched. Verified via
+compiled-CSS harness screenshots at 1280/390px. Files: `plants/_form|edit|new.html.erb`,
+`shared.sass`, `plants.sass`, `en.yml`/`es.yml`, autofauna-ui skill.
+
+## 2026-07-08 — Soil moisture + log entry forms brought into the card pattern
+
+Both were unfinished: log entry pages had **no card at all** (bare h1 + breadcrumbs on the page
+background, a 5-select `datetime_select`, inline-red errors); soil moisture used four unstyled
+classes (`.formContainer`, `.button`, `.subtitle`, `.danger-zone`) plus **three missing i18n keys**
+(`edit_log_entry_for`, `delete`, `are_you_sure`) and a `data:{confirm:}` delete that never fired
+under Turbo. Now: both controllers added to the shared centered-card + form-styling selector lists
+in `shared.sass` (that shared block also gained `textarea{width:100%}`); cards get
+`.card-title-row` (title + plant pill) and `.card-footer-actions` (cancel; soil moisture edit also
+a quiet delete with a working `onclick` confirm, new `soil_moisture_readings.delete/
+confirm_delete` keys); errors → `.form-errors`; log entry timestamp switched to
+`datetime_local_field` + "Now" chip (permitted params already accept the scalar); soil moisture
+`measured_at` also gets a "Now" chip. Consolidated the "Now" label into `actions.now` (waterings
+form switched over; dropped `waterings.form.now`). Added `log_entries.edit`,
+`soil_moisture_readings.save/select_prompt` (en/es). No eyebrow sections — 2–3-field forms don't
+need them. Verified via compiled-CSS harness screenshots at 1280/390px. Files:
+`soil_moisture_readings/*`, `log_entries/_form|edit|new.html.erb`, `shared.sass`, locales, skill.

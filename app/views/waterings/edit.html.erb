@@ -13,13 +13,16 @@
 <% end %>
 
 <div class="settings-card">
-  <h2><%= t('waterings.edit_watering') %></h2>
+  <div class="card-title-row">
+    <h2><%= t('waterings.edit_watering') %></h2>
+    <% if @watering.plant %>
+      <div class="plantButton"><%= link_to @watering.plant %></div>
+    <% end %>
+  </div>
   <%= render "form", watering: @watering %>
 
-  <p>
+  <div class="card-footer-actions">
     <%= link_to "❌ #{t('actions.discard_changes')}", @watering, class: 'link' %>
-  </p>
-  <p>
     <%= button_to "🗑️ #{t('waterings.delete_watering')}", @watering, method: :delete, class: 'buttonLinkDanger', onclick: "return confirm('#{t 'waterings.messages.confirm_delete'}');" %>
-  </p>
+  </div>
 </div>

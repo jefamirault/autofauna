@@ -45,7 +45,7 @@ This is defined in `shared.sass`. When adding a new controller to this pattern, 
 **Currently using this pattern:**
 - Plants: edit/new/create/update (in its own `&.plants` block)
 - Waterings: new/edit/create/update/show/water/quick_water (in its own `&.waterings` block)
-- Tanks, locations, zones, sensors, sensor_types, water_tests, recipes, recipe_sources, recipe_batches: new/edit/create/update (shared block)
+- Tanks, locations, zones, sensors, sensor_types, water_tests, recipes, recipe_sources, recipe_batches, soil_moisture_readings, log_entries: new/edit/create/update (shared block)
 
 ## Form Field Layout
 
@@ -79,8 +79,12 @@ CSS (in `shared.sass` under the form-styling selector):
   display: flex
   gap: 1rem
   align-items: flex-end
+  margin-bottom: 0.5em
   .field-row-item
     flex: 1
+    min-width: 0          // lets datetime/number inputs shrink on mobile
+  > .buttonLinkSmall
+    flex-shrink: 0        // trailing "✕ Remove"/"Now" pill stays intact
 ```
 
 ### Range inputs
@@ -220,51 +224,57 @@ The layout still supports rendering a plant graphic in `section#primary` via the
 
 ## No Breadcrumbs on Centered Pages
 
-Pages using the centered transparent layout should NOT have `<h1>` breadcrumb navigation. The header title and sidebar provide navigation context. Instead, add a heading inside the `.settings-card`:
+Pages using the centered transparent layout should NOT have `<h1>` breadcrumb navigation. The header title and sidebar provide navigation context. Instead, add a heading inside the `.settings-card` — use `.card-title-row` when there's a related-resource pill, and `.card-footer-actions` for the quiet discard/delete row:
 
 ```erb
 <div class="settings-card">
-  <h2>Edit Watering</h2>
+  <div class="card-title-row">
+    <h2>Edit Watering</h2>
+    <div class="plantButton"><%= link_to @watering.plant %></div>
+  </div>
   <%= render "form", ... %>
-  <p><%= link_to "Discard", ..., class: 'link' %></p>
-  <p><%= button_to "Delete", ..., class: 'buttonLinkDanger', ... %></p>
+  <div class="card-footer-actions">
+    <%= link_to "Discard", ..., class: 'link' %>
+    <%= button_to "Delete", ..., class: 'buttonLinkDanger', ... %>
+  </div>
 </div>
 ```
 
-Action links (edit, delete, etc.) belong inside the card, not floating outside it.
+Inside `.card-footer-actions`, `.link` and `.buttonLinkDanger` are restyled as quiet text/outline actions so they don't compete with the primary save button. Action links (edit, delete, etc.) belong inside the card, not floating outside it.
+
+## Sectioned Forms (waterings & plants forms)
+
+Long forms group fields under eyebrow labels (`.form-section-label` — small uppercase label with a hairline rule; on a `<label>` when the section has one field, a `<div>` otherwise). Eyebrows, chips, and the card's left border pick up the page's section color via `var(--section-color-start)` (waterings = water blue #1565C0, plants = green #2E7D32), so the pattern is reusable on any section's forms. Waterings sections: When / Mix / Measurements / Notes. Plants sections: Basics / Where / Care / Photo (keys under `plants.form.*` / `waterings.form.*`). The rules live in `shared.sass` under "Sectioned-form pattern" — that block must stay **after** the per-controller `main.<controller> label` rules (specificity tie broken by source order).
+
+```erb
+<%= form.label :watered_at, t('waterings.form.when'), class: 'form-section-label' %>
+<div class="field-row">
+  <div class="field-row-item"><%= form.datetime_local_field :watered_at %></div>
+  <button type="button" class="buttonLinkSmall">Now</button>
+</div>
+```
 
 ## Progressive Disclosure (Toggle Sections)
 
-For optional form fields revealed by a button click, group each toggle button with its field so visual ordering stays correct:
+Optional form fields are revealed by dashed pill chips (`.chipButton`) collected in one `.chip-row` at the end of the section; the hidden field containers sit **directly above the chip row in a fixed order**, so a revealed field always appears in the same zone (waterings form: volume → TDS → pre-moisture → post-moisture, then the chip row):
 
 ```erb
-<div class="moisture-section">
-  <!-- Pre group: button + field together -->
-  <div>
-    <button type="button" data-action="click->controller#togglePre"
-            data-controller-target="preButton" class="buttonLink">
-      Add Pre-Watering Moisture
-    </button>
-    <div data-controller-target="preField" style="display: none;">
-      <!-- field content -->
-      <button type="button" data-action="click->controller#hidePre"
-              class="buttonLinkSmall">Remove</button>
-    </div>
+<div data-controller-target="preField" style="display: none;">
+  <div class="field-row">
+    <div class="field-row-item"><!-- label + input --></div>
+    <button type="button" data-action="click->controller#hidePre"
+            class="buttonLinkSmall">✕ Remove</button>
   </div>
+</div>
 
-  <!-- Post group: button + field together -->
-  <div>
-    <button type="button" data-action="click->controller#togglePost" ...>
-      Add Post-Watering Moisture
-    </button>
-    <div data-controller-target="postField" style="display: none;">
-      <!-- field content -->
-    </div>
-  </div>
+<div class="chip-row">
+  <button type="button" data-action="click->controller#togglePre"
+          data-controller-target="preButton" class="chipButton">＋ Pre-moisture</button>
+  <!-- more chips… -->
 </div>
 ```
 
-**Never** put all toggle buttons in a shared header div separate from their fields — this causes the revealed field to appear after the other button, breaking visual order.
+Don't interleave toggle buttons *between* unrelated fields — either group each button with its field, or use the chip-row-with-fixed-field-zone layout above. What breaks is a revealed field popping up in an unpredictable mid-form position.
 
 ## Button Classes
 
@@ -272,8 +282,12 @@ For optional form fields revealed by a button click, group each toggle button wi
 |-------|-----|
 | `.saveButton` | Primary submit buttons |
 | `.buttonLink` | Action buttons styled as links (green background) |
-| `.buttonLinkSmall` | Small inline action buttons (e.g., "Remove") |
+| `.buttonLinkSmall` | Quiet neutral outline pill for secondary in-form actions ("✕ Remove", "Now", "Back"). Defined **before** `.buttonLink`/`.buttonLinkDanger` in `shared.sass` so combos like `buttonLinkSmall buttonLinkDanger` keep danger colors |
+| `.chipButton` | Dashed pill in the section color — "add optional field" toggles (see Progressive Disclosure) |
+| `.suggestion-chip` | Solid-outline selection pill (smart-select suggested picks); `.selected` fills with the section color |
 | `.buttonLinkDanger` | Destructive action buttons (red) |
+
+Related form classes: `.recipe-checkboxes` (vertical checkbox list — plant Groups/Recipes; overrides the global `input { width: 100% }` so boxes sit beside their labels), `.smart-select` (shared/_smart_select partial: suggested pills + "Show all" details), `.form-errors` (validation error box).
 | `.plantButton` | Green pill linking to a plant |
 | `.link` | Standard text links |
 

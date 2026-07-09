@@ -1,191 +1,192 @@
-  <%= form_with(model: watering, data: { controller: "watering-recipe watering-moisture", watering_recipe_url_value: for_recipe_recipe_batches_path, watering_recipe_project_url_value: for_project_recipe_batches_path, turbo: false }) do |form| %>
-    <% if watering.errors.any? %>
-      <div style="color: red">
-        <h2><%= pluralize(watering.errors.count, "error") %> prohibited this watering from being saved:</h2>
-
-        <ul>
-          <% watering.errors.each do |error| %>
-            <li><%= error.full_message %></li>
-          <% end %>
-        </ul>
-      </div>
-    <% end %>
-
-    <div class="field">
-      <%= form.label :plant, style: "display: block" %>
-      <div class="plantButton">
-        <%= link_to watering.plant %>
-        <%= form.hidden_field :plant_id, value: watering.plant&.id %>
-      </div>
+<%= form_with(model: watering, data: { controller: "watering-recipe watering-moisture", watering_recipe_url_value: for_recipe_recipe_batches_path, watering_recipe_project_url_value: for_project_recipe_batches_path, turbo: false }) do |form| %>
+  <% if watering.errors.any? %>
+    <div class="form-errors">
+      <h3><%= pluralize(watering.errors.count, "error") %> prohibited this watering from being saved:</h3>
+      <ul>
+        <% watering.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
     </div>
+  <% end %>
 
-    <div class="field">
-      <%= form.label :watered_at, "Date & Time", style: "display: block" %>
+  <%= form.hidden_field :plant_id, value: watering.plant&.id %>
+
+  <%= form.label :watered_at, t('waterings.form.when'), class: 'form-section-label' %>
+  <div class="field-row">
+    <div class="field-row-item">
       <%= form.datetime_local_field :watered_at,
           value: watering.watered_at&.strftime("%Y-%m-%dT%H:%M") ||
                  Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
     </div>
+    <button type="button" class="buttonLinkSmall"
+            onclick="document.getElementById('watering_watered_at').value = new Date(Date.now() - 60000 * new Date().getTimezoneOffset()).toISOString().slice(0, 16);">
+      <%= t('actions.now') %>
+    </button>
+  </div>
 
-    <%# Volume section: always available; submitting a value enables precise_measurements (first-use) %>
-      <div data-watering-recipe-target="volumeSection"
-           style="<%= watering.volume.present? ? '' : 'display: none;' %>">
-        <div class="field-row">
-          <div class="field-row-item">
-            <%= form.label :volume, style: "display: block" %>
-            <%= form.number_field :volume, step: 'any', placeholder: "e.g. 2.0", data: { watering_recipe_target: "volumeField" } %>
-          </div>
-          <div class="field-row-item">
-            <%= form.label :units, t('attributes.units'), style: "display: block" %>
-            <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units || watering.plant.suggested_watering_unit), {}, { data: { watering_recipe_target: "unitsSelect" } } %>
-          </div>
-        </div>
-        <button type="button"
-                data-action="click->watering-recipe#hideVolume"
-                class="buttonLinkSmall">✕ Remove Volume</button>
+  <% has_recipes = feature_enabled?(:use_fertilizers) && current_project.recipes.any? %>
+  <% has_sources = feature_enabled?(:use_fertilizers) && current_project.recipe_sources.any? %>
+  <% if has_recipes || has_sources %>
+    <div class="form-section-label"><%= t('waterings.form.mix') %></div>
+
+    <% if has_sources %>
+      <div class="field">
+        <%= form.label :recipe_source_id, "Source (water type)" %>
+        <%= form.collection_select :recipe_source_id, current_project.recipe_sources.order(:name), :id, :name,
+            { prompt: has_recipes ? t('waterings.form.none_use_recipe') : t('waterings.form.none'), selected: watering.recipe_source_id },
+            { data: { watering_recipe_target: "sourceSelect", action: "change->watering-recipe#sourceChanged" } } %>
       </div>
-
-      <button type="button"
-              data-action="click->watering-recipe#showVolume"
-              data-watering-recipe-target="volumeButton"
-              class="buttonLink"
-              style="<%= watering.volume.present? ? 'display: none;' : '' %>">
-        ➕ Add Volume
-      </button>
-
-    <% has_recipes = feature_enabled?(:use_fertilizers) && current_project.recipes.any? %>
-    <% has_sources = feature_enabled?(:use_fertilizers) && current_project.recipe_sources.any? %>
-    <% if has_recipes || has_sources %>
-      <% if has_sources %>
-        <div style="margin-bottom: 0.5rem;">
-          <%= form.label :recipe_source_id, "Source (water type)", style: "display: block" %>
-          <%= form.collection_select :recipe_source_id, current_project.recipe_sources.order(:name), :id, :name,
-              { prompt: '-- None (use recipe below) --', selected: watering.recipe_source_id },
-              { data: { watering_recipe_target: "sourceSelect", action: "change->watering-recipe#sourceChanged" } } %>
-        </div>
-      <% end %>
-
-      <% if has_recipes %>
-        <div class="field-row" data-watering-recipe-target="recipeSection"
-             style="<%= watering.recipe_source_id.present? ? 'display: none;' : '' %>">
-          <div class="field-row-item">
-            <%= form.label :recipe_id, "Recipe", style: "display: block" %>
-            <%= form.collection_select :recipe_id, current_project.recipes.order(:name), :id, :name,
-                { prompt: '-- None --', selected: watering.recipe_id },
-                { data: { watering_recipe_target: "recipeSelect", action: "change->watering-recipe#recipeChanged" } } %>
-          </div>
-          <div class="field-row-item">
-            <%= form.label :recipe_batch_id, "Batch", style: "display: block" %>
-            <select name="watering[recipe_batch_id]" id="watering_recipe_batch_id"
-                    data-watering-recipe-target="batchSelect"
-                    data-action="change->watering-recipe#batchChanged">
-              <option value="">-- None --</option>
-              <% if watering.recipe_id.present? %>
-                <% current_project.recipe_batches.active.where(recipe_id: watering.recipe_id).each do |batch| %>
-                  <option value="<%= batch.id %>" data-tds="<%= batch.tds %>" <%= 'selected' if watering.recipe_batch_id == batch.id %>><%= batch.label %></option>
-                <% end %>
-              <% end %>
-            </select>
-          </div>
-        </div>
-      <% end %>
-
     <% end %>
 
-      <%# TDS: always available; submitting a value enables precise_measurements (first-use) %>
-      <div>
-        <button type="button"
-                data-action="click->watering-recipe#toggleTds"
-                data-watering-recipe-target="tdsButton"
-                class="buttonLink"
-                style="<%= 'display: none;' if watering.tds.present? %>">
-          ➕ Add TDS
-        </button>
-        <div data-watering-recipe-target="tdsContainer" style="<%= watering.tds.present? ? 'display: block;' : 'display: none;' %>">
-          <div class="field">
-            <%= form.label :tds, "TDS (ppm)", style: "display: block" %>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <%= form.number_field :tds, placeholder: "e.g. 400", data: { watering_recipe_target: "tdsField" } %>
-              <button type="button"
-                      data-action="click->watering-recipe#hideTds"
-                      class="buttonLinkSmall">✕ Remove TDS</button>
-            </div>
-          </div>
+    <% if has_recipes %>
+      <div class="field-row" data-watering-recipe-target="recipeSection"
+           style="<%= watering.recipe_source_id.present? ? 'display: none;' : '' %>">
+        <div class="field-row-item">
+          <%= form.label :recipe_id, "Recipe" %>
+          <%= form.collection_select :recipe_id, current_project.recipes.order(:name), :id, :name,
+              { prompt: t('waterings.form.none'), selected: watering.recipe_id },
+              { data: { watering_recipe_target: "recipeSelect", action: "change->watering-recipe#recipeChanged" } } %>
+        </div>
+        <div class="field-row-item">
+          <%= form.label :recipe_batch_id, "Batch" %>
+          <select name="watering[recipe_batch_id]" id="watering_recipe_batch_id"
+                  data-watering-recipe-target="batchSelect"
+                  data-action="change->watering-recipe#batchChanged">
+            <option value=""><%= t('waterings.form.none') %></option>
+            <% if watering.recipe_id.present? %>
+              <% current_project.recipe_batches.active.where(recipe_id: watering.recipe_id).each do |batch| %>
+                <option value="<%= batch.id %>" data-tds="<%= batch.tds %>" <%= 'selected' if watering.recipe_batch_id == batch.id %>><%= batch.label %></option>
+              <% end %>
+            <% end %>
+          </select>
         </div>
       </div>
-
-    <div class="field">
-      <%= form.label :notes, style: "display: block" %>
-      <%= form.text_area :notes, autofocus: watering.notes.nil? || watering.notes == '', placeholder: "e.g. Tap water" %>
-    </div>
-
-    <%# Soil moisture: always available; submitting a value enables track_soil_moisture (first-use) %>
-    <div class="moisture-section">
-      <!-- Pre-watering moisture -->
-      <div>
-        <button type="button"
-                data-action="click->watering-moisture#togglePre"
-                data-watering-moisture-target="preButton"
-                class="buttonLink"
-                style="<%= 'display: none;' if @recent_moisture_reading %>">
-          ➕ Add Pre-Watering Moisture
-        </button>
-        <div data-watering-moisture-target="preField" style="<%= @recent_moisture_reading ? 'display: block;' : 'display: none;' %>">
-          <%= form.label :pre_moisture, "Pre-Watering Moisture", style: "display: block" %>
-          <% if @recent_moisture_reading %>
-            <small style="display: block; margin-bottom: 0.5rem; color: #666;">
-              ✨ Auto-filled from reading <%= time_ago_in_words(@recent_moisture_reading.measured_at) %> ago
-            </small>
-            <%= form.hidden_field :pre_moisture_reading_id, value: @recent_moisture_reading.id %>
-          <% end %>
-          <% if current_project.moisture_measurement_type == 'numeric' %>
-            <%= form.number_field :pre_moisture,
-                value: @recent_moisture_reading&.value_numeric,
-                step: '0.1', placeholder: "e.g. 45.5" %>
-            <small>Numeric value</small>
-          <% else %>
-            <%= form.select :pre_moisture,
-                options_for_select(
-                  SoilMoistureReading.value_categoricals.keys.map { |k| [k.titleize, k] },
-                  @recent_moisture_reading&.value_categorical
-                ),
-                { prompt: '-- Select --' } %>
-          <% end %>
-          <button type="button"
-                  data-action="click->watering-moisture#hidePre"
-                  class="buttonLinkSmall">✕ Remove</button>
-        </div>
-      </div>
-
-      <!-- Post-watering moisture -->
-      <div>
-        <button type="button"
-                data-action="click->watering-moisture#togglePost"
-                data-watering-moisture-target="postButton"
-                class="buttonLink">
-          ➕ Add Post-Watering Moisture
-        </button>
-        <div data-watering-moisture-target="postField" style="display: none;">
-          <%= form.label :post_moisture, "Post-Watering Moisture", style: "display: block" %>
-          <% if current_project.moisture_measurement_type == 'numeric' %>
-            <%= form.number_field :post_moisture,
-                step: '0.1', placeholder: "e.g. 85.0" %>
-            <small>Numeric value</small>
-          <% else %>
-            <%= form.select :post_moisture,
-                options_for_select(
-                  SoilMoistureReading.value_categoricals.keys.map { |k| [k.titleize, k] }
-                ),
-                { prompt: '-- Select --' } %>
-          <% end %>
-          <button type="button"
-                  data-action="click->watering-moisture#hidePost"
-                  class="buttonLinkSmall">✕ Remove</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="submit">
-      <% submit_text = t(watering.new_record? ? 'waterings.create_watering' : 'waterings.update_watering') %>
-      <%= form.submit submit_text, class: 'saveButton' %>
-    </div>
+    <% end %>
   <% end %>
+
+  <div class="form-section-label"><%= t('waterings.form.measurements') %></div>
+
+  <%# Volume: always available; submitting a value enables precise_measurements (first-use) %>
+  <div data-watering-recipe-target="volumeSection"
+       style="<%= watering.volume.present? ? '' : 'display: none;' %>">
+    <div class="field-row">
+      <div class="field-row-item">
+        <%= form.label :volume %>
+        <%= form.number_field :volume, step: 'any', placeholder: "e.g. 2.0", data: { watering_recipe_target: "volumeField" } %>
+      </div>
+      <div class="field-row-item">
+        <%= form.label :units, t('attributes.units') %>
+        <%= form.select :units, options_for_select(Watering.units.map {|k,v| [k, k]}, watering.units || watering.plant.suggested_watering_unit), {}, { data: { watering_recipe_target: "unitsSelect" } } %>
+      </div>
+      <button type="button"
+              data-action="click->watering-recipe#hideVolume"
+              class="buttonLinkSmall">✕ <%= t('waterings.form.remove') %></button>
+    </div>
+  </div>
+
+  <%# TDS: always available; submitting a value enables precise_measurements (first-use) %>
+  <div data-watering-recipe-target="tdsContainer"
+       style="<%= watering.tds.present? ? '' : 'display: none;' %>">
+    <div class="field-row">
+      <div class="field-row-item">
+        <%= form.label :tds, "TDS (ppm)" %>
+        <%= form.number_field :tds, placeholder: "e.g. 400", data: { watering_recipe_target: "tdsField" } %>
+      </div>
+      <button type="button"
+              data-action="click->watering-recipe#hideTds"
+              class="buttonLinkSmall">✕ <%= t('waterings.form.remove') %></button>
+    </div>
+  </div>
+
+  <%# Soil moisture: always available; submitting a value enables track_soil_moisture (first-use) %>
+  <div data-watering-moisture-target="preField" style="<%= @recent_moisture_reading ? 'display: block;' : 'display: none;' %>">
+    <div class="field-row">
+      <div class="field-row-item">
+        <%= form.label :pre_moisture, "Pre-Watering Moisture" %>
+        <% if @recent_moisture_reading %>
+          <small style="display: block; margin-bottom: 0.5rem; color: #666;">
+            ✨ Auto-filled from reading <%= time_ago_in_words(@recent_moisture_reading.measured_at) %> ago
+          </small>
+          <%= form.hidden_field :pre_moisture_reading_id, value: @recent_moisture_reading.id %>
+        <% end %>
+        <% if current_project.moisture_measurement_type == 'numeric' %>
+          <%= form.number_field :pre_moisture,
+              value: @recent_moisture_reading&.value_numeric,
+              step: '0.1', placeholder: "e.g. 45.5" %>
+        <% else %>
+          <%= form.select :pre_moisture,
+              options_for_select(
+                SoilMoistureReading.value_categoricals.keys.map { |k| [k.titleize, k] },
+                @recent_moisture_reading&.value_categorical
+              ),
+              { prompt: t('waterings.form.select_prompt') } %>
+        <% end %>
+      </div>
+      <button type="button"
+              data-action="click->watering-moisture#hidePre"
+              class="buttonLinkSmall">✕ <%= t('waterings.form.remove') %></button>
+    </div>
+  </div>
+
+  <div data-watering-moisture-target="postField" style="display: none;">
+    <div class="field-row">
+      <div class="field-row-item">
+        <%= form.label :post_moisture, "Post-Watering Moisture" %>
+        <% if current_project.moisture_measurement_type == 'numeric' %>
+          <%= form.number_field :post_moisture,
+              step: '0.1', placeholder: "e.g. 85.0" %>
+        <% else %>
+          <%= form.select :post_moisture,
+              options_for_select(
+                SoilMoistureReading.value_categoricals.keys.map { |k| [k.titleize, k] }
+              ),
+              { prompt: t('waterings.form.select_prompt') } %>
+        <% end %>
+      </div>
+      <button type="button"
+              data-action="click->watering-moisture#hidePost"
+              class="buttonLinkSmall">✕ <%= t('waterings.form.remove') %></button>
+    </div>
+  </div>
+
+  <div class="chip-row">
+    <button type="button"
+            data-action="click->watering-recipe#showVolume"
+            data-watering-recipe-target="volumeButton"
+            class="chipButton"
+            style="<%= 'display: none;' if watering.volume.present? %>">
+      <%= t('waterings.form.add_volume') %>
+    </button>
+    <button type="button"
+            data-action="click->watering-recipe#toggleTds"
+            data-watering-recipe-target="tdsButton"
+            class="chipButton"
+            style="<%= 'display: none;' if watering.tds.present? %>">
+      <%= t('waterings.form.add_tds') %>
+    </button>
+    <button type="button"
+            data-action="click->watering-moisture#togglePre"
+            data-watering-moisture-target="preButton"
+            class="chipButton"
+            style="<%= 'display: none;' if @recent_moisture_reading %>">
+      <%= t('waterings.form.add_pre_moisture') %>
+    </button>
+    <button type="button"
+            data-action="click->watering-moisture#togglePost"
+            data-watering-moisture-target="postButton"
+            class="chipButton">
+      <%= t('waterings.form.add_post_moisture') %>
+    </button>
+  </div>
+
+  <%= form.label :notes, t('waterings.form.notes'), class: 'form-section-label' %>
+  <div class="field">
+    <%= form.text_area :notes, autofocus: watering.notes.nil? || watering.notes == '', placeholder: "e.g. Tap water" %>
+  </div>
+
+  <div class="submit">
+    <% submit_text = t(watering.new_record? ? 'waterings.create_watering' : 'waterings.update_watering') %>
+    <%= form.submit submit_text, class: 'saveButton' %>
+  </div>
+<% end %>

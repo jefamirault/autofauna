@@ -27,7 +27,7 @@ class LogEntriesController < ApplicationController
 
     respond_to do |format|
       if @log_entry.save
-        format.html { redirect_to plant_log_entries_path(plant_id: @log_entry.loggable.id), notice: "Log Entry was successfully created." }
+        format.html { redirect_to @log_entry.loggable, notice: "Log Entry was successfully created." }
         format.json { render :show, status: :created, log_entry: @log_entry }
       else
         format.html { render :new, status: :unprocessable_entity }

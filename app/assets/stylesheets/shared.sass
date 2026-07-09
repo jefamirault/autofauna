@@ -90,7 +90,7 @@ h2
   margin: .5em 0 .5em .65em
 
 main
-  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings, &.weather, &.plants, &.waterings, &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests, &.recipes, &.recipe_sources, &.recipe_batches, &.onboarding
+  &.sessions, &.registrations, &.passwords, &.password_resets, &.settings, &.weather, &.plants, &.waterings, &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests, &.recipes, &.recipe_sources, &.recipe_batches, &.onboarding, &.soil_moisture_readings, &.log_entries
     label
       display: block
       font-size: 85%
@@ -103,8 +103,15 @@ main
       display: flex
       gap: 1rem
       align-items: flex-end
+      margin-bottom: 0.5em
       .field-row-item
         flex: 1
+        min-width: 0
+        input
+          max-width: 100%
+      > .buttonLinkSmall
+        flex-shrink: 0
+        margin-bottom: 6px
     .submit
       margin-top: 1em
 
@@ -139,6 +146,8 @@ main
         .settings-card
           width: 100%
           max-width: 450px
+          &:not(.danger)
+            border-left-color: var(--section-color-start, $green)
           @media (max-width: 600px)
             width: calc(100% - 2rem)
             margin: 0 1rem
@@ -150,13 +159,19 @@ main
         flex-direction: column
         align-items: center
         justify-content: center
+        textarea
+          width: 100%
         .settings-card
           width: 100%
           max-width: 450px
+          &:not(.danger)
+            border-left-color: var(--section-color-start, $green)
+          h2
+            color: $blue
           @media (max-width: 600px)
             width: calc(100% - 2rem)
             margin: 0 1rem
-  &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests, &.recipes, &.recipe_sources, &.recipe_batches
+  &.tanks, &.locations, &.zones, &.sensors, &.sensor_types, &.water_tests, &.recipes, &.recipe_sources, &.recipe_batches, &.soil_moisture_readings, &.log_entries
     &.new, &.edit, &.create, &.update
       section#primary
         background: transparent
@@ -164,6 +179,8 @@ main
         flex-direction: column
         align-items: center
         justify-content: center
+        textarea
+          width: 100%
         .settings-card
           width: 100%
           max-width: 450px
@@ -427,6 +444,158 @@ table.yellow
   form
     text-align: left
 
+// Sectioned-form pattern (waterings form; reusable on any settings-card form).
+// Eyebrow labels + chips inherit the page's section color via --section-color-start.
+// `main label.form-section-label` intentionally ties specificity with the
+// per-controller `main.<controller> label` rules — this block must stay later in the file.
+main
+  label.form-section-label, div.form-section-label
+    display: flex
+    align-items: center
+    gap: 0.6rem
+    margin: 1.4rem 0 0.6rem
+    font-size: 0.7rem
+    font-weight: 500
+    letter-spacing: 0.09em
+    text-transform: uppercase
+    color: var(--section-color-start, $green)
+    &::after
+      content: ""
+      flex: 1
+      height: 1px
+      background: color-mix(in srgb, var(--section-color-start, #004D40) 25%, transparent)
+    &:first-of-type
+      margin-top: 0.75rem
+
+.chip-row
+  display: flex
+  flex-wrap: wrap
+  gap: 0.5rem
+  margin-top: 0.75rem
+
+.chipButton
+  display: inline-flex
+  align-items: center
+  padding: 0.35rem 0.9rem
+  border-radius: 999px
+  border: 1.5px dashed color-mix(in srgb, var(--section-color-start, #004D40) 45%, transparent)
+  background: transparent
+  color: var(--section-color-start, $green)
+  font-family: Roboto, verdana, sans-serif
+  font-size: 0.85rem
+  cursor: pointer
+  transition: background 0.15s ease, border-color 0.15s ease
+  &:hover
+    background: color-mix(in srgb, var(--section-color-start, #004D40) 10%, transparent)
+    border-style: solid
+  &:focus-visible
+    outline: 2px solid var(--section-color-start, $green)
+    outline-offset: 2px
+
+.card-title-row
+  display: flex
+  align-items: center
+  justify-content: space-between
+  gap: 0.75rem
+  margin-bottom: 0.25rem
+  h2
+    margin: 0
+  .plantButton
+    width: auto
+    max-width: 55%
+    font-size: 95%
+    a
+      line-height: 34px
+      padding: 0 14px
+      overflow: hidden
+      text-overflow: ellipsis
+      white-space: nowrap
+
+.card-footer-actions
+  display: flex
+  justify-content: space-between
+  align-items: center
+  gap: 0.5rem
+  margin-top: 1.25rem
+  padding-top: 0.5rem
+  border-top: 1px solid rgba(0, 0, 0, 0.08)
+  form.button_to
+    margin: 0
+  .link
+    background: transparent
+    color: #517c68
+    padding: 4px 8px
+    margin: 0
+    &:hover
+      background: rgba(81, 124, 104, 0.08)
+      color: #2c4944
+  .buttonLinkDanger
+    background: transparent
+    color: #a52f2f
+    border: 1px solid rgba(165, 47, 47, 0.4)
+    border-radius: 999px
+    padding: 4px 12px
+    margin: 0
+    font-size: 0.85rem
+    &:hover
+      background: rgba(165, 47, 47, 0.08)
+      color: #a52f2f
+
+.form-errors
+  background: rgba(124, 81, 81, 0.12)
+  border-left: 3px solid #7c5151
+  border-radius: 4px
+  padding: 0.6rem 0.9rem
+  margin-bottom: 1rem
+  color: #5c3a3a
+  h3
+    margin: 0 0 0.25rem
+    font-size: 0.95em
+    font-weight: 500
+  ul
+    margin: 0
+    padding-left: 1.25rem
+
+// Smart select (shared/_smart_select): suggested picks as selection pills + "Show all" fallback
+.smart-select
+  .smart-select-suggestions
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: 0.5rem
+    margin: 0.25rem 0 0.5rem
+
+  .suggestions-label
+    font-size: 0.8rem
+    color: #777
+
+  .suggestion-chip
+    padding: 0.35rem 0.9rem
+    border-radius: 999px
+    border: 1px solid #b5bdb9
+    background: white
+    color: #333
+    font-family: Roboto, verdana, sans-serif
+    font-size: 0.85rem
+    cursor: pointer
+    transition: border-color 0.15s ease, background 0.15s ease
+
+    &:hover
+      border-color: var(--section-color-start, $green)
+
+    &.selected
+      background: var(--section-color-start, $green)
+      border-color: var(--section-color-start, $green)
+      color: white
+
+    &:focus-visible
+      outline: 2px solid var(--section-color-start, $green)
+      outline-offset: 2px
+
+  details
+    select
+      margin-top: 0.5rem
+
   .saveButton
     width: 100%
     box-sizing: border-box
@@ -653,6 +822,25 @@ p.large
   background: #7c5151
   &:hover
     background: #a52f2f
+// Quiet neutral pill for secondary in-form actions (Remove, Back, Now, Show all).
+// Keep defined BEFORE .buttonLink/.buttonLinkDanger so combos like
+// "buttonLinkSmall buttonLinkDanger" keep the danger colors.
+.buttonLinkSmall
+  display: inline-block
+  padding: 4px 12px
+  margin: 2px 0
+  background: transparent
+  border: 1px solid #b5bdb9
+  border-radius: 999px
+  color: #5a6560
+  font-family: Roboto, verdana, sans-serif
+  font-size: 0.8rem
+  cursor: pointer
+  white-space: nowrap
+  &:hover
+    border-color: #517c68
+    color: #2c4944
+    background: rgba(81, 124, 104, 0.08)
 .buttonLink
   @extend .link
   font-family: Roboto, verdana, sans-serif

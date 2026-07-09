@@ -1,51 +1,53 @@
-<div class="formContainer">
-  <%= form_with(model: [@plant, soil_moisture_reading], local: true) do |form| %>
-    <% if soil_moisture_reading.errors.any? %>
-      <div class="auth-errors">
-        <h2><%= pluralize(soil_moisture_reading.errors.count, "error") %> prohibited this reading from being saved:</h2>
-        <ul>
-          <% soil_moisture_reading.errors.full_messages.each do |message| %>
-            <li><%= message %></li>
-          <% end %>
-        </ul>
-      </div>
-    <% end %>
+<%= form_with(model: [@plant, soil_moisture_reading], local: true) do |form| %>
+  <% if soil_moisture_reading.errors.any? %>
+    <div class="form-errors">
+      <h3><%= pluralize(soil_moisture_reading.errors.count, "error") %> prohibited this reading from being saved:</h3>
+      <ul>
+        <% soil_moisture_reading.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
 
-    <div>
+  <div class="field-row">
+    <div class="field-row-item">
       <%= form.label :measured_at, t('attributes.measured_at') %>
       <%= form.datetime_local_field :measured_at,
           value: soil_moisture_reading.measured_at&.strftime("%Y-%m-%dT%H:%M") ||
                  Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
     </div>
+    <button type="button" class="buttonLinkSmall"
+            onclick="document.getElementById('soil_moisture_reading_measured_at').value = new Date(Date.now() - 60000 * new Date().getTimezoneOffset()).toISOString().slice(0, 16);">
+      <%= t('actions.now') %>
+    </button>
+  </div>
 
-    <% if current_project.moisture_measurement_type == 'numeric' %>
-      <div>
-        <%= form.label :value_numeric, t('attributes.value_numeric') %>
-        <%= form.number_field :value_numeric,
-            step: '0.1',
-            placeholder: "e.g. 45.5" %>
-        <small>Numeric value</small>
-      </div>
-    <% else %>
-      <div>
-        <%= form.label :value_categorical, t('attributes.value_categorical') %>
-        <%= form.select :value_categorical,
-            options_for_select(
-              SoilMoistureReading.value_categoricals.keys.map { |k| [k.titleize, k] },
-              soil_moisture_reading.value_categorical
-            ),
-            { prompt: '-- Select --' } %>
-      </div>
-    <% end %>
-
-    <div>
-      <%= form.label :notes %>
-      <%= form.text_area :notes, rows: 3 %>
+  <% if current_project.moisture_measurement_type == 'numeric' %>
+    <div class="field">
+      <%= form.label :value_numeric, t('attributes.value_numeric') %>
+      <%= form.number_field :value_numeric,
+          step: '0.1',
+          placeholder: "e.g. 45.5" %>
     </div>
-
-    <div class="actions">
-      <%= form.submit class: 'button' %>
-      <%= link_to t('cancel'), plant_path(@plant), class: 'button secondary' %>
+  <% else %>
+    <div class="field">
+      <%= form.label :value_categorical, t('attributes.value_categorical') %>
+      <%= form.select :value_categorical,
+          options_for_select(
+            SoilMoistureReading.value_categoricals.keys.map { |k| [k.titleize, k] },
+            soil_moisture_reading.value_categorical
+          ),
+          { prompt: t('soil_moisture_readings.select_prompt') } %>
     </div>
   <% end %>
-</div>
+
+  <div class="field">
+    <%= form.label :notes %>
+    <%= form.text_area :notes, rows: 3 %>
+  </div>
+
+  <div class="submit">
+    <%= form.submit t('soil_moisture_readings.save'), class: 'saveButton' %>
+  </div>
+<% end %>

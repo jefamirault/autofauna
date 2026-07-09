@@ -6,9 +6,8 @@
   turbo: false
 }) do |form| %>
   <% if plant.errors.any? %>
-    <div class="auth-errors">
-      <h2><%= pluralize(plant.errors.count, "error") %> prohibited this plant from being saved:</h2>
-
+    <div class="form-errors">
+      <h3><%= pluralize(plant.errors.count, "error") %> prohibited this plant from being saved:</h3>
       <ul>
         <% plant.errors.each do |error| %>
           <li><%= error.full_message %></li>
@@ -18,6 +17,8 @@
   <% end %>
 
   <%= form.hidden_field :project_id %>
+
+  <div class="form-section-label"><%= t('plants.form.basics') %></div>
 
   <div class="field">
     <%= form.label :name, "🪪 #{t('attributes.name')}" %>
@@ -39,46 +40,72 @@
     <%= form.hidden_field :uid %>
   <% end %>
 
-  <% locations = current_project.locations.order(:name) %>
-  <% unless locations.empty? %>
-    <div class="field">
-      <% loc_scorer = SmartSuggestions.location_scorer(current_project) %>
-      <% loc_suggestions_svc = SmartSuggestions.new(locations, scorer: loc_scorer, limit: 3) %>
-      <% loc_top = loc_suggestions_svc.top %>
-      <% if loc_top.any? %>
-        <%= render 'shared/smart_select',
-            field_name: "plant[location_id]",
-            field_id: "plant_location_id",
-            label: "📍 #{t('attributes.location')}",
-            suggestions: loc_top,
-            all_items: locations,
-            selected_id: plant.location_id,
-            prompt: "-- None --" %>
-      <% else %>
-        <%= form.label :location_id, "📍 #{t('attributes.location')}" %>
-        <%= form.collection_select :location_id, locations, :id, :name, include_blank: '-- None --' %>
-      <% end %>
-    </div>
-  <% end %>
+  <div class="field">
+    <%= form.label :pot, "🫙 #{t('attributes.container')}" %>
+    <%= form.text_field :pot, placeholder: "e.g. Clay pot" %>
+  </div>
 
+  <% locations = current_project.locations.order(:name) %>
   <% groups = current_project.plant_groups.order(:name) %>
-  <% unless groups.empty? %>
-    <div class="field">
-      <label>👪 Groups</label>
-      <div class="recipe-checkboxes">
-        <input type="hidden" name="plant[plant_group_ids][]" value="">
-        <% groups.each do |group| %>
-          <label class="checkbox-label">
-            <input type="checkbox" name="plant[plant_group_ids][]"
-                   value="<%= group.id %>"
-                   <%= 'checked' if plant.plant_group_ids.include?(group.id) %>>
-            <%= group.name %>
-          </label>
+  <% if locations.any? || groups.any? %>
+    <div class="form-section-label"><%= t('plants.form.where') %></div>
+
+    <% unless locations.empty? %>
+      <div class="field">
+        <% loc_scorer = SmartSuggestions.location_scorer(current_project) %>
+        <% loc_suggestions_svc = SmartSuggestions.new(locations, scorer: loc_scorer, limit: 3) %>
+        <% loc_top = loc_suggestions_svc.top %>
+        <% if loc_top.any? %>
+          <%= render 'shared/smart_select',
+              field_name: "plant[location_id]",
+              field_id: "plant_location_id",
+              label: "📍 #{t('attributes.location')}",
+              suggestions: loc_top,
+              all_items: locations,
+              selected_id: plant.location_id,
+              prompt: t('plants.form.none') %>
+        <% else %>
+          <%= form.label :location_id, "📍 #{t('attributes.location')}" %>
+          <%= form.collection_select :location_id, locations, :id, :name, include_blank: t('plants.form.none') %>
         <% end %>
       </div>
-      <small>Group plants to water them together or share a schedule.</small>
-    </div>
+    <% end %>
+
+    <% unless groups.empty? %>
+      <div class="field">
+        <label>👪 Groups</label>
+        <div class="recipe-checkboxes">
+          <input type="hidden" name="plant[plant_group_ids][]" value="">
+          <% groups.each do |group| %>
+            <label class="checkbox-label">
+              <input type="checkbox" name="plant[plant_group_ids][]"
+                     value="<%= group.id %>"
+                     <%= 'checked' if plant.plant_group_ids.include?(group.id) %>>
+              <%= group.name %>
+            </label>
+          <% end %>
+        </div>
+        <small>Group plants to water them together or share a schedule.</small>
+      </div>
+    <% end %>
   <% end %>
+
+  <div class="form-section-label"><%= t('plants.form.care') %></div>
+
+  <%= form.label :min_watering_freq, '⏳ Watering Frequency' %>
+  <div class="rangeInputContainer">
+    <div class="range-label">Every</div>
+    <div class="range-field">
+      <%= form.number_field :min_watering_freq, placeholder: "e.g. 7" %>
+    </div>
+    <% if plant.persisted? %>
+      <div class="range-dash">-</div>
+      <div class="range-field">
+        <%= form.number_field :max_watering_freq %>
+      </div>
+    <% end %>
+    <div class="range-label">days</div>
+  </div>
 
   <% recipes = feature_enabled?(:use_fertilizers) ? current_project.recipes.order(:name) : [] %>
   <% unless recipes.empty? %>
@@ -98,31 +125,10 @@
     </div>
   <% end %>
 
-  <div class="field">
-    <%= form.label :pot, "🫙 #{t('attributes.container')}" %>
-    <%= form.text_field :pot, placeholder: "e.g. Clay pot" %>
-  </div>
-
-  <%= form.label :min_watering_freq, '⏳ Watering Frequency' %>
-  <div class="rangeInputContainer">
-    <div class="range-label">Every</div>
-    <div class="range-field">
-      <%= form.number_field :min_watering_freq, placeholder: "e.g. 7" %>
-    </div>
-    <% if plant.persisted? %>
-      <div class="range-dash">-</div>
-      <div class="range-field">
-        <%= form.number_field :max_watering_freq %>
-      </div>
-    <% end %>
-    <div class="range-label">days</div>
-  </div>
-
+  <div class="form-section-label"><%= t('plants.form.photo') %></div>
 
   <% uploaded = @plant.custom_image_attached? %>
   <div class="plant-graphic-selector">
-    <%= form.label :graphic, t('attributes.graphic') %>
-
     <%# When "library" is active we want any existing upload removed on save; the controller flips this. %>
     <%= hidden_field_tag "plant[remove_custom_image]", uploaded ? "0" : "1", data: { plant_graphic_target: "removeFlag" } %>
 

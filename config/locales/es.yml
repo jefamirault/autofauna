@@ -182,9 +182,15 @@ es:
     all_plants: "Todas las plantas"
     create_plant: "💾 Crear planta"
     update_plant: "💾 Actualizar planta"
+    edit_plant: "Editar planta"
     form:
       number: "Número"
       select_graphic: "Seleccionar imagen..."
+      basics: "Básicos"
+      where: "Dónde"
+      care: "Cuidado"
+      photo: "Foto"
+      none: "Ninguna"
   waterings:
     new:
       plants: "Plantas"
@@ -201,6 +207,20 @@ es:
       export_waterings: "Exportar riegos"
     watered_on: "Regado el"
     edit_watering: "Editar riego"
+    new_watering: "Nuevo riego"
+    form:
+      when: "Cuándo"
+      mix: "Mezcla"
+      measurements: "Mediciones"
+      notes: "Notas"
+      none: "Ninguno"
+      none_use_recipe: "Ninguna — usar la receta de abajo"
+      select_prompt: "Seleccionar…"
+      remove: "Quitar"
+      add_volume: "＋ Volumen"
+      add_tds: "＋ TDS"
+      add_pre_moisture: "＋ Humedad previa"
+      add_post_moisture: "＋ Humedad posterior"
     all_waterings: "Todos riegos"
     water_again: "Riegar esta planta otra vez"
     delete_watering: "Eliminar este riego"
@@ -215,6 +235,10 @@ es:
   soil_moisture_readings:
     new: "Nueva lectura de humedad del suelo"
     edit: "Editar lectura de humedad del suelo"
+    delete: "Eliminar lectura"
+    confirm_delete: "¿Está seguro de que desea eliminar esta lectura?"
+    select_prompt: "Seleccionar…"
+    save: "💾 Guardar lectura"
     create_success: "Lectura de humedad registrada exitosamente"
     update_success: "Lectura de humedad actualizada"
     delete_success: "Lectura de humedad eliminada"
@@ -437,6 +461,7 @@ es:
     cancel_edit: "Cancelar Editar"
     discard_changes: "Descartar cambios"
     cancel: 'Cancelar'
+    now: "Ahora"
   true: "Verdadero"
   false: "Falso"
   back_to_settings: "⚙️ Volver a la configuración"
@@ -469,6 +494,7 @@ es:
   log_entries:
     create: '💾 Crear una entrada de registro'
     update: '💾 Actualizar entrada de registro'
+    edit: 'Editar entrada de registro'
   saved_searches:
     save: "Guardar búsqueda"
     delete: "Eliminar búsqueda guardada"

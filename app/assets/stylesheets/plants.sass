@@ -765,6 +765,25 @@ h1
   height: 32px
   object-fit: contain
 
+// Checkbox lists in the plant form (Groups, Recipes)
+.recipe-checkboxes
+  display: flex
+  flex-direction: column
+  gap: 0.35rem
+  margin: 0.25rem 0
+
+  label.checkbox-label
+    display: flex
+    align-items: center
+    gap: 0.6rem
+    cursor: pointer
+    font-size: 100%
+
+    input[type=checkbox]
+      width: auto
+      flex-shrink: 0
+      margin: 0 0.25rem
+
 // Plant Graphic Selector (Form)
 .plant-graphic-selector
   margin: 1rem 0
@@ -779,6 +798,10 @@ h1
     display: flex
     align-items: center
     gap: 0.35rem
+
+    input[type=radio]
+      width: auto
+      flex-shrink: 0
 
 .graphic-select-container
   display: flex

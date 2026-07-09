@@ -1,16 +1,17 @@
 <div class="settings-card">
-  <h1>🌱 <%= t('soil_moisture_readings.edit') %></h1>
-  <p class="subtitle">Plant: <%= @plant.label %></p>
+  <div class="card-title-row">
+    <h2>🌱 <%= t('soil_moisture_readings.edit') %></h2>
+    <div class="plantButton"><%= link_to @plant %></div>
+  </div>
 
   <%= render 'form', soil_moisture_reading: @soil_moisture_reading %>
 
-  <hr>
-
-  <div class="danger-zone">
-    <%= button_to t('delete'),
+  <div class="card-footer-actions">
+    <%= link_to "❌ #{t('actions.cancel')}", plant_path(@plant), class: 'link' %>
+    <%= button_to "🗑️ #{t('soil_moisture_readings.delete')}",
         plant_soil_moisture_reading_path(@plant, @soil_moisture_reading),
         method: :delete,
-        data: { confirm: t('are_you_sure') },
-        class: 'button danger' %>
+        class: 'buttonLinkDanger',
+        onclick: "return confirm('#{t 'soil_moisture_readings.confirm_delete'}');" %>
   </div>
 </div>

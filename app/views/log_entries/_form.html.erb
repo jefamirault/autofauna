@@ -1,36 +1,39 @@
-<div class="formContainer">
-  <%= form_with(model: [@plant, log_entry], local: true, url: plant_log_entry_form_path(plant: @plant, log_entry: log_entry)) do |form| %>
-    <% if log_entry.errors.any? %>
-      <div style="color: red">
-        <h2><%= pluralize(log_entry.errors.count, "error") %> prohibited this log entry from being saved:</h2>
-
-        <ul>
-          <% log_entry.errors.each do |error| %>
-            <li><%= error.full_message %></li>
-          <% end %>
-        </ul>
-      </div>
-    <% end %>
-
-    <%= form.hidden_field :loggable_type %>
-    <%= form.hidden_field :loggable_id %>
-    <%= form.hidden_field :user_id %>
-
-    <div>
-      <%= form.label :description, t('attributes.description'), style: "display: block" %>
-      <%= form.text_field :description %>
-    </div>
-
-
-    <div>
-      <%= form.label :timestamp, style: "display: block" %>
-      <%= form.datetime_select :timestamp %>
-    </div>
-
-    <br>
-    <div>
-      <% submit_text = t(log_entry.new_record? ? 'log_entries.create' : 'log_entries.update') %>
-      <%= form.submit submit_text, class: 'saveButton' %>
+<%= form_with(model: [@plant, log_entry], local: true, url: plant_log_entry_form_path(plant: @plant, log_entry: log_entry)) do |form| %>
+  <% if log_entry.errors.any? %>
+    <div class="form-errors">
+      <h3><%= pluralize(log_entry.errors.count, "error") %> prohibited this log entry from being saved:</h3>
+      <ul>
+        <% log_entry.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
     </div>
   <% end %>
-</div>
+
+  <%= form.hidden_field :loggable_type %>
+  <%= form.hidden_field :loggable_id %>
+  <%= form.hidden_field :user_id %>
+
+  <div class="field">
+    <%= form.label :description, t('attributes.description') %>
+    <%= form.text_field :description, autofocus: log_entry.new_record? %>
+  </div>
+
+  <div class="field-row">
+    <div class="field-row-item">
+      <%= form.label :timestamp %>
+      <%= form.datetime_local_field :timestamp,
+          value: log_entry.timestamp&.strftime("%Y-%m-%dT%H:%M") ||
+                 Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
+    </div>
+    <button type="button" class="buttonLinkSmall"
+            onclick="document.getElementById('log_entry_timestamp').value = new Date(Date.now() - 60000 * new Date().getTimezoneOffset()).toISOString().slice(0, 16);">
+      <%= t('actions.now') %>
+    </button>
+  </div>
+
+  <div class="submit">
+    <% submit_text = t(log_entry.new_record? ? 'log_entries.create' : 'log_entries.update') %>
+    <%= form.submit submit_text, class: 'saveButton' %>
+  </div>
+<% end %>

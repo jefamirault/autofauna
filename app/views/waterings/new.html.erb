@@ -13,10 +13,15 @@
 <% end %>
 
 <div class="settings-card">
-  <h2><%= t 'waterings.new_watering' %></h2>
+  <div class="card-title-row">
+    <h2><%= t 'waterings.new_watering' %></h2>
+    <% if @watering.plant %>
+      <div class="plantButton"><%= link_to @watering.plant %></div>
+    <% end %>
+  </div>
   <%= render "form", watering: @watering %>
 
-  <p>
+  <div class="card-footer-actions">
     <%= link_to "❌ #{t('actions.discard_changes')}", plant_path(@watering.plant), class: 'link' %>
-  </p>
+  </div>
 </div>
