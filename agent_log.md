@@ -181,3 +181,36 @@ graphics library. Form reuses the global `.graphic-upload-*` classes. Tank cards
 controller (hi-res 1600px variant). Six new controller tests mirror the plants image tests.
 Files: `tank.rb`, `tanks_controller.rb`, `tanks/_form|_tank|show.html.erb`,
 `image_upload_controller.js`, `shared.sass`, `tanks_controller_test.rb`.
+
+---
+
+## 2026-07-13 — Security audit + fix of three cross-tenant (IDOR) findings
+
+Full manual security review of the app + deploy config + `~/devops` static-site infra (report
+saved to a Google Doc). Three HIGH findings shared one root cause: **tenant scope derived from a
+request param / a separately-tracked `current_project` that authz checks were desynced from,
+instead of from the authenticated user + the object being acted on.** Fixing all three:
+
+1. **`SensorReadingsController`** — `set_project` switched `current_project` from an arbitrary
+   `project_id` param with no membership check, and `authorize_viewer` (only `readings`) ran
+   *before* it, so `readings` leaked any project's data; `import`/`process_file` had no auth at all
+   (unauthenticated cross-tenant write). Fix: `authenticate` + `ensure_project` (except
+   `transmit`), `authorize_viewer` on `readings`, `authorize_editor` on `import`/`process_file`;
+   removed the param-switching `set_project`. `transmit` stays public (API-key auth) and resolves
+   its project locally; also scoped its `Sensor` lookup to the authenticated project
+   (`project.sensors.find_by`) so a cross-project sensor_id can't be attached (was a Medium
+   finding). Behavior change: missing `project_id` on transmit now renders its own "Unauthorized"
+   (200) instead of a redirect — transmit test updated to match.
+2. **`ProjectsController#set_project`** — did an unscoped `Project.find(params[:id])` and only
+   switched `current_project` for members, leaving `@project` = victim while authz checked the
+   attacker's own project → any editor could read/update (rename, rotate `api_key`) any project by
+   id. Fix: `set_project` now raises `RecordNotFound` unless `authorized?(current_user, :viewer,
+   @project)`, then sets current_project to `@project` so downstream authz evaluates the target.
+3. **`plant_params` permitted `:project_id`** → editor could create/move a plant cross-tenant.
+   Fix: dropped `:project_id`; `create` now uses `current_project.plants.new(plant_params)`.
+
+Regression tests added to `authorization_test.rb` (projects read/update deny, plant create/move
+deny) + new `sensor_readings_authorization_test.rb` (unauth import blocked, cross-tenant readings
+blocked). NOTE: remaining mediums from the audit (non-constant-time api_key compare + key in query
+string, no rate limiting, nginx `add_header` inheritance dropping security headers, commented-out
+Rails CSP) are documented but NOT yet fixed.

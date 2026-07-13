@@ -62,7 +62,7 @@ class TransmitControllerTest < ActionDispatch::IntegrationTest
     assert_match /Unauthorized/, response.body
   end
 
-  test "missing project_id returns error response" do
+  test "missing project_id returns Unauthorized response" do
     assert_no_difference "HygroSensorReading.count" do
       get transmit_url, params: {
         API_KEY: "test-api-key-12345",
@@ -71,8 +71,24 @@ class TransmitControllerTest < ActionDispatch::IntegrationTest
         humidity: 45
       }
     end
-    # Without project_id, controller redirects to login (no project can be resolved)
-    assert_response :redirect
+    # project_id is a required param; the endpoint answers for itself rather than
+    # relying on a session/redirect (transmit is public, unauthenticated).
+    assert_response :success
+    assert_match /Unauthorized/, response.body
+  end
+
+  test "sensor from another project is not attached to the reading" do
+    # Correct API key for project one, but a sensor_id belonging to project two.
+    assert_no_difference "HygroSensorReading.count" do
+      get transmit_url, params: {
+        project_id: @project.id,
+        API_KEY: "test-api-key-12345",
+        sensor_id: sensors(:sensor_p2).id,
+        temp: 72,
+        humidity: 45
+      }
+    end
+    assert_response :success
   end
 
   test "project with nil api_key rejects request" do

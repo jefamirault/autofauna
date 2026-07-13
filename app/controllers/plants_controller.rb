@@ -196,7 +196,7 @@ class PlantsController < ApplicationController
 
   # POST /plants or /plants.json
   def create
-    @plant = Plant.new(plant_params)
+    @plant = current_project.plants.new(plant_params)
 
     respond_to do |format|
       if @plant.save
@@ -342,7 +342,10 @@ class PlantsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:name, :uid, :project_id, :zone_id, :location_id, :pot, :archived, :min_watering_freq, :max_watering_freq, :manual_watering_frequency, :graphic, :custom_image, :notifications_enabled, :recipe_id)
+      # NOTE: project_id is intentionally NOT permitted — the plant's project is set
+      # from current_project (create) / fixed on the record (update). Permitting it
+      # would let a client create or move a plant into another tenant's project.
+      params.require(:plant).permit(:name, :uid, :zone_id, :location_id, :pot, :archived, :min_watering_freq, :max_watering_freq, :manual_watering_frequency, :graphic, :custom_image, :notifications_enabled, :recipe_id)
     end
 
     # Purge the uploaded image when the form asked to remove it and no replacement was uploaded.

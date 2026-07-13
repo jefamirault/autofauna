@@ -89,9 +89,12 @@ class ProjectsController < ApplicationController
 
   def set_project
     @project = Project.find params[:id]
-    if current_user&.admin? || @project.users.include?(current_user)
-      set_current_project @project
-    end
+    # Scope access to the authenticated user: a non-member gets the same 404 as a
+    # nonexistent project (avoids leaking existence) and never reaches the action.
+    # Setting current_project to @project keeps the downstream authorize_* checks
+    # evaluating the *target* project, not whatever was in the session cookie.
+    raise ActiveRecord::RecordNotFound unless authorized?(current_user, :viewer, @project)
+    set_current_project @project
   end
 
   def project_params

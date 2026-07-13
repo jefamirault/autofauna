@@ -210,4 +210,33 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to plants_path
   end
+
+  # Projects (IDOR by id — set_project must scope to the authenticated user)
+
+  test "user cannot show another project by id" do
+    get project_url(projects(:one))
+    assert_redirected_to plants_path
+  end
+
+  test "user cannot update another project by id" do
+    patch project_url(projects(:one)),
+          params: { project: { name: "Hacked", api_key: "stolen-key" } }
+    assert_redirected_to plants_path
+    projects(:one).reload
+    assert_not_equal "Hacked", projects(:one).name
+    assert_not_equal "stolen-key", projects(:one).api_key
+  end
+
+  # Plants (mass-assignment: project_id must not be assignable)
+
+  test "user cannot create a plant in another project via project_id" do
+    assert_no_difference -> { projects(:one).plants.count } do
+      post plants_url, params: { plant: { name: "Injected", uid: 9999, project_id: projects(:one).id } }
+    end
+  end
+
+  test "user cannot move their own plant into another project via project_id" do
+    patch plant_url(plants(:plant_p2)), params: { plant: { project_id: projects(:one).id } }
+    assert_equal projects(:two).id, plants(:plant_p2).reload.project_id
+  end
 end
