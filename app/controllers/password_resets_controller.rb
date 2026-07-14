@@ -1,6 +1,10 @@
 class PasswordResetsController < ApplicationController
   skip_before_action :require_onboarding
   before_action :set_user_by_token, only: [:edit, :update]
+
+  rate_limit to: 5, within: 15.minutes, only: :create,
+             by: -> { params.dig(:user, :email).to_s.downcase.presence || request.remote_ip },
+             store: RateLimiting::STORE, with: -> { rate_limit_exceeded }
   def new
 
   end

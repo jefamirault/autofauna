@@ -214,3 +214,32 @@ deny) + new `sensor_readings_authorization_test.rb` (unauth import blocked, cros
 blocked). NOTE: remaining mediums from the audit (non-constant-time api_key compare + key in query
 string, no rate limiting, nginx `add_header` inheritance dropping security headers, commented-out
 Rails CSP) are documented but NOT yet fixed.
+
+## 2026-07-13 — Implemented the 4 "security"-labeled GitHub issues (#106–#109)
+
+Follow-up to the same-day security audit; clears the remaining mediums noted in the previous entry.
+
+- **#109 `HygroSensorReading.create_from_json`:** no longer assigns `id` from input (imports always
+  insert new rows); `sensor_id` resolved via `project.sensors.find_by` and a new model validation
+  (`sensor_matches_project`) rejects cross-project sensors everywhere. New
+  `test/models/hygro_sensor_reading_test.rb`.
+- **#107 transmit API key:** comparison now `SecurityUtils.secure_compare`; key accepted via
+  `Authorization: Bearer` or `X-Api-Key` header; `API_KEY` query param still works but logs a
+  deprecation warning per request (migration signal). Success response now HTML-escapes the reading.
+  Firmware migration path documented in `docs/api-sensors.md`.
+- **#106 rate limiting:** Rails 8 `rate_limit` on sessions#create (10/3min per IP **and** per
+  email), password_resets#create (5/15min per email), registrations#create + guests#create
+  (10/hour per IP). All render plain-text 429 (`errors.rate_limited`, en+es). Counters live in
+  `RateLimiting::STORE` (`config/initializers/rate_limiting.rb`) — a real MemoryStore in test
+  (global cache is `:null_store`, which would disable limiting), `Rails.cache` elsewhere;
+  `test_helper.rb` clears it per test so `sign_in` calls don't accumulate. New
+  `test/controllers/rate_limiting_test.rb`.
+- **#108 CSP:** enabled in **report-only** mode (`config/initializers/content_security_policy.rb`)
+  with script-src nonces (session-id based, SecureRandom fallback); style-src keeps
+  `unsafe-inline` deliberately (style nonce would void it and break `style=""` attributes).
+  Allows Google Sign-In (script/frame/connect) + Google Fonts. Layout inline scripts nonce'd; the
+  GSI `onload=` attribute replaced with a nonce'd listener. **Before enforcing:** migrate the ~35
+  inline `onclick=`/`onchange=` handlers in views to Stimulus, then remove the
+  `content_security_policy_report_only` line. New `test/controllers/content_security_policy_test.rb`.
+
+Tests not yet run (awaiting user `bin/rails test`).

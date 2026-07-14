@@ -8,6 +8,10 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def rate_limit_exceeded
+    render plain: t('errors.rate_limited'), status: :too_many_requests
+  end
+
   def ensure_project
     if current_project.nil?
       auto_select_project(current_user)

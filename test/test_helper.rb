@@ -9,6 +9,12 @@ class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
 
+  # Rate-limit counters live in a process-wide memory store; clear them so a
+  # test's requests (incl. sign_in) never trip limits accumulated by earlier tests.
+  setup do
+    RateLimiting::STORE.clear
+  end
+
   # Add more helper methods to be used by all tests here...
 end
 

@@ -447,6 +447,7 @@ en:
     invalid_email: "Please enter a valid user email address."
     invalid_email_or_password: "Invalid email or password."
     account_disabled: "This account has been disabled."
+    rate_limited: "Too many attempts. Please try again later."
     user_already_added: "User is already a collaborator on this project."
   time:
     today: "Today"

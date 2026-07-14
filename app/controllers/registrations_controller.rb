@@ -1,6 +1,9 @@
 class RegistrationsController < ApplicationController
   skip_before_action :require_onboarding
 
+  rate_limit to: 10, within: 1.hour, only: :create,
+             store: RateLimiting::STORE, with: -> { rate_limit_exceeded }
+
   def new
     @user = User.new
   end

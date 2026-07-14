@@ -106,6 +106,57 @@ class TransmitControllerTest < ActionDispatch::IntegrationTest
     assert_match /Hello Arduino/, response.body
   end
 
+  test "API key via Authorization Bearer header creates a reading (no key in URL)" do
+    assert_difference "HygroSensorReading.count", 1 do
+      get transmit_url,
+        params: { project_id: @project.id, sensor_id: @sensor.id, temp: 72, humidity: 45 },
+        headers: { "Authorization" => "Bearer test-api-key-12345" }
+    end
+    assert_response :success
+    assert_match /Hello Programmer/, response.body
+  end
+
+  test "API key via X-Api-Key header creates a reading" do
+    assert_difference "HygroSensorReading.count", 1 do
+      get transmit_url,
+        params: { project_id: @project.id, sensor_id: @sensor.id, temp: 72, humidity: 45 },
+        headers: { "X-Api-Key" => "test-api-key-12345" }
+    end
+    assert_response :success
+  end
+
+  test "wrong API key in header is rejected" do
+    assert_no_difference "HygroSensorReading.count" do
+      get transmit_url,
+        params: { project_id: @project.id, sensor_id: @sensor.id, temp: 72, humidity: 45 },
+        headers: { "Authorization" => "Bearer wrong-key" }
+    end
+    assert_response :success
+    assert_match /Hello Arduino/, response.body
+  end
+
+  test "missing API key entirely returns Unauthorized" do
+    assert_no_difference "HygroSensorReading.count" do
+      get transmit_url, params: {
+        project_id: @project.id, sensor_id: @sensor.id, temp: 72, humidity: 45
+      }
+    end
+    assert_response :success
+    assert_match /Unauthorized/, response.body
+  end
+
+  test "reading attributes are HTML-escaped in the response" do
+    get transmit_url, params: {
+      project_id: @project.id,
+      API_KEY: "test-api-key-12345",
+      sensor_id: @sensor.id,
+      temp: "<script>alert(1)</script>",
+      humidity: 45
+    }
+    assert_response :success
+    assert_no_match /<script>alert/, response.body
+  end
+
   test "valid request stores correct temperature and humidity" do
     get transmit_url, params: {
       project_id: @project.id,

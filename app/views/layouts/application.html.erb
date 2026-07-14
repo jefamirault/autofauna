@@ -3,7 +3,7 @@
   <head>
     <title><%= yield(:title).empty? ? "#{params[:controller].titleize} - #{params[:action].titleize}" : yield(:title) %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <script>
+    <script nonce="<%= content_security_policy_nonce %>">
       // Apply sidebar state before render to prevent FOUC
       (function() {
         try {
@@ -32,8 +32,13 @@
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
-    <script src="https://accounts.google.com/gsi/client" async defer onload="window.googleLoaded=true; window.dispatchEvent(new Event('google-loaded'))"></script>
-    <script>
+    <script src="https://accounts.google.com/gsi/client" async defer id="gsi-client"></script>
+    <script nonce="<%= content_security_policy_nonce %>">
+      // CSP blocks inline onload= handlers, so signal GSI readiness from here.
+      document.getElementById('gsi-client').addEventListener('load', function() {
+        window.googleLoaded = true;
+        window.dispatchEvent(new Event('google-loaded'));
+      });
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/service-worker.js');
       }

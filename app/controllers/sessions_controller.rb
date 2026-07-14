@@ -1,6 +1,12 @@
 class SessionsController < ApplicationController
   skip_before_action :require_onboarding
 
+  rate_limit to: 10, within: 3.minutes, only: :create,
+             store: RateLimiting::STORE, with: -> { rate_limit_exceeded }
+  rate_limit to: 10, within: 3.minutes, only: :create, name: "email",
+             by: -> { params.dig(:user, :email).to_s.downcase.presence || request.remote_ip },
+             store: RateLimiting::STORE, with: -> { rate_limit_exceeded }
+
   def new
     @user = User.new
   end

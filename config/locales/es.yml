@@ -401,6 +401,7 @@ es:
     invalid_email: "Ingrese una dirección de correo electrónico de usuario válida."
     invalid_email_or_password: "Correo electrónico o contraseña no válidos."
     account_disabled: "Esta cuenta ha sido deshabilitada."
+    rate_limited: "Demasiados intentos. Por favor, inténtalo de nuevo más tarde."
     user_already_added: "El usuario ya es colaborador de este proyecto."
   time:
     today: "Hoy"
