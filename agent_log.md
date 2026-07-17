@@ -243,3 +243,24 @@ Follow-up to the same-day security audit; clears the remaining mediums noted in 
   `content_security_policy_report_only` line. New `test/controllers/content_security_policy_test.rb`.
 
 Tests not yet run (awaiting user `bin/rails test`).
+
+## 2026-07-17 — Laptop dev-env bring-up + clone-script portability; filed issues #110–#113
+
+New-laptop (WSL2) setup debugging, fixed in sequence: (1) `.rbenv-vars` was missing
+`DATABASE_USER` (added `=autofauna_development`); (2) `config/master.key` was a stale 2023 copy —
+replaced from the server's `shared/config/master.key`; (3) Postgres wasn't installed; after
+install, the `autofauna_development` role's password didn't match `.rbenv-vars` (scripted
+create-or-reset from the file's value, SUPERUSER, verified TCP login); (4) `.rbenv-vars` had
+legacy `DATABASE=plant_care` → renamed to `autofauna_development` to match the clone script's
+restore target and test docs. Installed standalone `gh` CLI to `~/.local/bin` (not in apt).
+
+`util/clone_production_db_to_local.sh` reworked: derives repo root from its own location (was
+hardcoded `/home/jef/autofauna`), `mkdir -p db/backup`, loads `.rbenv-vars` via
+`eval "$(rbenv vars)"` for the ssh/scp/rsync lines, and **Active Storage sync is now opt-in via
+`--storage`** (was default; `AUTOFAUNA_SYNC_USER_EMAIL` still selects targeted mode). `-s` still
+boots the server, now position-independent. `docs/deployment.md` updated to match.
+
+Filed GitHub issues from user spec: #110 Location images (mirror Tank `:picture` pattern),
+#111 per-location water/fertilizer supply managed from Location show, #112 color-coded
+beaker/test-tube icons for Recipes (reuses existing `color`), #113 single recipe picker on the
+watering form (pinned shortlist + searchable "More…"). Suggested order: #112 before #113.

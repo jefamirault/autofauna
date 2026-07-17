@@ -31,17 +31,21 @@ cap production deploy
 
 ## Cloning production data locally
 
-`util/clone_production_db_to_local.sh` (env vars `AUTOFAUNA_SERVER`, `AUTOFAUNA_USER`; pass `-s` to
-also boot the dev server) dumps + restores the production DB, then `rsync`s the Active Storage files.
+`util/clone_production_db_to_local.sh` (env vars `AUTOFAUNA_SERVER`, `AUTOFAUNA_USER` — from the
+shell env or `.rbenv-vars`, which the script loads via `eval "$(rbenv vars)"`; pass `-s` to also
+boot the dev server) dumps + restores the production DB. Paths are derived from the script's
+location, so it works from any checkout path.
 
 - Uploads use the **Disk** service rooted at `Rails.root.join("storage")` (a Capistrano
   `linked_dir` → `shared/storage/` on prod). The DB clone copies `active_storage_blobs` rows (with
-  keys) but **not** the files, so the script rsyncs `shared/storage/` → local `storage/`.
-- Variants regenerate on demand locally (needs libvips).
-- **Targeted image sync (bandwidth saver):** set `AUTOFAUNA_SYNC_USER_EMAIL=<email>` to sync only
-  that user's plant images. The script runs `util/list_user_storage_paths.rb` against the restored
-  local DB to compute Disk paths (`key[0..1]/key[2..3]/key`) for blobs attached to `user.plants`
-  (originals only — variants regenerate) and passes them to `rsync --files-from`. Unset → full sync.
+  keys) but **not** the files; pass `--storage` to also rsync `shared/storage/` → local `storage/`.
+- **Active Storage files are NOT synced by default** — without `--storage`, cloned records render
+  broken images locally. Variants regenerate on demand locally (needs libvips).
+- **Targeted image sync (bandwidth saver):** with `--storage`, set
+  `AUTOFAUNA_SYNC_USER_EMAIL=<email>` to sync only that user's plant images. The script runs
+  `util/list_user_storage_paths.rb` against the restored local DB to compute Disk paths
+  (`key[0..1]/key[2..3]/key`) for blobs attached to `user.plants` (originals only — variants
+  regenerate) and passes them to `rsync --files-from`. Unset → full sync.
 
 ## Plant graphics / Active Storage
 
