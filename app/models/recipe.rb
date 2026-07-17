@@ -1,7 +1,7 @@
 class Recipe < ApplicationRecord
   belongs_to :project
 
-  has_many :recipe_ingredients, -> { order(:position) }, dependent: :destroy
+  has_many :recipe_ingredients, -> { order(:position) }, inverse_of: :recipe, dependent: :destroy
   has_many :recipe_sources, through: :recipe_ingredients
   has_many :recipe_batches, dependent: :destroy
   has_many :plants, dependent: :nullify

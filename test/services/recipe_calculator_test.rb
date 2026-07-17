@@ -12,6 +12,10 @@ class RecipeCalculatorTest < ActiveSupport::TestCase
       units: "mL",
       position: 1
     )
+    # Reload so the recipe's recipe_ingredients association reflects a fresh DB
+    # load (as it would in a controller), not the empty collection cached during
+    # Recipe.create!'s unique_recipe_sources validation.
+    @recipe.reload
   end
 
   test "scales by volume ratio (same units)" do
