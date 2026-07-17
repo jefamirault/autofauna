@@ -40,6 +40,50 @@
   </div>
 </div>
 
+<% if feature_enabled?(:use_fertilizers) %>
+  <div class="settings-card" id="location-supplies">
+    <h2>Supplies</h2>
+    <p class="supply-intro">Water &amp; fertilizer stocked here. Tracked separately from each batch's own remaining volume.</p>
+
+    <% if @location_supplies.any? %>
+      <div class="supply-list">
+        <% @location_supplies.each do |supply| %>
+          <%= render "location_supplies/supply", supply: supply, location: @location %>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="supply-empty">No supplies stocked here yet.</p>
+    <% end %>
+
+    <% if @available_sources.any? || @available_batches.any? %>
+      <div class="form-section-label">Stock a supply</div>
+      <%= form_with url: location_location_supplies_path(@location), method: :post, data: { turbo: false } do %>
+        <div class="field">
+          <%= select_tag :supplyable,
+                grouped_options_for_select([
+                  ["Sources", @available_sources.map { |s| [s.name, "RecipeSource:#{s.id}"] }],
+                  ["Batches", @available_batches.map { |b| [b.label, "RecipeBatch:#{b.id}"] }]
+                ]),
+                include_blank: "Choose a source or batch…" %>
+        </div>
+        <div class="field-row">
+          <div class="field-row-item">
+            <%= number_field_tag :amount, nil, step: 'any', min: 0, placeholder: "Amount" %>
+          </div>
+          <div class="field-row-item">
+            <%= select_tag :units, options_for_select(LocationSupply.quantity_units.keys.map { |k| [k, k] }, "gal") %>
+          </div>
+        </div>
+        <div class="submit">
+          <%= submit_tag "Add to supply", class: 'saveButton' %>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="supply-empty">Create a source or batch first to stock supply here.</p>
+    <% end %>
+  </div>
+<% end %>
+
 <% if @location.plants.where(archived: false).any? %>
   <%= button_to "💧 Water all plants here", water_all_location_path(@location), class: 'link', data: { turbo: false } %>
   <%= button_to "➕ Create a group from these plants", seed_from_location_plant_groups_path(location_id: @location.id), class: 'link', data: { turbo: false } %>

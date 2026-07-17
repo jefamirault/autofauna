@@ -4,6 +4,7 @@ class Location < ApplicationRecord
   belongs_to :zone, optional: true
   has_many :plants
   has_many :tanks
+  has_many :location_supplies, dependent: :destroy
   belongs_to :project
   validates_presence_of :name
   validates :color, format: { with: /\A#[0-9A-F]{6}\z/i }, allow_blank: true

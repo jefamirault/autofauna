@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+grow_batch:
+  project: one
+  recipe: grow
+  tds: 800
+  volume: 5.0
+  volume_units: 3      # gal
+  remaining_volume: 5.0
+  active: true
+  mixed_on: <%= Date.current.to_s %>
+
+batch_p2:
+  project: two
+  recipe: recipe_p2
+  tds: 500
+  active: true

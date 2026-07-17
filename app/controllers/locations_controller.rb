@@ -27,6 +27,11 @@ class LocationsController < ApplicationController
 
   # GET /locations/1 or /locations/1.json
   def show
+    if feature_enabled?(:use_fertilizers)
+      @location_supplies = @location.location_supplies.includes(:supplyable).to_a
+      @available_sources = current_project.recipe_sources.order(:name)
+      @available_batches = current_project.recipe_batches.active.includes(:recipe).order(mixed_on: :desc)
+    end
   end
 
   # GET /locations/new

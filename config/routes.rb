@@ -21,6 +21,11 @@ Rails.application.routes.draw do
     member do
       post :water_all
     end
+    resources :location_supplies, only: [:create, :destroy] do
+      member do
+        patch :adjust
+      end
+    end
   end
   resources :plant_groups do
     member do

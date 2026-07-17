@@ -492,6 +492,67 @@ main
     outline: 2px solid var(--section-color-start, $green)
     outline-offset: 2px
 
+// Per-location supply ledger (locations#show "Supplies" section)
+#location-supplies
+  h2
+    margin-bottom: 0.15rem
+
+.supply-intro
+  font-size: 0.85rem
+  color: #555
+  margin: 0 0 1rem
+
+.supply-empty
+  color: #777
+  margin: 0.75rem 0
+
+.supply-row
+  padding: 0.9rem 0
+  border-top: 1px solid rgba(0, 77, 64, 0.12)
+  &:first-of-type
+    border-top: none
+    padding-top: 0.25rem
+
+.supply-head
+  display: flex
+  align-items: baseline
+  justify-content: space-between
+  gap: 1rem
+  margin-bottom: 0.55rem
+  .supply-name
+    font-weight: 500
+    color: $darkgreen
+  .supply-qty
+    white-space: nowrap
+    strong
+      font-size: 1.2rem
+      color: #222
+    .supply-unit
+      color: #666
+      font-size: 0.8rem
+      margin-left: 0.25rem
+
+.supply-adjust
+  margin: 0
+  .field-row
+    margin-bottom: 0.5rem
+
+// button_to renders a <form>; keep it from adding block spacing between action pills
+.supply-primary-actions, .supply-secondary-actions
+  display: flex
+  flex-wrap: wrap
+  gap: 0.5rem
+  align-items: center
+  form
+    margin: 0
+
+.supply-primary-actions button
+  flex: 1
+  min-width: 6rem
+
+.supply-secondary-actions
+  margin-top: 0.5rem
+
 .card-title-row
   display: flex
   align-items: center

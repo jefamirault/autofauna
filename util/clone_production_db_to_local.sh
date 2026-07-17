@@ -80,6 +80,6 @@ if [ "$SYNC_STORAGE" = true ]; then
   echo "Active Storage files synced"
 else
   echo "Skipping Active Storage file sync (pass --storage to include it)"
-fi  
+fi
 
 [ "$START_SERVER" = true ] && echo "Starting development server..." && rails s

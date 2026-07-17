@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_29_144038) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_17_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -79,6 +79,33 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_29_144038) do
     t.datetime "updated_at", null: false
     t.integer "sensor_id"
     t.string "error"
+  end
+
+  create_table "location_supplies", force: :cascade do |t|
+    t.bigint "location_id", null: false
+    t.string "supplyable_type", null: false
+    t.bigint "supplyable_id", null: false
+    t.float "quantity", default: 0.0, null: false
+    t.integer "quantity_units"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["location_id", "supplyable_type", "supplyable_id"], name: "index_location_supplies_on_location_and_supplyable", unique: true
+    t.index ["location_id"], name: "index_location_supplies_on_location_id"
+    t.index ["supplyable_type", "supplyable_id"], name: "index_location_supplies_on_supplyable"
+  end
+
+  create_table "location_supply_adjustments", force: :cascade do |t|
+    t.bigint "location_supply_id", null: false
+    t.bigint "user_id"
+    t.integer "action", null: false
+    t.float "amount", default: 0.0, null: false
+    t.integer "units"
+    t.float "quantity_after"
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["location_supply_id"], name: "index_location_supply_adjustments_on_location_supply_id"
+    t.index ["user_id"], name: "index_location_supply_adjustments_on_user_id"
   end
 
   create_table "locations", force: :cascade do |t|
@@ -433,6 +460,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_29_144038) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "equipment", "tanks"
   add_foreign_key "feeding_instructions", "tanks"
+  add_foreign_key "location_supplies", "locations"
+  add_foreign_key "location_supply_adjustments", "location_supplies"
   add_foreign_key "log_entries", "users", on_delete: :nullify
   add_foreign_key "maintenance_logs", "equipment"
   add_foreign_key "plant_group_memberships", "plant_groups"

@@ -1,4 +1,6 @@
 class RecipeBatch < ApplicationRecord
+  include VolumeConvertible
+
   belongs_to :project
   belongs_to :recipe
   has_many :waterings, dependent: :nullify
@@ -6,14 +8,7 @@ class RecipeBatch < ApplicationRecord
   validates :tds, presence: true, numericality: { greater_than: 0, only_integer: true }
   validates :remaining_volume, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
-  enum :volume_units, {
-    'cups' => 0,
-    'oz' => 1,
-    'mL' => 2,
-    'gal' => 3,
-    'qt' => 4,
-    'L' => 5
-  }
+  enum :volume_units, VolumeConvertible::VOLUME_UNITS
 
   scope :active, -> { where(active: true) }
 
@@ -87,29 +82,5 @@ class RecipeBatch < ApplicationRecord
     new_remaining = current + added_in_batch_units
     new_remaining = [new_remaining, volume].min if volume.present?
     update!(remaining_volume: new_remaining, last_adjusted_at: Time.current)
-  end
-
-  private
-
-  UNITS_TO_ML = {
-    'cups' => 236.588,
-    'oz'   => 29.5735,
-    'mL'   => 1.0,
-    'gal'  => 3785.41,
-    'qt'   => 946.353,
-    'L'    => 1000.0
-  }.freeze
-
-  def convert_to_ml(amount, units)
-    factor = UNITS_TO_ML[units.to_s]
-    return 0.0 unless factor
-    amount.to_f * factor
-  end
-
-  def convert_volume(amount, from_units, to_units)
-    ml = convert_to_ml(amount, from_units)
-    to_factor = UNITS_TO_ML[to_units.to_s]
-    return 0.0 unless to_factor
-    ml / to_factor
   end
 end

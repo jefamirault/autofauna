@@ -1,0 +1,32 @@
+<div class="supply-row">
+  <div class="supply-head">
+    <span class="supply-name"><%= supply.to_s %></span>
+    <span class="supply-qty">
+      <strong><%= sprintf('%g', supply.quantity.round(3)) %></strong><span class="supply-unit"><%= supply.quantity_units %></span>
+    </span>
+  </div>
+
+  <%= form_with url: adjust_location_location_supply_path(location, supply), method: :patch, data: { turbo: false }, class: "supply-adjust" do |f| %>
+    <div class="field-row">
+      <div class="field-row-item">
+        <%= f.number_field :amount, step: 'any', min: 0, placeholder: "Amount" %>
+      </div>
+      <div class="field-row-item">
+        <%= f.select :units, options_for_select(LocationSupply.quantity_units.keys.map { |k| [k, k] }, supply.quantity_units) %>
+      </div>
+    </div>
+    <div class="supply-primary-actions">
+      <%= f.button "➕ Add", name: "adjust_action", value: "add", class: 'buttonLinkSmall' %>
+      <%= f.button "➖ Remove", name: "adjust_action", value: "remove", class: 'buttonLinkSmall' %>
+    </div>
+  <% end %>
+
+  <div class="supply-secondary-actions">
+    <%= button_to "🚱 Mark depleted", adjust_location_location_supply_path(location, supply),
+                  method: :patch, params: { adjust_action: "deplete" },
+                  class: 'buttonLinkSmall', data: { turbo: false } %>
+    <%= button_to "✕ Remove supply", location_location_supply_path(location, supply),
+                  method: :delete, class: 'buttonLinkSmall buttonLinkDanger', data: { turbo: false },
+                  form: { onsubmit: "return confirm('Remove this supply from the location?');" } %>
+  </div>
+</div>

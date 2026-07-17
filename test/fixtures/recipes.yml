@@ -1,0 +1,10 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+grow:
+  project: one
+  name: "3-1-2 Grow"
+  color: "#7B1FA2"
+
+recipe_p2:
+  project: two
+  name: "Project Two Recipe"

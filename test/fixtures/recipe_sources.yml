@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+ro_water:
+  project: one
+  name: "RO Water"
+
+cal_mag:
+  project: one
+  name: "Cal-Mag"
+
+source_p2:
+  project: two
+  name: "Project Two Source"

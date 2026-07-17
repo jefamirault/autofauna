@@ -293,3 +293,53 @@ the file *bytes* via Marcel at assignment time (`unfurl`, `identify: true`), so 
 mislabeled `text/plain` still resolves to `image/png` and passes validation — the Tank test was
 red at HEAD for the same reason. Fixed by adding `test/fixtures/files/not_an_image.txt` (genuine
 text, sniffs to `text/plain`) and pointing both reject tests at it.
+
+---
+
+## 2026-07-17 — Issue #111: Per-location water/fertilizer supply (LocationSupply)
+
+**Plan (agreed before implementing):**
+
+Add a per-location stocking ledger so users manage water/fertilizer supply entirely from the
+Location show page (no Recipe Batches index trip). Four recordable actions: add, remove, mark
+depleted (per supply); plus stocking a brand-new supply.
+
+- **Model `LocationSupply`** — `belongs_to :location`, polymorphic `belongs_to :supplyable`
+  (RecipeSource or RecipeBatch), `quantity` float + `quantity_units` enum. `has_many
+  :location_supply_adjustments`. One row per (location, supplyable) — unique index. Methods
+  `add!/remove!/deplete!` each mutate `quantity` and write an adjustment row (auditable history).
+- **Model `LocationSupplyAdjustment`** — `belongs_to :location_supply`, `belongs_to :user`
+  (optional), `action` enum (add/remove/deplete), `amount`, `units` enum, `quantity_after`, `note`.
+- **Concern `VolumeConvertible`** — shared UNITS_TO_ML table + VOLUME_UNITS enum map + convert
+  helpers. Included in LocationSupply and refactored into RecipeBatch (removes its private dupes).
+- **Batch-interaction decision (documented): INDEPENDENT POOLS.** LocationSupply is a manual
+  stocking ledger; it does NOT auto-sync with `RecipeBatch.remaining_volume`, and watering plants
+  does NOT decrement location stock. Rationale: a batch mixed in the basement and carried upstairs
+  is a physical transfer the user logs explicitly; auto-coupling would double-count against the
+  batch's own usage-based remaining_volume. Keeps the feature self-contained.
+- **Controller `LocationSuppliesController`** — nested under locations. `authenticate`,
+  `ensure_project`, `require_use_fertilizers`, `set_location` (scoped via
+  `current_project.locations.find`), `authorize_editor`. Actions: `create` (stock/add to a
+  supply — resolves supplyable ONLY from `current_project.recipe_sources/recipe_batches`, blocks
+  cross-project attach), `adjust` (add/remove/deplete existing), `destroy`. Plain redirects to the
+  location (matches recipe_batches#adjust_remaining pattern; `data: { turbo: false }` forms).
+- **Routes** — `resources :location_supplies, only: [:create, :destroy]` nested in `:locations`,
+  with member `patch :adjust`.
+- **Location show page** — new "Supplies" section (settings-card), gated by
+  `feature_enabled?(:use_fertilizers)`: current stock per supply + per-row Add/Remove/Deplete/Remove
+  and a "stock a new supply" form (grouped select of project sources + active batches).
+- **Migration** — create `location_supplies` + `location_supply_adjustments`.
+- **Tests** — model + controller: add/remove/deplete flows, cross-tenant denial (can't stock
+  another project's location, can't attach another project's source/batch), feature-flag gate.
+  New fixtures: recipes, recipe_sources, recipe_batches.
+
+**UI follow-up (overlap fix):** The `#location-supplies` settings-card had overlapping controls.
+Root causes: (1) the section used `<h4>`, which has a global rule `margin: -1em 0 1em 9em` (legacy)
+that shoved "Stock a supply" 9em right and up; (2) submit `<input>`s were crammed inside a
+`.field-row` flex row where the global `input { width: 100% }` made them overflow the sibling
+fields. Redesigned within the design system: card title is now `<h2>` (styled in `.settings-card`),
+the sub-form heading uses the `.form-section-label` eyebrow instead of `<h4>`, each `.field-row`
+holds only two inputs, and adjustments use explicit `f.button` Add/Remove pills (name=adjust_action)
+plus separate `button_to` Mark-depleted / Remove-supply pills (kept OUTSIDE the adjust form — no
+nested forms). New `.supply-row/.supply-head/.supply-primary-actions/.supply-secondary-actions`
+styles; the stock readout (bold quantity) is the row's visual anchor.
