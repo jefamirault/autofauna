@@ -34,6 +34,14 @@
     <small>Auto-filled in waterings when this recipe is selected</small>
   </div>
 
+  <div>
+    <label>
+      <%= form.check_box :pinned %>
+      Pin to watering shortcuts
+    </label>
+    <small style="display: block">Pinned items appear as one-tap choices on the watering form</small>
+  </div>
+
   <h3>Sources</h3>
   <div data-nested-form-target="container">
     <% recipe.recipe_ingredients.each do |ingredient| %>

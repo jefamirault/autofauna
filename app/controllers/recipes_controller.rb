@@ -93,7 +93,7 @@ class RecipesController < ApplicationController
   end
 
   def recipe_params
-    params.require(:recipe).permit(:name, :description, :project_id, :color, :default_tds,
+    params.require(:recipe).permit(:name, :description, :project_id, :color, :default_tds, :pinned,
       recipe_ingredients_attributes: [:id, :recipe_source_id, :amount, :units, :position, :_destroy])
   end
 end

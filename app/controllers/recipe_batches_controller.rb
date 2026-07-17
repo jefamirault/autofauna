@@ -3,8 +3,8 @@ class RecipeBatchesController < ApplicationController
   before_action :ensure_project
   before_action :require_use_fertilizers
   before_action :set_recipe_batch, only: %i[show edit update destroy adjust_remaining]
-  before_action :authorize_viewer, only: [:index, :show, :for_recipe, :for_project]
-  before_action :authorize_editor, except: [:index, :show, :for_recipe, :for_project]
+  before_action :authorize_viewer, only: [:index, :show, :for_recipe]
+  before_action :authorize_editor, except: [:index, :show, :for_recipe]
 
   def index
     urgency_order = { critical: 0, soon: 1, no_usage: 2, ok: 3 }
@@ -82,15 +82,6 @@ class RecipeBatchesController < ApplicationController
   def for_recipe
     batches = current_project.recipe_batches.active.where(recipe_id: params[:recipe_id])
     render json: batches.map { |b| { id: b.id, label: b.label, tds: b.tds } }
-  end
-
-  def for_project
-    batches = current_project.recipe_batches.includes(:recipe).active.order(mixed_on: :desc)
-    render json: batches.map { |b|
-      { id: b.id, label: b.label, tds: b.tds,
-        recipe_id: b.recipe_id, recipe_name: b.recipe.name,
-        recipe_default_tds: b.recipe.default_tds }
-    }
   end
 
   private

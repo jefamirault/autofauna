@@ -6,6 +6,7 @@ class Watering < ApplicationRecord
   has_many :soil_moisture_readings, dependent: :nullify
 
   validates :watered_at, presence: true
+  validate :mix_belongs_to_plant_project
 
   before_validation :set_recipe_from_batch
 
@@ -88,6 +89,24 @@ class Watering < ApplicationRecord
   attr_accessor :pre_moisture, :post_moisture, :pre_moisture_reading_id
 
   private
+
+  # Upholds the "mass-assignment must filter to the project" invariant server-side: the recipe,
+  # source, and batch attached to a watering must all belong to the plant's project. Guards against
+  # a crafted POST attaching another project's mix (watering_params permits the raw ids).
+  def mix_belongs_to_plant_project
+    project_id = plant&.project_id
+    return if project_id.nil?
+
+    if recipe.present? && recipe.project_id != project_id
+      errors.add(:recipe, "must belong to the plant's project")
+    end
+    if recipe_source.present? && recipe_source.project_id != project_id
+      errors.add(:recipe_source, "must belong to the plant's project")
+    end
+    if recipe_batch.present? && recipe_batch.project_id != project_id
+      errors.add(:recipe_batch, "must belong to the plant's project")
+    end
+  end
 
   def adjust_batch_remaining_on_save
     return unless recipe_batch.present? && volume.present?

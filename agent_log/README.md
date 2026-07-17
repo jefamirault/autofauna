@@ -18,3 +18,4 @@ Each line: date range — topic hook.
 - [2026-02-23 → 02-24](agent_log_2026-02-23_to_2026-02-24.md) — inline share-link actions; sidebar navigation rework
 - [2026-02-25 → 02-25](agent_log_2026-02-25_to_2026-02-25.md) — plants & waterings index load-time optimization
 - [2026-03-20 → 07-07](agent_log_2026-03-20_to_2026-07-07.md) — 1-click watering; sprints 0.9.0–0.9.2 (tank mgmt, UX); onboarding + feature flags; plant groups; CLAUDE.md restructure
+- [2026-07-07 → 07-17](agent_log_2026-07-07_to_2026-07-17.md) — location images/supplies; recipe calculator tests; color-coded fertilizer icons; #113 spec

@@ -28,6 +28,14 @@
   </div>
 
   <div>
+    <label>
+      <%= form.check_box :pinned %>
+      Pin to watering shortcuts
+    </label>
+    <small style="display: block">Pinned items appear as one-tap choices on the watering form</small>
+  </div>
+
+  <div>
     <%= form.submit "💾 #{recipe_source.new_record? ? 'Create' : 'Update'} Source", class: 'saveButton' %>
   </div>
 <% end %>

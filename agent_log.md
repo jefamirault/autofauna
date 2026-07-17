@@ -1,367 +1,54 @@
 # Agent Log
 
-Chronological journal of significant changes this session-series. Append a short summary after each
-significant task. **Rotate when this file exceeds ~30 KB** — move it to
-`agent_log/agent_log_<min-date>_to_<max-date>.md`, add a line to `agent_log/README.md`, and start a
-fresh file. See the Agent Log section of `CLAUDE.md`.
+## 2026-07-17 — Implement #113 (unified fertilizer picker on watering form)
 
----
+Executing `docs/specs/issue-113-fertilizer-picker.md`. Plan:
 
-## 2026-07-07 — Rotated agent_log (Mar–Jul 2026 → archive)
+1. **Migration** — `pinned:boolean default:false null:false` on `recipes` + `recipe_sources`.
+2. **Models** — `scope :pinned` on both; `Watering#mix_belongs_to_plant_project` validation
+   (recipe/source/batch project must match plant's project when present).
+3. **Strong params** — permit `:pinned` in `recipes_controller` + `recipe_sources_controller`.
+4. **Recipe / RecipeSource forms** — "Pin to watering shortcuts" checkbox (hardcoded English to
+   match the surrounding un-i18n'd forms — deviation from spec 4.5, which assumed an i18n namespace
+   that doesn't exist for these forms).
+5. **Picker partial** — new `waterings/_fertilizer_picker.html.erb`: chip row (None + pinned/current
+   + More…), 3 hidden fields, server-rendered search panel, batch `<select>`. Smart-suggestion
+   fallback when nothing pinned. Batches embedded as `data-batches` JSON incl. current inactive one.
+6. **New Stimulus `fertilizer_picker_controller.js`** — pick/togglePanel/search/batchChanged;
+   derives selection from hidden fields on connect; dispatches `tds` event.
+7. **`watering_recipe_controller.js` cleanup** — remove form-only `sourceChanged`/`sourceSelect`/
+   `recipeSection` + dead `unifiedBatch*`/`recipeIdHidden` + `projectUrl` value; add `applyTds`.
+   **Deviation from spec 4.3:** KEEP `recipeChanged`/`batchChanged`/`recipeSelect`/`batchSelect`/
+   `tdsField`/`url` — the plants-index bulk-water panel (out of scope, must stay working) still
+   uses them. Likewise KEEP the `for_recipe` endpoint; only remove `for_project` (form-only).
+8. **Styles** — `.fertilizer-picker` in shared.sass next to `.smart-select`.
+9. **i18n** — `waterings.form.picker_*` keys in en + es; remove `none_use_recipe`.
+10. **Tests** — model (pinned scope + validation), controller (pinned persist, create fidelity,
+    cross-project reject), system (chip/search/batch/edit round-trip).
 
-Active log had reached 56 KB / 520 lines spanning 2026-03-20 → 2026-07-07 (~3.5 months, overdue).
-Moved it to `agent_log/agent_log_2026-03-20_to_2026-07-07.md` and started this fresh file. Also
-created `agent_log/README.md` (an index of all archives, one line each with date range + topic
-hook) and added a size-trigger rotation rule (~30 KB) to `CLAUDE.md`. Entry order in the archive is
-intentionally non-chronological in places — it reflects concurrent sprint-worker appends and is
-left as an accurate record.
+**Outcome (implemented):** All of the above landed. Files: migration
+`20260717000002_add_pinned…`; `schema.rb` bumped by hand (version + two columns) to stay consistent
+pending `db:migrate`. Models: `pinned` scope on Recipe/RecipeSource; `Watering#mix_belongs_to_plant_project`.
+New `waterings/_fertilizer_picker.html.erb` + `fertilizer_picker_controller.js`; `_form.html.erb`
+swaps the three selects for the partial and adds `fertilizer-picker:tds->watering-recipe#applyTds`.
+Styles in `shared.sass`; picker i18n in en+es; `none_use_recipe` removed. Pin checkbox on both
+recipe/source forms (hardcoded English — those forms are un-i18n'd; **deviation from spec 4.5**).
 
-## 2026-07-07 — Plant card redesign (moisture bloom + watering-window gauge)
+**Key deviation from spec 4.3/3.2:** the plants-index bulk-water panel (`plants/index.html.erb`,
+out of scope) *also* consumes `watering-recipe`'s `recipeChanged`/`batchChanged`/`recipeSelect`/
+`batchSelect`/`tdsField`/`url` + the `for_recipe` endpoint. So I KEPT those and only removed the
+genuinely form-only/dead bits: `sourceChanged`/`sourceSelect`/`recipeSection`,
+`unifiedBatch*`/`recipeIdHidden`, `projectUrl` value, and the `for_project` endpoint+route. Added
+`applyTds`. Updated `controllers/CLAUDE.md` roster.
 
-Redesigned the plants-index card (prototyped standalone with screenshots before touching the app).
-The flat urgency tint became a **moisture bloom** — the hue soaks in from the status spine and
-fades out, so text sits on near-white while status still scans at the left edge. All hue surfaces
-now derive from CSS vars (`--hue`/`--hue-ink`/`--hue-soft`/`--hue-wash`) set per urgency class;
-quick-water aria-busy flips the vars to blue ("card drinks" optimistic feedback). New signature
-element: a **watering-window gauge** under the countdown (track = last watering → max due date or
-today when overdue; translucent band = min→max window; fill = elapsed, overshoots the band when
-late) via `PlantsHelper#watering_gauge_style` inline custom properties. Meta emoji got a fixed
-icon column (`.mi`/`.mv` spans) so values align; accession uid restyled as a nursery-tag chip;
-snoozed cards desaturate (`.snoozed`); water button copy shortened to "Water"/"Regar" (en/es).
-`card_fields_controller` hides the gauge together with the "Next watering" line. Helper unit
-tests added (`test/helpers/plants_helper_test.rb`). Docs: plant-cards section of
-`docs/plants-index-ui.md` rewritten. Files: `plants.sass`, `_plant_row.html.erb`,
-`plants_helper.rb`, `card_fields_controller.js`, `en.yml`/`es.yml`.
+**Tests:** model (`watering_test`, new `recipe_test`/`recipe_source_test`), controller (new
+`recipes`/`recipe_sources` update-pinned, extended `waterings_controller_test`). Because the picker
+is fully server-rendered, the "system" acceptance (chip vs panel placement, unpinned-absent,
+"(inactive)" edit round-trip, id fidelity, cross-project reject, no-pins fallback) is covered by
+integration assertions with `assert_select` rather than Capybara — the system-test harness here has
+no auth wiring and its existing waterings/plants system tests are stale scaffold (reference
+nonexistent fields, never sign in). New fixtures: `recipes(:pinned_grow)`, `recipe_sources(:cal_mag)`
+pinned.
 
-## 2026-07-08 — Plants index: Load More pagination + Back to Top
-
-Replaced the watering-mode page-number pagination (per-page select 10/20/50/All, prev/next +
-numbered buttons) with a fixed 50-per-page **"Load More..."** reveal: clicking shows the next 50
-cards without hiding earlier ones (`currentPage` now counts revealed batches; `PER_PAGE = 50`
-module const, `perPage` Stimulus value removed along with `changePerPage`/`goToPage`/
-`createPageButton`). `showing_info` locale changed to "Showing %{shown} of %{total}" and only
-renders while truncated. Also added a **"Back to Top"** button below the results (own container,
-all display modes — pagination-controls stays watering-only): shown only when `<main>` (the
-scroll container) overflows, smooth-scrolls it to 0; visibility refreshed in
-`paginateVisibleCards` and `updateResultsCount`. Files: `location_filter_controller.js`,
-`plants/index.html.erb`, `plants.sass`, `en.yml`/`es.yml`, `docs/plants-index-ui.md`.
-
-## 2026-07-08 — Plant card column ladder + mobile layout toggles
-
-Widened the plants-index grid ladder to **2 / 3 / 4 columns at ≥1200 / ≥1550 / ≥1900px**; in grid
-modes cards get `min-height: 15.5rem` and a wider photo column (170px, 150px at 4-up where the
-water column also slims) so the full-height image reads as a **portrait plate**. Unified the
-stacked-card breakpoint with the site mobile breakpoint (**500px → 600px**) and added mobile-only
-**layout toggles** to `.plants-toolbar`: a 1↔2 column segmented control + a photo-size button
-(visible in 1-col only; compact caps the hero at 10rem — default stays the full-width hero).
-2-col is a portrait gallery (aspect-ratio 3/4 photo box, compact type, water row pinned to the
-bottom of equal-height rows). New `card_layout_controller` stamps `plant-cols-2` /
-`plant-img-compact` on `<html>` (survives turbo-frame reloads), persists to localStorage
-(`plant-mobile-columns`, `plant-mobile-image`); all rules scoped inside the ≤600px media block so
-the classes are inert on desktop. Verified via compiled-CSS static harness + headless screenshots
-at 1950/1300/390px in all toggle states. Files: `plants.sass`, `plants/index.html.erb`,
-`card_layout_controller.js`, `en.yml`/`es.yml`, docs (`plants-index-ui.md`, controllers
-`CLAUDE.md`, autofauna-ui skill).
-
-**Follow-up (same day):** grid-mode (≥1200px) cards restructured into an internal CSS grid —
-columns `[select] [photo] [text]`, rows `1fr auto`. Photo spans the full card height; the water
-button leaves the right edge and becomes a horizontal bottom row of the text column (dashed top
-divider, mirroring the mobile stacked layout — the expanded inline watering form now gets that
-full-width row too). `min-height` bumped 15.5rem → 19rem. Below 1200px the classic right-edge
-water column remains. Re-verified via harness screenshots at 1950/1300px. Files: `plants.sass`,
-docs.
-
-**Follow-up 2:** grid-mode photo track resized from fixed 170px to **min-height × 3/4**
-(14.25rem; 4-up: min-height 17.5rem → 13.125rem track) with zero graphic inset, so a portrait
-4:3 image fills the full card height as an edge-to-edge plate (other ratios letterbox via
-`object-fit: contain`). Verified with a generated 600×800 test photo in the harness at
-1950/1300px. Files: `plants.sass`, docs.
-
-**Follow-up 3:** removed the card's expand-watering caret and the in-place watering form (it
-broke the new grid-mode formatting; the watering edit view covers the use case). Deleted
-`plants/_inline_watering_form.html.erb`; `inline_watering_controller` slimmed to just the
-quick-water double-submit guard; `WateringsController#create` turbo_stream failure branch now
-returns an empty 422 stream (quick-water data is valid by construction). The card's quick snooze
-went with the panel — snooze/unsnooze remains on the plant show page; snoozed state still shows
-on cards. Pruned card-only CSS (`.expand-watering-btn`, `.plant-card-inline-form`,
-`.inline-watering-*`, `.inline-water-*`, `.inline-snooze-*`); kept `.inline-field*`/`.inline-input`
-(bulk-water bar) and show-page snooze styles. Files: `_plant_row.html.erb`,
-`inline_watering_controller.js`, `waterings_controller.rb`, `plants.sass`.
-
-## 2026-07-08 — Group "Water all" → "Select all" (plants index)
-
-Replaced the per-location "💧 Water all" `button_to` in location group headers with a
-"☑ Select all" button, and added the same button to recipe group headers (which had no bulk
-action before). New `plant_select#selectGroup` action: enters selection mode if needed, then
-toggle-selects the group's visible (non-`data-filter-hidden`) cards; re-click deselects just that
-group. Bulk "Water selected" is now the index's water-all pathway (location show page keeps its
-direct "Water all"). Removed now-unused `plants.index.water_all` locale key (en/es) and the
-`.group-water-all-*` styles (`.group-watering-bar` → `.group-select-bar`); added es
-`plants.bulk.select_all`. Files: `plants/index.html.erb`, `plant_select_controller.js`,
-`shared.sass`, locale files, docs.
-
-**Follow-up (design pass):** the group "Select all" moved from a generic pill in its own bar
-into the group header itself — a stateful chip on the header's right edge (the app's action
-edge). Colors derive from the group's color via inline `--group-color(-soft/-tint)` vars on the
-`<h3>`: idle = white ghost pill with a soft group-color hairline; active (whole group selected) =
-group-tint fill + solid border + "✓ Selected", ink always `$blue` since free-form group colors
-can be too light to read. `plant_select#selectGroup` gained `stopPropagation` (header click
-collapses the group) and `_refreshGroupButtons()` keeps every chip's state live from
-`_updateCount`; `aria-pressed` + `:focus-visible` outline included. ≤600px the header flex-wraps
-(count hugs the name, chip owns the right edge). Removed the `.group-select-bar`; added
-`plants.bulk.group_selected` (en/es). Verified via compiled-CSS harness screenshots at
-900/390px incl. a light-yellow worst-case group color. Files: `plants/index.html.erb`,
-`plant_select_controller.js`, `plants.sass`, `shared.sass`, locales, docs.
-
-## 2026-07-08 — Watering edit/new form redesign (sectioned form + chip rail)
-
-Restructured the bare waterings `_form` into labeled sections — eyebrow labels (When / Mix /
-Measurements / Notes) with hairline rules, colored by `var(--section-color-start)` so they pick up
-the waterings blue (reusable on any section). Optional fields (volume, TDS, pre/post moisture) now
-toggle via dashed `.chipButton` pills in one `.chip-row` at the end of Measurements; hidden field
-containers sit directly above the row in fixed order (Stimulus targets/actions unchanged). Added a
-"Now" quick-set next to the datetime field (inline onclick). New shared classes: `.card-title-row`
-(h2 + plant pill replaces the redundant Plant field), `.card-footer-actions` (quiet
-discard/delete row), `.form-errors`. **Styled the previously-unstyled `.buttonLinkSmall`**
-(neutral outline pill; placed before `.buttonLink`/`.buttonLinkDanger` so the weather page's
-`buttonLinkSmall buttonLinkDanger` combo keeps danger colors) — also improves onboarding/weather.
-`.field-row` gained `margin-bottom`, `min-width: 0` (mobile shrink) and a trailing-small-button
-slot. Copy: prompts de-dashed ("None — use recipe below"), i18n'd new strings (en/es incl.
-missing `waterings.new_watering`). Verified via compiled-CSS harness screenshots at 1280/390px
-(state: volume+TDS+recipe present). Files: `waterings/_form|edit|new.html.erb`, `shared.sass`,
-`en.yml`/`es.yml`, autofauna-ui skill.
-
-## 2026-07-08 — Plant edit/new form gets the sectioned-form pattern
-
-Extended the watering-form redesign to the plants form: eyebrow sections **Basics** (name,
-number, container — pot moved up), **Where** (location smart-select, groups), **Care** (watering
-frequency, recipes — recipes moved after freq), **Photo** (graphic selector; its old label line
-replaced by the eyebrow). Eyebrows/card border pick up plants green (#2E7D32) via
-`--section-color-start`. Edit page: `.card-title-row` ("Edit Plant" + plant pill, new
-`plants.edit_plant` key) + `.card-footer-actions` (quiet discard/delete). New page: **removed the
-h1 breadcrumb** (violated the no-breadcrumbs rule) in favor of a card h2. Errors box switched
-`auth-errors` → `form-errors`. Fixed two more never-styled classes: `.recipe-checkboxes`
-(checkboxes were full-width via global `input {width:100%}`, floating away from labels — now a
-flex list) and `.smart-select`/`.suggestion-chip` (suggested-location pills, `.selected` fills
-with section color); also `input[type=radio] width:auto` in `.graphic-source-toggle`. Prompts
-"-- None --" → "None" (i18n'd, en/es). Stimulus `plant-graphic` targets untouched. Verified via
-compiled-CSS harness screenshots at 1280/390px. Files: `plants/_form|edit|new.html.erb`,
-`shared.sass`, `plants.sass`, `en.yml`/`es.yml`, autofauna-ui skill.
-
-## 2026-07-08 — Soil moisture + log entry forms brought into the card pattern
-
-Both were unfinished: log entry pages had **no card at all** (bare h1 + breadcrumbs on the page
-background, a 5-select `datetime_select`, inline-red errors); soil moisture used four unstyled
-classes (`.formContainer`, `.button`, `.subtitle`, `.danger-zone`) plus **three missing i18n keys**
-(`edit_log_entry_for`, `delete`, `are_you_sure`) and a `data:{confirm:}` delete that never fired
-under Turbo. Now: both controllers added to the shared centered-card + form-styling selector lists
-in `shared.sass` (that shared block also gained `textarea{width:100%}`); cards get
-`.card-title-row` (title + plant pill) and `.card-footer-actions` (cancel; soil moisture edit also
-a quiet delete with a working `onclick` confirm, new `soil_moisture_readings.delete/
-confirm_delete` keys); errors → `.form-errors`; log entry timestamp switched to
-`datetime_local_field` + "Now" chip (permitted params already accept the scalar); soil moisture
-`measured_at` also gets a "Now" chip. Consolidated the "Now" label into `actions.now` (waterings
-form switched over; dropped `waterings.form.now`). Added `log_entries.edit`,
-`soil_moisture_readings.save/select_prompt` (en/es). No eyebrow sections — 2–3-field forms don't
-need them. Verified via compiled-CSS harness screenshots at 1280/390px. Files:
-`soil_moisture_readings/*`, `log_entries/_form|edit|new.html.erb`, `shared.sass`, locales, skill.
-
-## 2026-07-08 — Uploadable pictures for Tanks
-
-Added a single uploadable photo per Tank (`has_one_attached :picture`, no migration — Active
-Storage already in place from plant custom images). Model validates content type (PNG/JPEG/WEBP/GIF)
-and 20MB cap; `picture_attached?` guards against unpersisted blobs after a failed save (same
-pattern as `PlantGraphics#custom_image_attached?`). Controller permits `:picture`, purges on
-`remove_picture=1` (skipped when a replacement is uploaded), and index eager-loads via
-`with_attached_picture`. New generic `image_upload_controller.js` Stimulus controller (choose/take
-photo buttons, client preview, remove flag) — plant_graphic_controller stays coupled to the
-graphics library. Form reuses the global `.graphic-upload-*` classes. Tank cards
-(`_tank.html.erb`) show a 3.5rem thumbnail (`.resource-card.with-photo` flex layout in
-`shared.sass`); tank show renders the photo above the info card with the existing `image-lightbox`
-controller (hi-res 1600px variant). Six new controller tests mirror the plants image tests.
-Files: `tank.rb`, `tanks_controller.rb`, `tanks/_form|_tank|show.html.erb`,
-`image_upload_controller.js`, `shared.sass`, `tanks_controller_test.rb`.
-
----
-
-## 2026-07-13 — Security audit + fix of three cross-tenant (IDOR) findings
-
-Full manual security review of the app + deploy config + `~/devops` static-site infra (report
-saved to a Google Doc). Three HIGH findings shared one root cause: **tenant scope derived from a
-request param / a separately-tracked `current_project` that authz checks were desynced from,
-instead of from the authenticated user + the object being acted on.** Fixing all three:
-
-1. **`SensorReadingsController`** — `set_project` switched `current_project` from an arbitrary
-   `project_id` param with no membership check, and `authorize_viewer` (only `readings`) ran
-   *before* it, so `readings` leaked any project's data; `import`/`process_file` had no auth at all
-   (unauthenticated cross-tenant write). Fix: `authenticate` + `ensure_project` (except
-   `transmit`), `authorize_viewer` on `readings`, `authorize_editor` on `import`/`process_file`;
-   removed the param-switching `set_project`. `transmit` stays public (API-key auth) and resolves
-   its project locally; also scoped its `Sensor` lookup to the authenticated project
-   (`project.sensors.find_by`) so a cross-project sensor_id can't be attached (was a Medium
-   finding). Behavior change: missing `project_id` on transmit now renders its own "Unauthorized"
-   (200) instead of a redirect — transmit test updated to match.
-2. **`ProjectsController#set_project`** — did an unscoped `Project.find(params[:id])` and only
-   switched `current_project` for members, leaving `@project` = victim while authz checked the
-   attacker's own project → any editor could read/update (rename, rotate `api_key`) any project by
-   id. Fix: `set_project` now raises `RecordNotFound` unless `authorized?(current_user, :viewer,
-   @project)`, then sets current_project to `@project` so downstream authz evaluates the target.
-3. **`plant_params` permitted `:project_id`** → editor could create/move a plant cross-tenant.
-   Fix: dropped `:project_id`; `create` now uses `current_project.plants.new(plant_params)`.
-
-Regression tests added to `authorization_test.rb` (projects read/update deny, plant create/move
-deny) + new `sensor_readings_authorization_test.rb` (unauth import blocked, cross-tenant readings
-blocked). NOTE: remaining mediums from the audit (non-constant-time api_key compare + key in query
-string, no rate limiting, nginx `add_header` inheritance dropping security headers, commented-out
-Rails CSP) are documented but NOT yet fixed.
-
-## 2026-07-13 — Implemented the 4 "security"-labeled GitHub issues (#106–#109)
-
-Follow-up to the same-day security audit; clears the remaining mediums noted in the previous entry.
-
-- **#109 `HygroSensorReading.create_from_json`:** no longer assigns `id` from input (imports always
-  insert new rows); `sensor_id` resolved via `project.sensors.find_by` and a new model validation
-  (`sensor_matches_project`) rejects cross-project sensors everywhere. New
-  `test/models/hygro_sensor_reading_test.rb`.
-- **#107 transmit API key:** comparison now `SecurityUtils.secure_compare`; key accepted via
-  `Authorization: Bearer` or `X-Api-Key` header; `API_KEY` query param still works but logs a
-  deprecation warning per request (migration signal). Success response now HTML-escapes the reading.
-  Firmware migration path documented in `docs/api-sensors.md`.
-- **#106 rate limiting:** Rails 8 `rate_limit` on sessions#create (10/3min per IP **and** per
-  email), password_resets#create (5/15min per email), registrations#create + guests#create
-  (10/hour per IP). All render plain-text 429 (`errors.rate_limited`, en+es). Counters live in
-  `RateLimiting::STORE` (`config/initializers/rate_limiting.rb`) — a real MemoryStore in test
-  (global cache is `:null_store`, which would disable limiting), `Rails.cache` elsewhere;
-  `test_helper.rb` clears it per test so `sign_in` calls don't accumulate. New
-  `test/controllers/rate_limiting_test.rb`.
-- **#108 CSP:** enabled in **report-only** mode (`config/initializers/content_security_policy.rb`)
-  with script-src nonces (session-id based, SecureRandom fallback); style-src keeps
-  `unsafe-inline` deliberately (style nonce would void it and break `style=""` attributes).
-  Allows Google Sign-In (script/frame/connect) + Google Fonts. Layout inline scripts nonce'd; the
-  GSI `onload=` attribute replaced with a nonce'd listener. **Before enforcing:** migrate the ~35
-  inline `onclick=`/`onchange=` handlers in views to Stimulus, then remove the
-  `content_security_policy_report_only` line. New `test/controllers/content_security_policy_test.rb`.
-
-Tests not yet run (awaiting user `bin/rails test`).
-
-## 2026-07-17 — Laptop dev-env bring-up + clone-script portability; filed issues #110–#113
-
-New-laptop (WSL2) setup debugging, fixed in sequence: (1) `.rbenv-vars` was missing
-`DATABASE_USER` (added `=autofauna_development`); (2) `config/master.key` was a stale 2023 copy —
-replaced from the server's `shared/config/master.key`; (3) Postgres wasn't installed; after
-install, the `autofauna_development` role's password didn't match `.rbenv-vars` (scripted
-create-or-reset from the file's value, SUPERUSER, verified TCP login); (4) `.rbenv-vars` had
-legacy `DATABASE=plant_care` → renamed to `autofauna_development` to match the clone script's
-restore target and test docs. Installed standalone `gh` CLI to `~/.local/bin` (not in apt).
-
-`util/clone_production_db_to_local.sh` reworked: derives repo root from its own location (was
-hardcoded `/home/jef/autofauna`), `mkdir -p db/backup`, loads `.rbenv-vars` via
-`eval "$(rbenv vars)"` for the ssh/scp/rsync lines, and **Active Storage sync is now opt-in via
-`--storage`** (was default; `AUTOFAUNA_SYNC_USER_EMAIL` still selects targeted mode). `-s` still
-boots the server, now position-independent. `docs/deployment.md` updated to match.
-
-Filed GitHub issues from user spec: #110 Location images (mirror Tank `:picture` pattern),
-#111 per-location water/fertilizer supply managed from Location show, #112 color-coded
-beaker/test-tube icons for Recipes (reuses existing `color`), #113 single recipe picker on the
-watering form (pinned shortlist + searchable "More…"). Suggested order: #112 before #113.
-
----
-
-## 2026-07-17 — Location images (#110)
-
-Added photo upload to Locations, mirroring the Tank `:picture` pattern.
-
-- Extracted shared `HasPicture` concern (`app/models/concerns/has_picture.rb`): `has_one_attached
-  :picture`, `PICTURE_VARIANT`/`PICTURE_THUMB_VARIANT`/`ACCEPTED_PICTURE_TYPES`/`MAX_PICTURE_SIZE`
-  constants, content-type + size validation, and `picture_attached?` (persisted-blob guard). Tank
-  now `include HasPicture` instead of duplicating; Location includes it too. `Model::CONST`
-  references in views resolve through the concern via ancestor lookup.
-- LocationsController: `with_attached_picture` on index (N+1), permit `:picture`,
-  `purge_picture_if_requested` on update (honors `remove_picture == "1"`, skipped when a
-  replacement is uploaded).
-- Views: `_form` file field + preview + remove checkbox wired to `image-upload` controller;
-  `_location` index card renders thumb with `with-photo`/`resource-card-photo`/`resource-card-body`
-  (kept the color-mix background/border); `show` renders large variant with `image-lightbox`.
-- CSS: generalized the show-page photo rule to `.tank-photo, .location-photo` (shared).
-- Tests: create/attach/remove/keep-on-replace/reject-bad-type/index+show render, plus a
-  cross-tenant scoping test (user one cannot attach to `locations(:location_p2)` → redirects to
-  plants_path). No migration — Active Storage already in use.
-
-**Follow-up (test fix):** The "reject unsupported content type" tests (Location + pre-existing
-Tank) were failing (302 instead of 422). Root cause: Active Storage re-identifies content type from
-the file *bytes* via Marcel at assignment time (`unfurl`, `identify: true`), so a *valid* PNG
-mislabeled `text/plain` still resolves to `image/png` and passes validation — the Tank test was
-red at HEAD for the same reason. Fixed by adding `test/fixtures/files/not_an_image.txt` (genuine
-text, sniffs to `text/plain`) and pointing both reject tests at it.
-
----
-
-## 2026-07-17 — Issue #111: Per-location water/fertilizer supply (LocationSupply)
-
-**Plan (agreed before implementing):**
-
-Add a per-location stocking ledger so users manage water/fertilizer supply entirely from the
-Location show page (no Recipe Batches index trip). Four recordable actions: add, remove, mark
-depleted (per supply); plus stocking a brand-new supply.
-
-- **Model `LocationSupply`** — `belongs_to :location`, polymorphic `belongs_to :supplyable`
-  (RecipeSource or RecipeBatch), `quantity` float + `quantity_units` enum. `has_many
-  :location_supply_adjustments`. One row per (location, supplyable) — unique index. Methods
-  `add!/remove!/deplete!` each mutate `quantity` and write an adjustment row (auditable history).
-- **Model `LocationSupplyAdjustment`** — `belongs_to :location_supply`, `belongs_to :user`
-  (optional), `action` enum (add/remove/deplete), `amount`, `units` enum, `quantity_after`, `note`.
-- **Concern `VolumeConvertible`** — shared UNITS_TO_ML table + VOLUME_UNITS enum map + convert
-  helpers. Included in LocationSupply and refactored into RecipeBatch (removes its private dupes).
-- **Batch-interaction decision (documented): INDEPENDENT POOLS.** LocationSupply is a manual
-  stocking ledger; it does NOT auto-sync with `RecipeBatch.remaining_volume`, and watering plants
-  does NOT decrement location stock. Rationale: a batch mixed in the basement and carried upstairs
-  is a physical transfer the user logs explicitly; auto-coupling would double-count against the
-  batch's own usage-based remaining_volume. Keeps the feature self-contained.
-- **Controller `LocationSuppliesController`** — nested under locations. `authenticate`,
-  `ensure_project`, `require_use_fertilizers`, `set_location` (scoped via
-  `current_project.locations.find`), `authorize_editor`. Actions: `create` (stock/add to a
-  supply — resolves supplyable ONLY from `current_project.recipe_sources/recipe_batches`, blocks
-  cross-project attach), `adjust` (add/remove/deplete existing), `destroy`. Plain redirects to the
-  location (matches recipe_batches#adjust_remaining pattern; `data: { turbo: false }` forms).
-- **Routes** — `resources :location_supplies, only: [:create, :destroy]` nested in `:locations`,
-  with member `patch :adjust`.
-- **Location show page** — new "Supplies" section (settings-card), gated by
-  `feature_enabled?(:use_fertilizers)`: current stock per supply + per-row Add/Remove/Deplete/Remove
-  and a "stock a new supply" form (grouped select of project sources + active batches).
-- **Migration** — create `location_supplies` + `location_supply_adjustments`.
-- **Tests** — model + controller: add/remove/deplete flows, cross-tenant denial (can't stock
-  another project's location, can't attach another project's source/batch), feature-flag gate.
-  New fixtures: recipes, recipe_sources, recipe_batches.
-
-**UI follow-up (overlap fix):** The `#location-supplies` settings-card had overlapping controls.
-Root causes: (1) the section used `<h4>`, which has a global rule `margin: -1em 0 1em 9em` (legacy)
-that shoved "Stock a supply" 9em right and up; (2) submit `<input>`s were crammed inside a
-`.field-row` flex row where the global `input { width: 100% }` made them overflow the sibling
-fields. Redesigned within the design system: card title is now `<h2>` (styled in `.settings-card`),
-the sub-form heading uses the `.form-section-label` eyebrow instead of `<h4>`, each `.field-row`
-holds only two inputs, and adjustments use explicit `f.button` Add/Remove pills (name=adjust_action)
-plus separate `button_to` Mark-depleted / Remove-supply pills (kept OUTSIDE the adjust form — no
-nested forms). New `.supply-row/.supply-head/.supply-primary-actions/.supply-secondary-actions`
-styles; the stock readout (bold quantity) is the row's visual anchor.
-
-## 2026-07-17 — Issue #112: Fertilizer graphics (color-coded test-tube icon)
-
-**Plan:** Add a color-coded inline SVG test-tube icon for Recipes (fertilizers), liquid color
-driven by `recipe.hex_color` (existing attr; no migration). Single parameterized helper
-`fertilizer_icon(recipe, size:)` in ApplicationHelper returning an inline test-tube SVG (neutral
-`currentColor` stroke, liquid `<rect>` clipped to the tube interior via a per-instance unique
-clipPath id). Two sizes: `:small` (~18px, list/inline) and `:medium` (~28px, cards/headers).
-Render on: recipes index cards, recipe show header, watering `_watering.html.erb` recipe row,
-plants `_plant_row.html.erb` recipe line (replace 🧪 emoji), and the timeline recipe line. No photo
-upload UI. Add `.fertilizer-icon` sizing CSS to shared.sass.
-
-**Done:** Added `fertilizer_icon(recipe=nil, color:, size:, title:)` to ApplicationHelper — inline
-test-tube SVG, liquid `<rect>` clipped to the tube interior (per-instance unique clipPath id),
-`currentColor` soft stroke + rim, meniscus highlight; `:small`=18px / `:medium`=28px. Wired into:
-recipes index card name, recipe show `<h1>`, watering `_watering` recipe row, plant `_plant_row`
-card recipe line, plant `_timeline` recipe line, plant show `_plant` (last-watering recipe +
-recipes list), and plants-index recipe filter buttons (via `color:`). Added `.fertilizer-icon`
-inline-alignment CSS to shared.sass. Reused existing `Recipe#hex_color` (no migration, no photo
-upload UI). Verified SVG shape by rendering to PNG (sharp) — liquid clips inside the rounded tube,
-crisp at small sizes. ERB/helper syntax checked; `plant-card-recipe` class preserved so
-feature_flags_test still passes.
+**Needs user:** `bin/rails db:migrate` then `bin/rails test`. (Migration + tests not run here — I
+can't run `bin/rails`.)

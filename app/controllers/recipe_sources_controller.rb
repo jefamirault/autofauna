@@ -62,6 +62,6 @@ class RecipeSourcesController < ApplicationController
   end
 
   def recipe_source_params
-    params.require(:recipe_source).permit(:name, :tank_id, :description, :project_id)
+    params.require(:recipe_source).permit(:name, :tank_id, :description, :project_id, :pinned)
   end
 end

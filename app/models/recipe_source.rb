@@ -7,6 +7,8 @@ class RecipeSource < ApplicationRecord
 
   validates :name, presence: true, uniqueness: { scope: :project_id }
 
+  scope :pinned, -> { where(pinned: true) }
+
   def to_s
     name
   end

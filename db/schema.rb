@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_17_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_17_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -277,6 +277,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_17_000001) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "pinned", default: false, null: false
     t.index ["project_id", "name"], name: "index_recipe_sources_on_project_id_and_name", unique: true
     t.index ["project_id"], name: "index_recipe_sources_on_project_id"
     t.index ["tank_id"], name: "index_recipe_sources_on_tank_id"
@@ -290,6 +291,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_17_000001) do
     t.datetime "updated_at", null: false
     t.string "color", default: "#7B1FA2"
     t.integer "default_tds"
+    t.boolean "pinned", default: false, null: false
     t.index ["project_id", "name"], name: "index_recipes_on_project_id_and_name", unique: true
     t.index ["project_id"], name: "index_recipes_on_project_id"
   end

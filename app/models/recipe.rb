@@ -13,6 +13,8 @@ class Recipe < ApplicationRecord
   validates :color, format: { with: /\A#[0-9A-F]{6}\z/i }, allow_blank: true
   validate :unique_recipe_sources
 
+  scope :pinned, -> { where(pinned: true) }
+
   def reject_ingredient(attributes)
     # Reject if all blank OR if no recipe_source_id is present
     attributes[:recipe_source_id].blank?

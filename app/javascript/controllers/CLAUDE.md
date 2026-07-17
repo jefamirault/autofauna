@@ -19,7 +19,8 @@ Hotwire + Importmap (no Node/Webpack). Controllers register conventionally.
 | `plant_select_controller` | Plants index multi-select: mode toggle, whole-card click-to-select (`cardClick`, skips the watering column), per-card checkbox reveal (inline `display`), selection keyed by plant id (synced across triple-rendered cards), select-all over filtered set, per-group select-all (`selectGroup`, buttons in location/recipe group headers), bulk water/archive/set-location/create-group/add-to-group via a dynamically-built POST form. Calls sibling `location-filter#updateResultsCount` (`_refreshCount`) |
 | `plant_graphic_controller` | Graphic selection with live preview and auto-matching by name |
 | `image_upload_controller` | Generic single-image upload widget (tank photos): hidden file input driven by choose/take-photo buttons, client preview, remove flag |
-| `watering_recipe_controller` | Dynamic batch dropdown on recipe change, auto-fill TDS |
+| `fertilizer_picker_controller` | Watering form (#113): unified source/recipe/batch picker — chip-row shortlist (pins or smart suggestions) + searchable "More…" panel, all server-rendered. Drives 3 hidden ids; auto-resolves the active batch (reveals a Batch select only at ≥2); dispatches `tds` for `watering-recipe#applyTds` to autofill |
+| `watering_recipe_controller` | **Plants-index bulk-water panel**: dynamic batch dropdown on recipe change (`recipeChanged` → `for_recipe` fetch), auto-fill TDS. Also owns volume/TDS progressive disclosure shared with the watering form, and `applyTds` (fired by `fertilizer-picker`) |
 | `watering_moisture_controller` | Progressive disclosure of pre/post moisture fields |
 | `nested_form_controller` | Add/remove rows for nested attributes (recipes) |
 | `push_notification_controller` | Push device list: inline enable/disable toggle, "This Device" detection, test button state, global toggle sync |

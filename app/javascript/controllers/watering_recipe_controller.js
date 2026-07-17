@@ -1,27 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
+  // Batch/TDS behavior here now serves only the plants-index bulk-water panel; the watering form
+  // itself uses fertilizer-picker (which dispatches `tds` -> applyTds). Volume/TDS disclosure below
+  // is shared by both.
   static targets = [
-    "sourceSelect", "recipeSection",
     "recipeSelect", "batchSelect", "tdsField", "tdsButton", "tdsContainer",
-    "unifiedBatchSelect", "recipeIdHidden",
     "volumeSection", "volumeButton", "volumeField", "unitsSelect"
   ]
-  static values = { url: String, projectUrl: String }
-
-  sourceChanged() {
-    const sourceId = this.hasSourceSelectTarget ? this.sourceSelectTarget.value : null
-    if (this.hasRecipeSectionTarget) {
-      this.recipeSectionTarget.style.display = sourceId ? "none" : ""
-    }
-    if (sourceId && this.hasRecipeSelectTarget) {
-      this.recipeSelectTarget.value = ""
-      if (this.hasBatchSelectTarget) {
-        this.batchSelectTarget.innerHTML = '<option value="">-- None --</option>'
-      }
-    }
-  }
-
+  static values = { url: String }
 
   recipeChanged() {
     const recipeId = this.hasRecipeSelectTarget ? this.recipeSelectTarget.value : null
@@ -55,32 +42,12 @@ export default class extends Controller {
     }
   }
 
-  // Unified batch select: one dropdown for recipe+batch
-  unifiedBatchChanged() {
-    if (!this.hasUnifiedBatchSelectTarget) return
-    const selected = this.unifiedBatchSelectTarget.selectedOptions[0]
-    if (!selected || !selected.value) {
-      // No selection — clear recipe_id hidden
-      if (this.hasRecipeIdHiddenTarget) this.recipeIdHiddenTarget.value = ""
-      return
-    }
-
-    const recipeId = selected.dataset.recipeId || ""
-    const batchTds = selected.dataset.tds
-    const recipeDefaultTds = selected.dataset.recipeDefaultTds
-
-    // Set hidden recipe_id
-    if (this.hasRecipeIdHiddenTarget) {
-      this.recipeIdHiddenTarget.value = recipeId
-    }
-
-    // Auto-fill TDS: prefer batch TDS, fall back to recipe default
-    const tdsValue = (batchTds && batchTds !== "") ? batchTds
-                   : (recipeDefaultTds && recipeDefaultTds !== "") ? recipeDefaultTds
-                   : null
-
-    if (tdsValue && this.hasTdsFieldTarget) {
-      this.tdsFieldTarget.value = tdsValue
+  // Fired by fertilizer-picker on the watering form when a selection implies a TDS value.
+  applyTds(event) {
+    const tds = event.detail && event.detail.tds
+    if (tds == null || tds === "") return
+    if (this.hasTdsFieldTarget) {
+      this.tdsFieldTarget.value = tds
       this.showTds()
     }
   }

@@ -1,0 +1,142 @@
+<%#
+  Unified fertilizer picker (#113). Replaces the Source/Recipe/Batch selects with a chip row +
+  searchable "More…" panel that populate the same three hidden ids. Locals: form, watering.
+
+  Everything is server-rendered from current_project (cross-tenant scoping enforced at render
+  time), so new/edit/param-prefill all round-trip and no fetch is needed.
+%>
+<%
+  all_sources    = current_project.recipe_sources.order(:name).to_a
+  all_recipes    = current_project.recipes.order(:name).to_a
+  pinned_sources = all_sources.select(&:pinned?)
+  pinned_recipes = all_recipes.select(&:pinned?)
+  has_pins       = pinned_sources.any? || pinned_recipes.any?
+
+  sel_source_id = watering.recipe_source_id
+  sel_recipe_id = watering.recipe_id
+  sel_batch_id  = watering.recipe_batch_id
+  none_selected = sel_source_id.blank? && sel_recipe_id.blank? && sel_batch_id.blank?
+
+  # Active batches per recipe, most-recent first, as the JSON the JS reads for batch resolution.
+  active_batches_by_recipe = current_project.recipe_batches.active.includes(:recipe)
+                                            .order(mixed_on: :desc).group_by(&:recipe_id)
+
+  # Batch list for a recipe. On edit, include the currently-selected batch even if it has since
+  # been deactivated (labeled "(inactive)") so saving without changes preserves recipe_batch_id.
+  batches_json = ->(recipe) {
+    list = (active_batches_by_recipe[recipe.id] || []).map { |b| { id: b.id, label: b.label, tds: b.tds } }
+    if sel_batch_id.present? && sel_recipe_id == recipe.id && list.none? { |b| b[:id] == sel_batch_id }
+      inactive = current_project.recipe_batches.find_by(id: sel_batch_id)
+      list << { id: inactive.id, label: "#{inactive.label} (inactive)", tds: inactive.tds } if inactive
+    end
+    list
+  }
+
+  # Chip shortlist: pins define it once configured; otherwise fall back to smart suggestions.
+  if has_pins
+    chip_sources = pinned_sources
+    chip_recipes = pinned_recipes
+  else
+    chip_sources = all_sources.size <= 2 ? all_sources : []
+    if watering.plant && all_recipes.any?
+      scorer      = SmartSuggestions.watering_recipe_scorer(watering.plant)
+      top         = SmartSuggestions.new(all_recipes, scorer: scorer, limit: 3).top
+      by_id       = all_recipes.index_by(&:id)
+      chip_recipes = top.map { |s| by_id[s.id] }.compact
+    else
+      chip_recipes = []
+    end
+  end
+
+  # Always surface the current selection as a chip, even when it isn't pinned/suggested.
+  if sel_source_id.present? && chip_sources.none? { |s| s.id == sel_source_id }
+    current = all_sources.find { |s| s.id == sel_source_id }
+    chip_sources += [current] if current
+  end
+  if sel_recipe_id.present? && chip_recipes.none? { |r| r.id == sel_recipe_id }
+    current = all_recipes.find { |r| r.id == sel_recipe_id }
+    chip_recipes += [current] if current
+  end
+%>
+
+<div class="fertilizer-picker" data-controller="fertilizer-picker">
+  <%= form.hidden_field :recipe_source_id, data: { fertilizer_picker_target: "sourceIdField" } %>
+  <%= form.hidden_field :recipe_id, data: { fertilizer_picker_target: "recipeIdField" } %>
+  <%= form.hidden_field :recipe_batch_id, data: { fertilizer_picker_target: "batchIdField" } %>
+
+  <div class="fertilizer-picker-chips" data-fertilizer-picker-target="chipRow">
+    <button type="button" class="suggestion-chip<%= ' selected' if none_selected %>"
+            data-fertilizer-picker-target="chip" data-action="click->fertilizer-picker#pick"
+            data-kind="none"><%= t('waterings.form.picker_none') %></button>
+
+    <% chip_sources.each do |source| %>
+      <button type="button" class="suggestion-chip<%= ' selected' if source.id == sel_source_id %>"
+              data-fertilizer-picker-target="chip" data-action="click->fertilizer-picker#pick"
+              data-kind="source" data-id="<%= source.id %>">
+        💧 <%= source.name %>
+      </button>
+    <% end %>
+
+    <% chip_recipes.each do |recipe| %>
+      <button type="button" class="suggestion-chip<%= ' selected' if recipe.id == sel_recipe_id %>"
+              data-fertilizer-picker-target="chip" data-action="click->fertilizer-picker#pick"
+              data-kind="recipe" data-id="<%= recipe.id %>"
+              data-default-tds="<%= recipe.default_tds %>"
+              data-batches="<%= batches_json.call(recipe).to_json %>">
+        <%= fertilizer_icon(recipe) %> <%= recipe.name %>
+      </button>
+    <% end %>
+
+    <button type="button" class="suggestion-chip fertilizer-picker-more"
+            data-action="click->fertilizer-picker#togglePanel">
+      <%= t('waterings.form.picker_more') %>
+    </button>
+  </div>
+
+  <%# Secondary batch override — revealed only when a recipe has ≥ 2 selectable batches. %>
+  <div class="fertilizer-picker-batch" data-fertilizer-picker-target="batchRow" style="display: none;">
+    <label><%= t('waterings.form.picker_batch') %></label>
+    <select data-fertilizer-picker-target="batchSelect"
+            data-action="change->fertilizer-picker#batchChanged"></select>
+  </div>
+
+  <%# Expanded search panel — every source & recipe, filtered client-side. Hidden until "More…". %>
+  <div class="fertilizer-picker-panel" data-fertilizer-picker-target="panel" style="display: none;">
+    <input type="text" class="fertilizer-picker-search"
+           placeholder="<%= t('waterings.form.picker_search_placeholder') %>"
+           data-fertilizer-picker-target="searchInput"
+           data-action="input->fertilizer-picker#search">
+    <div class="fertilizer-picker-list">
+      <% if all_sources.any? %>
+        <div class="fertilizer-picker-group-header"
+             data-fertilizer-picker-target="groupHeader" data-group="sources">
+          <%= t('waterings.form.picker_sources') %>
+        </div>
+        <% all_sources.each do |source| %>
+          <button type="button" class="fertilizer-picker-row"
+                  data-fertilizer-picker-target="listRow" data-action="click->fertilizer-picker#pick"
+                  data-kind="source" data-id="<%= source.id %>" data-group="sources"
+                  data-name="<%= source.name.downcase %>">
+            💧 <%= source.name %>
+          </button>
+        <% end %>
+      <% end %>
+      <% if all_recipes.any? %>
+        <div class="fertilizer-picker-group-header"
+             data-fertilizer-picker-target="groupHeader" data-group="recipes">
+          <%= t('waterings.form.picker_fertilizers') %>
+        </div>
+        <% all_recipes.each do |recipe| %>
+          <button type="button" class="fertilizer-picker-row"
+                  data-fertilizer-picker-target="listRow" data-action="click->fertilizer-picker#pick"
+                  data-kind="recipe" data-id="<%= recipe.id %>" data-group="recipes"
+                  data-name="<%= recipe.name.downcase %>"
+                  data-default-tds="<%= recipe.default_tds %>"
+                  data-batches="<%= batches_json.call(recipe).to_json %>">
+            <%= fertilizer_icon(recipe) %> <%= recipe.name %>
+          </button>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

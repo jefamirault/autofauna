@@ -665,6 +665,107 @@ main
     display: flex
     justify-content: center
 
+// Fertilizer picker (waterings/_fertilizer_picker, #113): chip-row shortlist + searchable panel.
+// Reuses .suggestion-chip; section color inherits the watering-form blue via --section-color-start.
+.fertilizer-picker
+  .fertilizer-picker-chips
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: 0.5rem
+    margin: 0.25rem 0 0.5rem
+
+  .suggestion-chip
+    display: inline-flex
+    align-items: center
+    gap: 0.3rem
+    padding: 0.35rem 0.9rem
+    border-radius: 999px
+    border: 1px solid #b5bdb9
+    background: white
+    color: #333
+    font-family: Roboto, verdana, sans-serif
+    font-size: 0.85rem
+    cursor: pointer
+    transition: border-color 0.15s ease, background 0.15s ease
+
+    .fertilizer-icon
+      flex: 0 0 auto
+
+    &:hover
+      border-color: var(--section-color-start, $green)
+
+    &.selected
+      background: var(--section-color-start, $green)
+      border-color: var(--section-color-start, $green)
+      color: white
+
+    &:focus-visible
+      outline: 2px solid var(--section-color-start, $green)
+      outline-offset: 2px
+
+  .fertilizer-picker-more
+    font-style: italic
+    color: #555
+
+    &:hover
+      color: var(--section-color-start, $green)
+
+  .fertilizer-picker-batch
+    display: flex
+    align-items: center
+    gap: 0.5rem
+    margin: 0.25rem 0 0.5rem
+
+    label
+      font-size: 0.8rem
+      color: #777
+
+  .fertilizer-picker-panel
+    border: 1px solid #d5dbd8
+    border-radius: 8px
+    padding: 0.5rem
+    margin: 0.25rem 0 0.5rem
+    background: white
+
+  .fertilizer-picker-search
+    width: 100%
+    box-sizing: border-box
+    margin-bottom: 0.5rem
+
+  .fertilizer-picker-list
+    max-height: 14rem
+    overflow-y: auto
+
+  .fertilizer-picker-group-header
+    font-size: 0.72rem
+    text-transform: uppercase
+    letter-spacing: 0.06em
+    color: #999
+    margin: 0.4rem 0 0.2rem
+
+  .fertilizer-picker-row
+    display: flex
+    align-items: center
+    gap: 0.4rem
+    width: 100%
+    text-align: left
+    padding: 0.4rem 0.5rem
+    border: none
+    border-radius: 6px
+    background: none
+    color: #333
+    font-family: Roboto, verdana, sans-serif
+    font-size: 0.9rem
+    cursor: pointer
+
+    &:hover
+      background: rgba(0, 0, 0, 0.05)
+
+    &:focus-visible
+      outline: 2px solid var(--section-color-start, $green)
+      outline-offset: -2px
+
 .auth-links
   margin-top: 1.5rem
   display: flex
