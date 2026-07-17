@@ -1,5 +1,37 @@
 module ApplicationHelper
 
+  # Color-coded test-tube icon used as the at-a-glance identifier for a fertilizer (Recipe).
+  # The liquid fill comes from the recipe's color (hex_color fallback). Inline SVG so the fill is
+  # settable per-recipe; no external assets. `size:` is :small (~18px, list/inline) or :medium
+  # (~28px, cards/headers). Pass a Recipe, or override the color directly with `color:`.
+  FERTILIZER_ICON_SIZES = { small: 18, medium: 28 }.freeze
+
+  def fertilizer_icon(recipe = nil, color: nil, size: :small, title: nil)
+    liquid = color.presence || (recipe.respond_to?(:hex_color) ? recipe.hex_color : nil) || '#7B1FA2'
+    px = FERTILIZER_ICON_SIZES[size] || FERTILIZER_ICON_SIZES[:small]
+    label = title || (recipe.respond_to?(:name) ? "#{recipe.name} fertilizer" : 'fertilizer')
+    clip_id = "ferttube-#{SecureRandom.hex(4)}"
+
+    svg = <<~SVG
+      <svg class="fertilizer-icon fertilizer-icon-#{size}" width="#{px}" height="#{px}"
+           viewBox="0 0 24 24" fill="none" role="img" aria-label="#{ERB::Util.html_escape(label)}">
+        <clipPath id="#{clip_id}">
+          <path d="M9 3.5 V16 A3 3 0 0 0 15 16 V3.5 Z"/>
+        </clipPath>
+        <g clip-path="url(##{clip_id})">
+          <rect x="8" y="10" width="8" height="12" fill="#{ERB::Util.html_escape(liquid)}"/>
+          <ellipse cx="12" cy="10" rx="3" ry="0.9" fill="#ffffff" fill-opacity="0.28"/>
+        </g>
+        <path d="M9 3.5 V16 A3 3 0 0 0 15 16 V3.5"
+              stroke="currentColor" stroke-opacity="0.6" stroke-width="1.3"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="7.5" y1="3.5" x2="16.5" y2="3.5"
+              stroke="currentColor" stroke-opacity="0.6" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+    SVG
+    svg.html_safe
+  end
+
   def time_or_date(datetime)
     return '' if datetime.nil?
     format_string = datetime.today? ? '%I:%M %p' : datetime.strftime('%B %d, %Y')

@@ -9,7 +9,7 @@
         <div class="info-card-section" style="background: color-mix(in srgb, <%= recipe.hex_color %> 12%, transparent); border-left: 3px solid color-mix(in srgb, <%= recipe.hex_color %> 80%, black);">
           <div class="info-row">
             <span class="label">Name</span>
-            <span class="value"><%= link_to recipe.name, recipe_path(recipe) %></span>
+            <span class="value"><%= fertilizer_icon(recipe, size: :medium) %> <%= link_to recipe.name, recipe_path(recipe) %></span>
           </div>
           <% if recipe.recipe_sources.any? %>
             <div class="info-row">

@@ -3,6 +3,7 @@
 <h1>
   <%= link_to "Recipes", recipes_path, class: 'breadcrumb' %>
   <%= icon 'chevron-right', variant: 'mini', class: 'breadcrumb' %>
+  <%= fertilizer_icon(@recipe, size: :medium) %>
   <%= @recipe %>
 </h1>
 

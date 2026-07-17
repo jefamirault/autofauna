@@ -30,7 +30,7 @@
           <% if feature_enabled?(:precise_measurements) && watering.tds.present? %><span class='watering-tds'>📊 <%= watering.tds %>ppm</span><% end %>
           <% if feature_enabled?(:use_fertilizers) %>
             <% if watering.recipe_source.present? %><span class='watering-recipe'>💧 <%= watering.recipe_source.name %></span><% end %>
-            <% if watering.recipe.present? %><span class='watering-recipe'>🧪 <%= watering.recipe.name %></span><% end %>
+            <% if watering.recipe.present? %><span class='watering-recipe'><%= fertilizer_icon(watering.recipe) %> <%= watering.recipe.name %></span><% end %>
             <% if watering.recipe_batch.present? %><span class='watering-batch'>🪣 <%= watering.recipe_batch.to_s %></span><% end %>
           <% end %>
           <% if feature_enabled?(:track_soil_moisture) && watering.soil_moisture_readings.any? %>

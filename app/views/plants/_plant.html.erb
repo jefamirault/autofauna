@@ -61,7 +61,7 @@
             <% if @plant.last_watering&.recipe_source.present? %>
               <span class="watering-recipe-text">💧 <%= @plant.last_watering.recipe_source.name %></span>
             <% elsif @plant.last_watering&.recipe.present? %>
-              <span class="watering-recipe-text">🧪 <%= @plant.last_watering.recipe.name %></span>
+              <span class="watering-recipe-text"><%= fertilizer_icon(@plant.last_watering.recipe) %> <%= @plant.last_watering.recipe.name %></span>
             <% end %>
             <% if @plant.last_watering&.recipe_batch.present? %>
               <span class="watering-batch-text">🪣 Batch: <%= @plant.last_watering.recipe_batch.to_s %></span>
@@ -115,7 +115,7 @@
           <span class="label">🧪 <%= plant_recipe_list.size == 1 ? 'Recipe' : 'Recipes' %>:</span>
           <span class="value">
             <% plant_recipe_list.each_with_index do |r, i| %>
-              <%= link_to r.name, recipe_path(r) %><%= i < plant_recipe_list.size - 1 ? ', ' : '' %>
+              <%= fertilizer_icon(r) %> <%= link_to r.name, recipe_path(r) %><%= i < plant_recipe_list.size - 1 ? ', ' : '' %>
             <% end %>
           </span>
         </div>

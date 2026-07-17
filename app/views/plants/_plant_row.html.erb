@@ -56,7 +56,7 @@
       <% end %>
       <span class="plant-card-container"><span class="mi">🫙</span><span class="mv"><%= plant.pot.presence || "–" %></span></span>
       <% if feature_enabled?(:use_fertilizers) && plant.recipe.present? %>
-        <span class="plant-card-recipe"><span class="mi">🧪</span><span class="mv"><%= plant.recipe.name %></span></span>
+        <span class="plant-card-recipe"><span class="mi"><%= fertilizer_icon(plant.recipe) %></span><span class="mv"><%= plant.recipe.name %></span></span>
       <% end %>
     </div>
     </div>

@@ -112,7 +112,7 @@
                             data-recipe-count="<%= filter[:count] %>"
                             data-recipe-color="<%= filter[:color] %>"
                             data-action="click->location-filter#toggleRecipeFilter">
-                      <%= filter[:name] %>
+                      <% if filter[:id].present? %><%= fertilizer_icon(color: filter[:color], title: filter[:name]) %> <% end %><%= filter[:name] %>
                     </button>
                   <% end %>
                 </div>

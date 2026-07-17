@@ -343,3 +343,25 @@ holds only two inputs, and adjustments use explicit `f.button` Add/Remove pills 
 plus separate `button_to` Mark-depleted / Remove-supply pills (kept OUTSIDE the adjust form — no
 nested forms). New `.supply-row/.supply-head/.supply-primary-actions/.supply-secondary-actions`
 styles; the stock readout (bold quantity) is the row's visual anchor.
+
+## 2026-07-17 — Issue #112: Fertilizer graphics (color-coded test-tube icon)
+
+**Plan:** Add a color-coded inline SVG test-tube icon for Recipes (fertilizers), liquid color
+driven by `recipe.hex_color` (existing attr; no migration). Single parameterized helper
+`fertilizer_icon(recipe, size:)` in ApplicationHelper returning an inline test-tube SVG (neutral
+`currentColor` stroke, liquid `<rect>` clipped to the tube interior via a per-instance unique
+clipPath id). Two sizes: `:small` (~18px, list/inline) and `:medium` (~28px, cards/headers).
+Render on: recipes index cards, recipe show header, watering `_watering.html.erb` recipe row,
+plants `_plant_row.html.erb` recipe line (replace 🧪 emoji), and the timeline recipe line. No photo
+upload UI. Add `.fertilizer-icon` sizing CSS to shared.sass.
+
+**Done:** Added `fertilizer_icon(recipe=nil, color:, size:, title:)` to ApplicationHelper — inline
+test-tube SVG, liquid `<rect>` clipped to the tube interior (per-instance unique clipPath id),
+`currentColor` soft stroke + rim, meniscus highlight; `:small`=18px / `:medium`=28px. Wired into:
+recipes index card name, recipe show `<h1>`, watering `_watering` recipe row, plant `_plant_row`
+card recipe line, plant `_timeline` recipe line, plant show `_plant` (last-watering recipe +
+recipes list), and plants-index recipe filter buttons (via `color:`). Added `.fertilizer-icon`
+inline-alignment CSS to shared.sass. Reused existing `Recipe#hex_color` (no migration, no photo
+upload UI). Verified SVG shape by rendering to PNG (sharp) — liquid clips inside the rounded tube,
+crisp at small sizes. ERB/helper syntax checked; `plant-card-recipe` class preserved so
+feature_flags_test still passes.

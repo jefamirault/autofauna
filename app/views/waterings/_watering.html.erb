@@ -27,7 +27,7 @@
   <% if watering.recipe.present? %>
     <div class="info-row">
       <strong>Recipe</strong>
-      <span class="value"><%= link_to watering.recipe.name, recipe_path(watering.recipe), class: 'link' %></span>
+      <span class="value"><%= fertilizer_icon(watering.recipe) %> <%= link_to watering.recipe.name, recipe_path(watering.recipe), class: 'link' %></span>
     </div>
   <% end %>
 
