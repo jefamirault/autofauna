@@ -6,6 +6,15 @@
   <%= @location %>
 </h1>
 
+<% if @location.picture_attached? %>
+  <div class="location-photo" data-controller="image-lightbox"
+       data-image-lightbox-src-value="<%= url_for(@location.picture.variant(resize_to_limit: [1600, 1600])) %>">
+    <%= image_tag @location.picture.variant(Location::PICTURE_VARIANT), alt: @location.name, class: 'location-photo-image',
+                  role: 'button', tabindex: 0, title: 'View fullscreen',
+                  data: { action: 'click->image-lightbox#open' } %>
+  </div>
+<% end %>
+
 <div class="info-card">
   <div class="info-card-grid">
     <div class="info-card-section">

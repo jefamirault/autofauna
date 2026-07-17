@@ -74,7 +74,7 @@ class TanksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should reject a picture with an unsupported content type" do
-    file = fixture_file_upload("plant.png", "text/plain")
+    file = fixture_file_upload("not_an_image.txt", "text/plain")
     patch tank_url(@tank), params: { tank: { name: @tank.name, picture: file } }
     assert_response :unprocessable_entity
     assert_not @tank.reload.picture.attached?

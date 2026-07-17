@@ -264,3 +264,32 @@ Filed GitHub issues from user spec: #110 Location images (mirror Tank `:picture`
 #111 per-location water/fertilizer supply managed from Location show, #112 color-coded
 beaker/test-tube icons for Recipes (reuses existing `color`), #113 single recipe picker on the
 watering form (pinned shortlist + searchable "More…"). Suggested order: #112 before #113.
+
+---
+
+## 2026-07-17 — Location images (#110)
+
+Added photo upload to Locations, mirroring the Tank `:picture` pattern.
+
+- Extracted shared `HasPicture` concern (`app/models/concerns/has_picture.rb`): `has_one_attached
+  :picture`, `PICTURE_VARIANT`/`PICTURE_THUMB_VARIANT`/`ACCEPTED_PICTURE_TYPES`/`MAX_PICTURE_SIZE`
+  constants, content-type + size validation, and `picture_attached?` (persisted-blob guard). Tank
+  now `include HasPicture` instead of duplicating; Location includes it too. `Model::CONST`
+  references in views resolve through the concern via ancestor lookup.
+- LocationsController: `with_attached_picture` on index (N+1), permit `:picture`,
+  `purge_picture_if_requested` on update (honors `remove_picture == "1"`, skipped when a
+  replacement is uploaded).
+- Views: `_form` file field + preview + remove checkbox wired to `image-upload` controller;
+  `_location` index card renders thumb with `with-photo`/`resource-card-photo`/`resource-card-body`
+  (kept the color-mix background/border); `show` renders large variant with `image-lightbox`.
+- CSS: generalized the show-page photo rule to `.tank-photo, .location-photo` (shared).
+- Tests: create/attach/remove/keep-on-replace/reject-bad-type/index+show render, plus a
+  cross-tenant scoping test (user one cannot attach to `locations(:location_p2)` → redirects to
+  plants_path). No migration — Active Storage already in use.
+
+**Follow-up (test fix):** The "reject unsupported content type" tests (Location + pre-existing
+Tank) were failing (302 instead of 422). Root cause: Active Storage re-identifies content type from
+the file *bytes* via Marcel at assignment time (`unfurl`, `identify: true`), so a *valid* PNG
+mislabeled `text/plain` still resolves to `image/png` and passes validation — the Tank test was
+red at HEAD for the same reason. Fixed by adding `test/fixtures/files/not_an_image.txt` (genuine
+text, sniffs to `text/plain`) and pointing both reject tests at it.

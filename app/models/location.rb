@@ -1,4 +1,6 @@
 class Location < ApplicationRecord
+  include HasPicture
+
   belongs_to :zone, optional: true
   has_many :plants
   has_many :tanks

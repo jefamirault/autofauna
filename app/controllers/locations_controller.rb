@@ -18,6 +18,7 @@ class LocationsController < ApplicationController
   # GET /locations or /locations.json
   def index
     @locations = current_project.locations
+      .with_attached_picture
       .left_joins(:plants)
       .where('plants.id IS NULL OR plants.archived = ?', false)
       .group('locations.id')
@@ -56,6 +57,7 @@ class LocationsController < ApplicationController
   def update
     respond_to do |format|
       if @location.update(location_params)
+        purge_picture_if_requested
         format.html { redirect_to @location, notice: "Location was successfully updated." }
         format.json { render :show, status: :ok, location: @location }
       else
@@ -83,6 +85,13 @@ class LocationsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def location_params
-      params.expect(location: [ :zone_id, :name, :description, :project_id, :color])
+      params.expect(location: [ :zone_id, :name, :description, :project_id, :color, :picture])
+    end
+
+    def purge_picture_if_requested
+      return unless params.dig(:location, :remove_picture) == "1"
+      return if location_params[:picture].present?
+
+      @location.picture.purge
     end
 end

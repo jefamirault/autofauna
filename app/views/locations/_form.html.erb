@@ -35,6 +35,38 @@
     <small>Used for filter buttons and group headers</small>
   </div>
 
+  <div data-controller="image-upload">
+    <%= form.label :picture, "Photo", style: "display: block" %>
+    <div class="graphic-upload-container">
+      <%= hidden_field_tag "location[remove_picture]", "0", data: { image_upload_target: "removeFlag" } %>
+      <% if location.picture_attached? %>
+        <%= image_tag location.picture.variant(resize_to_limit: [300, 300]), alt: "Current photo", class: "plant-graphic-preview-image", data: { image_upload_target: "currentImage" } %>
+      <% end %>
+      <%= form.file_field :picture,
+        accept: Location::ACCEPTED_PICTURE_TYPES.join(","),
+        class: "graphic-file-input",
+        data: {
+          image_upload_target: "fileInput",
+          action: "change->image-upload#filePreview"
+        }
+      %>
+      <div class="graphic-upload-buttons">
+        <button type="button" class="graphic-upload-btn"
+                data-action="image-upload#chooseFile">📁 Choose a photo</button>
+        <button type="button" class="graphic-upload-btn"
+                data-image-upload-target="cameraButton"
+                data-action="image-upload#takePhoto">📷 Take a photo</button>
+        <% if location.picture_attached? %>
+          <button type="button" class="graphic-upload-btn"
+                  data-image-upload-target="removeButton"
+                  data-action="image-upload#remove">✕ Remove photo</button>
+        <% end %>
+      </div>
+      <%= image_tag "", alt: "Upload preview", class: "plant-graphic-preview-image", data: { image_upload_target: "preview" }, style: "display: none;" %>
+      <small>PNG, JPEG, WEBP, or GIF — up to 20MB.</small>
+    </div>
+  </div>
+
   <div>
     <%= form.submit "💾 #{location.new_record? ? 'Create' : 'Update'} Location", class: 'saveButton' %>
   </div>

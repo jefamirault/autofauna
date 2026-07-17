@@ -1,7 +1,12 @@
-<%= link_to location, class: 'resource-card', style: "background: color-mix(in srgb, #{location.hex_color} 12%, transparent); border-left: 3px solid color-mix(in srgb, #{location.hex_color} 80%, black);" do %>
-  <div class="resource-card-name"><%= location.name %></div>
-  <div class="resource-card-meta">
-    <% if location.zone %>Zone: <%= location.zone %> · <% end %>
-    <%= pluralize(location.plants.count, 'plant') %>
+<%= link_to location, class: "resource-card#{' with-photo' if location.picture_attached?}", style: "background: color-mix(in srgb, #{location.hex_color} 12%, transparent); border-left: 3px solid color-mix(in srgb, #{location.hex_color} 80%, black);" do %>
+  <% if location.picture_attached? %>
+    <%= image_tag location.picture.variant(Location::PICTURE_THUMB_VARIANT), alt: location.name, class: 'resource-card-photo' %>
+  <% end %>
+  <div class="resource-card-body">
+    <div class="resource-card-name"><%= location.name %></div>
+    <div class="resource-card-meta">
+      <% if location.zone %>Zone: <%= location.zone %> · <% end %>
+      <%= pluralize(location.plants.count, 'plant') %>
+    </div>
   </div>
 <% end %>
