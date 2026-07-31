@@ -16,6 +16,7 @@ class Plant < ApplicationRecord
 
   before_validation :strip_whitespace
   before_validation :set_default_max_watering_freq, on: :create
+  before_validation :clear_layout_on_location_change
 
   # Keep recipe_id in sync with the first plant_recipe entry
   def sync_primary_recipe!
@@ -25,7 +26,19 @@ class Plant < ApplicationRecord
 
   validates_uniqueness_of :uid, scope: :project_id
 
+  # Diagram position on the location canvas — normalized, so 0 is the left/top edge and 1
+  # the right/bottom edge regardless of how wide the canvas renders.
+  validates :layout_x, :layout_y,
+            numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 },
+            allow_nil: true
+
   after_save_commit :sync_watering_dates_if_schedule_changed
+
+  # Placed on its location's diagram. Both coordinates are written together, but check
+  # each — a half-written pair should read as unplaced rather than land at an edge.
+  def layout_placed?
+    layout_x.present? && layout_y.present?
+  end
 
   def container
     self.pot
@@ -256,6 +269,18 @@ class Plant < ApplicationRecord
     if changes['pot']
       self.pot = self.pot.strip
     end
+  end
+
+  # Coordinates are meaningful only against the diagram they were placed on, so moving a
+  # plant to another location sends it back to that location's tray instead of dropping it
+  # at whatever spot it happened to occupy before.
+  # NOTE: `plants#bulk_set_location` reassigns with `update_all` and skips this callback —
+  # it clears the columns itself.
+  def clear_layout_on_location_change
+    return unless will_save_change_to_location_id?
+
+    self.layout_x = nil
+    self.layout_y = nil
   end
 
   def self.create_from_json(json, project)

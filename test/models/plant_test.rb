@@ -427,4 +427,50 @@ class PlantTest < ActiveSupport::TestCase
     attach_test_image(plant)
     assert plant.valid?
   end
+
+  test "layout_placed? needs both coordinates" do
+    plant = plants(:one)
+    assert_not plant.layout_placed?
+
+    plant.assign_attributes(layout_x: 0.5, layout_y: nil)
+    assert_not plant.layout_placed?
+
+    plant.layout_y = 0.5
+    assert plant.layout_placed?
+  end
+
+  test "layout coordinates must be within the canvas" do
+    plant = plants(:one)
+
+    plant.layout_x = 1.4
+    assert_not plant.valid?
+    assert plant.errors[:layout_x].any?
+
+    plant.layout_x = 0.5
+    plant.layout_y = -0.1
+    assert_not plant.valid?
+    assert plant.errors[:layout_y].any?
+
+    plant.layout_y = 1.0
+    assert plant.valid?
+  end
+
+  test "moving a plant to another location clears its diagram position" do
+    plant = plants(:one)
+    plant.update!(layout_x: 0.3, layout_y: 0.7)
+
+    plant.update!(location: locations(:two))
+
+    assert_nil plant.reload.layout_x
+    assert_nil plant.layout_y
+  end
+
+  test "saving a plant without changing location keeps its diagram position" do
+    plant = plants(:one)
+    plant.update!(layout_x: 0.3, layout_y: 0.7)
+
+    plant.update!(name: "Monstera Deliciosa")
+
+    assert_in_delta 0.3, plant.reload.layout_x, 0.0001
+  end
 end

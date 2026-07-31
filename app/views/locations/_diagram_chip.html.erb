@@ -1,0 +1,34 @@
+<%#
+  One circular plant chip. Rendered identically on the canvas and in the tray — the parent
+  element decides which; `layout_placed?` decides whether the inline position applies.
+
+  It's an <a> so it stays keyboard-reachable and right-click-openable without JS. In edit
+  mode the Stimulus controller swallows the click after a drag.
+%>
+<% accent = plant.plant_groups.first&.hex_color || location.hex_color %>
+<%= link_to plant_path(plant),
+      id: dom_id(plant, :chip),
+      class: "diagram-chip",
+      draggable: false,
+      title: plant.label,
+      style: ("left: #{(plant.layout_x * 100).round(2)}%; top: #{(plant.layout_y * 100).round(2)}%;" if plant.layout_placed?),
+      data: {
+        location_diagram_target: "chip",
+        plant_id: plant.id,
+        group_ids: plant.plant_groups.map(&:id).join(" "),
+        recipe_ids: plant.recipes.map(&:id).join(" "),
+        action: "pointerdown->location-diagram#startDrag click->location-diagram#chipClick keydown->location-diagram#nudge"
+      } do %>
+  <span class="diagram-chip-circle" style="--chip-accent: <%= accent %>">
+    <% if plant.has_graphic? %>
+      <%= image_tag plant.display_graphic, alt: "", draggable: false, class: "diagram-chip-image" %>
+    <% else %>
+      <span class="diagram-chip-initial"><%= plant.name.to_s.strip.first&.upcase || "?" %></span>
+    <% end %>
+  </span>
+  <%# Two plants of the same species read as one chip repeated, so the uid leads the label. %>
+  <span class="diagram-chip-label">
+    <span class="diagram-chip-uid">#<%= plant.uid %></span>
+    <%= plant.name.presence %>
+  </span>
+<% end %>

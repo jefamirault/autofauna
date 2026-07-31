@@ -1,5 +1,21 @@
-<%= link_to location, class: "resource-card#{' with-photo' if location.picture_attached?}", style: "background: color-mix(in srgb, #{location.hex_color} 12%, transparent); border-left: 3px solid color-mix(in srgb, #{location.hex_color} 80%, black);" do %>
-  <% if location.picture_attached? %>
+<%#
+  Index card. The thumbnail slot shows a read-only mini-diagram once the location has a
+  layout (keeping the photo, if any, as a faint backdrop); otherwise it falls back to the
+  plain photo thumb, or to no thumbnail at all.
+%>
+<% points = local_assigns[:points] %>
+<% thumb = points.present? ? :diagram : (location.picture_attached? ? :photo : nil) %>
+<%= link_to location, class: "resource-card#{' with-photo' if thumb}", style: "background: color-mix(in srgb, #{location.hex_color} 12%, transparent); border-left: 3px solid color-mix(in srgb, #{location.hex_color} 80%, black);" do %>
+  <% if thumb == :diagram %>
+    <span class="resource-card-diagram" style="--dot-color: <%= location.hex_color %>" aria-hidden="true">
+      <% if location.picture_attached? %>
+        <%= image_tag location.picture.variant(Location::PICTURE_THUMB_VARIANT), alt: "", class: 'resource-card-diagram-backdrop' %>
+      <% end %>
+      <% points.each do |x, y| %>
+        <span class="resource-card-dot" style="left: <%= (x * 100).round(2) %>%; top: <%= (y * 100).round(2) %>%"></span>
+      <% end %>
+    </span>
+  <% elsif thumb == :photo %>
     <%= image_tag location.picture.variant(Location::PICTURE_THUMB_VARIANT), alt: location.name, class: 'resource-card-photo' %>
   <% end %>
   <div class="resource-card-body">

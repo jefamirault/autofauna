@@ -15,30 +15,12 @@
   </div>
 <% end %>
 
-<div class="info-card">
-  <div class="info-card-grid">
-    <div class="info-card-section">
-      <div class="info-row">
-        <span class="label">Name</span>
-        <span class="value"><%= @location.name %></span>
-      </div>
-      <div class="info-row">
-        <span class="label">Zone</span>
-        <span class="value"><%= @location.zone || '—' %></span>
-      </div>
-      <% if @location.description.present? %>
-        <div class="info-row">
-          <span class="label">Description</span>
-          <span class="value"><%= @location.description %></span>
-        </div>
-      <% end %>
-      <div class="info-row">
-        <span class="label">Plants</span>
-        <span class="value"><%= @location.plants.count %></span>
-      </div>
-    </div>
-  </div>
-</div>
+<%# The diagram leads the page — the name/zone details sit below the cards, past the fold. %>
+<%= render "locations/diagram",
+      location: @location,
+      plants: @diagram_plants,
+      groups: @diagram_groups,
+      recipes: @diagram_recipes %>
 
 <% if feature_enabled?(:use_fertilizers) %>
   <div class="settings-card" id="location-supplies">
@@ -83,6 +65,31 @@
     <% end %>
   </div>
 <% end %>
+
+<div class="info-card">
+  <div class="info-card-grid">
+    <div class="info-card-section">
+      <div class="info-row">
+        <span class="label">Name</span>
+        <span class="value"><%= @location.name %></span>
+      </div>
+      <div class="info-row">
+        <span class="label">Zone</span>
+        <span class="value"><%= @location.zone || '—' %></span>
+      </div>
+      <% if @location.description.present? %>
+        <div class="info-row">
+          <span class="label">Description</span>
+          <span class="value"><%= @location.description %></span>
+        </div>
+      <% end %>
+      <div class="info-row">
+        <span class="label">Plants</span>
+        <span class="value"><%= @location.plants.count %></span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <% if @location.plants.where(archived: false).any? %>
   <%= button_to "💧 Water all plants here", water_all_location_path(@location), class: 'link', data: { turbo: false } %>

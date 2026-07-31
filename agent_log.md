@@ -52,3 +52,162 @@ pinned.
 
 **Needs user:** `bin/rails db:migrate` then `bin/rails test`. (Migration + tests not run here — I
 can't run `bin/rails`.)
+
+## 2026-07-30 — Filed #115 (location diagram: drag-and-drop 2D plant layout)
+
+Issue only, no code. Feature request from Jef: build a 2D diagram per Location where circular plant
+chips are dragged into place to mirror the real room, as another way to visualize the plant data.
+Scoped to `LocationsController` + `locations/show`, `locations/index`, `locations/_location`.
+
+Three design questions resolved with Jef before filing, and baked into the issue body:
+- **Canvas** — blank grid by default, Location photo (from #110) available as an *optional* faint
+  backdrop rather than required.
+- **Groups/recipes side list** — a legend derived from the plants actually in the location (not the
+  project-wide list), click-to-highlight matching chips; fertilizer half behind `use_fertilizers`.
+- **Index** — read-only mini-diagram on location cards, falling back to today's card when a location
+  has no layout.
+
+Issue body records the suggested persistence shape (nullable `layout_x`/`layout_y` floats on
+`plants`, normalized 0.0–1.0 so the canvas can be responsive), the multi-tenancy requirement for the
+layout-save endpoint (filter plant ids through `@location.plants`, mirroring `assign_plant_groups`),
+and the trap in the existing index query (`left_joins(:plants).group('locations.id')` — don't bolt
+`includes(:plants)` onto it). Labels: enhancement, UX/UI. No milestone.
+
+https://github.com/jefamirault/autofauna/issues/115
+
+## 2026-07-30 — Implement #115 (location diagram: drag-and-drop 2D plant layout)
+
+Built the feature filed earlier today. Design write-up lives in `docs/location-diagram.md`; this is
+what was done and why.
+
+**Data.** New migration `20260730000001_add_layout_coordinates_to_plants` adds nullable
+`layout_x`/`layout_y` floats. Stored **normalized 0.0–1.0 as the chip's centre**, not pixels, so a
+layout arranged on a phone reads the same on a desktop and the canvas can be any width.
+`Plant#layout_placed?` requires both columns; range validation 0..1 allowing nil.
+`Plant#clear_layout_on_location_change` (before_validation) drops the pair when `location_id`
+changes — and because `plants#bulk_set_location` relocates with `update_all` and skips callbacks, it
+now clears the columns in the same statement. That pairing is the one thing here likely to be
+re-broken later, so it went into CLAUDE.md's Data-layer traps as well as the doc.
+
+**Server.** `PATCH /locations/:id/layout` → `LocationsController#update_layout` (route named
+`layout_location`; the action can't be `layout` — collides with Rails' layout machinery). Payload is
+`{positions: [{id, x, y}]}`, batched. Ids are filtered through `@location.plants`, so a plant from
+another project *or another location* is silently ignored; coordinates are clamped server-side.
+Writes use `update_columns` rather than `update!` **on purpose**: a chip move must not 500 because
+the plant carries an unrelated validation error (a duplicate `uid` from an import), and the
+coordinates are already clamped. `show` derives the legend from the plants actually standing in the
+location (`@diagram_plants.flat_map(&:plant_groups)` tallied; recipes behind `use_fertilizers`).
+`index` loads `@layout_points` in a **second query** — the main relation is grouped for the
+plant-count ordering, so plant rows can't be preloaded onto it.
+
+**Client.** New `location_diagram_controller.js`: pointer events (one path for finger and cursor),
+4px drag threshold so a tap isn't a fling, canvas↔tray drag as the place/unplace gesture, chip
+half-size clamping so nothing hangs off the edge, debounced batched PATCH, arrow-key nudge, optional
+photo backdrop, legend click-to-highlight. Dragging is gated on "Arrange" mode, which only renders
+for `can_edit?` (and `editableValue` gates it client-side too). Followed the codebase idiom of
+`.bind(this)` in `connect()` rather than class fields, matching `card_fields_controller`.
+
+**Views/CSS.** `locations/_diagram` + `_diagram_chip` partials on show; new
+`app/assets/stylesheets/locations.sass` (re-declares the palette, as each sass file here does). Index
+cards get a read-only mini-diagram in the thumbnail slot when a layout exists, keeping the photo as a
+faint backdrop, and falling back to the previous card exactly when it doesn't.
+
+**Tests:** 10 new controller tests (store/clamp/unplace, cross-project reject, wrong-location reject,
+other-project location 404, viewer can view but not save, index mini-diagram present/absent, show
+chip count incl. archived exclusion), 4 Plant model tests, 3 Location model tests. New test helper
+`viewer_of_project_one` builds a view-only collaborator inline — there are no collaborations
+fixtures, and adding one would break the alphabetical FK load order.
+
+**Needs user:** `bin/rails db:migrate` then `bin/rails test`. (Not run here — I can't run
+`bin/rails`.) Nothing has exercised the drag interaction in a browser yet.
+
+## 2026-07-31 — Location diagram: chip uids + desktop vertical fit (#114 follow-up)
+
+**Chip labels.** Two plants of the same species rendered as two identical "Fern" chips. The label
+now leads with the uid (`#37 Fern`) via a muted `.diagram-chip-uid` span; chip width 4.5rem → 5rem
+(mobile 3.6 → 4.1rem) so the common case doesn't ellipsis. `plant.label` was already the `title`,
+so the full text was always one hover away — this just surfaces it.
+
+**Desktop space.** Goal was the whole diagram card inside one laptop screen without scrolling.
+Four changes:
+
+1. `_diagram` gained a `.diagram-body` wrapper splitting into `.diagram-stage` (canvas + status)
+   and `.diagram-side` (tray + legend). At ≥1000px that's a 2-column grid — the tray and legend
+   move off the vertical stack into a side rail. Below 1000px it's a flex column, i.e. the old
+   order. No JS change needed: the controller finds its targets anywhere in scope, and
+   `isOverTray` is rect-based so the tray works as a drop zone wherever it sits.
+2. Canvas is height-driven above 750px: `aspect-ratio: auto` + `height: var(--diagram-canvas-h)`
+   = `clamp(14rem, 46vh, 26rem)`. Legitimate because coordinates are normalized — a shorter, wider
+   frame is still a faithful layout. The card is capped at 1200px so the frame can't go
+   letterbox-thin on an ultrawide. Mobile keeps 4/3.
+3. `show.html.erb`: the `.info-card` moved below `#location-supplies` (user's call) — the diagram
+   now leads the page, details sit past the fold.
+4. `.location-photo` thumb capped at 9rem (was the shared 18rem with tanks). It sat directly above
+   the diagram and was the single biggest thing pushing it off screen; the diagram can already
+   show the same photo as its backdrop.
+
+Rail scrolls internally (`max-height: var(--diagram-canvas-h)`) so a long legend can't outgrow the
+canvas, and a `:not(:has(.diagram-side > *:not([hidden])))` rule gives the rail's width back to the
+canvas when there's nothing unplaced and no legend.
+
+**Verification:** templates compile under the Rails ERB handler, both sass files compile (`:has()`
+survives sassc). Not run: `bin/rails test`, and no browser check of the new grid.
+
+**Correction, same day.** The side rail held the tray as well as the legend, which made the tray
+two chips wide with heavy scrolling — bad, since the tray is the surface you drag *from*. Tray
+moved back full-width under the canvas (~10 chips a row, `max-height: 10rem` then it scrolls
+itself), rail now holds the legend only. While the tray is showing,
+`:has(.diagram-tray:not([hidden]))` drops `--diagram-canvas-h` to `clamp(11rem, 31vh, 19rem)` so
+the tray's space comes out of the canvas, not off the bottom of the page; the canvas transitions
+its height so entering Arrange glides rather than jumps. The legend is now omitted server-side when
+empty and the grid keys off `.diagram-body:has(.diagram-side)`, which replaced the earlier
+`:not(:has(...))` collapse hack.
+
+**Widescreen, same day.** Dropped the `max-width: 1200px` on `.location-diagram` — the card now
+runs the full content width so a wide monitor is actually used, and the canvas takes whatever the
+rail doesn't. Clamp maxima raised (`26rem` → `30rem`, tray-open `19rem` → `22rem`) so a tall
+widescreen gets a less letterboxed frame; the `vh` terms still do the "one screen" work.
+
+## 2026-07-31 (cont.) — Drag ghost + recipe-grouped tray
+
+**Drag glitch.** Reported: dragging a chip out of "Not placed yet" made a chip appear on the canvas
+before the pointer got there. Cause was in `_onPointerMove` — at the 4px threshold a tray chip was
+`appendChild`-ed into the canvas and positioned via `pointToCanvas`, which *clamps* to the canvas,
+so a pointer still down in the tray parked it on the canvas's bottom edge. Fixed by never changing
+containers mid-drag: `.is-dragging` now sets `position: fixed` (z-index 900 — above the header at
+100, below modals at 1000) and the controller writes viewport px into `left`/`top`, converting to
+normalized canvas coordinates only in the new `place()` on pointerup. `pointToCanvas` is gone,
+`_onPointerCancel` just restores the two inline strings, and the drag now preserves the grab offset
+so a chip grabbed by its edge doesn't snap under the cursor. Checked first that no ancestor
+(`html`/`body`/`main`/`section#primary`) has a transform or filter that would make `fixed` resolve
+against something other than the viewport.
+
+**Tray grouped by fertilizer recipe.** Keyed on the *primary* recipe (`plant.recipe`) so a plant on
+several recipes files once; `:recipe` added to the show-action `includes`. Behind `use_fertilizers`,
+and the flat tray is kept verbatim when no plant here has a recipe. Buckets are rendered for every
+recipe in the location rather than only the unplaced ones, because `unplace()` needs a group to
+return a chip to (`trayBucketFor` matches `data-recipe-group` against the first id in the chip's
+`data-recipe-ids`); empty ones are `hidden` and `refreshEmptyStates` maintains that. `.legend-swatch`
+hoisted out of `.legend-chip` so the tray headings can reuse it. Tray cap 10rem → 12rem and the
+tray-open canvas 31vh → 28vh to pay for the heading rows.
+
+**Verification:** templates + sass compile, divs balance, controller parses. Still not run:
+`bin/rails test`; no browser check of the new drag behaviour.
+
+**Full-height rail + resizable areas.** `.diagram-side` now spans the whole body height rather than
+stopping at the canvas: grid items stretch (dropped `align-items: start`) and the legend inside is
+`position: absolute; inset: 0`, so it fills the rail but contributes nothing to the row's sizing —
+a long legend scrolls in place instead of stretching the row and leaving dead space beside the
+canvas.
+
+Canvas and tray both take CSS `resize: vertical` above 750px (each already had a non-visible
+`overflow`, the prerequisite). The tray moved from `max-height: 12rem` to a definite
+`height: var(--diagram-tray-h)` (10rem) — a max-height caps growth, so the handle could only ever
+shrink it. Removed the canvas height `transition` added earlier: it fights the resize handle. With
+the tray now a fixed 10rem the tray-open canvas went back to 31vh.
+
+Heights persist per device via localStorage. The trick that keeps it honest: a resize handle writes
+an *inline* height, and CSS-driven changes never do — so the controller persists
+`style.height` and automatically ignores the tray-open shrink and window resizes. `ResizeObserver`
+is the (debounced, read-only) trigger; restore is skipped below 751px where a pixel height would be
+wrong.

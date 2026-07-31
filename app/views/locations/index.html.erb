@@ -8,7 +8,7 @@
 
 <div class="resource-cards">
   <% @locations.each do |location| %>
-    <%= render location %>
+    <%= render "locations/location", location: location, points: @layout_points[location.id] %>
   <% end %>
 </div>
 

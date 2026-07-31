@@ -1,0 +1,374 @@
+// Location diagram — the drag-and-drop 2D layout on locations#show, plus the read-only
+// mini-diagram on the locations index cards.
+//
+// Sprockets compiles every file in this directory on its own, so the shared palette is
+// re-declared here the same way plants.sass and layout.sass do.
+
+$green: #004D40
+$blue: #0E487B
+$lightblue: rgba(14, 72, 123, 0.1)
+$grey: #666
+
+// ---------------------------------------------------------------- show page
+
+.location-diagram
+  // Drives both the canvas height and the side rail's scroll height, so the two columns
+  // always end level and the whole card clears a laptop viewport.
+  // Starting heights only — both areas carry `resize: vertical` on desktop, and a height the
+  // user drags is written inline, overriding these for good (the controller remembers it).
+  //
+  // The card runs the full content width, so the vh terms are the only thing keeping the canvas
+  // on one screen; the rem bounds just stop it going silly on very short or very tall displays.
+  --diagram-canvas-h: clamp(14rem, 46vh, 30rem)
+  // A steady, generous drop zone beats one that fits its contents exactly: ~2 chip rows, or a
+  // heading plus a row once the tray is grouped by recipe.
+  --diagram-tray-h: 10rem
+
+  // The tray sits under the canvas, so while it's showing (unplaced plants, or Arrange mode)
+  // its space comes out of the canvas rather than off the bottom of the screen.
+  &:has(.diagram-tray:not([hidden]))
+    --diagram-canvas-h: clamp(11rem, 31vh, 22rem)
+
+  .diagram-actions
+    display: flex
+    gap: 0.4rem
+    flex-shrink: 0
+
+  .diagram-hint, .diagram-empty
+    color: $grey
+    font-size: 0.9em
+    margin: 0.25rem 0 0.6rem
+
+  .diagram-status
+    min-height: 1.1em
+    margin: 0.35rem 0 0
+    font-size: 0.85em
+    color: $grey
+    &.is-error
+      color: #b3261e
+
+.diagram-body
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
+.diagram-stage
+  min-width: 0
+
+.diagram-side
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+  min-width: 0
+
+.diagram-canvas
+  position: relative
+  aspect-ratio: 16 / 10
+  border-radius: 10px
+  border: 1px solid rgba(14, 72, 123, 0.25)
+  background-color: rgba(255, 255, 255, 0.55)
+  // Faint graph paper so an empty canvas reads as a surface you can drop things onto.
+  background-image: linear-gradient(to right, $lightblue 1px, transparent 1px), linear-gradient(to bottom, $lightblue 1px, transparent 1px)
+  background-size: 10% 10%
+  overflow: hidden
+
+  .diagram-backdrop
+    position: absolute
+    inset: 0
+    width: 100%
+    height: 100%
+    object-fit: cover
+    opacity: 0
+    transition: opacity 0.2s ease
+    pointer-events: none
+
+  .diagram-canvas-empty
+    position: absolute
+    inset: 0
+    display: flex
+    align-items: center
+    justify-content: center
+    margin: 0
+    color: $grey
+    font-size: 0.9em
+    pointer-events: none
+    &[hidden]
+      display: none
+
+.location-diagram.show-backdrop .diagram-canvas .diagram-backdrop
+  opacity: 0.28
+
+// ---- chips
+
+.diagram-chip
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 0.15rem
+  // Wide enough for the "#37 Fern" label; longer names still ellipsis (the title has it all).
+  width: 5rem
+  text-decoration: none
+  color: inherit
+  user-select: none
+  &:hover
+    text-decoration: none
+
+  .diagram-chip-circle
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 3rem
+    height: 3rem
+    border-radius: 50%
+    overflow: hidden
+    background: color-mix(in srgb, var(--chip-accent) 22%, white)
+    border: 2px solid var(--chip-accent)
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2)
+    transition: transform 0.12s ease, box-shadow 0.12s ease
+
+  .diagram-chip-image
+    width: 100%
+    height: 100%
+    object-fit: cover
+
+  .diagram-chip-initial
+    font-size: 1.1rem
+    font-weight: 600
+    color: var(--chip-accent)
+
+  .diagram-chip-label
+    max-width: 100%
+    font-size: 0.7rem
+    line-height: 1.1
+    text-align: center
+    color: #333
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  .diagram-chip-uid
+    color: $grey
+    font-variant-numeric: tabular-nums
+
+  &:hover .diagram-chip-circle, &:focus-visible .diagram-chip-circle
+    transform: scale(1.06)
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3)
+
+.diagram-canvas .diagram-chip
+  position: absolute
+  // left/top are the chip's centre, so a stored 0.5/0.5 lands dead centre at any width.
+  transform: translate(-50%, -50%)
+  z-index: 1
+
+// ---- arrange mode
+
+.location-diagram.is-editing
+  .diagram-chip
+    cursor: grab
+    // Without this the browser claims the gesture for scrolling on touch.
+    touch-action: none
+  // Lifted clear of both containers and pinned to the viewport, so the chip tracks the pointer
+  // across the gap between tray and canvas instead of jumping to whichever one owns it.
+  // `left`/`top` are the chip's centre in px, written by the controller; it lands (and goes back
+  // to percentage coordinates) on drop. Below the modals at 1000, above the header at 100.
+  .diagram-chip.is-dragging
+    position: fixed
+    z-index: 900
+    transform: translate(-50%, -50%)
+    cursor: grabbing
+    .diagram-chip-circle
+      transform: scale(1.12)
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35)
+  .diagram-canvas
+    border-style: dashed
+    border-color: $green
+  .diagram-tray
+    border-color: $green
+    border-style: dashed
+
+// ---- tray
+
+.diagram-tray
+  margin-top: 0.5rem
+  padding: 0.5rem 0.75rem 0.75rem
+  border: 1px solid rgba(14, 72, 123, 0.2)
+  border-radius: 10px
+  &[hidden]
+    display: none
+  .diagram-tray-chips
+    display: flex
+    flex-wrap: wrap
+    gap: 0.75rem
+    min-height: 4rem
+    align-items: flex-start
+
+    // Grouped by recipe: the groups stack, the chips inside each still wrap across the row.
+    &.is-grouped
+      flex-direction: column
+      flex-wrap: nowrap
+      gap: 0.6rem
+      align-items: stretch
+
+  .diagram-tray-group
+    display: flex
+    flex-direction: column
+    gap: 0.35rem
+    &[hidden]
+      display: none
+
+  .diagram-tray-group-label
+    display: flex
+    align-items: center
+    gap: 0.35rem
+    font-size: 0.8em
+    color: $grey
+
+  .diagram-tray-group-chips
+    display: flex
+    flex-wrap: wrap
+    gap: 0.75rem
+    align-items: flex-start
+
+// ---- legend
+
+.diagram-legend
+  display: flex
+  flex-wrap: wrap
+  gap: 1rem
+  .diagram-legend-section
+    flex: 1 1 12rem
+    min-width: 0
+  .diagram-legend-items
+    display: flex
+    flex-wrap: wrap
+    gap: 0.4rem
+
+// Shared by the legend buttons and the tray's recipe headings.
+.legend-swatch
+  width: 0.7rem
+  height: 0.7rem
+  border-radius: 50%
+  background: var(--legend-color)
+  flex-shrink: 0
+
+.legend-chip
+  display: inline-flex
+  align-items: center
+  gap: 0.35rem
+  width: auto
+  padding: 0.25rem 0.6rem
+  border: 1px solid color-mix(in srgb, var(--legend-color) 55%, transparent)
+  border-radius: 999px
+  background: color-mix(in srgb, var(--legend-color) 10%, transparent)
+  color: #333
+  font-size: 0.85em
+  cursor: pointer
+  &:hover
+    background: color-mix(in srgb, var(--legend-color) 20%, transparent)
+  &.is-active
+    background: color-mix(in srgb, var(--legend-color) 35%, transparent)
+    border-color: var(--legend-color)
+    font-weight: 600
+  .legend-count
+    color: $grey
+    font-variant-numeric: tabular-nums
+
+// Dim everything that isn't in the highlighted group/recipe.
+.location-diagram.is-highlighting
+  .diagram-chip
+    opacity: 0.25
+    filter: grayscale(0.6)
+  .diagram-chip.is-match
+    opacity: 1
+    filter: none
+    z-index: 2
+    .diagram-chip-circle
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 2px 8px rgba(0, 0, 0, 0.35)
+
+// ---- desktop: fixed-height canvas beside a side rail
+//
+// The canvas is height-driven rather than aspect-driven here: coordinates are normalized, so a
+// shorter, wider frame is still a faithful layout, and it's the only way the card clears a
+// laptop viewport without scrolling. The card itself is capped so the frame can't go
+// letterbox-thin on an ultrawide.
+
+@media (min-width: 751px)
+  // Both areas are drag-resizable from their bottom-right corner (`overflow` is already
+  // non-visible on each, which is what `resize` needs). Deliberately no height transition —
+  // it would fight the resize handle and make the drag feel rubbery.
+  .diagram-canvas
+    aspect-ratio: auto
+    height: var(--diagram-canvas-h)
+    min-height: 8rem
+    resize: vertical
+
+  // Full width here, so ~10 chips a row instead of the rail's two. A definite height rather
+  // than a max-height, so the handle can drag it both ways — a max-height would cap growth.
+  .diagram-tray
+    height: var(--diagram-tray-h)
+    min-height: 5rem
+    overflow-y: auto
+    resize: vertical
+
+@media (min-width: 1000px)
+  // Only the legend sits in the rail, and the partial omits it entirely when empty — so the
+  // column is never reserved for nothing. Items stretch, so the rail spans the body's full
+  // height (canvas + status + tray) rather than stopping at the canvas.
+  .diagram-body:has(.diagram-side)
+    display: grid
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 17rem)
+    gap: 1rem
+
+  .diagram-side
+    position: relative
+    min-height: 0
+
+    // Out of flow, so the legend fills the rail's full height but contributes nothing to the
+    // row's own sizing: a long legend scrolls inside the rail instead of stretching the row
+    // and leaving dead space beside the canvas.
+    > .diagram-legend
+      position: absolute
+      inset: 0
+      overflow-y: auto
+      align-content: flex-start
+
+@media (max-width: 600px)
+  .diagram-canvas
+    aspect-ratio: 4 / 3
+  .diagram-chip
+    width: 4.1rem
+    .diagram-chip-circle
+      width: 2.4rem
+      height: 2.4rem
+
+// --------------------------------------------------------------- index card
+
+// Occupies the same slot as .resource-card-photo, so a card with a layout is the same
+// shape as one with a photo.
+.resource-card-diagram
+  position: relative
+  display: block
+  width: 3.5rem
+  height: 3.5rem
+  flex-shrink: 0
+  border-radius: 6px
+  overflow: hidden
+  background: color-mix(in srgb, var(--dot-color) 12%, white)
+  border: 1px solid color-mix(in srgb, var(--dot-color) 35%, transparent)
+
+  .resource-card-diagram-backdrop
+    position: absolute
+    inset: 0
+    width: 100%
+    height: 100%
+    object-fit: cover
+    opacity: 0.35
+
+  .resource-card-dot
+    position: absolute
+    width: 0.45rem
+    height: 0.45rem
+    margin: -0.225rem 0 0 -0.225rem
+    border-radius: 50%
+    background: var(--dot-color)
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85)

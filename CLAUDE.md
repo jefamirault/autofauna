@@ -90,6 +90,9 @@ user-assignable colors for UI filter buttons.
   different sort (it propagates through `current_project.waterings`).
 - Watering `after_save_commit` (`update_last_watering`) may not have committed when a stream
   template renders — pass the new watering as an explicit local, don't read `plant.date_last_watering`.
+- Diagram coordinates (`plants.layout_x/y`) are only meaningful on their own location's canvas.
+  `Plant#clear_layout_on_location_change` nils them, but **any relocation done with `update_all`
+  skips that callback** and must clear the columns itself (see `plants#bulk_set_location`).
 
 ## Testing (essentials — full reference in `test/CLAUDE.md`)
 
@@ -120,6 +123,7 @@ to `agent_log/README.md` (date range + topic hook); (3) create a fresh `agent_lo
 | When you're working on… | Read |
 |---|---|
 | Plants index (filters, display modes, multi-select, card fields) + Plant Groups & bulk watering | `docs/plants-index-ui.md` |
+| Location diagram (drag-and-drop 2D plant layout, `plants.layout_x/y`, index mini-diagram) | `docs/location-diagram.md` |
 | Header / sidebar / dynamic-header / responsive CSS + design-system classes | `docs/layout-css.md` |
 | Feature flags & onboarding wizard | `docs/feature-flags.md` |
 | Notifications (email + web push) | `docs/notifications.md` |

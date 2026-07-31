@@ -40,7 +40,10 @@ class PlantsController < ApplicationController
   # POST /plants/bulk_set_location
   def bulk_set_location
     location = current_project.locations.find_by(id: params[:location_id])
-    count = current_project.plants.where(id: bulk_ids).update_all(location_id: location&.id)
+    # `update_all` skips `Plant#clear_layout_on_location_change`, so drop the diagram
+    # coordinates here too — they only mean something on the old location's canvas.
+    count = current_project.plants.where(id: bulk_ids)
+      .update_all(location_id: location&.id, layout_x: nil, layout_y: nil)
     redirect_to plants_path(forward_params),
       notice: t('plants.bulk.relocated', count: count, name: location&.name || t('plants.index.no_location'))
   end

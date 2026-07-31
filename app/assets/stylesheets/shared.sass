@@ -1178,6 +1178,14 @@ table.timeline
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15)
     cursor: zoom-in
 
+// The location diagram sits right below this photo and can render the same shot as its own
+// backdrop, so the standalone version stays a thumbnail — otherwise it pushes the diagram off
+// screen. Click still opens it fullscreen.
+.location-photo
+  margin: 0.75rem 0
+  .location-photo-image
+    max-height: 9rem
+
 // Info card
 .info-card
   margin: 1.5rem 0

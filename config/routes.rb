@@ -20,6 +20,8 @@ Rails.application.routes.draw do
   resources :locations do
     member do
       post :water_all
+      # `layout` is too close to Rails' own layout machinery to use as an action name.
+      patch :layout, action: :update_layout
     end
     resources :location_supplies, only: [:create, :destroy] do
       member do

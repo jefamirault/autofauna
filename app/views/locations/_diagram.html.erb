@@ -1,0 +1,150 @@
+<%#
+  The location diagram: drag circular plant chips around a canvas to mirror how the room
+  actually looks. Positions are normalized 0.0–1.0 so the same layout reads correctly at
+  any canvas width. Read-only for viewers; editors get an "Arrange" mode.
+%>
+<%
+  placed = plants.select(&:layout_placed?)
+  unplaced = plants - placed
+  editable = can_edit?
+
+  # Tray grouping keys off the *primary* recipe (`plant.recipe`, kept in sync with the first
+  # plant_recipe), so a plant on several recipes files under one group rather than appearing twice.
+  tray_recipes = feature_enabled?(:use_fertilizers) ? plants.map(&:recipe).uniq : []
+  tray_recipes = tray_recipes.sort_by { |recipe| recipe ? [0, recipe.name.to_s.downcase] : [1, ""] }
+  grouped_tray = tray_recipes.compact.any?
+  unplaced_by_recipe = unplaced.group_by(&:recipe)
+%>
+
+<div class="settings-card location-diagram" id="location-diagram"
+     data-controller="location-diagram"
+     data-location-diagram-url-value="<%= layout_location_path(location) %>"
+     data-location-diagram-editable-value="<%= editable %>">
+
+  <div class="card-title-row">
+    <h2>Diagram</h2>
+    <div class="diagram-actions">
+      <% if location.picture_attached? %>
+        <button type="button" class="buttonLinkSmall"
+                data-location-diagram-target="backdropButton"
+                data-action="location-diagram#toggleBackdrop"
+                aria-pressed="false">🖼️ Photo</button>
+      <% end %>
+      <% if editable && plants.any? %>
+        <button type="button" class="buttonLinkSmall"
+                data-location-diagram-target="editButton"
+                data-action="location-diagram#toggleEdit"
+                aria-pressed="false">✏️ Arrange</button>
+      <% end %>
+    </div>
+  </div>
+
+  <% if plants.empty? %>
+    <p class="diagram-empty">No plants here yet — add one to start building the layout.</p>
+  <% else %>
+    <p class="diagram-hint" data-location-diagram-target="hint">
+      <%= editable ? "Tap Arrange, then drag each plant to where it really sits." : "Positions are set by an editor of this project." %>
+    </p>
+
+    <%#
+      Canvas + tray on the left, legend in a side rail — on desktop that keeps the whole
+      diagram inside one screen. The tray stays full-width under the canvas because it's the
+      surface you drag from: in a rail it's two chips wide and all scrolling. Below 1000px
+      the rail simply stacks underneath.
+    %>
+    <div class="diagram-body">
+      <div class="diagram-stage">
+        <div class="diagram-canvas" data-location-diagram-target="canvas">
+          <% if location.picture_attached? %>
+            <%= image_tag location.picture.variant(Location::PICTURE_VARIANT),
+                  alt: "", draggable: false, class: "diagram-backdrop",
+                  data: { location_diagram_target: "backdrop" } %>
+          <% end %>
+
+          <p class="diagram-canvas-empty" data-location-diagram-target="canvasEmpty"
+             <%= "hidden" if placed.any? %>>Nothing placed yet.</p>
+
+          <% placed.each do |plant| %>
+            <%= render "locations/diagram_chip", plant: plant, location: location %>
+          <% end %>
+        </div>
+
+        <p class="diagram-status" role="status" data-location-diagram-target="status"></p>
+
+        <div class="diagram-tray" data-location-diagram-target="tray" <%= "hidden" if unplaced.empty? %>>
+          <div class="form-section-label">Not placed yet</div>
+          <div class="diagram-tray-chips <%= "is-grouped" if grouped_tray %>"
+               data-location-diagram-target="trayChips">
+            <% if grouped_tray %>
+              <%# A bucket per recipe in the whole location, not just the unplaced ones —
+                  unplacing a chip needs its group to exist. Empty ones start hidden, and the
+                  controller re-hides them as chips come and go. %>
+              <% tray_recipes.each do |recipe| %>
+                <% group_plants = unplaced_by_recipe[recipe] || [] %>
+                <div class="diagram-tray-group" data-recipe-group="<%= recipe&.id %>"
+                     <%= "hidden" if group_plants.empty? %>>
+                  <div class="diagram-tray-group-label"
+                       style="--legend-color: <%= recipe&.hex_color || "#9e9e9e" %>">
+                    <span class="legend-swatch"></span><%= recipe&.name || "No recipe" %>
+                  </div>
+                  <div class="diagram-tray-group-chips">
+                    <% group_plants.each do |plant| %>
+                      <%= render "locations/diagram_chip", plant: plant, location: location %>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            <% else %>
+              <% unplaced.each do |plant| %>
+                <%= render "locations/diagram_chip", plant: plant, location: location %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <%# Rendered only when there's something to show, so the rail's column never sits empty. %>
+      <% if groups.any? || recipes.any? %>
+        <div class="diagram-side">
+          <div class="diagram-legend">
+            <% if groups.any? %>
+              <div class="diagram-legend-section">
+                <div class="form-section-label">Plant groups</div>
+                <div class="diagram-legend-items">
+                  <% groups.each do |group, count| %>
+                    <button type="button" class="legend-chip"
+                            style="--legend-color: <%= group.hex_color %>"
+                            aria-pressed="false"
+                            data-kind="group" data-id="<%= group.id %>"
+                            data-action="location-diagram#toggleHighlight">
+                      <span class="legend-swatch"></span><%= group.name %>
+                      <span class="legend-count"><%= count %></span>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+
+            <% if recipes.any? %>
+              <div class="diagram-legend-section">
+                <div class="form-section-label">Fertilizer recipes</div>
+                <div class="diagram-legend-items">
+                  <% recipes.each do |recipe, count| %>
+                    <button type="button" class="legend-chip"
+                            style="--legend-color: <%= recipe.hex_color %>"
+                            aria-pressed="false"
+                            data-kind="recipe" data-id="<%= recipe.id %>"
+                            data-action="location-diagram#toggleHighlight">
+                      <span class="legend-swatch"></span><%= recipe.name %>
+                      <span class="legend-count"><%= count %></span>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
