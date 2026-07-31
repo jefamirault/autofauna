@@ -211,3 +211,29 @@ an *inline* height, and CSS-driven changes never do — so the controller persis
 `style.height` and automatically ignores the tray-open shrink and window resizes. `ResizeObserver`
 is the (debounced, read-only) trigger; restore is skipped below 751px where a pixel height would be
 wrong.
+
+## 2026-07-31 — Cross-user project carryover on login (waterings#new test failure)
+
+`WateringsControllerTest#test_no-pins_project_falls_back_to_smart-suggestion_chips` 302'd to
+`/plants`. Root cause was in `login`, not the test: `reset_session` doesn't touch
+`cookies.encrypted[:project_id]`, so the setup sign-in as `users(:one)` left project one selected
+when the test signed in as `users(:two)` — `auto_select_project` returns early whenever
+`current_project` is present, so user two browsed project one and `authorize_editor` bounced them.
+Same bug in production on a shared browser, and after a non-advanced guest merge the carried-over
+cookie points at a *destroyed* project.
+
+Fixed with `discard_foreign_project_selection(user)` in `ApplicationController#login`: delete the
+cookie and nil `Current.project` unless the incoming user owns or collaborates on it. Membership
+check rather than an unconditional clear, because the advanced-mode branch of `merge_guest!`
+reassigns the guest's projects to the target user, who should stay in the project they were working
+in. Safe because all eight `login` callers already follow up with `auto_select_project` or
+`set_current_project`. Writing the cookie after `delete` in the same request wins (`[]=` drops the
+key from `@delete_cookies`), so the `set_current_project` callers are unaffected.
+
+The four sibling cross-project tests (`equipment`, `water_changes`, `feeding_instructions`,
+`maintenance_logs`) still assert `redirected_to plants_url` — they now reach it through
+`set_tank`'s scoped `find` raising `RecordNotFound` instead of through the authorize check.
+
+**Verification:** `bin/rails test test/controllers/waterings_controller_test.rb` and
+`bin/rails test test/controllers` — no failures (run by Jef). Doc note added to
+`docs/auth-accounts.md`.

@@ -3,6 +3,17 @@
 Custom auth — no Devise. `User has_secure_password`. Auth uses encrypted cookies
 (`cookies.encrypted[:user_id]` and `cookies.encrypted[:project_id]`).
 
+## Project selection on login
+
+The two cookies have independent lifetimes (`user_id` 6 months, `project_id` 1 year) and
+`reset_session` clears neither, so signing in *without* logging out first would otherwise leave the
+previous user's project selected — `auto_select_project` no-ops when `current_project` is already
+present, and every later request then fails `authorize_*` and bounces to `/plants`.
+`login` calls `discard_foreign_project_selection`, which drops the cookie unless the incoming user
+owns or collaborates on that project. Membership, not blanket clearing: an advanced-mode guest merge
+reassigns the guest's project to the target user, who should stay where they were. Every caller of
+`login` re-selects afterwards via `auto_select_project` or `set_current_project`.
+
 ## Account types
 
 - **Guest accounts:** real `User` records with `guest: true`, convertible to full accounts via

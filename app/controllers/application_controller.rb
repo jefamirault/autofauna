@@ -141,11 +141,28 @@ class ApplicationController < ActionController::Base
     Current.user = user
     reset_session
     cookies.encrypted[:user_id] = { value: user.id, expires: 6.months }
+    discard_foreign_project_selection(user)
 
     # Ensure user has at least one project (for existing users)
     if user.projects.empty? && Collaboration.where(user: user).empty?
       user.projects.create(name: "My Plants")
     end
+  end
+
+  # The project cookie outlives the user cookie, so signing in as a *different*
+  # user (shared browser, guest → account merge) can leave the previous user's
+  # project selected — every later request then fails authorize_* and bounces to
+  # /plants. Drop a selection the incoming user has no membership in; each
+  # caller of `login` re-selects via auto_select_project / set_current_project.
+  # A selection they can still reach is kept (e.g. an advanced-mode guest merge
+  # hands their project to the target user, who should stay where they were).
+  def discard_foreign_project_selection(user)
+    project = get_project_from_session
+    return if project && (project.owner_id == user.id ||
+                          Collaboration.exists?(user_id: user.id, project_id: project.id))
+
+    cookies.delete :project_id
+    Current.project = nil
   end
 
   def auto_select_project(user)
