@@ -40,12 +40,21 @@ location, so it works from any checkout path.
   `linked_dir` → `shared/storage/` on prod). The DB clone copies `active_storage_blobs` rows (with
   keys) but **not** the files; pass `--storage` to also rsync `shared/storage/` → local `storage/`.
 - **Active Storage files are NOT synced by default** — without `--storage`, cloned records render
-  broken images locally. Variants regenerate on demand locally (needs libvips).
+  broken images locally.
+- **Variants do not "just regenerate" after a clone.** `track_variants` is on, so the dump carries
+  `active_storage_variant_records` rows from production; Rails treats a tracked variant as already
+  processed and serves a URL to a file that was never synced (blank image) instead of rebuilding it.
+  Any variant that is *tracked* must also be *transferred* — or its record deleted so Rails rebuilds.
 - **Targeted image sync (bandwidth saver):** with `--storage`, set
-  `AUTOFAUNA_SYNC_USER_EMAIL=<email>` to sync only that user's plant images. The script runs
-  `util/list_user_storage_paths.rb` against the restored local DB to compute Disk paths
-  (`key[0..1]/key[2..3]/key`) for blobs attached to `user.plants` (originals only — variants
-  regenerate) and passes them to `rsync --files-from`. Unset → full sync.
+  `AUTOFAUNA_SYNC_USER_EMAIL=<email>` (the **app login** email) to sync only that user's images. The
+  script runs `util/list_user_storage_paths.rb` against the restored local DB to compute Disk paths
+  (`key[0..1]/key[2..3]/key`) and passes them to `rsync --files-from`. Unset → full sync.
+  - It covers **every attachable model** scoped to the user's projects — `Plant#custom_image`
+    (PlantGraphics) and `Location#picture` / `Tank#picture` (HasPicture) — **plus tracked variants**.
+    A new attachable model must be added to `record_scopes` in that script or its uploads will
+    silently never sync.
+  - Scoping is `user.projects` (`owner_id`), so records in projects you only *collaborate* on are
+    excluded.
 
 ## Plant graphics / Active Storage
 

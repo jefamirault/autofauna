@@ -252,3 +252,47 @@ affected by pointing at an authenticated route.
 
 Added `test/controllers/plants_controller_test.rb` "show links the location to its show page"
 (`assert_select` on the href). Not yet run — needs `bin/rails test test/controllers/plants_controller_test.rb`.
+
+## 2026-07-31 — Cloned prod photo renders blank locally (stale variant records)
+
+Symptom: after `AUTOFAUNA_SYNC_USER_EMAIL=... ./util/clone_production_db_to_local.sh --storage`, a
+newly-uploaded photo on plant 19 showed a blank image locally.
+
+Ruled out in order: original file *was* synced and intact (8247490 bytes, md5 matched the blob
+checksum); libvips 8.12.1 present and `ruby-vips` loads; `ImageProcessing::Vips.resize_to_limit`
+succeeded on that exact file. So neither the sync nor the image pipeline was at fault.
+
+Root cause: `track_variants` is on (`load_defaults 7.0`), so the pg dump carries
+`active_storage_variant_records` from production. Rails sees a tracked variant, considers it already
+processed, and serves a URL to a variant file that `list_user_storage_paths.rb` never transferred —
+it listed originals only, on the assumption (stated in its header and in `docs/deployment.md`) that
+variants regenerate on demand. They don't, once tracked. 12 of 94 variant records pointed at missing
+files; the other 82 survived from an earlier full `--storage` sync, which is why only the new photo
+looked broken.
+
+Fixes:
+- `util/list_user_storage_paths.rb` now emits originals **plus** their tracked variant blobs.
+- `util/clone_production_db_to_local.sh` aborts if the path list comes back empty (an unknown email
+  made the runner abort, leaving rsync to "succeed" having copied nothing).
+- `docs/deployment.md`: replaced the "variants regenerate" claim; noted `AUTOFAUNA_SYNC_USER_EMAIL`
+  is the app login and that `user.plants` is `through: :projects` on `owner_id` (collaborator-only
+  projects are excluded).
+
+Unblocked the existing clone without re-downloading by deleting the 12 stale variant records
+(+ their attachment/blob rows) so Active Storage rebuilds them on next render. Verified 0 of the
+remaining 82 dangle. No app code touched; nothing to test with `bin/rails`.
+
+### Follow-up same day — second cause: non-Plant attachments never synced
+
+Re-running the clone with the variant fix cut missing variant files from 12 to 5, but images were
+still blank. The remaining 5 (plus 2 originals) belonged to `Location#picture`, not plants:
+`list_user_storage_paths.rb` filtered on `record_type: "Plant"`, while `HasPicture` also attaches
+`:picture` to **Location** and **Tank**. Those originals had never been transferred by targeted mode
+at all — the first report just surfaced the plant photo, so the location photos went unnoticed.
+
+Generalised the script from `user.plants` to a `record_scopes` map over every attachable model
+scoped to `user.projects` (Plant / Location / Tank), with a comment that new attachable models must
+be registered there. Query now emits 149 keys vs 139.
+
+Cleared the 5 stale Location variant records so they rebuild locally; the 2 missing originals still
+need fetching from prod (targeted rsync, or just re-run the clone script now that it's fixed).

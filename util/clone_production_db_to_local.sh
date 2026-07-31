@@ -65,12 +65,21 @@ echo "Local database updated with latest backup"
 if [ "$SYNC_STORAGE" = true ]; then
   REMOTE_STORAGE="$AUTOFAUNA_USER@$AUTOFAUNA_SERVER:/home/deploy/autofauna/shared/storage/"
   if [ -n "$AUTOFAUNA_SYNC_USER_EMAIL" ]; then
-    # Bandwidth-saving mode: sync only the target user's plant images. We compute the
-    # relative disk paths from the just-restored local DB (no extra load on production)
-    # and hand them to rsync --files-from, which transfers exactly those files.
+    # Bandwidth-saving mode: sync only the target user's plant images (originals plus
+    # their tracked variants). We compute the relative disk paths from the just-restored
+    # local DB (no extra load on production) and hand them to rsync --files-from, which
+    # transfers exactly those files.
     echo "Syncing Active Storage files for $AUTOFAUNA_SYNC_USER_EMAIL..."
     STORAGE_LIST=$(mktemp)
     rails runner util/list_user_storage_paths.rb "$AUTOFAUNA_SYNC_USER_EMAIL" > "$STORAGE_LIST"
+    # An unknown email makes the runner abort with an empty list, and rsync would then
+    # "succeed" having copied nothing. Fail loudly instead — AUTOFAUNA_SYNC_USER_EMAIL is
+    # the app login, which is easy to confuse with some other address.
+    if [ ! -s "$STORAGE_LIST" ]; then
+      rm -f "$STORAGE_LIST"
+      echo "ERROR: no storage paths for '$AUTOFAUNA_SYNC_USER_EMAIL' — is that the app login email?" >&2
+      exit 1
+    fi
     rsync -avz --files-from="$STORAGE_LIST" "$REMOTE_STORAGE" "$ROOT/storage/"
     rm -f "$STORAGE_LIST"
   else
