@@ -237,3 +237,18 @@ The four sibling cross-project tests (`equipment`, `water_changes`, `feeding_ins
 **Verification:** `bin/rails test test/controllers/waterings_controller_test.rb` and
 `bin/rails test test/controllers` — no failures (run by Jef). Doc note added to
 `docs/auth-accounts.md`.
+
+## 2026-07-31 — Plant show: location value links to its show page
+
+The 📍 Location row in `app/views/plants/_plant.html.erb` rendered `plant.location` as plain text
+while the sibling Recipes row already linked through. Wrapped it in
+`link_to plant.location, location_path(plant.location)`, matching the recipe row's unstyled-link
+pattern.
+
+No `data: { turbo_frame: "_top" }` needed here — that gotcha applies to links inside
+`turbo-frame#plants-results` on the index; `plants/show.html.erb` renders the partial at top level.
+The partial is rendered only from the plant show page (checked), so no public/share-token view is
+affected by pointing at an authenticated route.
+
+Added `test/controllers/plants_controller_test.rb` "show links the location to its show page"
+(`assert_select` on the href). Not yet run — needs `bin/rails test test/controllers/plants_controller_test.rb`.

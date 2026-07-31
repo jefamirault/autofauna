@@ -76,7 +76,7 @@
         <span class="label">📍 <%= t('attributes.location') %>:</span>
         <span class="value">
           <% if plant.location.present? %>
-            <%= plant.location %>
+            <%= link_to plant.location, location_path(plant.location) %>
           <% else %>
             <%= link_to "➕ Add Location", edit_plant_path(@plant), class: 'link' %>
           <% end %>

@@ -30,6 +30,11 @@ class PlantsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show links the location to its show page" do
+    get plant_url(@plant)
+    assert_select "a[href=?]", location_path(@plant.location), text: @plant.location.name
+  end
+
   test "should get edit" do
     get edit_plant_url(@plant)
     assert_response :success
